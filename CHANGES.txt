@@ -5,4 +5,11 @@ Changelog of lizard-flooding
 1.0 (2010-04-21)
 ----------------
 
-- Initial library skeleton created by thaskel.  [your name]
+- Added "old" flooding as lizard_flooding.
+
+- Also added "old" visualization and presentation into this very same python
+  package as lizard_visualization and lizard_presentation.  WARNING: there are
+  now three django apps in one python package.  Necessary as the code was
+  pretty much intertwined.
+
+- Initial library skeleton created by nensskel.
