@@ -1,36 +1,13 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#***********************************************************************
-#*   
-#***********************************************************************
-#*                      All rights reserved                           **
-#*   
-#*   
-#*                                                                    **
-#*   
-#*   
-#*   
-#***********************************************************************
-#* Purpose    : Permission manager for flooding
-#*               
-#* Project    : Lizard Flooding v2
-#*  
-#* $Id$
-#*
-#* initial programmer :  Jack Ha
-#* initial date       :  20090624
-#**********************************************************************
-
-__revision__ = "$Rev$"[6:-2]
-
 import logging
-log = logging.getLogger('permission_manager')
 
 from django.contrib.auth.models import Group
 from django.db.models import Q
 
-from lizard.flooding.models import UserPermission, Project, Region, RegionSet, ProjectGroupPermission, Scenario
+from lizard_flooding.models import UserPermission, Project, Region, RegionSet
+from lizard_flooding.models import ProjectGroupPermission, Scenario
 
+log = logging.getLogger('permission_manager')
 
 
 class PermissionManager:
@@ -68,7 +45,7 @@ class PermissionManager:
             return Project.objects.filter(
                 projectgrouppermission__group__user=user,
                 projectgrouppermission__permission=permission)
-    
+
     def get_regionsets(self, permission = UserPermission.PERMISSION_SCENARIO_VIEW, through_scenario=False):
         """Find regionsets with given permission for a user and return them."""
         user = self.user
@@ -77,7 +54,7 @@ class PermissionManager:
         elif not(user.is_authenticated()):
             #return all regionsets of projects that belong to the demo group
             demogroup = Group.objects.get(name = 'demo group')
-            project_list = Project.objects.filter(projectgrouppermission__group = demogroup, 
+            project_list = Project.objects.filter(projectgrouppermission__group = demogroup,
                 projectgrouppermission__permission = permission)
         elif not self.check_permission(permission):
             return RegionSet.objects.filter(pk = -1)
@@ -103,7 +80,7 @@ class PermissionManager:
             return Region.objects.filter(pk = -1)
         else:
             project_list = Project.objects.filter(Q(projectgrouppermission__group__user=user, projectgrouppermission__permission=permission))
-                   
+
         if through_scenario:
             return Region.objects.filter(Q(region__breach__scenario__project__in = project_list)|
                                          Q(breach__scenario__project__in = project_list)).distinct()
@@ -115,15 +92,15 @@ class PermissionManager:
 
     def get_scenarios(self, breach = None, permission = UserPermission.PERMISSION_SCENARIO_VIEW, status_list = None):
         """work in progress
-        
+
         scenarios met view en permission recht - alle
         scenarios met view recht - alleen met status approved
-        
-        
+
+
         get list of scenarios"""
         if status_list == None:
             status_list = [a for a, b in Scenario.STATUS_CHOICES]
-        
+
         user = self.user
         if user.is_superuser:
             filter = Q(status_cache__in=status_list)
@@ -131,26 +108,43 @@ class PermissionManager:
             #return all regionsets of projects that belong to the demo group
             demogroup = Group.objects.get(name = 'demo group')
             if permission == UserPermission.PERMISSION_SCENARIO_VIEW:
-                filter = Q(project__projectgrouppermission__group=group, project__projectgrouppermission__permission=UserPermission.PERMISSION_SCENARIO_VIEW, status_cache=Scenario.STATUS_APPROVED, status_cache__in=status_list)
-                if len(user.userpermission_set.filter(permission=UserPermission.PERMISSION_SCENARIO_APPROVE)) == 0:
-                    filter = filter | Q(project__projectgrouppermission__group=group, project__projectgrouppermission__permission=UserPermission.PERMISSION_SCENARIO_APPROVE, status_cache__in=status_list)
+                filter = Q(
+                    project__projectgrouppermission__group=demogroup,
+                    project__projectgrouppermission__permission=UserPermission.PERMISSION_SCENARIO_VIEW,
+                    status_cache=Scenario.STATUS_APPROVED, status_cache__in=status_list)
+                if len(user.userpermission_set.filter(
+                        permission=UserPermission.PERMISSION_SCENARIO_APPROVE)) == 0:
+                    filter = filter | Q(
+                        project__projectgrouppermission__group=demogroup,
+                        project__projectgrouppermission__permission=UserPermission.PERMISSION_SCENARIO_APPROVE,
+                        status_cache__in=status_list)
             else:
-                filter = Q(project__projectgrouppermission__group=group, project__projectgrouppermission__permission=permission, status_cache__in=status_list)
+                filter = Q(project__projectgrouppermission__group=demogroup,
+                           project__projectgrouppermission__permission=permission,
+                           status_cache__in=status_list)
         elif not self.check_permission(permission):
             return Scenario.objects.filter(pk = -1)
         else:
             if permission == UserPermission.PERMISSION_SCENARIO_VIEW:
-                filter = Q(project__projectgrouppermission__group__user=user, project__projectgrouppermission__permission=UserPermission.PERMISSION_SCENARIO_VIEW, status_cache=Scenario.STATUS_APPROVED, status_cache__in=status_list)
+                filter = Q(project__projectgrouppermission__group__user=user,
+                           project__projectgrouppermission__permission=UserPermission.PERMISSION_SCENARIO_VIEW,
+                           status_cache=Scenario.STATUS_APPROVED,
+                           status_cache__in=status_list)
                 if self.check_permission(UserPermission.PERMISSION_SCENARIO_APPROVE):
-                    filter = filter | Q(project__projectgrouppermission__group__user=user, project__projectgrouppermission__permission=UserPermission.PERMISSION_SCENARIO_APPROVE, status_cache__in=status_list)
+                    filter = filter | Q(
+                        project__projectgrouppermission__group__user=user,
+                        project__projectgrouppermission__permission=UserPermission.PERMISSION_SCENARIO_APPROVE,
+                        status_cache__in=status_list)
             else:
-                filter = Q(project__projectgrouppermission__group__user=user,project__projectgrouppermission__permission=permission, status_cache__in=status_list)
-        
+                filter = Q(
+                    project__projectgrouppermission__group__user=user,project__projectgrouppermission__permission=permission,
+                    status_cache__in=status_list)
+
         if breach is None:
             return Scenario.objects.filter(filter).distinct()
         else:
             return Scenario.objects.filter(breaches=breach).filter(filter).distinct()
-        
+
 
     #------------------------- permission functions ----------------------------
     def check_permission(self, permission):
@@ -167,7 +161,7 @@ class PermissionManager:
             return False
 
     def check_project_permission(self, project, permission):
-        """Check project access permission.    
+        """Check project access permission.
         return True if user has the correct permission, False if user has no permission.
 
         """
@@ -178,8 +172,8 @@ class PermissionManager:
         if user.is_authenticated() and (len(user.userpermission_set.filter(permission = permission)) == 0):
             return False
         #one of users groups must have permission for this project
-        if len(ProjectGroupPermission.objects.filter(group__in = user.groups.all(), 
-                                                     project = project, 
+        if len(ProjectGroupPermission.objects.filter(group__in = user.groups.all(),
+                                                     project = project,
                                                      permission = permission)) > 0:
             return True
         #last chance: user is not authenticated, then the project must
@@ -213,5 +207,5 @@ class PermissionManager:
             return True
         else:
             return False
-           
+
 

@@ -1,53 +1,18 @@
-#!c:/python25/python.exe
 # -*- coding: utf-8 -*-
-#***********************************************************************
-#*   
-#***********************************************************************
-#
-# This file is part of Lizard Flooding 2.0.
-#
-# Lizard Flooding 2.0 is free software: you can redistribute it and/or
-# modify it under the terms of the GNU General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# Lizard Flooding 2.0 is distributed in the hope that it will be
-# useful, but WITHOUT ANY WARRANTY; without even the implied warranty
-# of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-# General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with Lizard Flooding 2.0.  If not, see
-# <http://www.gnu.org/licenses/>.
-#
-# Copyright 2009 Jack Ha, Mario Frasca
-#
-#***********************************************************************
-# this module defines the properties of the database connection.
-#
-# $Id$
-#
-# initial programmer :  Jack Ha
-# initial date       :  20090201
-#***********************************************************************
+import datetime
+import os
 
-__revision__ = "$Rev$"[6:-2]
-
-#from django.db import models
-from django.contrib.gis.db import models
 from django.contrib.auth.models import User, Group
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
-from django.utils.translation import ugettext as _
+from django.contrib.gis.db import models
 from django.core.urlresolvers import reverse
-
+from django.utils.translation import ugettext as _
 from treebeard.al_tree import AL_Node #Adjacent list implementation
 
-from lizard.presentation.models import PresentationLayer, PresentationType, PresentationSource
-from lizard.visualization.models import ShapeDataLegend, ValueVisualizerMap
-from lizard.flooding.tools.approvaltool.models import ApprovalObject
-import datetime
-import os
+from lizard_presentation.models import PresentationLayer, PresentationType
+from lizard_visualization.models import ShapeDataLegend, ValueVisualizerMap
+from lizard_flooding.tools.approvaltool.models import ApprovalObject
 
 #------------- helper functions ------------------
 def convert_color_to_hex(color_tuple):
@@ -56,38 +21,38 @@ def convert_color_to_hex(color_tuple):
     return '#%02X%02X%02X'%(r,g,b)
 
 #------------ the classes ---------------------
-def get_attachment_path(instance, filename):   
+def get_attachment_path(instance, filename):
     """
     Method that functions as a callback method to set dynamically the path of
     the uploaded file of an attachment.
     """
-    return 'attachments/' + str(instance.content_type) + '/' + str(instance.object_id) + '/' + filename     
+    return 'attachments/' + str(instance.content_type) + '/' + str(instance.object_id) + '/' + filename
 
 class Attachment(models.Model):
     """An attachment
-    
+
     An attachment can be related to any object due to generic relations.
-    
+
     """
-    
+
     class Meta:
         verbose_name = _('Attachment')
         verbose_name_plural = _('Attachments')
-    
-    #Fields needed for generic relation    
+
+    #Fields needed for generic relation
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
     content_object = generic.GenericForeignKey('content_type', 'object_id')
-    
+
     name = models.CharField(max_length=200, blank=False)
     remarks = models.TextField(null=True, blank=True)
     file = models.FileField(upload_to = get_attachment_path, blank = True, null = True)
     uploaded_by = models.CharField(max_length = 200, blank = False)
     uploaded_date = models.DateTimeField(blank=True, null=True)
-  
+
     def __unicode__(self):
-        return self.name    
-    
+        return self.name
+
 class SobekVersion(models.Model):
     """Sobek version"""
     class Meta:
@@ -95,12 +60,12 @@ class SobekVersion(models.Model):
         verbose_name_plural = _('Sobek versions')
     name = models.CharField(max_length=200)
     fileloc_startfile = models.CharField(max_length=200)
-    
+
     '''
     #is waarschijnlijk niet nodig
     startfile = models.TextField()
     '''
-    
+
     def __unicode__(self):
         return self.name
 
@@ -113,8 +78,8 @@ class SobekModel(models.Model):
     - is related to 0 or more externalwater*
     - is related to 0 or more regions*
     - is related to 0 or more scenario's*
-    
-    """ 
+
+    """
     class Meta:
         verbose_name = _('Sobek model')
         verbose_name_plural = _('Sobek models')
@@ -139,14 +104,14 @@ class SobekModel(models.Model):
     model_vardescription = models.CharField(max_length=200, null=True)
     remarks = models.TextField(null=True)
     attachments = generic.GenericRelation(Attachment)
-    
+
     embankment_damage_shape = models.CharField(max_length=200, null=True)
-    
+
     code = models.CharField(max_length=15, null=True)
-    
+
     def __unicode__(self):
-        return 'type: %s case: %d version: %s'%(self.TYPE_DICT[self.sobekmodeltype], 
-                                                self.model_case, 
+        return 'type: %s case: %d version: %s'%(self.TYPE_DICT[self.sobekmodeltype],
+                                                self.model_case,
                                                 self.model_version)
 
     def get_summary_str(self):
@@ -194,7 +159,7 @@ class CutoffLocation(models.Model):
     geom = models.PointField('node itself', srid=4326)
 
     sobekmodels = models.ManyToManyField(SobekModel, through='CutoffLocationSobekModelSetting')
-    
+
     code = models.CharField(max_length=15, null=True)
 
     def __unicode__(self):
@@ -202,7 +167,7 @@ class CutoffLocation(models.Model):
 
     def isinternal(self):
         """Returns if CutoffLocation is an internal cutoff location
-        
+
         True if it is exclusively connected to region's,
         False if it is exclusively connected to external waters
         None else
@@ -249,7 +214,7 @@ class ExternalWater(models.Model):
     TYPE_LOWER_RIVER = 8
 
     name = models.CharField(max_length=200)
-    
+
     sobekmodels = models.ManyToManyField(SobekModel, blank=True)
     cutofflocations = models.ManyToManyField(CutoffLocation, blank=True)
 
@@ -264,7 +229,7 @@ class ExternalWater(models.Model):
     maxlevel = models.FloatField(default = 15)
 
     code = models.CharField(max_length=15, null=True)
-    
+
     def __unicode__(self):
         return self.name
 
@@ -286,7 +251,7 @@ class WaterlevelSet(models.Model):
     """waterlevelset properties:
 
     - represents a complete graph per element
-    
+
     """
     class Meta:
         verbose_name = _('Waterlevel set')
@@ -302,7 +267,7 @@ class WaterlevelSet(models.Model):
     name = models.CharField(max_length=200)
     type = models.IntegerField(choices=WATERLEVELSETTYPE_CHOICES)
     remarks = models.TextField(null=True, blank=True)
-    
+
     code = models.CharField(max_length=20, null=True)
 
     def __unicode__(self):
@@ -325,7 +290,7 @@ class Waterlevel(models.Model):
     waterlevelset = models.ForeignKey(WaterlevelSet)
 
     def __unicode__(self):
-        return u'%s: %s, %f'%(self.waterlevelset.__unicode__(), 
+        return u'%s: %s, %f'%(self.waterlevelset.__unicode__(),
                               str(datetime.timedelta(self.time)), self.value)
 
 class Region(models.Model):
@@ -352,7 +317,7 @@ class Region(models.Model):
     geom = models.MultiPolygonField('Region Border', srid=4326)
     objects = models.GeoManager()
     path = models.CharField(max_length=200)
-    
+
     code = models.CharField(max_length=20, null=True)
     dijkringnr = models.IntegerField(null=True, blank=True)
 
@@ -375,7 +340,7 @@ class RegionSet(AL_Node):
         verbose_name = _('Region set')
         verbose_name_plural = _('Region sets')
     name = models.CharField(max_length=200)
-    parent = models.ForeignKey('self', related_name='children_set', 
+    parent = models.ForeignKey('self', related_name='children_set',
                                null=True, db_index=True, blank=True)
     regions = models.ManyToManyField(Region, blank=True)
     node_order_by = ['name']
@@ -443,9 +408,9 @@ class Breach(models.Model):
     geom = models.PointField('node itself',srid=4326)
 
     code = models.CharField(max_length=20, null=True)
-    
+
     objects = models.GeoManager()
-    
+
 
     def get_all_projects(self):
         """find out all projects that the current breach is part of"""
@@ -477,7 +442,7 @@ class BreachSobekModel(models.Model):
     """
     class Meta:
         unique_together = (("sobekmodel", "breach"),)
-        
+
     sobekmodel = models.ForeignKey(SobekModel)
     breach = models.ForeignKey(Breach)
 
@@ -486,7 +451,7 @@ class BreachSobekModel(models.Model):
     def __unicode__(self):
         return "%s - %s: %s"%(self.sobekmodel.__unicode__(), self.breach.__unicode__(),
                               self.sobekid)
-    
+
 
 class CutoffLocationSet(models.Model):
     """breachset properties:
@@ -519,12 +484,12 @@ class Project(models.Model):
     name = models.CharField(max_length=200)
     owner = models.ForeignKey(User)
     attachments = generic.GenericRelation(Attachment)
-    
+
     regionsets = models.ManyToManyField(RegionSet, blank=True)
     regions = models.ManyToManyField(Region, blank=True)
-    
+
     code = models.CharField(max_length=20, null=True)
-    
+
     #Project -> RegionSet (+) -> (RegionSet ->) Region(+) -> Breach
     def get_all_breaches(self):
         all_regions = {}
@@ -537,7 +502,7 @@ class Project(models.Model):
             for b in r.breach_set.all():
                 all_breaches[b.id] = b
         return all_breaches.values()
-    
+
     def count_scenarios(self):
         """returns number of scenarios attached to this project."""
         return len(self.scenario_set.all())
@@ -551,7 +516,7 @@ class Project(models.Model):
 
 
 class UserPermission(models.Model):
-    """userpermission 
+    """userpermission
 
     - if a permission is in the user permission table AND
     in the projectgrouppermission, then the permission is granted for
@@ -580,14 +545,14 @@ class UserPermission(models.Model):
 #    PERMISSION_TASK_DELETE = 24
 #    PERMISSION_IMPORT_ADD = 30
 #    PERMISSION_IMPORT_APPROVE = 31
-#    PERMISSION_IMPORT_TO_MAINDATABASE = 32 
+#    PERMISSION_IMPORT_TO_MAINDATABASE = 32
 #    PERMISSION_EXPORT_ADD = 40
 #    PERMISSION_EXPORT_VIEW = 41
-    
+
     PERMISSION_CHOICES = (
         (PERMISSION_SCENARIO_VIEW, _('view_scenario')),
         (PERMISSION_SCENARIO_ADD, _('add_scenario_new_simulation')),
-        (PERMISSION_SCENARIO_ADD_IMPORT, _('add_scenario_import')),        
+        (PERMISSION_SCENARIO_ADD_IMPORT, _('add_scenario_import')),
         (PERMISSION_SCENARIO_EDIT, _('edit_scenario')),
         (PERMISSION_SCENARIO_APPROVE, _('approve_scenario')),
         (PERMISSION_SCENARIO_DELETE, _('delete_scenario')),
@@ -603,14 +568,14 @@ class UserPermission(models.Model):
 #        (PERMISSION_IMPORT_APPROVE, _('approve Import scenarios')),
 #        (PERMISSION_IMPORT_TO_MAINDATABASE, _('Import scenario to maindatabase')),
 #        (PERMISSION_EXPORT_ADD, _('add export')),
-#        (PERMISSION_EXPORT_VIEW, _('view exports')),     
+#        (PERMISSION_EXPORT_VIEW, _('view exports')),
         )
-      
+
     user = models.ForeignKey(User)
     permission = models.IntegerField(choices=PERMISSION_CHOICES)
-    
+
     def __unicode__(self):
-        return u'%s: %s'%(self.user.__unicode__(), 
+        return u'%s: %s'%(self.user.__unicode__(),
                           self.get_permission_display())
 
 class ProjectGroupPermission(models.Model):
@@ -628,8 +593,8 @@ class ProjectGroupPermission(models.Model):
     permission = models.IntegerField(choices=UserPermission.PERMISSION_CHOICES)
 
     def __unicode__(self):
-        return u'%s - %s (%s)'%(self.group.__unicode__(), 
-                                self.project.__unicode__(), 
+        return u'%s - %s (%s)'%(self.group.__unicode__(),
+                                self.project.__unicode__(),
                                 self.get_permission_display())
 
 class PermissionProjectShapeDataLegend(models.Model):
@@ -659,7 +624,7 @@ class PermissionProjectGridDataLegend(models.Model):
 
 class ExtraInfoField(models.Model):
     """extra informatie velden voor scenarios
-    """ 
+    """
     HEADER_GENERAL = 10
     HEADER_METADATA = 20
     HEADER_BREACH = 30
@@ -673,7 +638,7 @@ class ExtraInfoField(models.Model):
         (HEADER_EXTERNALWATER, _('externalwater')),
         (HEADER_NONE, _('none')),
     )
-    
+
     name = models.CharField(max_length=200, unique = True)
     use_in_scenario_overview = models.BooleanField(default = False)
     header = models.IntegerField(choices=HEADER_CHOICES, default=HEADER_METADATA)
@@ -681,18 +646,18 @@ class ExtraInfoField(models.Model):
 
     def __unicode__(self):
         return self.name
-    
+
 class ExtraScenarioInfo(models.Model):
-    """De extra metadata waarden van een scenario 
-    """    
+    """De extra metadata waarden van een scenario
+    """
     class Meta:
         unique_together = (("extrainfofield", "scenario"),)
-    
+
     extrainfofield = models.ForeignKey('ExtraInfoField')
     scenario = models.ForeignKey('Scenario')
     value = models.CharField(max_length=100)
- 
-    def __unicode__(self):   
+
+    def __unicode__(self):
         return self.scenario.__unicode__() + ', ' + self.extrainfofield.__unicode__() + ': ' + str(self.value)
 
 class Scenario(models.Model):
@@ -717,7 +682,7 @@ class Scenario(models.Model):
     CALCPRIORITY_LOW = 20
     CALCPRIORITY_MEDIUM = 30
     CALCPRIORITY_HIGH = 40
-    
+
     STATUS_DELETED = 10
     STATUS_APPROVED = 20
     STATUS_DISAPPROVED = 30
@@ -744,21 +709,21 @@ class Scenario(models.Model):
     approvalobject = models.ForeignKey(ApprovalObject,blank=True, null=True, default=None)
 
     breaches = models.ManyToManyField(Breach, through='ScenarioBreach')
-    cutofflocations = models.ManyToManyField(CutoffLocation, 
-                                             through='ScenarioCutoffLocation', 
+    cutofflocations = models.ManyToManyField(CutoffLocation,
+                                             through='ScenarioCutoffLocation',
                                              blank=True) #optional
 
     sobekmodel_inundation = models.ForeignKey(SobekModel)
 
     tsim = models.FloatField() #datetime object, time in days
-    calcpriority = models.IntegerField(choices=CALCPRIORITY_CHOICES, 
+    calcpriority = models.IntegerField(choices=CALCPRIORITY_CHOICES,
                                        default=CALCPRIORITY_LOW)
 
     status_cache = models.IntegerField(choices=STATUS_CHOICES, default=None, null=True)
     presentationlayer = models.ManyToManyField(PresentationLayer, through = 'Scenario_PresentationLayer')
-    
+
     migrated = models.NullBooleanField(blank = True, null=True)
-    
+
     code = models.CharField(max_length=15, null=True)
 
     class Meta:
@@ -769,7 +734,7 @@ class Scenario(models.Model):
 
     def get_tsim(self):
         return datetime.datetime(self.tsim)
-    
+
     def get_rel_destdir(self):
         leading_breach = self.breaches.all()[0]
         return os.path.join(leading_breach.region.path, self.id)
@@ -860,11 +825,11 @@ class ScenarioBreach(models.Model):
     tstorm = models.FloatField(null=True, blank=True, default=None)
     tpeak = models.FloatField(null=True, blank=True, default=None)
     tdeltaphase = models.FloatField(null=True, blank=True, default=None)
-    
+
     code = models.CharField(max_length=15, null=True, blank=True)
 
     def __unicode__(self):
-        return u'%s: %s (%s)'%(self.scenario.__unicode__(), self.breach.__unicode__(), 
+        return u'%s: %s (%s)'%(self.scenario.__unicode__(), self.breach.__unicode__(),
                                self.waterlevelset.__unicode__())
 
     def get_tstartbreach(self):
@@ -909,7 +874,7 @@ class ScenarioCutoffLocation(models.Model):
     tclose = models.FloatField() #interval timedelta
 
     def __unicode__(self):
-        return u'%s: %s'%(self.scenario.__unicode__(), 
+        return u'%s: %s'%(self.scenario.__unicode__(),
                           self.cutofflocation.__unicode__())
 
     def get_tclose(self):
@@ -946,7 +911,7 @@ class ResultType(models.Model):
     program = models.ForeignKey(Program)
     content_names_re = models.CharField(max_length=256, blank=True, null=True)
     presentationtype = models.ManyToManyField(PresentationType, through = 'ResultType_PresentationType')
-    
+
     def __unicode__(self):
         return self.shortname_dutch
 
@@ -990,20 +955,20 @@ class CutoffLocationSobekModelSetting(models.Model):
 
     """
 
-        
+
     cutofflocation = models.ForeignKey(CutoffLocation)
     sobekmodel = models.ForeignKey(SobekModel)
 
     sobekid = models.CharField(max_length=200)
     #todo: add settings
-    
+
     class Meta:
         #unique_together = (("sobekmodel", "cutofflocation "),)
         verbose_name = _('Cutoff location sobek model setting')
         verbose_name_plural = _('Cutoff location sobek model settings')
     def __unicode__(self):
-        return u'%s - %s: %s'%(self.sobekmodel.__unicode__(), 
-                               self.cutofflocation.__unicode__(), 
+        return u'%s - %s: %s'%(self.sobekmodel.__unicode__(),
+                               self.cutofflocation.__unicode__(),
                                self.sobekid)
 
 class TaskType(models.Model):
@@ -1011,7 +976,7 @@ class TaskType(models.Model):
 
     id's of tasktypes are fixed! DO NOT CHANGE
     """
-    
+
     TYPE_SCENARIO_CREATE = 50
     TYPE_SOBEK_PREPARATION = 120
     TYPE_SOBEK_CALCULATION = 130
@@ -1079,7 +1044,7 @@ class Task(models.Model):
 #    name = models.CharField(max_length=200)
 #    ipaddress = models.IPAddressField()
 #    port = models.PositiveIntegerField()
-#    
+#
 #    tasktypes = models.ManyToManyField(TaskType)
 #
 #    def __unicode__(self):
@@ -1098,7 +1063,7 @@ class TaskExecutor(models.Model):
     port = models.IntegerField()
     active = models.BooleanField(default=True)
     revision = models.CharField(max_length=20)
-    seq = models.IntegerField(default=1) 
+    seq = models.IntegerField(default=1)
 
     tasktypes = models.ManyToManyField(TaskType, null=True, blank=True)
 
@@ -1109,13 +1074,13 @@ class Scenario_PresentationLayer(models.Model):
     """link to presentation.PresentationLayer """
     scenario = models.ForeignKey(Scenario)
     presentationlayer = models.ForeignKey(PresentationLayer)
-    
-    
+
+
 class ResultType_PresentationType(models.Model):
     """link to presentation.PresentationType """
     resulttype = models.ForeignKey(ResultType)
     presentationtype = models.ForeignKey(PresentationType)
     remarks = models.CharField(max_length=100)
-     
+
     def __unicode__(self):
         return self.remarks

@@ -6,9 +6,9 @@ urlpatterns = patterns(
     '',
 
     url(r'table/(?P<approvalobject_id>\d+)$',
-        'lizard.flooding.tools.approvaltool.views.approvaltable_page',
+        'lizard_flooding.tools.approvaltool.views.approvaltable_page',
         name='flooding_tools_approval_table'
         ),
 
-    
+
 )

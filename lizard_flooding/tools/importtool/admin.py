@@ -1,17 +1,17 @@
 #alphabetical order
-from lizard.flooding.tools.importtool.models import ImportScenario, ImportScenarioInputField, InputField
-    
+from lizard_flooding.tools.importtool.models import ImportScenario, ImportScenarioInputField, InputField
+
 
 from django.contrib import admin
 from django.contrib import databrowse
 from django.contrib.gis.admin import OSMGeoAdmin
 
 '''
-class PresentationLayerInline(admin.TabularInline):   
+class PresentationLayerInline(admin.TabularInline):
     model = Scenario_PresentationLayer
     extra = 2
 
-class PresentationTypeInline(admin.TabularInline):   
+class PresentationTypeInline(admin.TabularInline):
     model = ResultType_PresentationType
     extra = 2
 '''

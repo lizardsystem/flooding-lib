@@ -1,22 +1,22 @@
 #!c:/python25/python.exe
 # -*- coding: utf-8 -*-
 #***********************************************************************
-#*   
+#*
 #***********************************************************************
 #*                      All rights reserved                           **
-#*   
-#*   
+#*
+#*
 #*                                                                    **
-#*   
-#*   
-#*   
+#*
+#*
+#*
 #***********************************************************************
 #* Library    : Presentation_shape_generation
 #* Purpose    : convert a sobekmodel and resultfiles (his-files) to a Presentation_shape
 #* Function   : Presentation_shape_generation.sobek/his_ssm
-#*               
+#*
 #* Project    : Lizard-flooding v2.0
-#*  
+#*
 #* $Id: presentation_shape_generation.py 7947 2009-09-07 08:23:36Z Bastiaan $
 #*
 #* initial programmer :  Bastiaan Roos
@@ -31,16 +31,16 @@ sys.path.append('..\\..')
 
 import settings
 from django.core.management import setup_environ
-setup_environ(settings)     
-  
-from lizard.flooding.models import Project, UserPermission, \
+setup_environ(settings)
+
+from lizard_flooding.models import Project, UserPermission, \
     ProjectGroupPermission, Scenario, Region, RegionSet, Breach, \
     ScenarioCutoffLocation, \
     ScenarioBreach, Result, ResultType, Task, TaskType, \
     ExternalWater, CutoffLocation, CutoffLocationSet, SobekModel, \
     Scenario_PresentationLayer, ResultType_PresentationType
 
-from lizard.presentation.models import SourceLinkType, SourceLink, \
+from lizard_presentation.models import SourceLinkType, SourceLink, \
     PresentationSource, PresentationType, PresentationLayer, \
     PresentationShape, PresentationValueTable, PresentationGrid, Animation, Field
 
@@ -80,7 +80,7 @@ get_or_create_presentation_sources:
 * his-files toevoegen
 * return aanpassen
 
-* PresentationShape maken (nu worden alleen de sources gemaakt). 
+* PresentationShape maken (nu worden alleen de sources gemaakt).
 
 
 Later:
@@ -101,7 +101,7 @@ if sys.version_info < (2, 5):
 
 import logging
 
-log = logging.getLogger('nens.web.flooding.presentationlayer_generation') 
+log = logging.getLogger('nens.web.flooding.presentationlayer_generation')
 
 source_dir = '\\\\192.168.1.14\\BackupFlooding\\resultaten'
 dest_dir = '\\\\192.168.1.14\\BackupFlooding\\resultaten_new'
@@ -113,12 +113,12 @@ for scenario in Scenario.objects.filter(migrated = None).exclude(id__in=[7007,70
     new_scenario_dir = os.path.join(region.path, str(scenario.id) )+"\\"
     if not os.path.isdir(os.path.join(dest_dir,new_scenario_dir)):
         os.makedirs(os.path.join(dest_dir,new_scenario_dir))
-    
-    
-    
+
+
+
     for result in scenario.result_set.all():
         #print "result: " + str(result.resulttype.id)
-        try:         
+        try:
             if result.resulttype.id == 16:
                 if scenario.result_set.filter(resulttype=26).count()==0:
                     source_filename = result.resultloc.replace('simulatie_rapport.zip', 'model.zip').replace('/', '\\')
@@ -132,15 +132,15 @@ for scenario in Scenario.objects.filter(migrated = None).exclude(id__in=[7007,70
 
                     Result.objects.create(scenario=scenario, resulttype=ResultType.objects.get(pk=26), resultloc=new_filename)
         except AttributeError, e:
-            print "error: %s"%e     
+            print "error: %s"%e
         except IOError,e:
             print "can't find model of scenario %i: %s"%(scenario.id, e)
             result.unit = 'error'
-            result.save()            
-                
-        
+            result.save()
+
+
         try:
-            if not (result.resultloc == None or result.resultloc == ""): 
+            if not (result.resultloc == None or result.resultloc == ""):
                 #get new file name
                 source_filename = result.resultloc.replace('/', '\\')
                 project_dir = re.match(r'(\d+\\)+', source_filename )
@@ -150,7 +150,7 @@ for scenario in Scenario.objects.filter(migrated = None).exclude(id__in=[7007,70
                 dest = os.path.join(dest_dir, new_filename)
                 #print "move %s to %s"%(source, dest)
                 shutil.move(source, dest)
-                
+
                 result.resultloc = new_filename
                 result.save()
         except AttributeError, e:
@@ -158,16 +158,16 @@ for scenario in Scenario.objects.filter(migrated = None).exclude(id__in=[7007,70
         except IOError,e:
             print "can't find resulttype %i of scenario %i: %s"%(result.resulttype.id, scenario.id, e)
             result.unit = 'error'
-            result.save()            
-                
-        try:  
-            if not (result.resultpngloc == None or result.resultpngloc == ""): 
+            result.save()
+
+        try:
+            if not (result.resultpngloc == None or result.resultpngloc == ""):
                 #get new file name
                 source_filename = result.resultpngloc.replace('/', '\\')
                 project_dir = re.match(r'(\d+\\)+' , source_filename)
                 new_filename = source_filename.replace(project_dir.group(),new_scenario_dir)
 
-                
+
                 source = os.path.join(source_dir, os.path.split(source_filename)[0])
                 dest = os.path.join(dest_dir, os.path.split(new_filename)[0])
                 #print "------------move %s to %s"%(source, dest)
@@ -180,15 +180,15 @@ for scenario in Scenario.objects.filter(migrated = None).exclude(id__in=[7007,70
         except IOError,e:
             print "can't find resulttype %i of scenario %i: %s"%(result.resulttype.id, scenario.id, e)
             result.unit = 'error-png'
-            result.save()  
-                
+            result.save()
+
         #create model result
 
-           
+
 
     scenario.migrated = True
     scenario.save()
-    
+
 #voor alle scenario's:
 #- resultaten tabel aanpassen
 #- naam

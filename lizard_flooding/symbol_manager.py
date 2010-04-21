@@ -1,36 +1,7 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#***********************************************************************
-#*
-#***********************************************************************
-#*                      All rights reserved                           **
-#*
-#*
-#*                                                                    **
-#*
-#*
-#*
-#***********************************************************************
-#* Library    : symbol_manager
-#* Purpose    : Manage image files that are scaled, colorized and rotated.
-#*              They are stored in 1 particular directory.
-#* Function   :
-#* Usage      : <function> --help <please use optparse and fill in the --help information>
-#*
-#* Project    : Lizard Flooding
-#*
-#* $Id$
-#*
-#* $Name:  $
-#*
-#* initial programmer :  <Name and Surname>
-#* initial date       :  <yyyymmdd>
-#**********************************************************************
-
-__revision__ = "$Rev$"[6:-2]
-
 import logging
 import os.path
+
 log = logging.getLogger('nens.symbol_manager')
 
 class SymbolManager:
@@ -64,7 +35,8 @@ class SymbolManager:
             return result_filename
         else:
             log.debug('generating image...')
-            filename_abs = os.path.join(self.symbol_path, 'originals/', filename_nopath)
+            #filename_abs = os.path.join(self.symbol_path, 'originals/', filename_nopath)
+
 
 if __name__=='__main__':
     #set log level to debug

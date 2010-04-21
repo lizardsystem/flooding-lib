@@ -5,6 +5,8 @@ DATABASE_NAME = 'test.db'
 SITE_ID = 1
 INSTALLED_APPS = [
     'lizard_flooding',
+    'lizard_presentation',
+    'lizard_visualization',
     'lizard_base',
     'staticfiles',
     'django.contrib.admin',

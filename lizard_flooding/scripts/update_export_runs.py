@@ -34,7 +34,7 @@ import datetime
 
 # Load settings first, to be able to import the exporttool models
 #setup_environ(settings)
-from lizard.flooding.tools.exporttool.models import ExportRun, Result
+from lizard_flooding.tools.exporttool.models import ExportRun, Result
 
 
 

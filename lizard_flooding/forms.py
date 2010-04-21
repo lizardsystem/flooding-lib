@@ -1,6 +1,6 @@
 from django import forms
 from django.utils.translation import ugettext_lazy as _
-from lizard.flooding.models import Scenario, ScenarioCutoffLocation, ScenarioBreach, Project, Task
+from lizard_flooding.models import Scenario, ScenarioCutoffLocation, ScenarioBreach, Project, Task
 
 
 class ScenarioForm(forms.ModelForm):
@@ -12,7 +12,7 @@ class ScenarioNameRemarksForm(forms.ModelForm):
     """Form to edit only the name and remarks of a scenario"""
     name = forms.CharField(label =_('Name'), widget=forms.TextInput(attrs={'class':'iwScenarioRemarks'}))
     remarks = forms.CharField(label = _('Remarks'), widget =forms.widgets.Textarea(attrs={'class':'iwScenarioRemarks'}) )
-    
+
     class Meta:
         model = Scenario
         fields = ('name', 'remarks',)
@@ -30,7 +30,7 @@ class ScenarioBreachForm(forms.ModelForm):
 class TaskApprovalForm(forms.ModelForm):
     remarks = forms.CharField(label  = _('Remarks'), widget = forms.widgets.Textarea(attrs={'class':'iwScenarioApproval'}) )
     successful = forms.CharField(label  = _('Successful'), widget=forms.NullBooleanSelect(attrs={'class':'iwScenarioApproval'}), required=False)
-    
+
     class Meta:
         model = Task
         fields = ('successful', 'remarks',)
@@ -42,14 +42,14 @@ class ProjectForm(forms.ModelForm):
 
 class AttachmentForm(forms.Form):
     name = forms.CharField(label = _('Name'), max_length=200)
-    remarks = forms.CharField(label = _('Remarks'), widget =forms.widgets.Textarea(attrs={'rows':4, 'cols':60}) ) 
+    remarks = forms.CharField(label = _('Remarks'), widget =forms.widgets.Textarea(attrs={'rows':4, 'cols':60}) )
     file = forms.FileField(label = _('File') )
 
     def __init__(self, sobekmodel_choices, *args,**kwargs):
-        forms.Form.__init__(self, *args,**kwargs)   
+        forms.Form.__init__(self, *args,**kwargs)
         if sobekmodel_choices:
             self.fields.insert(0,'Sobekmodel',forms.CharField(label = _('Sobek model'), widget = forms.widgets.Select(choices = sobekmodel_choices)))
-   
+
 class EditScenarioPropertiesForm(forms.Form):
     animation_start = forms.IntegerField(label = _('Start animation'), min_value=0)
-    
+

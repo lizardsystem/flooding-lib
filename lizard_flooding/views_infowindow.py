@@ -1,52 +1,26 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#***********************************************************************
-#*
-#***********************************************************************
-#*                      All rights reserved                           **
-#*                                                                    **
-#*                                                                    **
-#*                                                                    **
-#*                                                                    **
-#*                                                                    **
-#*                                                                    **
-#***********************************************************************
-#* Purpose    : Infowindow views for flooding                          *
-#*                                                                     *
-#* Project    : Lizard Flooding v2                                     *
-#*                                                                     *
-#* $Id$
-#*                                                                     *
-#* initial programmer :  Jan-Maarten Verbree (moved here by Jack Ha)   *
-#* initial date       :  20090625                                      *
-#***********************************************************************
-
-
-__revision__ = "$Rev$"[6:-2]
-
-#------------------- Infowindow ---------------
-from lizard.flooding.forms import AttachmentForm, EditScenarioPropertiesForm,ScenarioNameRemarksForm, \
-    TaskApprovalForm
-from lizard.flooding.models import Attachment, ExternalWater, Scenario, ScenarioBreach, SobekModel, \
-    Task, TaskType, UserPermission, ExtraInfoField
-from lizard.presentation.models import Animation
-from lizard.flooding.permission_manager import PermissionManager
-from lizard.flooding.tools.approvaltool.views import approvaltable
-from django import forms, forms
-from django.contrib.auth.decorators import login_required
-from django.contrib.contenttypes.models import ContentType
-from django.core.files.base import ContentFile
-from django.shortcuts import render_to_response, get_object_or_404
-from django.utils.translation import ugettext_lazy as _, ungettext
-from django.http import HttpResponse
-from django.http import Http404
-from os import mkdir
-from os.path import isdir, isfile
 from string import Template
 import datetime
 import math
-import string
 import os.path
+import string
+
+from django.contrib.auth.decorators import login_required
+from django.contrib.contenttypes.models import ContentType
+from django.core.files.base import ContentFile
+from django.db.models import Q
+from django.http import HttpResponse
+from django.shortcuts import render_to_response, get_object_or_404
+from django.utils.translation import ugettext_lazy as _, ungettext
+
+from lizard_flooding.forms import AttachmentForm
+from lizard_flooding.forms import EditScenarioPropertiesForm,ScenarioNameRemarksForm, TaskApprovalForm
+from lizard_flooding.models import Attachment, ExternalWater, Scenario
+from lizard_flooding.models import ScenarioBreach, SobekModel, Task, TaskType
+from lizard_flooding.models import UserPermission, ExtraInfoField
+from lizard_flooding.permission_manager import PermissionManager
+from lizard_flooding.tools.approvaltool.views import approvaltable
+from lizard_presentation.models import Animation
 
 
 def format_timedelta(t_delta):
@@ -97,15 +71,15 @@ def infowindow(request):
 
 
 def get_intervalstring_from_dayfloat(input):
-    
+
     if input == None:
         return ""
-    
+
     if input <0:
         sign = '-'
     else:
         sign = ''
-    
+
     days = math.floor(input)
     input = (input - days)*24
     hours = math.floor(input)
@@ -272,7 +246,6 @@ def infowindow_remarks(request, scenario_id, callbackfunction, form_id):
 def infowindow_approval(request, scenario_id, callbackfunction, form_id, with_approvalobject ):
     """Calls the page to give approval to scenarios"""
 
-    from django.db.models import Q
     used_scenario = get_object_or_404(Scenario, pk=scenario_id)
 
     pm = PermissionManager(request.user)
@@ -339,7 +312,7 @@ def infowindow_edit(request, scenario_id):
     pm = PermissionManager(request.user)
     if not(pm.check_project_permission(used_scenario.project, UserPermission.PERMISSION_SCENARIO_EDIT)):
         return HttpResponse(_("No permission to import scenario or login"))
-    
+
     return render_to_response('flooding/infowindow_edit.html', {'scenario_id': scenario_id})
 
 def showattachments(request, scenario_id):
@@ -380,10 +353,9 @@ def showattachments(request, scenario_id):
 
         form = AttachmentForm(sobekmodel_choices, request.POST, request.FILES)
         if form.is_valid():
-            file = request.FILES['file']
             if form.cleaned_data.has_key('Sobekmodel'):
                 related_to_object = SobekModel.objects.get(pk = int(form.cleaned_data['Sobekmodel']))
-            path = object_name_and_path_map[request_related_to][1].substitute(id= str(related_to_object.id))
+            #path = object_name_and_path_map[request_related_to][1].substitute(id= str(related_to_object.id))
             newAttachment = Attachment(uploaded_by = request.user.username,
                                    uploaded_date = datetime.datetime.now(),
                                    content_object = related_to_object,

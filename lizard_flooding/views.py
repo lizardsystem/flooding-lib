@@ -1,28 +1,27 @@
 # Create your views here.
-from django.conf import settings
-from lizard.base.models import Setting
+from math import cos, sin
+import csv
+import datetime
+import string
 
-from lizard.flooding.models import Project, UserPermission, ProjectGroupPermission, Scenario, \
-    Region, RegionSet, Breach, ScenarioCutoffLocation, ScenarioBreach, Result, \
-    ResultType, Task, TaskType, ExternalWater, CutoffLocation, CutoffLocationSet, \
-    SobekModel
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import Group
-from django.core.cache import cache
-from django.core.paginator import Paginator, InvalidPage, EmptyPage
+from django.core.paginator import Paginator
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
-from django.template import RequestContext, loader
 from django.utils.translation import ugettext as _
-from forms import ScenarioForm, ScenarioCutoffLocationForm, ScenarioBreachForm, \
-    ProjectForm, ScenarioNameRemarksForm, TaskApprovalForm
-from permission_manager import PermissionManager
 import Image
 import ImageDraw
-import datetime
-#we use RequestContext instead of Context, because of custom insertion tags
+
+from lizard_flooding.models import (Project, UserPermission, Scenario,
+    Region, RegionSet, Breach, ScenarioCutoffLocation, ScenarioBreach, Result,
+    ResultType, Task, TaskType, SobekModel)
+from lizard_flooding.forms import ScenarioBreachForm, ProjectForm
+from lizard_flooding.forms import ScenarioForm, ScenarioCutoffLocationForm
+from lizard_flooding.forms import ScenarioNameRemarksForm
+from lizard_flooding.permission_manager import PermissionManager
 
 
 #-----------------------'constants' - make a copy when using them--------------------
@@ -309,8 +308,6 @@ def index(request):
 
 def project_list(request):
     """Renders index of projects: viewable projects."""
-
-    user = request.user
 
     #stuff from request
     query = request.GET.get('q', '')
@@ -693,8 +690,6 @@ def scenario_list(request):
     is_embedded = request.GET.get('is_embedded', 0)
     search_defaults = scenario_list_search_defaults.copy()
 
-    user = request.user
-
     clear_search = request.GET.has_key('clear_search')
     if clear_search:
         search_session = search_defaults.copy()
@@ -755,8 +750,6 @@ def scenario_list(request):
 
     format = request.GET.get('format', 'html')
     if format == 'csv':
-        import csv
-        import string
 
         # create csv file
         csv_file = open('query.csv', 'wb')
@@ -1151,7 +1144,6 @@ def result_list(request):
             })
 
 def fractal(request):
-    from math import cos, sin
     def rotate_scale(coords, angle, scale):
         return (scale*(cos(angle)*coords[0]-sin(angle)*coords[1]),
                 scale*(sin(angle)*coords[0]+cos(angle)*coords[1]))

@@ -1,27 +1,25 @@
 from django.conf.urls.defaults import *
-from django.core.urlresolvers import reverse
-from django.utils.translation import ugettext as _
 
 urlpatterns = patterns(
     '',
 
     url(r'^$',
-        'lizard.flooding.tools.exporttool.views.index',
+        'lizard_flooding.tools.exporttool.views.index',
         name='flooding_tools_export_index'),
-    
+
     url(r'^exportdetail/(?P<export_run_id>\d+)$',
-        'lizard.flooding.tools.exporttool.views.export_detail',
+        'lizard_flooding.tools.exporttool.views.export_detail',
         name='flooding_tools_export_detail'),
-    
+
     url(r'^exportdetailscenarios/(?P<export_run_id>\d+)$',
-        'lizard.flooding.tools.exporttool.views.export_detail_scenarios',
-        name='flooding_tools_export_detail_scenarios'),     
-             
+        'lizard_flooding.tools.exporttool.views.export_detail_scenarios',
+        name='flooding_tools_export_detail_scenarios'),
+
     url(r'^newexportindex/$',
-        'lizard.flooding.tools.exporttool.views.new_export_index',
-        name='flooding_tools_export_new_export_index'),     
-        
+        'lizard_flooding.tools.exporttool.views.new_export_index',
+        name='flooding_tools_export_new_export_index'),
+
     url(r'^newexport/$',
-        'lizard.flooding.tools.exporttool.views.new_export',
-        name='flooding_tools_export_new_export'),    
+        'lizard_flooding.tools.exporttool.views.new_export',
+        name='flooding_tools_export_new_export'),
 )
