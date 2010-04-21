@@ -1,5 +1,5 @@
 #alphabetical order
-from .models import ExportRun, Setting, Result
+from lizard_flooding.tools.exporttool.models import ExportRun, Setting, Result
 from django.contrib import admin
 
 #alphabetical order

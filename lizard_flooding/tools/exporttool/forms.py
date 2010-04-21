@@ -1,5 +1,5 @@
 from django import forms
-from .models import ExportRun
+from lizard_flooding.tools.exporttool.models import ExportRun
 
 class ExportRunForm(forms.ModelForm):
     class Meta:

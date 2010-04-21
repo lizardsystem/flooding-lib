@@ -8,8 +8,8 @@ from django.utils import simplejson
 from django.utils.translation import ugettext as _
 
 from lizard_flooding.models import Scenario
-from lizard_flooding.toosl.exporttool.forms import ExportRunForm
-from lizard_flooding.toosl.exporttool.models import ExportRun, Setting
+from lizard_flooding.tools.exporttool.forms import ExportRunForm
+from lizard_flooding.tools.exporttool.models import ExportRun, Setting
 
 
 def get_result_path_location(result):

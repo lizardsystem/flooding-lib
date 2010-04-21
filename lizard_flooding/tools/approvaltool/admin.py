@@ -1,8 +1,7 @@
 #alphabetical order
-from .models import ApprovalObjectType, ApprovalObject, ApprovalObjectState, ApprovalRule
+from lizard_flooding.tools.approvaltool.models import ApprovalObjectType, ApprovalObject, ApprovalObjectState, ApprovalRule
 
 from django.contrib import admin
-from django.contrib import databrowse
 
 
 class ApprovalObjectTypeAdmin(admin.ModelAdmin):
