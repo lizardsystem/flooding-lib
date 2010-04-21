@@ -1,9 +1,14 @@
 Usage of lizard-presentation
-=============================================
+============================
 
 
 Usage:
 
     >>> import lizard_presentation
+    >>> import lizard_presentation.admin
+    >>> import lizard_presentation.models
+    >>> import lizard_presentation.permission_manager
+    >>> import lizard_presentation.urls
+    >>> import lizard_presentation.views
 
 Show how to import the main classes and how to use them.

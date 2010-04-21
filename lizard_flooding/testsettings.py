@@ -9,6 +9,7 @@ INSTALLED_APPS = [
     'lizard_visualization',
     'lizard_base',
     'staticfiles',
+    'django.contrib.gis',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

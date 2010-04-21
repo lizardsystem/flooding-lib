@@ -5,5 +5,11 @@ Usage of lizard-visualization
 Usage:
 
     >>> import lizard_visualization
+    >>> import lizard_visualization.admin
+    >>> import lizard_visualization.mapnik_legend
+    >>> import lizard_visualization.models
+    >>> import lizard_visualization.symbol_manager
+    >>> import lizard_visualization.urls
+    >>> import lizard_visualization.views
 
 Show how to import the main classes and how to use them.
