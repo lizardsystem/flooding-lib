@@ -1,31 +1,8 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#***********************************************************************
-#*
-#***********************************************************************
-#*                      All rights reserved                           **
-#*                                                                    **
-#*                                                                    **
-#*                                                                    **
-#*                                                                    **
-#*                                                                    **
-#*                                                                    **
-#***********************************************************************
-#* Purpose    : Models for Presentation                                *
-#*                                                                     *
-#* Project    : Lizard Flooding v2                                     *
-#*                                                                     *
-#* $Id$
-#*                                                                     *
-#* initial programmer :  Jack Ha                                       *
-#* initial date       :  20090625                                      *
-#***********************************************************************
-
-__revision__ = "$Rev$"[6:-2]
-
 from django.db import models
 from django.utils.translation import ugettext as _
-from lizard.presentation.models import Field, PresentationType
+
+from lizard_presentation.models import Field, PresentationType
 
 class ValueVisualizerMap(models.Model):
     """Maps a value from the source to a visualizable value (i.e. color, size)

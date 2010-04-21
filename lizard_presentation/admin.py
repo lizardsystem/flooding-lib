@@ -1,11 +1,6 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#* $Id$
-
-__revision__ = "$Rev$"[6:-2]
-
-from .models import Animation, Classified, ClassifiedNr, CustomIndicator, Derivative, Field, FieldChoice, PresentationGrid, PresentationLayer, PresentationNoGeom, PresentationShape, PresentationSource, PresentationType, PresentationValueTable, SupportLayers
-from ..flooding.models import Scenario_PresentationLayer, ResultType_PresentationType
+from lizard_presentation.models import Animation, Classified, ClassifiedNr, CustomIndicator, Derivative, Field, FieldChoice, PresentationGrid, PresentationLayer, PresentationNoGeom, PresentationShape, PresentationSource, PresentationType, PresentationValueTable, SupportLayers
+from lizard_flooding.models import Scenario_PresentationLayer, ResultType_PresentationType
 from django.contrib import admin
 
 class FieldInline(admin.TabularInline):
@@ -15,29 +10,29 @@ class FieldInline(admin.TabularInline):
 class FieldChoiceInline(admin.TabularInline):
     model = FieldChoice
     extra = 2
-    
+
 class SupportLayersInline(admin.StackedInline):
     model = SupportLayers
     #extra = 2
-     
-class ClassifiedNrInline(admin.TabularInline):   
+
+class ClassifiedNrInline(admin.TabularInline):
     model = ClassifiedNr
     extra = 2
 
-class PresentationLayerInline(admin.TabularInline):   
+class PresentationLayerInline(admin.TabularInline):
     model = Scenario_PresentationLayer
     extra = 1
 
-class PresentationTypeInline(admin.TabularInline):   
+class PresentationTypeInline(admin.TabularInline):
     model = ResultType_PresentationType
     extra = 1
 
-#class FlowPresentationTypeInline(admin.TabularInline):   
+#class FlowPresentationTypeInline(admin.TabularInline):
 #    model = Flow_ResultType_PresentationType
 #    extra = 1
 
 
-class PresentationTypeInline(admin.TabularInline):   
+class PresentationTypeInline(admin.TabularInline):
     model = ResultType_PresentationType
     extra = 1
 
@@ -45,7 +40,7 @@ class PresentationTypeAdmin(admin.ModelAdmin):
 
     list_display = ('name', 'active', 'custom_indicator','absolute', 'object', 'parameter', 'geo_type', 'value_type', 'value_source_id_prefix', 'generation_geo_source', 'generation_geo_source_part', 'geo_source_filter' , 'permission_level' )
     inlines = [PresentationTypeInline, FieldInline, SupportLayersInline]
-    
+
 class CustomIndicatorAdmin(admin.ModelAdmin):
     list_display = ('name', 'description',)
 
@@ -59,10 +54,10 @@ class FieldAdmin(admin.ModelAdmin):
 class PresentationLayerAdmin(admin.ModelAdmin):
     list_display = ('presentationtype', 'source_application', )
     inlines = [PresentationLayerInline]
-    
+
 class AnimationAdmin(admin.ModelAdmin):
     list_display = ('presentationlayer', 'firstnr', 'lastnr', 'startnr', 'delta_timestep', )
-    
+
 class ClassifiedAdmin(admin.ModelAdmin):
     list_display = ('presentationlayer', 'firstnr', 'lastnr', )
     inlines = [ClassifiedNrInline]
@@ -72,13 +67,13 @@ class PresentationSourceAdmin(admin.ModelAdmin):
 
 class PresentationGridAdmin(admin.ModelAdmin):
     list_display = ('presentationlayer', 'rownr', 'colnr', 'gridsize', 'png_indexed_palette', 'png_default_legend', 'location_netcdf_file', )
-    
+
 class PresentationShapeAdmin(admin.ModelAdmin):
     list_display = ('presentationlayer', 'geo_source', 'value_source',)
 
 class PresentationNoGeomAdmin(admin.ModelAdmin):
     list_display = ('presentationlayer', 'value_source',)
- 
+
 class PresentationValueTableAdmin(admin.ModelAdmin):
     list_display = ('presentationsource', 'location_id', 'time', 'value',)
 
