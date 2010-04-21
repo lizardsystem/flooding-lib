@@ -29,7 +29,7 @@ Legend list
   No legends!
   {% endif %}
   {% if has_edit_permission %}
-  <li><a href="{% url flooding_legend_add %}?next={% url flooding_legend_list %}">add</a></li>
+  <li><a href="{% url flooding_legend_add %}?next={# url flooding_legend_list #}">add</a></li>
   {% endif %}
 </ul>
 {% endblock %}
