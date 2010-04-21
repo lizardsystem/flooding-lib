@@ -1,0 +1,9 @@
+{# 20090629 B.Roos template for json result file #}
+{% spaceless %}
+{identifier:'id',items:[
+  {% for r in result_list %}
+  {id:{{ r.id }},name:'{{ r.presentationtype.name }}',prestypeid:{{ r.presentationtype.id }},geoType:{{ r.presentationtype.geo_type }}, valueType:{{ r.presentationtype.value_type }}}
+  {% ifequal forloop.last 0 %},{% endifequal %}
+  {% endfor %}
+]}
+{% endspaceless %}

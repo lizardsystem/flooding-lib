@@ -1,0 +1,38 @@
+{# 20090312 kkh form to add legend #}
+
+{% extends "lizard/base.html" %}
+{% load i18n %}
+
+{% block title %}
+Scenario details
+{% endblock %}
+
+{% block content %}
+<h2>Scenario detail</h2>
+<form action="./" method="POST">
+<table>
+{{ form.as_table }}
+<tr><td><input type="submit" value="{% trans 'Submit' %}" /></td></tr>
+</table>
+</form>
+
+{# only if scenario already exists #}
+{% if scenario %}
+<h3>Cutofflocations</h3>
+<ul>
+{% for scl in scenario.scenariocutofflocation_set.all %}
+<li>{{ scl.cutofflocation }}&nbsp;<a href="{% url flooding_scenario_cutofflocation_delete object_id=scl.id %}">delete</a></li>
+{% endfor %}
+<li><a href="{% url flooding_scenario_cutofflocation_add scenario_id=scenario.id %}">add</a></li>
+</ul>
+
+<h3>Breaches</h3>
+<ul>
+{% for sb in scenario.scenariobreach_set.all %}
+<li>{{ sb.breach }}&nbsp;<a href="{% url flooding_scenario_breach_delete object_id=sb.id %}">delete</a></li>
+{% endfor %}
+<li><a href="{% url flooding_scenario_breach_add scenario_id=scenario.id %}">add</a></li>
+</ul>
+{% endif %}
+
+{% endblock %}

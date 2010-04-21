@@ -1,0 +1,15 @@
+{# 20090501 b.roos template for json sobekmodel ccords#}
+{% spaceless %}
+{identifier:'id',items:{nodes:[
+{% for node in nodes %}
+  {id:'{{ node.id }}',x:{{ node.x }},y:{{ node.y }}}
+  {% ifequal forloop.last 0 %},{% endifequal %}
+  {% endfor %}
+],
+branches:[
+  {% for branch in branches %}
+  {id:'{{ branch.id }}',f:'{{ branch.from }}',t:'{{ branch.to }}'}
+  {% ifequal forloop.last 0 %},{% endifequal %}
+  {% endfor %}
+]}
+{% endspaceless %}

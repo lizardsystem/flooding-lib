@@ -1,0 +1,48 @@
+{% extends "lizard/base.html" %}
+
+{% comment %}
+20090212 k.k.ha template for scenario view 
+object has to be a Scenario
+
+{% endcomment %}
+
+{% load i18n %}
+
+{% block title %}
+Lizard-flooding: Scenario {{ object.name }}
+{% endblock %}
+
+{% block content %}
+<p><strong>Project:</strong> <a href="{% url flooding_project_detail object_id=object.project.id %}">{{ object.project.name }}</a></p>
+<p><strong>Name:</strong> {{ object.name }}</p>
+<p><strong>Owner:</strong> {{ object.owner }}</p>
+<p><strong>Remarks:</strong> {{ object.remarks }}</p>
+<p><strong>Breaches:</strong>
+  <ul>
+  {% for b in object.breaches.all %}
+  <li>{{ b.name }}</li>
+  {% endfor %}
+  </ul>
+</p>
+<p><strong>Cutoff locations:</strong>
+  <ul>
+  {% for cl in object.cutofflocations.all %}
+  <li>{{ cl.name }}</li>
+  {% endfor %}
+  </ul>
+</p>
+<p><strong>Tides:</strong>
+  <ul>
+  {% for t in object.tides.all %}
+  <li>{{ t.name }}</li>
+  {% endfor %}
+  </ul>
+</p>
+<p><strong>Sobek models:</strong>
+  <ul>
+  {% for sm in object.sobekmodels.all %}
+  <li>{{ sm.name }}</li>
+  {% endfor %}
+  </ul>
+</p>
+{% endblock %}

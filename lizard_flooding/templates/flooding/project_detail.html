@@ -1,0 +1,21 @@
+{% extends "lizard/base.html" %}
+
+{% comment %}
+20090212 k.k.ha template for scenario view 
+object has to be a Project
+{% endcomment %}
+
+{% load i18n %}
+
+{% block title %}
+Lizard-flooding: Project {{ object.name }}
+{% endblock %}
+
+{% block content %}
+<h2>{{ object.name }}</h2>
+<ul>
+  {% for s in object.scenario_set.all %}
+  <li><a href="{% url flooding_scenario_detail object_id=s.id %}">{{ s.name }}</a></li>
+  {% endfor %}
+</ul>
+{% endblock %}
