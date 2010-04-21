@@ -1,0 +1,38 @@
+{% extends "lizard/base.html" %}
+
+{% block title %}
+Presentation: permission overview
+{% endblock %}
+
+{% block content %}
+
+{{ text }}
+
+{% for app_block in permissions %}
+<p>
+<h1>Permissions for source application "{{ app_block.title }}"</h1>
+
+<table>
+<thead>
+  <tr>
+    <th>permission\permission_level</th>
+    {% for header_item in app_block.header %}
+    <th>{{ header_item }}</th>
+    {% endfor %}
+  </tr>
+</thead>
+<tbody>
+  {% for row in app_block.table %}
+  <tr>
+    {% for row_item in row %}
+    <td{% if not forloop.first %}{% if row_item %} bgcolor="#00FF00"{% endif %}{% endif %}>{{ row_item }}</td>
+    {% endfor %}
+  </tr>
+  {% endfor %}
+</tbody>
+</table>
+<br/>
+</p>
+{% endfor %}
+
+{% endblock %}

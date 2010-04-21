@@ -1,0 +1,16 @@
+<link href="{% url root_url %}static_media/style/legend.css" rel="stylesheet" type="text/css">
+<div class="legend-title">{{ title }}</div>
+<div class="legend">
+  <table class="legend-block">
+    <tbody>
+  {% for value, color in content %}
+      <tr>
+	<td class="legend-row-left" bgcolor="{{ color }}">
+	</td>
+	<td>
+	  {{ value }}
+	</td>
+      </tr>
+  {% endfor %}
+    </tbody>
+</div>

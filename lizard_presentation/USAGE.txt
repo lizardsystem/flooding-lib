@@ -1,0 +1,9 @@
+Usage of lizard-presentation
+=============================================
+
+
+Usage:
+
+    >>> import lizard_presentation
+
+Show how to import the main classes and how to use them.

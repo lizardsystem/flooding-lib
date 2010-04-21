@@ -1,0 +1,9 @@
+Usage of lizard-visualization
+=============================================
+
+
+Usage:
+
+    >>> import lizard_visualization
+
+Show how to import the main classes and how to use them.
