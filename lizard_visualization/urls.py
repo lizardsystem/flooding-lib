@@ -21,8 +21,8 @@ urlpatterns = patterns(
         'lizard_visualization.views.testmapping',
         name='visualization_testmapping'),
 
-    url(r'^test_mpl/$',
-        'lizard_visualization.views_dev.test_mpl'),
+    # url(r'^test_mpl/$',
+    #     'lizard_visualization.views_dev.test_mpl'),
 
 
 )

@@ -3,6 +3,8 @@ from django.conf import settings
 from django.contrib import databrowse
 
 from lizard_flooding.models import Project
+import lizard_visualization.urls
+import lizard_presentation.urls
 
 info_dict = {
     'queryset': Project.objects.all(),
@@ -14,6 +16,9 @@ urlpatterns = patterns(
     url(r'^$',
         'lizard_flooding.views.index',
         name='flooding'),
+
+    (r'^visualization/', include(lizard_visualization.urls)),
+    (r'^presentation/', include(lizard_presentation.urls)),
 
     url(r'^tools/',
         include('lizard_flooding.tools.urls')),
@@ -149,7 +154,6 @@ urlpatterns = patterns(
     url(r'^service/result/(?P<object_id>\d+)/(?P<location_nr>\d+)/(?P<parameter_nr>\d+)/$',
         'lizard_flooding.views_dev.service_result',
         name='flooding_service_result'),
-
 
     #url(r'^floodingsa/$',
     #    'lizard_flooding.views.service_get_dict_for_lizardsa'),
