@@ -128,14 +128,15 @@ def infowindow_information(request, scenario_id):
     project_attachments = scenario.project.attachments.order_by('uploaded_date').reverse()
 
     #Needed for generic relation search for multiple breaches
-    c =  ContentType.objects.get(model='sobekmodel')
+    c = SobekModel
+    #ContentType.objects.get(model='sobekmodel')
     sobekmodel_choices=[]
 
     #Get the the sobekmodels
     for breach in scenario.breaches.all():
         for sobekmodel in breach.sobekmodels.all():
             sobekmodel_choices+=[[sobekmodel.id]]
-
+    #xxxxxx
     breachmodel_attachments = Attachment.objects.filter(content_type=c, object_id__in=[sm[0] for sm in sobekmodel_choices]).order_by('uploaded_date')
 
     scen_atts = [(f.file.name, os.path.split(f.file.name)[1]) for f in scenario_attachments]
