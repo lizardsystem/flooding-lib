@@ -1,4 +1,5 @@
 from django.conf.urls.defaults import *
+from django.conf import settings
 from django.contrib import databrowse
 
 from lizard_flooding.models import Project
