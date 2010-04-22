@@ -7,15 +7,12 @@ info_dict = {
     'queryset': Project.objects.all(),
 }
 
-#databrowse is for debugging purposes, remove when in a production environment!
 
 urlpatterns = patterns(
     '',
     url(r'^$',
         'lizard_flooding.views.index',
         name='flooding'),
-
-    (r'^databrowse/(.*)', databrowse.site.root),
 
     url(r'^tools/',
         include('lizard_flooding.tools.urls')),
@@ -158,3 +155,11 @@ urlpatterns = patterns(
 
 
 )
+
+
+if settings.DEBUG:
+    #databrowse is for debugging purposes, so it is disabled in production
+    urlpatterns += patterns(
+        '',
+        (r'^databrowse/(.*)', databrowse.site.root),
+        )
