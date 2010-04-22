@@ -3,8 +3,6 @@ from django.conf import settings
 from django.contrib import databrowse
 
 from lizard_flooding.models import Project
-import lizard_visualization.urls
-import lizard_presentation.urls
 
 info_dict = {
     'queryset': Project.objects.all(),
@@ -17,8 +15,6 @@ urlpatterns = patterns(
         'lizard_flooding.views.index',
         name='flooding'),
 
-    (r'^visualization/', include(lizard_visualization.urls)),
-    (r'^presentation/', include(lizard_presentation.urls)),
 
     url(r'^tools/',
         include('lizard_flooding.tools.urls')),
