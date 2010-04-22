@@ -35,6 +35,27 @@ from nens.sobek import HISFile
 log = logging.getLogger('nens.web.presentation.views')
 
 
+
+def external_file_location(filename):
+    """Return full filename of file that's on smb (currently)
+
+    Old: look in database for config value and request smb file from windows.
+
+    New: look if django setting exists and then assume a mounted directory.
+
+    """
+    if hasattr(settings, 'EXTERNAL_MOUNTED_DIR'):
+        # smb mounted on linux.
+        base_dir = settings.EXTERNAL_MOUNTED_DIR
+        filename = filename.replace('\\', '/')
+        full_name = os.path.join(base_dir, filename)
+    else:
+        # Windows direct smb link.
+        base_dir = Setting.objects.get( key = 'presentation_dir' ).value
+        full_name = os.path.join(base_dir, filename.lstrip('\\').lstrip('/'))
+    return str(full_name)
+
+
 def service_get_presentationlayer_settings(
     request, pl_id):
     """get_settings of presentationlayer
@@ -134,7 +155,7 @@ def service_get_wms_of_shape(
     if legend_id == -1:
         legend_id = pl.presentationtype.default_legend_id
 
-    presentation_dir = Setting.objects.get( key = 'presentation_dir' ).value
+    #presentation_dir = Setting.objects.get( key = 'presentation_dir' ).value
 
     #################### set up map ###################################
     log.debug( 'start setting up map ' + str(datetime.datetime.now()))
@@ -192,7 +213,7 @@ def service_get_wms_of_shape(
                     layer = layers[0]
 
                     lyrl = mapnik.Layer('lines', spherical_mercator)
-                    lyrl.datasource = mapnik.Shapefile(file=str(presentation_dir+'\\'+layer.presentationshape.geo_source.file_location))
+                    lyrl.datasource = mapnik.Shapefile(file=external_file_location(layer.presentationshape.geo_source.file_location))
 
                     lyrl.styles.append('Line Style')
                     m.layers.append(lyrl)
@@ -208,7 +229,7 @@ def service_get_wms_of_shape(
                     layer = layers[0]
 
                     lyrl = mapnik.Layer('lines',spherical_mercator)
-                    lyrl.datasource = mapnik.Shapefile(file=str(presentation_dir+'\\'+layer.presentationshape.geo_source.file_location))
+                    lyrl.datasource = mapnik.Shapefile(file=external_file_location(layer.presentationshape.geo_source.file_location))
 
                     lyrl.styles.append('Line Style')
                     m.layers.append(lyrl)
@@ -237,7 +258,7 @@ def service_get_wms_of_shape(
         points = []
 
         drv = ogr.GetDriverByName('ESRI Shapefile')
-        shapefile_name = str(presentation_dir + "\\"+ pl.presentationshape.geo_source.file_location)
+        shapefile_name = external_file_location(pl.presentationshape.geo_source.file_location)
         ds = drv.Open(shapefile_name)
         layer = ds.GetLayer()
 
@@ -257,7 +278,7 @@ def service_get_wms_of_shape(
 
                 if his == None:
                     log.debug( 'read hisfile' + str(datetime.datetime.now()) )
-                    zip_name = os.path.join(presentation_dir,pl.presentationshape.value_source.file_location.lstrip('\\').lstrip('/'))
+                    zip_name = external_file_location(pl.presentationshape.value_source.file_location)
                     input_file = ZipFile(zip_name, "r")
                     if pl.presentationtype.geo_source_filter:
                         filename = pl.presentationtype.geo_source_filter
@@ -405,11 +426,11 @@ def service_get_gridframe(request, presentationlayer_id, legend_id, framenr=0):
     """
     pl = get_object_or_404(PresentationLayer, pk=presentationlayer_id)
 
-    dir_settings = Setting.objects.get( key = 'presentation_dir' )
+    #dir_settings = Setting.objects.get( key = 'presentation_dir' )
     if True: #legend_id == None :, custom legend not yet implemented
         #use prefab image
 
-        png_name = os.path.join(dir_settings.value, pl.presentationgrid.png_default_legend.file_location.lstrip('\\').lstrip('/'))
+        png_name = external_file_location(pl.presentationgrid.png_default_legend.file_location)
         if pl.presentationtype.value_type == 3:
             numberstring = '%04i' % framenr
             png_name = png_name.replace('####',numberstring)
@@ -434,8 +455,8 @@ def service_get_shapes(
         name shape
     """
     pl = get_object_or_404(PresentationLayer, pk=presentationlayer_id)
-    presentation_dir = Setting.objects.get( key = 'presentation_dir' ).value
-    shapefile_name = str(presentation_dir + '\\' + pl.presentationshape.geo_source.file_location)
+    #presentation_dir = Setting.objects.get( key = 'presentation_dir' ).value
+    shapefile_name = external_file_location(pl.presentationshape.geo_source.file_location)
 
     drv = ogr.GetDriverByName('ESRI Shapefile')
     ds = drv.Open(shapefile_name)
@@ -592,8 +613,8 @@ def read_his_file(sobek_id, presentationlayer):
 
     his = cache.get('his_' + str(presentationlayer.id) )
     if his == None:
-        presentation_dir = Setting.objects.get( key = 'presentation_dir' ).value
-        zip_name = presentation_dir + pl.presentationshape.value_source.file_location
+        #presentation_dir = Setting.objects.get( key = 'presentation_dir' ).value
+        zip_name = external_file_location(pl.presentationshape.value_source.file_location)
 
         input_file = ZipFile(zip_name, "r")
 
