@@ -5,7 +5,7 @@ Changelog of lizard-flooding
 1.1 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Making PNG result images working on linux, too.
 
 
 1.0 (2010-04-21)
