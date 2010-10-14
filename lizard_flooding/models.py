@@ -35,9 +35,6 @@ class Attachment(models.Model):
 
     """
 
-    class Meta:
-        verbose_name = _('Attachment')
-        verbose_name_plural = _('Attachments')
 
     #Fields needed for generic relation
     content_type = models.ForeignKey(ContentType)
@@ -50,6 +47,11 @@ class Attachment(models.Model):
     uploaded_by = models.CharField(max_length = 200, blank = False)
     uploaded_date = models.DateTimeField(blank=True, null=True)
 
+    class Meta:
+        verbose_name = _('Attachment')
+        verbose_name_plural = _('Attachments')
+        db_table = 'flooding_attachment'
+          
     def __unicode__(self):
         return self.name
 
@@ -65,6 +67,8 @@ class SobekVersion(models.Model):
     #is waarschijnlijk niet nodig
     startfile = models.TextField()
     '''
+    class Meta:
+        db_table = 'flooding_sobekversion'
 
     def __unicode__(self):
         return self.name
@@ -80,9 +84,7 @@ class SobekModel(models.Model):
     - is related to 0 or more scenario's*
 
     """
-    class Meta:
-        verbose_name = _('Sobek model')
-        verbose_name_plural = _('Sobek models')
+        
     SOBEKMODELTYPE_CHOICES = (
         (1, _('canal')),
         (2, _('inundation')),
@@ -109,6 +111,11 @@ class SobekModel(models.Model):
 
     code = models.CharField(max_length=15, null=True)
 
+    class Meta:
+        verbose_name = _('Sobek model')
+        verbose_name_plural = _('Sobek models')
+        db_table = 'flooding_sobekmodel'
+        
     def __unicode__(self):
         return 'type: %s case: %d version: %s'%(self.TYPE_DICT[self.sobekmodeltype],
                                                 self.model_case,
@@ -132,9 +139,6 @@ class CutoffLocation(models.Model):
     - is related to sobekmodel through cutofflocationsobekid
 
     """
-    class Meta:
-        verbose_name = _('Cutoff location')
-        verbose_name_plural = _('Cutoff locations')
     TYPE_CHOICES = (
         (1, _('lock')), #sluis
         (2, _('culvert')), #duiker
@@ -162,6 +166,11 @@ class CutoffLocation(models.Model):
 
     code = models.CharField(max_length=15, null=True)
 
+    class Meta:
+        verbose_name = _('Cutoff location')
+        verbose_name_plural = _('Cutoff locations')
+        db_table = 'flooding_cutofflocation'
+        
     def __unicode__(self):
         return self.name
 
@@ -190,10 +199,6 @@ class ExternalWater(models.Model):
     - is related to 0 or more cutofflocations
 
     """
-    class Meta:
-        verbose_name = _('External water')
-        verbose_name_plural = _('External waters')
-
     TYPE_CHOICES = (
         (1,_('sea')),
         (2,_('lake')),
@@ -230,6 +235,11 @@ class ExternalWater(models.Model):
 
     code = models.CharField(max_length=15, null=True)
 
+    class Meta:
+        verbose_name = _('External water')
+        verbose_name_plural = _('External waters')
+        db_table = 'flooding_externalwater'
+
     def __unicode__(self):
         return self.name
 
@@ -239,11 +249,13 @@ class Dike(models.Model):
     - for now, holds no extra information
 
     """
+    name = models.CharField(max_length=200)
+
     class Meta:
         verbose_name = _('Dike')
         verbose_name_plural = _('Dikes')
-    name = models.CharField(max_length=200)
-
+        db_table = 'flooding_dike'
+        
     def __unicode__(self):
         return self.name
 
@@ -253,9 +265,6 @@ class WaterlevelSet(models.Model):
     - represents a complete graph per element
 
     """
-    class Meta:
-        verbose_name = _('Waterlevel set')
-        verbose_name_plural = _('Waterlevel sets')
     WATERLEVELSETTYPE_CHOICES = (
         (1, _('undefined')),
         (2, _('tide')),
@@ -270,6 +279,11 @@ class WaterlevelSet(models.Model):
 
     code = models.CharField(max_length=20, null=True)
 
+    class Meta:
+        verbose_name = _('Waterlevel set')
+        verbose_name_plural = _('Waterlevel sets')
+        db_table = 'flooding_waterlevelset'
+        
     def __unicode__(self):
         return self.name
 
@@ -280,15 +294,16 @@ class Waterlevel(models.Model):
     - belongs to a waterlevel set
 
     """
+    time = models.FloatField() #interval
+    value = models.FloatField()
+    waterlevelset = models.ForeignKey(WaterlevelSet)
+
     class Meta:
         unique_together = (("waterlevelset", "time"),)
         verbose_name = _('Waterlevel')
         verbose_name_plural = _('Waterlevels')
-    time = models.FloatField() #interval
-    value = models.FloatField()
-
-    waterlevelset = models.ForeignKey(WaterlevelSet)
-
+        db_table = 'flooding_waterlevel'
+        
     def __unicode__(self):
         return u'%s: %s, %f'%(self.waterlevelset.__unicode__(),
                               str(datetime.timedelta(self.time)), self.value)
@@ -301,9 +316,6 @@ class Region(models.Model):
     - is related to 0 or more cutofflocations
 
     """
-    class Meta:
-        verbose_name = _('Region')
-        verbose_name_plural = _('Regions')
     name = models.CharField(max_length=200)
     longname = models.CharField(max_length=200)
     active = models.BooleanField(default=True)
@@ -321,6 +333,11 @@ class Region(models.Model):
     code = models.CharField(max_length=20, null=True)
     dijkringnr = models.IntegerField(null=True, blank=True)
 
+    class Meta:
+        verbose_name = _('Region')
+        verbose_name_plural = _('Regions')
+        db_table = 'flooding_region'
+        
     def __unicode__(self):
         if self.longname:
             return self.longname
@@ -336,15 +353,17 @@ class RegionSet(AL_Node):
     note: nog niet alle velden onder de knie.. dit is een django-treebeard implementatie
 
     """
-    class Meta:
-        verbose_name = _('Region set')
-        verbose_name_plural = _('Region sets')
     name = models.CharField(max_length=200)
     parent = models.ForeignKey('self', related_name='children_set',
                                null=True, db_index=True, blank=True)
     regions = models.ManyToManyField(Region, blank=True)
     node_order_by = ['name']
 
+    class Meta:
+        verbose_name = _('Region set')
+        verbose_name_plural = _('Region sets')
+        db_table = 'flooding_regionset'
+        
     def get_all_regions(self, filter_active=True):
         """get all regions from all descendants.
 
@@ -379,9 +398,6 @@ class Breach(models.Model):
     - is related to 0 or more scenario's
 
     """
-    class Meta:
-        verbose_name = _('Breach')
-        verbose_name_plural = _('Breaches')
     name = models.CharField(max_length=200)
     remarks = models.TextField(blank=True)
     externalwater = models.ForeignKey(ExternalWater)
@@ -411,6 +427,10 @@ class Breach(models.Model):
 
     objects = models.GeoManager()
 
+    class Meta:
+        verbose_name = _('Breach')
+        verbose_name_plural = _('Breaches')
+        db_table = 'flooding_breach'
 
     def get_all_projects(self):
         """find out all projects that the current breach is part of"""
@@ -440,13 +460,14 @@ class BreachSobekModel(models.Model):
     extra eigenschappen van de koppeling bepaald (sobekid).
 
     """
-    class Meta:
-        unique_together = (("sobekmodel", "breach"),)
-
     sobekmodel = models.ForeignKey(SobekModel)
     breach = models.ForeignKey(Breach)
 
     sobekid = models.CharField(max_length=200)
+
+    class Meta:
+        unique_together = (("sobekmodel", "breach"),)
+        db_table = 'flooding_breachsobekmodel'
 
     def __unicode__(self):
         return "%s - %s: %s"%(self.sobekmodel.__unicode__(), self.breach.__unicode__(),
@@ -459,12 +480,14 @@ class CutoffLocationSet(models.Model):
     - is related to 0 or more breaches
 
     """
-    class Meta:
-        verbose_name = _('Cutoff location set')
-        verbose_name_plural = _('Cutoff location sets')
     name = models.CharField(max_length=200)
     cutofflocations = models.ManyToManyField(CutoffLocation)
 
+    class Meta:
+        verbose_name = _('Cutoff location set')
+        verbose_name_plural = _('Cutoff location sets')
+        db_table = 'flooding_cutofflocationset'
+        
     def __unicode__(self):
         return self.name
 
@@ -476,10 +499,6 @@ class Project(models.Model):
     - is referred to by 0 or more scenario's
 
     """
-    class Meta:
-        verbose_name = _('Project')
-        verbose_name_plural = _('Projects')
-        ordering = ('friendlyname', 'name', 'owner', )
     friendlyname = models.CharField(max_length=200)
     name = models.CharField(max_length=200)
     owner = models.ForeignKey(User)
@@ -489,6 +508,12 @@ class Project(models.Model):
     regions = models.ManyToManyField(Region, blank=True)
 
     code = models.CharField(max_length=20, null=True)
+
+    class Meta:
+        verbose_name = _('Project')
+        verbose_name_plural = _('Projects')
+        ordering = ('friendlyname', 'name', 'owner', )
+        db_table = 'flooding_project'
 
     #Project -> RegionSet (+) -> (RegionSet ->) Region(+) -> Breach
     def get_all_breaches(self):
@@ -513,8 +538,6 @@ class Project(models.Model):
     def get_absolute_url(self):
         return reverse("flooding_project_detail", kwargs={"object_id": self.id})
 
-
-
 class UserPermission(models.Model):
     """userpermission
 
@@ -522,11 +545,6 @@ class UserPermission(models.Model):
     in the projectgrouppermission, then the permission is granted for
     that (user,project,permission)
     """
-
-    class Meta:
-        unique_together = (("user", "permission"),)
-        verbose_name = _('User permission')
-        verbose_name_plural = _('User permissions')
 
     PERMISSION_SCENARIO_VIEW = 1
     PERMISSION_SCENARIO_ADD = 2
@@ -574,6 +592,12 @@ class UserPermission(models.Model):
     user = models.ForeignKey(User)
     permission = models.IntegerField(choices=PERMISSION_CHOICES)
 
+    class Meta:
+        unique_together = (("user", "permission"),)
+        verbose_name = _('User permission')
+        verbose_name_plural = _('User permissions')
+        db_table = 'flooding_userpermission'
+
     def __unicode__(self):
         return u'%s: %s'%(self.user.__unicode__(),
                           self.get_permission_display())
@@ -584,14 +608,16 @@ class ProjectGroupPermission(models.Model):
     - links a group to a project, through a permission
 
     """
-    class Meta:
-        unique_together = (("group", "project", "permission"),)
-        verbose_name = _('Project group permission')
-        verbose_name_plural = _('Project group permissions')
     group = models.ForeignKey(Group)
     project = models.ForeignKey(Project)
     permission = models.IntegerField(choices=UserPermission.PERMISSION_CHOICES)
 
+    class Meta:
+        unique_together = (("group", "project", "permission"),)
+        verbose_name = _('Project group permission')
+        verbose_name_plural = _('Project group permissions')
+        db_table = 'flooding_projectgrouppermission'
+        
     def __unicode__(self):
         return u'%s - %s (%s)'%(self.group.__unicode__(),
                                 self.project.__unicode__(),
@@ -600,24 +626,28 @@ class ProjectGroupPermission(models.Model):
 class PermissionProjectShapeDataLegend(models.Model):
     """View permissions for visualization.models.ShapeDataLegend
     """
-    class meta:
-        verbose_name = _('Permission project shapedatalegend')
-        verbose_name_plural = _('Permissions project shapedatalegend')
     project = models.ForeignKey(Project)
     shapedatalegend = models.ForeignKey(ShapeDataLegend)
 
+    class meta:
+        verbose_name = _('Permission project shapedatalegend')
+        verbose_name_plural = _('Permissions project shapedatalegend')
+        db_table = 'flooding_permissionprojectshapedatalegend'
+        
     def __unicode__(self):
         return u'view %s - %s'%(self.project.__unicode__(), self.shapedatalegend.__unicode__())
 
 class PermissionProjectGridDataLegend(models.Model):
     """View permissions for visualization.models.ValueVisualizerMap
     """
-    class meta:
-        verbose_name = _('Permission project griddatalegend')
-        verbose_name_plural = _('Permissions project griddatalegend')
     project = models.ForeignKey(Project)
     griddatalegend = models.ForeignKey(ValueVisualizerMap)
 
+    class meta:
+        verbose_name = _('Permission project griddatalegend')
+        verbose_name_plural = _('Permissions project griddatalegend')
+        db_table = 'flooding_permissinoprojectgriddatalegend'
+        
     def __unicode__(self):
         return u'view %s - %s'%(self.project.__unicode__(), self.griddatalegend.__unicode__())
 
@@ -644,18 +674,22 @@ class ExtraInfoField(models.Model):
     header = models.IntegerField(choices=HEADER_CHOICES, default=HEADER_METADATA)
     position = models.IntegerField(default=0)
 
+    class Meta:
+        db_table = 'flooding_extrainfofield'
+        
     def __unicode__(self):
         return self.name
 
 class ExtraScenarioInfo(models.Model):
     """De extra metadata waarden van een scenario
     """
-    class Meta:
-        unique_together = (("extrainfofield", "scenario"),)
-
     extrainfofield = models.ForeignKey('ExtraInfoField')
     scenario = models.ForeignKey('Scenario')
     value = models.CharField(max_length=100)
+
+    class Meta:
+        unique_together = (("extrainfofield", "scenario"),)
+        db_table = 'flooding_extrascenarioinfo'
 
     def __unicode__(self):
         return self.scenario.__unicode__() + ', ' + self.extrainfofield.__unicode__() + ': ' + str(self.value)
@@ -671,9 +705,6 @@ class Scenario(models.Model):
     - is referred to by results
 
     """
-    class Meta:
-        verbose_name = _('Scenario')
-        verbose_name_plural = _('Scenarios')
     CALCPRIORITY_CHOICES = (
         (20, _('low')),
         (30, _('medium')),
@@ -728,6 +759,9 @@ class Scenario(models.Model):
 
     class Meta:
         ordering = ('name', 'project', 'owner', )
+        verbose_name = _('Scenario')
+        verbose_name_plural = _('Scenarios')
+        db_table = 'flooding_scenario'
 
     def __unicode__(self):
         return self.name
@@ -786,10 +820,6 @@ class ScenarioBreach(models.Model):
     - extra settings, such as waterlevel
 
     """
-    class Meta:
-        unique_together = (("scenario", "breach"),)
-        verbose_name = _('Scenario breach')
-        verbose_name_plural = _('Scenario breaches')
     METHOD_START_BREACH_CHOICES = (
         (1, _('at top')),
         (2, _('at moment x')),
@@ -828,6 +858,12 @@ class ScenarioBreach(models.Model):
 
     code = models.CharField(max_length=15, null=True, blank=True)
 
+    class Meta:
+        unique_together = (("scenario", "breach"),)
+        verbose_name = _('Scenario breach')
+        verbose_name_plural = _('Scenario breaches')
+        db_table = 'flooding_scenariobreach'
+        
     def __unicode__(self):
         return u'%s: %s (%s)'%(self.scenario.__unicode__(), self.breach.__unicode__(),
                                self.waterlevelset.__unicode__())
@@ -864,15 +900,17 @@ class ScenarioCutoffLocation(models.Model):
     - provides settings for scenario cutofflocation
 
     """
-    class Meta:
-        unique_together = (("scenario", "cutofflocation"),)
-        verbose_name = _('Scenario cutoff location')
-        verbose_name_plural = _('Scenario cutoff locations')
     scenario = models.ForeignKey(Scenario)
     cutofflocation = models.ForeignKey(CutoffLocation)
 
     tclose = models.FloatField() #interval timedelta
 
+    class Meta:
+        unique_together = (("scenario", "cutofflocation"),)
+        verbose_name = _('Scenario cutoff location')
+        verbose_name_plural = _('Scenario cutoff locations')
+        db_table = 'flooding_scenariocutofflocation'
+        
     def __unicode__(self):
         return u'%s: %s'%(self.scenario.__unicode__(),
                           self.cutofflocation.__unicode__())
@@ -889,20 +927,18 @@ class ScenarioCutoffLocation(models.Model):
 
 class Program(models.Model):
     """Program meta info: Sobek, Ascii2Png, etc"""
+    name = models.CharField(max_length=200)
+
     class Meta:
         verbose_name = _('Program')
         verbose_name_plural = _('Programs')
-    name = models.CharField(max_length=200)
-
+        db_table = 'flooding_program'
+        
     def __unicode__(self):
         return self.name
 
 class ResultType(models.Model):
     """Resulttype."""
-    class Meta:
-        verbose_name = _('Result type')
-        verbose_name_plural = _('Result types')
-
     name = models.CharField(max_length=50)
     shortname_dutch = models.CharField(max_length=20, blank=True, null=True)
     overlaytype = models.CharField(max_length=20, blank=True, null=True)
@@ -911,6 +947,11 @@ class ResultType(models.Model):
     program = models.ForeignKey(Program)
     content_names_re = models.CharField(max_length=256, blank=True, null=True)
     presentationtype = models.ManyToManyField(PresentationType, through = 'ResultType_PresentationType')
+
+    class Meta:
+        verbose_name = _('Result type')
+        verbose_name_plural = _('Result types')
+        db_table = 'flooding_resulttype'
 
     def __unicode__(self):
         return self.shortname_dutch
@@ -923,11 +964,6 @@ class Result(models.Model):
     todo: types
 
     """
-    class Meta:
-        unique_together = (("scenario", "resulttype"),)
-        verbose_name = _('Result')
-        verbose_name_plural = _('Results')
-
     scenario = models.ForeignKey(Scenario)
     resulttype = models.ForeignKey(ResultType)
 
@@ -941,6 +977,12 @@ class Result(models.Model):
     unit = models.CharField(max_length=10, blank=True, null=True)
     value = models.FloatField(null=True, blank=True)
     bbox = models.MultiPolygonField('Result Border', srid=4326, blank=True, null=True)
+
+    class Meta:
+        unique_together = (("scenario", "resulttype"),)
+        verbose_name = _('Result')
+        verbose_name_plural = _('Results')
+        db_table = 'flooding_result'
 
 
 class CutoffLocationSobekModelSetting(models.Model):
@@ -966,6 +1008,8 @@ class CutoffLocationSobekModelSetting(models.Model):
         #unique_together = (("sobekmodel", "cutofflocation "),)
         verbose_name = _('Cutoff location sobek model setting')
         verbose_name_plural = _('Cutoff location sobek model settings')
+        db_table = 'flooding_cutofflocationsobekmodelsetting'
+        
     def __unicode__(self):
         return u'%s - %s: %s'%(self.sobekmodel.__unicode__(),
                                self.cutofflocation.__unicode__(),
@@ -986,10 +1030,12 @@ class TaskType(models.Model):
     TYPE_SCENARIO_APPROVE = 190
     TYPE_SCENARIO_DELETE = 200
 
+    name = models.CharField(max_length=200)
+    
     class Meta:
         verbose_name = _('Task type')
         verbose_name_plural = _('Task types')
-    name = models.CharField(max_length=200)
+        db_table = 'flooding_tasktype'
 
     def __unicode__(self):
         return u'%s (%d)'%(self.name, self.id)
@@ -1001,11 +1047,6 @@ class Task(models.Model):
     tasktypes are fixed
 
     """
-    class Meta:
-        verbose_name = _('Task')
-        verbose_name_plural = _('Tasks')
-        get_latest_by = 'tstart'
-
     #lookup for TaskType??
 
     scenario = models.ForeignKey(Scenario)
@@ -1018,6 +1059,12 @@ class Task(models.Model):
     tfinished = models.DateTimeField(blank=True, null=True)
     errorlog = models.TextField(blank=True, null=True)
     successful = models.NullBooleanField(blank = True, null=True)
+
+    class Meta:
+        verbose_name = _('Task')
+        verbose_name_plural = _('Tasks')
+        get_latest_by = 'tstart'
+        db_table = 'flooding_task'
 
     def __unicode__(self):
         return u'Scenario %s (tasktype %d %s)'%(self.scenario.__unicode__(), self.tasktype.id, self.tasktype)
@@ -1053,11 +1100,6 @@ class Task(models.Model):
 
 class TaskExecutor(models.Model):
     """Defines all machines that can execute tasks"""
-    class Meta:
-        verbose_name = _('Task executor')
-        verbose_name_plural = _('Task executors')
-        unique_together = (("ipaddress", "port"),("name", "seq"))
-
     name = models.CharField(max_length=200)
     ipaddress = models.IPAddressField()
     port = models.IntegerField()
@@ -1067,6 +1109,12 @@ class TaskExecutor(models.Model):
 
     tasktypes = models.ManyToManyField(TaskType, null=True, blank=True)
 
+    class Meta:
+        verbose_name = _('Task executor')
+        verbose_name_plural = _('Task executors')
+        unique_together = (("ipaddress", "port"),("name", "seq"))
+        db_table = 'flooding_taskexecutor'
+
     def __unicode__(self):
         return self.name
 
@@ -1075,12 +1123,18 @@ class Scenario_PresentationLayer(models.Model):
     scenario = models.ForeignKey(Scenario)
     presentationlayer = models.ForeignKey(PresentationLayer)
 
+    class Meta:    
+        db_table = 'flooding_scenario_presentationlayer'
+
 
 class ResultType_PresentationType(models.Model):
     """link to presentation.PresentationType """
     resulttype = models.ForeignKey(ResultType)
     presentationtype = models.ForeignKey(PresentationType)
     remarks = models.CharField(max_length=100)
+
+    class Meta:    
+        db_table = 'flooding_resulttype_presentationtype'
 
     def __unicode__(self):
         return self.remarks

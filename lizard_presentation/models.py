@@ -55,7 +55,10 @@ class PresentationType(models.Model):
     #numeric permission level; meaning is given by permission_manager
     permission_level = models.IntegerField(default=1)
     default_legend_id = models.IntegerField(blank = False)
-
+    
+    class Meta:        
+        db_table = 'presentation_presentationtype'
+        
     def __unicode__(self):
         return self.name
 
@@ -65,7 +68,10 @@ class CustomIndicator(models.Model):
     """ A label for a group of PresentationTypes """
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
-
+    
+    class Meta:        
+        db_table = 'presentation_customindicator'
+    
     def __unicode__(self):
         return self.name
 
@@ -82,7 +88,6 @@ class Derivative(models.Model):
     COMBINE_TYPE_LOCATIONS = 2
     COMBINE_TYPE_TIMESERIE_LOCATIONS = 3
     COMBINE_TYPE_CUSTOM_COMP_DAMAGE_EMBANKMENTS = 4
-
 
     FUNCTION_TYPE = (
         (1, _('min')),
@@ -101,14 +106,19 @@ class Derivative(models.Model):
     dest_presentationtype = models.ForeignKey('PresentationType')
     combine_on = models.IntegerField(choices = COMBINE_TYPE) #
     function_derivative = models.IntegerField(choices = FUNCTION_TYPE)# # max, sum, sum_multiplied_by_dt, min, mean
-
-
+    
+    class Meta:        
+        db_table = 'presentation_derivative'
+    
 class SupportLayers(models.Model):
     """ Information how to create a PresentionLayer based on another PresentaionLayer """
 
     presentationtype = models.OneToOneField('PresentationType',related_name = 'supported_presentationtype')
     supportive_presentationtype = models.ManyToManyField('PresentationType',related_name = 'supportive_presentationtypes')
-
+    
+    class Meta:        
+        db_table = 'presentation_supportlayers'
+    
 class Field(models.Model):
     """ Fields of a PresentaionType """
 
@@ -140,6 +150,9 @@ class Field(models.Model):
     is_main_value_field = models.BooleanField(default=False)
     name_in_source = models.CharField(max_length=80)
     field_type = models.IntegerField(choices = DATA_TYPE)
+    
+    class Meta:        
+        db_table = 'presentation_field'
 
     def __unicode__(self):
         return self.presentationtype.name +': ' + self.friendlyname
@@ -149,6 +162,9 @@ class FieldChoice(models.Model):
     field = models.ForeignKey(Field)
     friendlyname = models.CharField(max_length=50)
     fieldname_source = models.CharField(max_length=80)
+    
+    class Meta:        
+        db_table = 'presentation_fieldchoice'
 
     def __unicode__(self):
         return self.friendlyname
@@ -169,6 +185,9 @@ class PresentationLayer(models.Model):
     presentationtype = models.ForeignKey(PresentationType)
     source_application = models.IntegerField(choices=SOURCE_APPLICATION_CHOICES, default=SOURCE_APPLICATION_NONE)
     value = models.FloatField(blank = True, null = True)
+    
+    class Meta:        
+        db_table = 'presentation_presentationlayer'
 
     def __unicode__(self):
         return '%s - %s'%(self.presentationtype.__unicode__(),
@@ -181,18 +200,27 @@ class Animation(models.Model):
     lastnr = models.IntegerField()
     startnr = models.IntegerField(blank=True)
     delta_timestep = models.FloatField() #datetime object, time in days
+    
+    class Meta:        
+        db_table = 'presentation_animation'
 
 class Classified(models.Model):
     """ Information about the PresentationLayer's classes """
     presentationlayer = models.OneToOneField(PresentationLayer, unique=True) #must be unique
     firstnr = models.IntegerField()
     lastnr = models.IntegerField()
+    
+    class Meta:        
+        db_table = 'presentation_classified'
 
 class ClassifiedNr(models.Model):
     """ classes of a Classified PresentationLayer """
     classes = models.ForeignKey(Classified) #must be unique
     nr = models.IntegerField()
     boundary = models.FloatField()
+    
+    class Meta:        
+        db_table = 'presentation_classifiednr'
 
 class PresentationSource(models.Model):
     """ A data source for presentation """
@@ -219,6 +247,10 @@ class PresentationSource(models.Model):
     file_location = models.CharField(max_length=150,blank=True, null=True)
     t_source = models.DateTimeField(blank=True, null=True)
     t_origin = models.DateTimeField(blank=True, null=True)
+
+    class Meta:        
+        db_table = 'presentation_presentationsource'
+    
     def __unicode__(self):
         return str(self.file_location)
 
@@ -229,10 +261,16 @@ class SourceLink(models.Model):
     sourcelinktype = models.ForeignKey('SourceLinkType')
     link_id = models.CharField(max_length=50)
     type = models.CharField(max_length=50)
+    
+    class Meta:        
+        db_table = 'presentation_sourcelink'
 
 class SourceLinkType(models.Model):
     ''' A label for a group of PresentationSources. Most of the time based on the origin of the data '''
     name = models.CharField(max_length=50)
+    
+    class Meta:        
+        db_table = 'presentation_sourcelinktype'
 
 class PresentationGrid(models.Model):
     ''' Information about a PresentationLayer of the type grid '''
@@ -246,6 +284,9 @@ class PresentationGrid(models.Model):
     png_indexed_palette = models.ForeignKey(PresentationSource, related_name = 'png_indexed_palette', null = True, blank = True)
     png_default_legend = models.ForeignKey(PresentationSource, related_name = 'png_default_legend',null = True, blank = True)
     location_netcdf_file = models.ForeignKey(PresentationSource, related_name = 'location_netcdf_file',null = True, blank = True)
+    
+    class Meta:        
+        db_table = 'presentation_presentationgrid'
 
 class PresentationShape(models.Model):
     ''' Information about a PresentationLayer of the type shape '''
@@ -253,11 +294,17 @@ class PresentationShape(models.Model):
 
     geo_source = models.ForeignKey(PresentationSource, related_name = 'geo_source', null = True, blank = True)
     value_source = models.ForeignKey(PresentationSource, related_name = 'value_source', null = True, blank = True)
+    
+    class Meta:        
+        db_table = 'presentation_presentationshape'
 
 class PresentationNoGeom(models.Model):
     ''' Information about a PresentationLayer of the type no geom '''
     presentationlayer = models.OneToOneField(PresentationLayer, unique=True) #must be unique
     value_source = models.ForeignKey(PresentationSource, null = True, blank = True)
+    
+    class Meta:        
+        db_table = 'presentation_presentationnogeom'
 
 class PresentationValueTable(models.Model):
     ''' table for storing values '''
@@ -267,7 +314,8 @@ class PresentationValueTable(models.Model):
     time = models.FloatField(null = True, blank = True)
     value = models.FloatField()
 
+    class Meta:        
+        db_table = 'presentation_presentationvaluetable'
+        
     def __unicode__(self):
         return str(self.presentationsource) + ' ' + str(self.location_id)
-
-
