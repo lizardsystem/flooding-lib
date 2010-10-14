@@ -837,9 +837,8 @@ def import_scenario_into_flooding(request, importscenario):
                                                "deltat":1/24})
 
 
-        dest_path_rel = os.path.join("imported_scenarios",str(importscenario.region_id), str(importscenario.breach_id), str(scenario.id))
-        dest_file_rel = os.path.join(dest_path_rel, os.path.split(value)[1])
-        dest_path = os.path.join(Setting.objects.get( key = 'destination_dir' ).value, dest_path_rel)
+        dest_file_rel = os.path.join(scenario.get_rel_destdir(), os.path.split(value)[1])
+        dest_path = os.path.join(Setting.objects.get( key = 'destination_dir' ).value, scenario.get_rel_destdir())
         dest_file = os.path.join(Setting.objects.get( key = 'destination_dir' ).value, dest_file_rel)
         if not os.path.isdir( dest_path ):
             os.makedirs( dest_path )

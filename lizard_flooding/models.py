@@ -102,14 +102,31 @@ class SobekModel(models.Model):
     model_version = models.CharField(max_length=20)
     model_srid = models.IntegerField()
 
-    model_varname = models.CharField(max_length=40, null=True)
-    model_vardescription = models.CharField(max_length=200, null=True)
+    model_varname = models.CharField(max_length=40, null=True, blank=True)
+    model_vardescription = models.CharField(max_length=200, null=True, blank=True)
     remarks = models.TextField(null=True)
     attachments = generic.GenericRelation(Attachment)
+    
+    embankment_damage_shape = models.CharField(max_length=200, null=True, blank=True)
+    
+    code = models.CharField(max_length=15, null=True, blank=True)
+    
+    def __unicode__(self):
+        try:
+            if self.sobekmodeltype == self.SOBEKMODELTYPE_CANAL:
+                return 'extw. model, code: %s, project %s, case  %s, version: %s'%(self.code,
+                                                    self.project_fileloc,
+                                                    str(self.model_case),
+                                                    self.model_version)
 
-    embankment_damage_shape = models.CharField(max_length=200, null=True)
+            else: 
+                return 'inund. model, code: %s, project %s, case  %s, version: %s'%(self.code,
+                                                    self.project_fileloc,
+                                                    str(self.model_case),
+                                                    self.model_version)
+        except Exception, e:
+            return 'error: %s'%e
 
-    code = models.CharField(max_length=15, null=True)
 
     class Meta:
         verbose_name = _('Sobek model')
