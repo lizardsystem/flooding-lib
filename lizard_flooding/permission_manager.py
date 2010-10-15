@@ -107,21 +107,7 @@ class PermissionManager:
         elif not(user.is_authenticated()):
             #return all regionsets of projects that belong to the demo group
             demogroup = Group.objects.get(name = 'demo group')
-            if permission == UserPermission.PERMISSION_SCENARIO_VIEW:
-                filter = Q(
-                    project__projectgrouppermission__group=demogroup,
-                    project__projectgrouppermission__permission=UserPermission.PERMISSION_SCENARIO_VIEW,
-                    status_cache=Scenario.STATUS_APPROVED, status_cache__in=status_list)
-                if len(user.userpermission_set.filter(
-                        permission=UserPermission.PERMISSION_SCENARIO_APPROVE)) == 0:
-                    filter = filter | Q(
-                        project__projectgrouppermission__group=demogroup,
-                        project__projectgrouppermission__permission=UserPermission.PERMISSION_SCENARIO_APPROVE,
-                        status_cache__in=status_list)
-            else:
-                filter = Q(project__projectgrouppermission__group=demogroup,
-                           project__projectgrouppermission__permission=permission,
-                           status_cache__in=status_list)
+            filter = Q(project__projectgrouppermission__group=demogroup, project__projectgrouppermission__permission=UserPermission.PERMISSION_SCENARIO_VIEW, status_cache=Scenario.STATUS_APPROVED, status_cache__in=status_list)
         elif not self.check_permission(permission):
             return Scenario.objects.filter(pk = -1)
         else:
@@ -202,7 +188,11 @@ class PermissionManager:
         user = self.user
         if user.is_superuser:
             return True
-        perms = ProjectGroupPermission.objects.filter(permission=permission, group__user=user).filter(Q(project__regions=region)|Q(project__regionsets__regions=region)).count()
+        elif not user.is_authenticated():
+            demogroup = Group.objects.get(name = 'demo group')
+            perms = ProjectGroupPermission.objects.filter(permission=permission, group=demogroup).filter(Q(project__regions=region)|Q(project__regionsets__regions=region)).count()
+        else:
+            perms = ProjectGroupPermission.objects.filter(permission=permission, group__user=user).filter(Q(project__regions=region)|Q(project__regionsets__regions=region)).count()
         if perms>0:
             return True
         else:

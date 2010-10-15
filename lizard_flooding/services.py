@@ -105,10 +105,8 @@ def service_get_breach_tree(request, permission=UserPermission.PERMISSION_SCENAR
     optional: filter_scenario: filter on scenario status. choices are None or Scenario.STATUS_*
 
     """
+  
     pm = PermissionManager(request.user)
-    if not(pm.check_permission(permission)):
-        raise Http404
-
 
     scenarios = pm.get_scenarios(None, permission, filter_scenario)
 
@@ -122,6 +120,8 @@ def service_get_breach_tree(request, permission=UserPermission.PERMISSION_SCENAR
         else:
             breach_list = region.breach_set.filter()
     else:
+        if not(pm.check_permission(permission)):
+            raise Http404
         if filter_onlyscenariobreaches:
             breach_list = Breach.objects.filter(scenario__in=scenarios).distinct()
         else:
@@ -154,7 +154,7 @@ def service_get_breach_tree(request, permission=UserPermission.PERMISSION_SCENAR
                            )
 
     return HttpResponse(simplejson.dumps(object_list), mimetype="application/json")
-#render_to_response('flooding/breachtree.json',{'object_list': object_list})
+
 
 @never_cache
 def service_get_scenario_tree(request, breach_id,
@@ -171,9 +171,7 @@ def service_get_scenario_tree(request, breach_id,
     if filter_scenariostatus == 0:
         filter_scenariostatus = []
 
-    breach = get_object_or_404(Breach, pk=breach_id)
-    breach  # pyflakes
-    # ^^^ TODO: breach isn't used
+        
     #select all projects that you can see
     pm = PermissionManager(request.user)
 
@@ -203,7 +201,7 @@ def service_get_scenario_tree(request, breach_id,
                                 })
 
     return HttpResponse(simplejson.dumps(object_list), mimetype="application/json")
-#render_to_response('flooding/scenariotree.json',{'object_list': object_list})
+
 
 @never_cache
 def service_get_cutofflocations_from_scenario(
@@ -562,8 +560,7 @@ def service(request):
 
     if request.method == 'GET':
         query = request.GET
-
-        action_name = query.get('action')
+        action_name = query.get('action')        
         #action_name_cap = query.get('ACTION') #Omdat wms service alleen hoofdletters genereerd (get_modelnodes)
 
         if action_name == 'get_projects':
@@ -654,6 +651,7 @@ def service(request):
             return service_get_breaches(request, region_id, scenariofilter=scenariofilter)
 
         elif action_name == 'get_breach_tree':
+                      
             region_id = query.get('region_id')
             permission = int(query.get('permission',
                                        UserPermission.PERMISSION_SCENARIO_VIEW))
@@ -781,11 +779,9 @@ def service(request):
         query = request.POST
 
         action_name = query.get('action')
-        #action_name_cap = query.get('ACTION') #Omdat wms service alleen hoofdletters genereerd (get_modelnodes)
-
+        
         if action_name == 'post_newscenario':
             return service_save_new_scenario(request)
-
         else:
             raise Http404
 
