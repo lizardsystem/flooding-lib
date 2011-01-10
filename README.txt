@@ -34,3 +34,16 @@ versions), add them as an "svn external" in the ``local_checkouts/`` directory
 and add them to the ``develop =`` list in buildout.cfg.
 
 Tests can always be run with ``bin/test`` or ``bin\test.exe``.
+
+
+
+Deployment installation for Windows
+-----------------------------------
+Install GDAL: gdalwin32-1.6
+Add to the system environment variables:
+- GDAL_DATA (to the right folder)
+- PATH (Gdal\bin)
+
+Comment or uncomment the EXTERNAL_MOUNTED_DIR in settings.py:
+Uncommented-> this folder is used for the external files
+Commented-> the settings in the admin interface (like 'presentation_dir') are used.   
