@@ -469,7 +469,7 @@ def service_get_presentations_of_scenario(
     """
     scenario = get_object_or_404(Scenario, pk=scenario_id)
 
-    players = scenario.presentationlayer.filter(presentationtype__custom_indicator__name = 'flooding_result').select_related('presentationtype').order_by('presentationtype__name')
+    players = scenario.presentationlayer.filter(presentationtype__custom_indicator__name = 'flooding_result').select_related('presentationtype').order_by('presentationtype__order_index')
     resp = []
     for pl in players:
         name = pl.presentationtype.name

@@ -37,6 +37,7 @@ class PresentationType(models.Model):
     parameter = models.CharField(max_length=35)
     remarks = models.TextField(blank=True)
     custom_indicator = models.ForeignKey('CustomIndicator', null=True, blank=True) #for selecting subselection
+    order_index = models.IntegerField()
 
     absolute = models.BooleanField(default = False)
 
