@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-import os
+
 
 from django.http import HttpResponse, Http404
 from django.utils import simplejson
 from django.conf import settings
 from django.shortcuts import render_to_response, get_object_or_404
 from django.views.decorators.cache import never_cache
-import Image
+
 
 from lizard_flooding.views_dev import service_compose_scenario
 from lizard_flooding.views_dev import get_externalwater_graph
@@ -17,6 +17,11 @@ from lizard_flooding.models import Breach, CutoffLocationSet, \
     Project, Result, Region, Scenario, UserPermission, SobekModel
 from lizard_flooding.permission_manager import PermissionManager
 
+import Image
+import mapnik
+import os
+import PIL
+import StringIO
 #-------------------- Services ----------------
 
 
@@ -551,6 +556,57 @@ def service_get_import_scenario_uploaded_file(request, path):
     return  response
 
 
+def service_get_existing_embankments_shape(request, width, height, bbox, model_id):
+    """
+    width = int
+    height = int
+    bbox = tuple
+    """
+    
+    #################### set up map ###################################
+    m = mapnik.Map(width, height)
+    spherical_mercator = '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs +over'
+    rds = "+proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.999908 +x_0=155000 +y_0=463000 +ellps=bessel +towgs84=565.237,50.0087,465.658,-0.406857,0.350733,-1.87035,4.0812 +units=m +no_defs"
+    m.srs = spherical_mercator
+    m.background = mapnik.Color('transparent')
+    #p = mapnik.Projection(spherical_mercator)
+
+    
+    sl = mapnik.Style()
+    rule_l = mapnik.Rule()
+
+    rule_stk = mapnik.Stroke()
+    rule_stk.color = mapnik.Color(3,158,137)
+    rule_stk.line_cap = mapnik.line_cap.ROUND_CAP
+    rule_stk.width = 2.0
+    rule_l.symbols.append(mapnik.LineSymbolizer(rule_stk))
+    sl.rules.append(rule_l)
+    m.append_style('Line Style', sl)
+
+    lyrl = mapnik.Layer('lines', rds)
+    lyrl.datasource = mapnik.Shapefile(file='C:/repo/gisdata/Verhoogde_lijnelementen_c3_split200.shp')
+
+    lyrl.styles.append('Line Style')
+    m.layers.append(lyrl)
+  
+    ##################### render map #############################
+    m.zoom_to_box(mapnik.Envelope(*bbox))
+    #m.zoom_to_box(lyrl.envelope())
+    
+    img = mapnik.Image(width,height)
+    mapnik.render(m,img)
+
+    # you can use this if you want te modify image with PIL
+    imgPIL = PIL.Image.fromstring('RGBA', (width,height), img.tostring())
+    #imgPIL = imgPIL.convert('RGB')
+    buffer = StringIO.StringIO()
+    imgPIL.save(buffer, 'png')#,transparency = 10
+    buffer.seek(0)
+
+    response = HttpResponse(buffer.read())
+    response['Content-type'] = 'image/png'
+    return response
+
 def service(request):
     """Calls other service functions
 
@@ -560,8 +616,7 @@ def service(request):
 
     if request.method == 'GET':
         query = request.GET
-        action_name = query.get('action')        
-        #action_name_cap = query.get('ACTION') #Omdat wms service alleen hoofdletters genereerd (get_modelnodes)
+        action_name = query.get('action', query.get('ACTION')).lower()        
 
         if action_name == 'get_projects':
             permission = int(query.get('permission',
@@ -770,7 +825,12 @@ def service(request):
             scenario_id = query.get('scenario_id', None)
             path = query.get('path', '')
             return service_get_attachment(request, scenario_id, path)
-
+        elif  action_name == 'get_existing_embankments_shape':
+            bbox =  query.get('BBOX', None)
+            width =  query.get('WIDTH', None)
+            height =  query.get('HEIGHT', None)
+            model_id = query.get('model_id', -1)            
+            return service_get_existing_embankments_shape(request, int(width), int(height), tuple([float(value) for value in bbox.split(',')]), model_id)
         else:
             #pass
             raise Http404
