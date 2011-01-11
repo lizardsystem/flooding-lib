@@ -1163,6 +1163,13 @@ class Strategy(models.Model):
     """
     
     name = models.CharField(max_length=100)
+    
+    class Meta:
+        db_table = 'flooding_strategy'     
+    def __unicode__(self):
+        return self.name    
+    
+
 
 class Measure(models.Model):
     """
@@ -1175,18 +1182,30 @@ class Measure(models.Model):
     class Meta:
         db_table = 'flooding_measure'            
     def __unicode__(self):
-        return self.remarks    
+        return self.name    
     
 class EmbankmentUnit(models.Model):
     """
     Defines a unit of an embankment (e.g. if an embankment is 
     splitted up in parts of 200 m).
     """
-    unit_id = models.IntegerField()
+    TYPE_EXISTING = 0
+    TYPE_NEW = 1
+        
+    EMBANKMENTUNIT_TYPES = (
+        (TYPE_EXISTING, _('existing')),
+        (TYPE_NEW, _('new')),        
+    )
+    
+    unit_id = models.CharField(max_length=20)
+    type = models.IntegerField(choices=EMBANKMENTUNIT_TYPES)
     original_height = models.FloatField()
     region = models.ForeignKey(Region)
     measure = models.ManyToManyField(Measure)
     geometry = models.LineStringField()
+    
+    objects = models.GeoManager()
+    
     
     class Meta:
         db_table = 'flooding_embankment_unit'
