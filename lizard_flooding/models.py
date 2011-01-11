@@ -1177,7 +1177,7 @@ class Measure(models.Model):
     def __unicode__(self):
         return self.remarks    
     
-class Embankment_unit(models.Model):
+class EmbankmentUnit(models.Model):
     """
     Defines a unit of an embankment (e.g. if an embankment is 
     splitted up in parts of 200 m).

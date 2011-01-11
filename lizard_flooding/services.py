@@ -6,14 +6,14 @@ from django.utils import simplejson
 from django.conf import settings
 from django.shortcuts import render_to_response, get_object_or_404
 from django.views.decorators.cache import never_cache
-
+from django.contrib.gis.geos import GEOSGeometry
 
 from lizard_flooding.views_dev import service_compose_scenario
 from lizard_flooding.views_dev import get_externalwater_graph
 from lizard_flooding.views_dev import service_save_new_scenario
 from lizard_base.models import Setting
 from lizard_flooding.models import Breach, CutoffLocationSet, \
-    ExternalWater, RegionSet, \
+    ExternalWater, EmbankmentUnit, RegionSet,  \
     Project, Result, Region, Scenario, UserPermission, SobekModel
 from lizard_flooding.permission_manager import PermissionManager
 
@@ -123,17 +123,17 @@ def service_get_breach_tree(request, permission=UserPermission.PERMISSION_SCENAR
         if filter_onlyscenariobreaches:
             breach_list = region.breach_set.filter(scenario__in=scenarios).distinct()
         else:
-            breach_list = region.breach_set.filter()
+            breach_list = region.breach_set.filter(active=True)
     else:
         if not(pm.check_permission(permission)):
             raise Http404
         if filter_onlyscenariobreaches:
             breach_list = Breach.objects.filter(scenario__in=scenarios).distinct()
         else:
-            breach_list = Breach.objects.filter()
+            breach_list = Breach.objects.filter(active=True)
 
-    if filter_active == 1:
-         breach_list = breach_list.filter(active=True)
+    #if filter_active == 1:
+    #     breach_list = breach_list.filter(active=True)
 
     externalwater_list = ExternalWater.objects.filter(breach__in=breach_list).distinct()
 
@@ -555,7 +555,7 @@ def service_get_import_scenario_uploaded_file(request, path):
     file_object.close()
     return  response
 
-
+@never_cache
 def service_get_existing_embankments_shape(request, width, height, bbox, model_id):
     """
     width = int
@@ -571,7 +571,7 @@ def service_get_existing_embankments_shape(request, width, height, bbox, model_i
     m.background = mapnik.Color('transparent')
     #p = mapnik.Projection(spherical_mercator)
 
-    
+    #### Line style for existing embankments
     sl = mapnik.Style()
     rule_l = mapnik.Rule()
 
@@ -582,13 +582,33 @@ def service_get_existing_embankments_shape(request, width, height, bbox, model_i
     rule_l.symbols.append(mapnik.LineSymbolizer(rule_stk))
     sl.rules.append(rule_l)
     m.append_style('Line Style', sl)
+    
+    #### Line style for new embankments
+    s2 = mapnik.Style()
+    rule_2 = mapnik.Rule()
 
+    rule_stk = mapnik.Stroke()
+    rule_stk.color = mapnik.Color(200,0,0)
+    rule_stk.line_cap = mapnik.line_cap.ROUND_CAP
+    rule_stk.width = 2.0
+    rule_l.symbols.append(mapnik.LineSymbolizer(rule_stk))
+    s2.rules.append(rule_l)
+    m.append_style('Line Style New Embankment', s2)
+    
+    #### Get layer for shape file    
     lyrl = mapnik.Layer('lines', rds)
     lyrl.datasource = mapnik.Shapefile(file='C:/repo/gisdata/Verhoogde_lijnelementen_c3_split200.shp')
-
     lyrl.styles.append('Line Style')
     m.layers.append(lyrl)
-  
+    
+    #### Get layer for new embankments
+    lyr_new_embankments = mapnik.Layer('Geometry from PostGIS')
+    lyr_new_embankments.srs = '+proj=latlong +datum=WGS84'
+    BUFFERED_TABLE = '(SELECT geometry FROM flooding_embankment_unit) new_embankements'
+    lyr_new_embankments.datasource = mapnik.PostGIS(host=settings.DATABASE_HOST, user=settings.DATABASE_USER, password=settings.DATABASE_PASSWORD, dbname=settings.DATABASE_NAME, table=str(BUFFERED_TABLE))
+    lyr_new_embankments.styles.append('Line Style New Embankment')
+    m.layers.append(lyr_new_embankments)
+      
     ##################### render map #############################
     m.zoom_to_box(mapnik.Envelope(*bbox))
     #m.zoom_to_box(lyrl.envelope())
@@ -606,6 +626,23 @@ def service_get_existing_embankments_shape(request, width, height, bbox, model_i
     response = HttpResponse(buffer.read())
     response['Content-type'] = 'image/png'
     return response
+
+def service_save_drawn_embankment(geometries):
+    #TODO
+    print '---'
+    print geometries
+    for geometry in geometries.split(';'):
+        line = GEOSGeometry(geometry, srid=900913)     
+        embankment_unit = EmbankmentUnit(unit_id=-999,
+                                         original_height=-999,
+                                         region=Region.objects.get(pk=96),
+                                         geometry=line)
+        embankment_unit.save()
+    #TODO: measure (m2m)
+    
+    
+    answer = {'successful':True, 'save_log':'opgeslagen' }
+    return HttpResponse(simplejson.dumps(answer), mimetype="application/json")
 
 def service(request):
     """Calls other service functions
@@ -830,18 +867,20 @@ def service(request):
             width =  query.get('WIDTH', None)
             height =  query.get('HEIGHT', None)
             model_id = query.get('model_id', -1)            
-            return service_get_existing_embankments_shape(request, int(width), int(height), tuple([float(value) for value in bbox.split(',')]), model_id)
+            return service_get_existing_embankments_shape(request, int(width), int(height), tuple([float(value) for value in bbox.split(',')]), model_id)       
         else:
             #pass
             raise Http404
 
     elif request.method == 'POST':
         query = request.POST
-
-        action_name = query.get('action')
+        action_name = query.get('action', query.get('ACTION')).lower()    
         
         if action_name == 'post_newscenario':
             return service_save_new_scenario(request)
+        elif action_name == 'save_drawn_embankment':            
+            geometry = query.get('geometry')
+            return service_save_drawn_embankment(geometry)
         else:
             raise Http404
 
