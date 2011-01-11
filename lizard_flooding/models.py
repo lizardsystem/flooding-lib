@@ -1155,3 +1155,41 @@ class ResultType_PresentationType(models.Model):
 
     def __unicode__(self):
         return self.remarks
+
+    
+class Strategy(models.Model):
+    """
+    Defines measures that can be taken to reach a certain goal.    
+    """
+    
+    name = models.CharField(max_length=100)
+
+class Measure(models.Model):
+    """
+    Defines a set of embankment-changements and new embankments
+    that can be executed.
+    """
+    name = models.CharField(max_length=100)
+    strategy = models.ManyToManyField(Strategy)
+    
+    class Meta:
+        db_table = 'flooding_measure'            
+    def __unicode__(self):
+        return self.remarks    
+    
+class Embankment_unit(models.Model):
+    """
+    Defines a unit of an embankment (e.g. if an embankment is 
+    splitted up in parts of 200 m).
+    """
+    unit_id = models.IntegerField()
+    original_height = models.FloatField()
+    region = models.ForeignKey(Region)
+    measure = models.ManyToManyField(Measure)
+    geometry = models.LineStringField()
+    
+    class Meta:
+        db_table = 'flooding_embankment_unit'
+    def __unicode__(self):
+        return self.unit_id
+    
