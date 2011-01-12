@@ -10,6 +10,10 @@ from lizard_presentation.views import get_time_step_locators, TimestepFormatter
 log = logging.getLogger('nens.web.flooding.calc')
 
 
+def get_interval_seconds(string):
+    return 50000
+
+
 class BoundaryConditions:
 
     def __init__(self, breach, extwmaxlevel, tpeak, tstorm, tsim, tstartbreach = 0, tdeltaphase = 0, tide_id = None, extwbaselevel = None):
@@ -23,7 +27,9 @@ class BoundaryConditions:
         self.tdeltaphase = tdeltaphase
         self.tide_id = tide_id
         self.extwbaselevel = extwbaselevel
-
+        
+        self.useManualWaterlevels = False
+        self.manualWaterlevels = []
 
     def get_max_storm_tide(self, tidewaterlevels):
         maxtide = tidewaterlevels.order_by('-value')[0]
@@ -50,41 +56,48 @@ class BoundaryConditions:
             return 0
 
     def get_waterlevels(self, tstart = -1000, tend = 1000):
-        waterleveltbl = []
-        if self.breach.externalwater.type == ExternalWater.TYPE_SEA:
-            tide = WaterlevelSet.objects.get(pk = self.tide_id)
-            tidewaterlevels = tide.waterlevel_set.order_by('time')
-
-            #get max of tide
-            maxtide, max_storm_tide, maxlevel_storm = self.get_max_storm_tide(tidewaterlevels)
-
-            #relative to tide timestamps
-            beginsimulation_rel = max_storm_tide.time + self.tstartbreach
-            tidewaterlevels = tidewaterlevels.filter(time__gt = tstart + beginsimulation_rel ).exclude(time__gt = tend + beginsimulation_rel )
-
-            for tide in tidewaterlevels:
-                time_rel = tide.time - beginsimulation_rel
-                stormlevel = self.stormvalue(tide.time - maxtide.time + self.tdeltaphase, maxlevel_storm )
-                waterlevel = stormlevel + tide.value
-                waterleveltbl.append({'time':time_rel,'stormlevel':stormlevel, 'waterlevel':waterlevel })
-
-
-
-        elif self.breach.externalwater.type == ExternalWater.TYPE_LAKE:
-            waterleveltbl.append({'time':-0.5*self.tstorm, 'waterlevel':self.extwbaselevel })
-            waterleveltbl.append({'time':-0.5*self.tpeak, 'waterlevel':self.extwmaxlevel })
-            waterleveltbl.append({'time':0.5*self.tpeak, 'waterlevel':self.extwmaxlevel })
-            waterleveltbl.append({'time':0.5*self.tstorm, 'waterlevel':self.extwbaselevel })
-            if self.tsim > 0.5*self.tpeak:
-                waterleveltbl.append({'time':self.tsim, 'waterlevel':self.extwbaselevel })
-
-
-
+        if self.useManualWaterlevels:
+            return self.manualWaterlevels
         else:
-            waterleveltbl.append({'time':0, 'waterlevel':self.extwmaxlevel })
-            waterleveltbl.append({'time':self.tsim, 'waterlevel':self.extwmaxlevel })
+            waterleveltbl = []
+            if self.breach.externalwater.type == ExternalWater.TYPE_SEA:
+                tide = WaterlevelSet.objects.get(pk = self.tide_id)
+                tidewaterlevels = tide.waterlevel_set.order_by('time')
+    
+                #get max of tide
+                maxtide, max_storm_tide, maxlevel_storm = self.get_max_storm_tide(tidewaterlevels)
+    
+                #relative to tide timestamps
+                beginsimulation_rel = max_storm_tide.time + self.tstartbreach
+                tidewaterlevels = tidewaterlevels.filter(time__gt = tstart + beginsimulation_rel ).exclude(time__gt = tend + beginsimulation_rel )
+    
+                for tide in tidewaterlevels:
+                    time_rel = tide.time - beginsimulation_rel
+                    stormlevel = self.stormvalue(tide.time - maxtide.time + self.tdeltaphase, maxlevel_storm )
+                    waterlevel = stormlevel + tide.value
+                    waterleveltbl.append({'time':time_rel,'stormlevel':stormlevel, 'waterlevel':waterlevel })
+    
+            elif self.breach.externalwater.type == ExternalWater.TYPE_LAKE:
+                waterleveltbl.append({'time':-0.5*self.tstorm, 'waterlevel':self.extwbaselevel })
+                waterleveltbl.append({'time':-0.5*self.tpeak, 'waterlevel':self.extwmaxlevel })
+                waterleveltbl.append({'time':0.5*self.tpeak, 'waterlevel':self.extwmaxlevel })
+                waterleveltbl.append({'time':0.5*self.tstorm, 'waterlevel':self.extwbaselevel })
+                if self.tsim > 0.5*self.tpeak:
+                    waterleveltbl.append({'time':self.tsim, 'waterlevel':self.extwbaselevel })
+    
+            else:
+                waterleveltbl.append({'time':0, 'waterlevel':self.extwmaxlevel })
+                waterleveltbl.append({'time':self.tsim, 'waterlevel':self.extwmaxlevel })
 
-        return waterleveltbl
+            return waterleveltbl
+    
+    def set_waterlevels(self, waterlevel_string):
+        this.waterleveltbl = []
+        self.useManualWaterlevels = True
+        
+        for line in waterlevel_string.split('\n'):
+            lineparts = line.split(',');  
+            this.waterleveltbl.append({'time':get_interval_seconds(lineparts[0]), 'waterlevel':lineparts[1]})
 
     def get_graph(self, destination, width, height):
 

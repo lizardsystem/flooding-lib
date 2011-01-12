@@ -25,12 +25,30 @@ def service_result(request, object_id, location_nr, parameter_nr):
         {'data': his.get_timeseries_by_index(int(location_nr), int(parameter_nr))}
         )
 
-def get_externalwater_graph(request, width, height, breach_id, extwmaxlevel, tpeak, tstorm, tsim, tstartbreach=0, tdeltaphase = None, tide_id = None, extwbaselevel = None):
+def get_externalwater_graph(request, width, height, breach_id, extwmaxlevel, tpeak, tstorm, tsim, tstartbreach=0, tdeltaphase = None, tide_id = None, extwbaselevel = None, useManualInput = False, manualTimeserie = ""):
     """  """
     breach =  get_object_or_404(Breach, pk=breach_id)
-    waterlevel = calc.BoundaryConditions(breach, extwmaxlevel, tpeak, tstorm, tsim, tstartbreach, tdeltaphase, tide_id, extwbaselevel)
+    if not useManualInput:
+        waterlevel = calc.BoundaryConditions(breach, extwmaxlevel, tpeak, tstorm, tsim, tstartbreach, tdeltaphase, tide_id, extwbaselevel)
+    else:
+        waterlevel = calc.BoundaryConditions(breach, extwmaxlevel, tpeak, tstorm, tsim, tstartbreach, tdeltaphase, tide_id, extwbaselevel)
+        waterlevel.set_waterlevels(manualTimeserie)
+    
     response = HttpResponse(content_type='image/png')
     return waterlevel.get_graph(response, width, height)
+
+def get_externalwater_csv(request, width, height, breach_id, extwmaxlevel, tpeak, tstorm, tsim, tstartbreach=0, tdeltaphase = None, tide_id = None, extwbaselevel = None, useManualInput = False, manualTimeserie = ""):
+    """  """
+    breach =  get_object_or_404(Breach, pk=breach_id)
+    if not useManualInput:
+        waterlevel = calc.BoundaryConditions(breach, extwmaxlevel, tpeak, tstorm, tsim, tstartbreach, tdeltaphase, tide_id, extwbaselevel)
+    else:
+        waterlevel = calc.BoundaryConditions(breach, extwmaxlevel, tpeak, tstorm, tsim, tstartbreach, tdeltaphase, tide_id, extwbaselevel)
+        waterlevel.set_waterlevels(manualTimeserie)
+    
+    response = HttpResponse(content_type='csv')
+    answer = '\n'.join(["%s,%.3f" % (a['time'],a['waterlevel']) for a in waterlevel.get_waterlevels()])
+    return HttpResponse(answer, mimetype="application/csv")
 
 
 def service_save_new_scenario(request):

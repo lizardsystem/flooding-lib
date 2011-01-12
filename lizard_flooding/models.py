@@ -760,6 +760,7 @@ class Scenario(models.Model):
     cutofflocations = models.ManyToManyField(CutoffLocation,
                                              through='ScenarioCutoffLocation',
                                              blank=True) #optional
+    strategy = models.ForeignKey('Strategy',blank=True, null=True, default=None)
 
     sobekmodel_inundation = models.ForeignKey(SobekModel)
 
@@ -1176,8 +1177,20 @@ class Measure(models.Model):
     Defines a set of embankment-changements and new embankments
     that can be executed.
     """
+    TYPE_UNKNOWN = 0
+    TYPE_EXISTING_LEVEL = 1
+    TYPE_SEA_LEVEL = 2
+        
+    ADJUSTMENT_TYPES = (
+        (TYPE_UNKNOWN, _('unkown')),
+        (TYPE_EXISTING_LEVEL, _('existing level')),
+        (TYPE_SEA_LEVEL, _('new level')),        
+    )
+    
     name = models.CharField(max_length=100)
     strategy = models.ManyToManyField(Strategy)
+    reference_adjustment = models.IntegerField(choices=ADJUSTMENT_TYPES, default=TYPE_UNKNOWN)
+    adjustment = models.FloatField(default=0)
     
     class Meta:
         db_table = 'flooding_measure'            

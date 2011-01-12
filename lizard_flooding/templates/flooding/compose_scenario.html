@@ -70,6 +70,8 @@
         { name: "decheight", _constructor: "HiddenItem", defaultValue: {% if breach.decheight %} {{ breach.decheight }} {% else %} 0 {% endif %} }, 
         { name: "extwmaxlevel_ini", _constructor: "HiddenItem", defaultValue: {% if breach.levelnormfrequency %} {{ breach.levelnormfrequency }} {% else %} 0 {% endif %} }, 
         { name: "extwrepeattime_ini", _constructor: "HiddenItem", defaultValue: {% if breach.region.normfrequency %} {{ breach.region.normfrequency }} {% else %} 1 {% endif %} },
+        { name: "strategyId", _constructor: "HiddenItem"},
+        { name: "measures", _constructor: "HiddenItem", defaultValue: ""},
         {
             name: "location_name",
             type: "header",
@@ -416,6 +418,67 @@
             step: 0.1,
             width: 100
         }
+        {% if sea %}
+        , {
+            name: "useManualInput",
+            title: "Gebruik handmatige invoer",
+            type: "checkbox",
+            required: true,
+            showIf: "form.getValue('showAdvancedSettings') == true",
+            defaultValue: false,
+            endRow:true,
+            min: 0.1,
+            max: 2,
+            step: 0.1,
+            width: 100
+        },
+        {
+            name: "waterlevelInput",
+            title: "invoeren waterlevels (komma gescheiden)",
+            editorType: "TextAreaItem",
+            //_constructor: "TextAreaItem",
+            //showTitle: true,
+            defaultValue: "",
+            showIf: "form.getValue('showAdvancedSettings') == true",
+            colSpan: 2, width: 300, height: 50
+        },
+        {
+            name: "manualTimeserie",
+            _constructor: "HiddenItem",
+            defaultValue: "",
+            width: 0,
+           
+        },
+        {
+            name: "buttonLoadWaterlevels",
+            title: "Download buitenwaterstand",
+            _constructor: "ButtonItem",
+            showRollOver: false,
+            //showDown: true,
+            showFocused: false,
+            colSpan: 2,
+            width: 150,
+            showIf: "form.getValue('showAdvancedSettings') == true",
+            click: function(form, item){
+                
+                window.open(get_waterlevel_csv_url());
+            }
+        },
+        {
+            name: "processWaterlevels",
+            title: "verwerk handinvoer ",
+            _constructor: "ButtonItem",
+            showRollOver: false,
+            //showDown: true,
+            showFocused: false,
+            colSpan: 1,
+            width: 150,
+            showIf: "form.getValue('showAdvancedSettings') == true",
+            click: function(form, item){
+                //TO DO
+            }
+        }
+        {% endif %}
         ],
         //canDragResize: true,
         autoDraw: false
@@ -487,7 +550,11 @@
 			args.extwbaselevel = formScenarioSettings.getValue('extwbaselevel');
 	              
 			args.action = 'get_externalwater_graph';
-	
+			{% if sea %}
+			if (formScenarioSettings.getValue('useManualInput') == true) {
+				args.timeserie = formScenarioSettings.getValue('manualTimeserie');		
+			}
+			{% endif %}
 			var url = '{% url root_url %}flooding/service/?';
 	               		
 			var first = true;
@@ -501,6 +568,39 @@
       	} else {
       		//do nothing
       	}
+    }
+    
+    function get_waterlevel_csv_url() {
+		var args = {};
+		args.width = scGraph.getWidth();
+		args.height = scGraph.getHeight();
+		args.breach_id = formScenarioSettings.getValue('breach_id');
+		args.extwmaxlevel = formScenarioSettings.getValue('extwmaxlevel');
+		args.tpeak =  intervalReader(formScenarioSettings.getValue('tpeak')).getTime();
+		args.tstorm =  intervalReader(formScenarioSettings.getValue('tstorm')).getTime();
+		args.tsim =  intervalReader(formScenarioSettings.getValue('tsim')).getTime();
+		args.tstartbreach =  intervalReader(formScenarioSettings.getValue('tstartbreach')).getTime();
+		args.tdeltaphase =  intervalReader(formScenarioSettings.getValue('tdeltaphase')).getTime(); 
+		args.tide_id = formScenarioSettings.getValue('loctide');
+		args.extwbaselevel = formScenarioSettings.getValue('extwbaselevel');
+              
+		args.action = 'get_externalwater_csv';
+		{% if sea %}
+		if (formScenarioSettings.getValue('useManualInput') == true) {
+			args.timeserie = formScenarioSettings.getValue('manualTimeserie');		
+		}
+		{% endif %}
+		var url = '{% url root_url %}flooding/service/?';
+               		
+		var first = true;
+		for (elem in args) {
+			if  (args[elem]!=null) {
+				if (!first) { url+='&' } else {	first = false }	
+				url+= elem + '=' + args[elem]
+			}
+		}
+  		return url
+
     }
     
     isc.IButton.create({
@@ -574,6 +674,30 @@
         //formScenarioSettings.rememberValues();
         console.log("aantal afsluitlocaties aan form toegevoegd: " + endRow )
     }
+    if (typeof(strategyId)!="undefined") {
+        
+        formScenarioSettings.getField('strategyId').setValue(strategyId);
+
+        //formScenarioSettings.rememberValues();
+        console.log("aantal afsluitlocaties aan form toegevoegd: " + endRow )
+    }
+    
+    if (typeof(listMeasures)!="undefined") {
+        
+        var measures = "";
+        var endRow = listMeasures.data.getLength();
+        for (var i = 0; i < endRow ; i++ ){
+            measures += listMeasures.data[i].id + "|" + listMeasures.data[i].name + "|" + listMeasures.data[i].reference + "|" + listMeasures.data[i].adjustment;
+            if (i != endRow -1) {
+                measures += ";";
+            }
+        }
+        formScenarioSettings.getField('measures').setValue(measures);
+
+        //formScenarioSettings.rememberValues();
+        console.log("aantal measures aan form toegevoegd: " + endRow )
+    }
+    
        
     if (typeof(selectInundationModel)!="undefined") {
     	formScenarioSettings.getField('inundationmodel').setValue( selectInundationModel.getValue() );
