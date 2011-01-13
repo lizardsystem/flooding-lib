@@ -8,7 +8,7 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.views.decorators.cache import never_cache
 from django.contrib.gis.geos import GEOSGeometry, MultiPolygon
 
-from lizard_flooding.views_dev import service_compose_scenario, get_externalwater_graph, service_save_new_scenario, get_externalwater_csv
+from lizard_flooding.views_dev import service_compose_scenario, get_externalwater_graph, get_externalwater_graph_session, service_save_new_scenario, get_externalwater_csv
 from lizard_base.models import Setting
 from lizard_flooding.models import Breach, CutoffLocationSet, \
     ExternalWater, EmbankmentUnit, Measure, RegionSet,  \
@@ -1051,6 +1051,8 @@ def service(request):
                                                           tuple([float(value) for value in bbox.split(',')]), int(region_id), int(strategy_id))
         elif action_name == 'import_embankment_shape':
             return service_import_embankment_shape()
+        elif action_name == 'get_externalwater_graph_session':
+            return get_externalwater_graph_session(request)        
         else:
             #pass
             raise Http404
@@ -1076,6 +1078,40 @@ def service(request):
         elif action_name == 'delete_measure':
             measure_ids = query.get('measure_ids', -1)    
             return service_delete_measure (measure_ids)
+        elif action_name == 'get_externalwater_graph':
+            mid = 24*60*60*1000
+
+            width = int(query.get('width',None))
+            height = int(query.get('height',None))
+            breach_id= int(query.get('breach_id',None))
+            extwmaxlevel= float(query.get('extwmaxlevel',-999))
+            tpeak=  float(query.get('tpeak',0))/mid
+            tstorm=  float(query.get('tstorm',0))/mid
+            tsim=  float(query.get('tsim',0))/mid
+            tstartbreach=  float(query.get('tstartbreach',0))/mid
+            tdeltaphase=  float(query.get('tdeltaphase',0))/mid
+            tide_id= int(query.get('tide_id',0))
+            try:
+                extwbaselevel= float(query.get('extwbaselevel',-999))
+            except:
+                extwbaselevel = None
+            use_manual_input= bool(query.get('useManualInput',False))
+            timeserie= str(query.get('timeserie',0))
+
+            return get_externalwater_graph(request,
+                                        width,
+                                        height,
+                                        breach_id,
+                                        extwmaxlevel,
+                                        tpeak,
+                                        tstorm,
+                                        tsim,
+                                        tstartbreach,
+                                        tdeltaphase,
+                                        tide_id,
+                                        extwbaselevel,
+                                        use_manual_input,
+                                        timeserie)
         else:
             raise Http404
 

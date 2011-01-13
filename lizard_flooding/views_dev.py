@@ -7,7 +7,7 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.utils import simplejson
 
 from lizard_flooding import calc
-from lizard_flooding.models import Breach, WaterlevelSet
+from lizard_flooding.models import Breach, WaterlevelSet, Measure
 from lizard_flooding.models import ExternalWater, UserPermission, Project
 from lizard_flooding.models import Scenario, SobekModel
 from lizard_flooding.models import ScenarioCutoffLocation, CutoffLocation
@@ -33,9 +33,13 @@ def get_externalwater_graph(request, width, height, breach_id, extwmaxlevel, tpe
     else:
         waterlevel = calc.BoundaryConditions(breach, extwmaxlevel, tpeak, tstorm, tsim, tstartbreach, tdeltaphase, tide_id, extwbaselevel)
         waterlevel.set_waterlevels(manualTimeserie)
+       
+    response = HttpResponse(content_type='image/png')    
+    request.session['external_water_graph'] = waterlevel.get_graph(response, width, height)
+    return HttpResponse['Grafiek opgeslagen in sessie']
     
-    response = HttpResponse(content_type='image/png')
-    return waterlevel.get_graph(response, width, height)
+def get_externalwater_graph_session(request):    
+    return request.session['external_water_graph']
 
 def get_externalwater_csv(request, width, height, breach_id, extwmaxlevel, tpeak, tstorm, tsim, tstartbreach=0, tdeltaphase = None, tide_id = None, extwbaselevel = None, useManualInput = False, manualTimeserie = ""):
     """  """
@@ -73,8 +77,6 @@ def service_save_new_scenario(request):
                                         tsim = to_intervalfloat(query.get('tsim_ms')),
                                         calcpriority = query.get('calcpriority') )
 
-
-
     scenario.code = '2s_c_%i' % scenario.id
     scenario.save()
 
@@ -83,7 +85,22 @@ def service_save_new_scenario(request):
                                 creatorlog = request.user.get_full_name(),
                                 tstart = datetime.datetime.now())
 
-    waterlevel = calc.BoundaryConditions( breach,
+    useManualInput = query.get("useManualInput", False)
+    if useManualInput == 'false':
+        useManualInput = False
+    
+    waterlevel_list = []
+    if useManualInput:
+       
+        js_waterlevel_set = query.get("waterlevelInput").split('\n')
+        for js_wl in js_waterlevel_set:
+            js_waterlevel_props = js_wl.split(',')
+            wl={}
+            wl['time']= float(js_waterlevel_props[0])
+            wl['waterlevel'] = float(js_waterlevel_props[1])
+            waterlevel_list += [wl]        
+    else:
+        waterlevel = calc.BoundaryConditions( breach,
                                           float(query.get('extwmaxlevel')),
                                           to_intervalfloat(query.get('tpeak_ms')),
                                           to_intervalfloat(query.get('tstorm_ms')),
@@ -92,13 +109,14 @@ def service_save_new_scenario(request):
                                           to_intervalfloat(query.get('tdeltaphase_ms')),
                                           int(query.get('loctide',-999)),
                                           query.get('extwbaselevel') )
-
+        waterlevel_list = waterlevel.get_waterlevels( 0, tsim )
+        
     waterlevelset = WaterlevelSet.objects.create( name = scenario.name,
                                                   type = WaterlevelSet.WATERLEVELSETTYPE_BREACH,
                                                   code = scenario.code )
+    
 
-
-    for wl in waterlevel.get_waterlevels( 0, tsim ):
+    for wl in waterlevel_list:
         Waterlevel.objects.create( time = wl['time'], #interval
                                    value = wl['waterlevel'],
                                    waterlevelset = waterlevelset)
@@ -150,6 +168,25 @@ def service_save_new_scenario(request):
             ScenarioCutoffLocation.objects.create(cutofflocation = CutoffLocation.objects.get(pk = cutoffloc_id), scenario = scenario, tclose = to_intervalfloat(cutoffloc_tclose))
 
 
+    
+    measures = query.get("measures").split(';')
+    strategy_id = query.get("strategyId")
+     
+    if len(measures)>0:
+         for measure_input in measures:
+             measure_part = measure_input.split('|')
+             measure = Measure.objects.get(pk=measure_part[0])
+             measure.name = measure_part[1]
+             measure.reference_adjustment = measure_part[2]
+             measure.adjustment = measure_part[3]
+             measure.save()
+         
+         
+    else:
+        Strategy.objects.get(pk=strategy_id).delete()
+         
+         
+    
     #approvalobject = a,
 
 
@@ -161,7 +198,6 @@ def service_save_new_scenario(request):
     answer = {'successful':True, 'save_log':'opgeslagen. scenario id is: %i' % scenario.id }
 
     return HttpResponse(simplejson.dumps(answer), mimetype="application/json")
-
 
 
 def service_compose_scenario(request, breach_id):

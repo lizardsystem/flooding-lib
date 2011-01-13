@@ -92,12 +92,12 @@ class BoundaryConditions:
             return waterleveltbl
     
     def set_waterlevels(self, waterlevel_string):
-        this.waterleveltbl = []
+        self.waterleveltbl = []
         self.useManualWaterlevels = True
         
-        for line in waterlevel_string.split('\n'):
+        for line in waterlevel_string.split('|'):
             lineparts = line.split(',');  
-            this.waterleveltbl.append({'time':get_interval_seconds(lineparts[0]), 'waterlevel':lineparts[1]})
+            self.waterleveltbl.append({'time':get_interval_seconds(lineparts[0]), 'waterlevel':lineparts[1]})
 
     def get_graph(self, destination, width, height):
 

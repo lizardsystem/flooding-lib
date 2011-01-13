@@ -189,6 +189,7 @@ def infowindow_information(request, scenario_id):
         if br.externalwater.type == ExternalWater.TYPE_SEA:
             extw_info_list.append((_('Duration storm'), get_intervalstring_from_dayfloat(scenariobreach.tstorm)))
             extw_info_list.append((_('Duration peak'), get_intervalstring_from_dayfloat(scenariobreach.tpeak)))
+            extw_info_list.append((_('Tide shift'), get_intervalstring_from_dayfloat(scenariobreach.tdeltaphase)))
             if scenariobreach.tide != None:
                 extw_info_list.append((_('Tide properties'), scenariobreach.tide.name))
         elif br.externalwater.type == ExternalWater.TYPE_LAKE:
