@@ -34,9 +34,9 @@ def get_externalwater_graph(request, width, height, breach_id, extwmaxlevel, tpe
         waterlevel = calc.BoundaryConditions(breach, extwmaxlevel, tpeak, tstorm, tsim, tstartbreach, tdeltaphase, tide_id, extwbaselevel)
         waterlevel.set_waterlevels(manualTimeserie)
        
-    response = HttpResponse(content_type='image/png')    
+    response = HttpResponse(content_type='image/png  ')  # image/png  
     request.session['external_water_graph'] = waterlevel.get_graph(response, width, height)
-    return HttpResponse['Grafiek opgeslagen in sessie']
+    return HttpResponse('Grafiek opgeslagen in sessie')
     
 def get_externalwater_graph_session(request):    
     return request.session['external_water_graph']
@@ -50,9 +50,9 @@ def get_externalwater_csv(request, width, height, breach_id, extwmaxlevel, tpeak
         waterlevel = calc.BoundaryConditions(breach, extwmaxlevel, tpeak, tstorm, tsim, tstartbreach, tdeltaphase, tide_id, extwbaselevel)
         waterlevel.set_waterlevels(manualTimeserie)
     
-    response = HttpResponse(content_type='csv')
+    response = HttpResponse(content_type='csv', mimetype="application/csv")
     answer = '\n'.join(["%s,%.3f" % (a['time'],a['waterlevel']) for a in waterlevel.get_waterlevels()])
-    return HttpResponse(answer, mimetype="application/csv")
+    return HttpResponse(answer, mimetype="application/csv", content_type='csv')
 
 
 def service_save_new_scenario(request):
@@ -88,11 +88,13 @@ def service_save_new_scenario(request):
     useManualInput = query.get("useManualInput", False)
     if useManualInput == 'false':
         useManualInput = False
+    else:
+        useManualInput = True
     
     waterlevel_list = []
     if useManualInput:
        
-        js_waterlevel_set = query.get("waterlevelInput").split('\n')
+        js_waterlevel_set = query.get("waterlevelInput").split('|')
         for js_wl in js_waterlevel_set:
             js_waterlevel_props = js_wl.split(',')
             wl={}
@@ -185,10 +187,6 @@ def service_save_new_scenario(request):
     else:
         Strategy.objects.get(pk=strategy_id).delete()
          
-         
-    
-    #approvalobject = a,
-
 
     task.tfinished = datetime.datetime.now()
     task.successful = True

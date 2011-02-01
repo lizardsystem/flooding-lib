@@ -11,7 +11,7 @@ log = logging.getLogger('nens.web.flooding.calc')
 
 
 def get_interval_seconds(string):
-    return 50000
+    return float(string)
 
 
 class BoundaryConditions:
@@ -29,7 +29,7 @@ class BoundaryConditions:
         self.extwbaselevel = extwbaselevel
         
         self.useManualWaterlevels = False
-        self.manualWaterlevels = []
+        self.manualWaterlevels = []  
 
     def get_max_storm_tide(self, tidewaterlevels):
         maxtide = tidewaterlevels.order_by('-value')[0]
@@ -40,8 +40,7 @@ class BoundaryConditions:
              if stormfactor > 0:
                  stormvalue_if_peak_is_at_this_moment = (self.extwmaxlevel - tide.value) / stormfactor
 
-                 if stormvalue_if_peak_is_at_this_moment < min_storm_level:
-                     #print 'new peak: ' + str(tide)
+                 if stormvalue_if_peak_is_at_this_moment < min_storm_level:                     
                      stormpeak = tide
                      min_storm_level = stormvalue_if_peak_is_at_this_moment
         return (maxtide, stormpeak, min_storm_level)
@@ -56,7 +55,7 @@ class BoundaryConditions:
             return 0
 
     def get_waterlevels(self, tstart = -1000, tend = 1000):
-        if self.useManualWaterlevels:
+        if self.useManualWaterlevels:            
             return self.manualWaterlevels
         else:
             waterleveltbl = []
@@ -65,17 +64,24 @@ class BoundaryConditions:
                 tidewaterlevels = tide.waterlevel_set.order_by('time')
     
                 #get max of tide
-                maxtide, max_storm_tide, maxlevel_storm = self.get_max_storm_tide(tidewaterlevels)
+                if len(tidewaterlevels) > 0:
+                    maxtide, max_storm_tide, maxlevel_storm = self.get_max_storm_tide(tidewaterlevels)
+                  
+                    #relative to tide timestamps
+                    beginsimulation_rel = max_storm_tide.time + self.tstartbreach
+                    tidewaterlevels = tidewaterlevels.filter(time__gt = tstart + beginsimulation_rel ).exclude(time__gt = tend + beginsimulation_rel )
+  
+                    for tide in tidewaterlevels:
+                        time_rel = tide.time - beginsimulation_rel
+                        stormlevel = self.stormvalue(tide.time - maxtide.time + self.tdeltaphase, maxlevel_storm )
+                        waterlevel = stormlevel + tide.value
+                        waterleveltbl.append({'time':time_rel,'stormlevel':stormlevel, 'waterlevel':waterlevel })
     
-                #relative to tide timestamps
-                beginsimulation_rel = max_storm_tide.time + self.tstartbreach
-                tidewaterlevels = tidewaterlevels.filter(time__gt = tstart + beginsimulation_rel ).exclude(time__gt = tend + beginsimulation_rel )
-    
-                for tide in tidewaterlevels:
-                    time_rel = tide.time - beginsimulation_rel
-                    stormlevel = self.stormvalue(tide.time - maxtide.time + self.tdeltaphase, maxlevel_storm )
-                    waterlevel = stormlevel + tide.value
-                    waterleveltbl.append({'time':time_rel,'stormlevel':stormlevel, 'waterlevel':waterlevel })
+                else:
+                    waterleveltbl.append({'time':-0.5*self.tstorm, 'waterlevel':0 })
+                    waterleveltbl.append({'time':-0.5*self.tpeak, 'waterlevel':self.extwmaxlevel })
+                    waterleveltbl.append({'time':0.5*self.tpeak, 'waterlevel':self.extwmaxlevel })
+                    waterleveltbl.append({'time':0.5*self.tstorm, 'waterlevel':0 })
     
             elif self.breach.externalwater.type == ExternalWater.TYPE_LAKE:
                 waterleveltbl.append({'time':-0.5*self.tstorm, 'waterlevel':self.extwbaselevel })
@@ -96,8 +102,8 @@ class BoundaryConditions:
         self.useManualWaterlevels = True
         
         for line in waterlevel_string.split('|'):
-            lineparts = line.split(',');  
-            self.waterleveltbl.append({'time':get_interval_seconds(lineparts[0]), 'waterlevel':lineparts[1]})
+            lineparts = line.split(',');             
+            self.manualWaterlevels.append({'time':get_interval_seconds(lineparts[0]), 'waterlevel':float(lineparts[1])})
 
     def get_graph(self, destination, width, height):
 
@@ -137,8 +143,7 @@ class BoundaryConditions:
         # get values
         table = self.get_waterlevels( -0.25*self.tsim, 1.25*self.tsim )
 
-
-        time_steps  = [obj['time']*24 for obj in table]
+        time_steps  = [obj['time']*24 for obj in table]         
         if table[0].has_key('stormlevel'):
             use_stormlevel = True
             stormlevel = [obj['stormlevel'] for obj in table]
@@ -146,11 +151,13 @@ class BoundaryConditions:
             use_stormlevel = False
             stormlevel = [0,]
         waterlevel = [obj['waterlevel'] for obj in table]
-
+        
         min_level = min(min(stormlevel),min(waterlevel))
         max_level = max(max(stormlevel),max(waterlevel))
-
-        simperiod_levels = [min_level, max_level, max_level , min_level]
+        
+        
+        max_for_timeperiod = max_level + (max_level - min_level) * 0.05
+        simperiod_levels = [min_level, max_for_timeperiod, max_for_timeperiod, min_level]
         simperiod_times = [0, 0, self.tsim*24, self.tsim*24]
 
         plot_simperiod = ax.plot(simperiod_times, simperiod_levels, '-', linewidth = 3)
@@ -162,14 +169,16 @@ class BoundaryConditions:
         if use_stormlevel:
             plots['stormlevel'] = plot_stormlevel
         plots['simulatie periode'] = plot_simperiod
-
+ 
         #temp fix for locators
         dt = time_steps[-1]- time_steps[0]/len(time_steps)
+
         if dt > 50:
             dt = 10
         else:
             dt = 1
 
+        
         [min_locator, maj_locator] = get_time_step_locators(len(time_steps), dt)
 
         #Set formatting of the x-axis and y-axis

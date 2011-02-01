@@ -320,8 +320,7 @@ def service_get_wms_of_shape(
                 if pl.presentationtype.absolute:
                     try:
                         input_dict[his_field.name_in_source] = abs(values.get(id, None))
-                        if values.get(id, None) > 1:
-                            #print values.get(id, None)
+                        if values.get(id, None) > 1:                            
                             pass
 
                     except TypeError:

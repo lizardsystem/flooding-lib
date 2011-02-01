@@ -143,7 +143,6 @@ def new_export(request):
 
     if request.method == 'POST':
         form = ExportRunForm(request.POST)
-        print request.POST
 
         # necessary to call 'is_valid()' before adding custom errors
         valid = form.is_valid()
@@ -153,7 +152,6 @@ def new_export(request):
             valid = False
 
         if valid:
-            print 'is valid'
             new_export_run  = ExportRun(
                                         export_type = ExportRun.EXPORT_TYPE_WATER_DEPTH_MAP,
                                         name = form.cleaned_data['name'],

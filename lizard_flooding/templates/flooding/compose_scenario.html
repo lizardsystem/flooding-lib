@@ -538,10 +538,11 @@
 			args.extwbaselevel = formScenarioSettings.getValue('extwbaselevel');
 	              
 			args.action = 'get_externalwater_graph';
+			args.useManualInput = false;
 			{% if sea %}
 			if (formScenarioSettings.getValue('useManualInput') == true) {
 				args.useManualInput = formScenarioSettings.getValue('useManualInput');
-				args.timeserie = formScenarioSettings.getValue('waterlevelInput').replace('\r\n','\n').replace('\n','|');
+				args.timeserie = formScenarioSettings.getValue('waterlevelInput').replace(/\r\n/g,'|').replace(/\n/g,'|');
 						
 			}
 			{% endif %}
@@ -564,7 +565,7 @@
 							 		  width: args.width,
             						  height: args.height,
             						  breach_id: args.breach_id,
-            						  ewtmaxleve: args.ewtmaxlevel,
+            						  extwmaxlevel: args.extwmaxlevel,
             						  tpeak: args.tpeak,
             						  tstorm: args.tstorm,
             						  tsim: args.tsim,
@@ -576,7 +577,8 @@
             						  timeserie: args.timeserie}, 
 							 callback: function(response, data, request){
 				                if (response.httpResponseCode == 200) {				                	
-				                    console.log("Data ophalen gelukt.")																		                    	                                   
+				                    console.log("Data ophalen gelukt.");
+				                    scGraph.setSrc('{% url root_url %}flooding/service/?action=get_externalwater_graph_session&ct='+(new Date).valueOf())																	                    	                                   
 				                	} 
 				                	else {				                    
 				                    console.log("Fout bij het ophalen van gegevens.");                   
@@ -586,7 +588,7 @@
 				        
 				        
 				        
-      		scGraph.setSrc('{% url root_url %}flooding/service/?action=get_externalwater_graph_session')
+      		
       	} else {
       		//do nothing
       	}

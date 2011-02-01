@@ -561,9 +561,6 @@ def service_get_existing_embankments_shape(request, width, height, bbox, region_
     bbox = tuple
     """
     
-    print '----'
-    print region_id
-    
     #################### set up map ###################################
     m = mapnik.Map(width, height)
     spherical_mercator = '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs +over'
@@ -633,10 +630,10 @@ def service_get_existing_embankments_shape(request, width, height, bbox, region_
     m.append_style('Line Style Region Boundary', s5)
         
     #### Get layer for shape file    
-    lyrl = mapnik.Layer('lines', rds)
-    lyrl.datasource = mapnik.Shapefile(file='C:/repo/gisdata/Verhoogde_lijnelementen_c3_split200.shp')
-    lyrl.styles.append('Line Style')
-    m.layers.append(lyrl)
+    #lyrl = mapnik.Layer('lines', rds)
+    #lyrl.datasource = mapnik.Shapefile(file='C:/repo/gisdata/Verhoogde_lijnelementen_c3_split200.shp')
+    #lyrl.styles.append('Line Style')
+    #m.layers.append(lyrl)
     
     #### Get layer for a specific region (embankment units)    
     lyr_specific_region = mapnik.Layer('Geometry from PostGIS')
@@ -704,7 +701,7 @@ def service_get_existing_embankments_shape(request, width, height, bbox, region_
 def service_save_drawn_embankment(geometries, strategy_id, region_id):
     
     selected_strategy = Strategy.objects.get(pk=strategy_id)
-    selected_measure = selected_strategy.measure_set.create(name='test_draw')
+    selected_measure = selected_strategy.measure_set.create(name='Ingetekend')
     
     region=Region.objects.get(pk=region_id)
        
@@ -733,7 +730,7 @@ def select_existing_embankments_by_polygon(geometries, strategy_id, region_id):
     
     selected_strategy = Strategy.objects.get(pk=strategy_id)
     selected_measure = selected_strategy.measure_set.create(name='test')
-    selected_measure.name = "Bestaande kering selectie %i" %  selected_measure.id
+    selected_measure.name = "Bestaand (%i)" %  selected_measure.id
     selected_measure.save()   
        
     selected_embankment_units = EmbankmentUnit.objects.filter(region=region_id, type=EmbankmentUnit.TYPE_EXISTING)\
@@ -745,10 +742,8 @@ def select_existing_embankments_by_polygon(geometries, strategy_id, region_id):
     return HttpResponse(simplejson.dumps(answer), mimetype="application/json")
 
 def service_delete_measure(measure_ids):
-    print ' ---'
-    
+        
     measure_ids = [int(id) for id in measure_ids.split(';')]
-    print measure_ids
     Measure.objects.filter(id__in = measure_ids).delete()
     answer = {'successful':True }
     return HttpResponse(simplejson.dumps(answer), mimetype="application/json")        
@@ -1095,7 +1090,12 @@ def service(request):
                 extwbaselevel= float(query.get('extwbaselevel',-999))
             except:
                 extwbaselevel = None
-            use_manual_input= bool(query.get('useManualInput',False))
+            
+            if query.get('use_manual_input',False) == 'true':
+                use_manual_input = True
+            else:
+                use_manual_input = False
+
             timeserie= str(query.get('timeserie',0))
 
             return get_externalwater_graph(request,

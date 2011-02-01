@@ -144,12 +144,7 @@ class MapnikPointLegend:
         def generate_block_row(value_in, output_dict_template, output_dict_key, label):
             """
 
-            """
-            print 'value_in ' + str(value_in)
-            print 'output_dict_template ' + str(output_dict_template)
-            print 'output_dict_key ' + str(output_dict_key)
-            print 'label ' + str(label)
-
+            """            
             valuedict = output_dict_template.copy()
             valuedict[output_dict_key] = value_in
             row = {'symbol_properties': self.get_output_properties(valuedict), 'text': label}
