@@ -201,6 +201,7 @@ def service_get_scenario_tree(request, breach_id,
                                 'parentid': scenario.project.id,
                                 'isscenario': True,
                                 'status': scenario.get_status(),
+                                'strategy_id': scenario.strategy_id,
                                 })
 
     return HttpResponse(simplejson.dumps(object_list), mimetype="application/json")
@@ -554,7 +555,7 @@ def service_get_import_scenario_uploaded_file(request, path):
     return  response
 
 @never_cache
-def service_get_existing_embankments_shape(request, width, height, bbox, region_id, strategy_id):
+def service_get_existing_embankments_shape(request, width, height, bbox, region_id, strategy_id, only_selected = False):
     """
     width = int
     height = int
@@ -635,13 +636,14 @@ def service_get_existing_embankments_shape(request, width, height, bbox, region_
     #lyrl.styles.append('Line Style')
     #m.layers.append(lyrl)
     
-    #### Get layer for a specific region (embankment units)    
-    lyr_specific_region = mapnik.Layer('Geometry from PostGIS')
-    lyr_specific_region.srs = '+proj=latlong +datum=WGS84'
-    BUFFERED_TABLE = '(SELECT geometry FROM flooding_embankment_unit WHERE type=0 AND region_id=%i) specific_region' % region_id
-    lyr_specific_region.datasource = mapnik.PostGIS(host=settings.DATABASE_HOST, user=settings.DATABASE_USER, password=settings.DATABASE_PASSWORD, dbname=settings.DATABASE_NAME, table=str(BUFFERED_TABLE))
-    lyr_specific_region.styles.append('Line Style Specific Region')
-    m.layers.append(lyr_specific_region)
+    #### Get layer for a specific region (embankment units)
+    if not only_selected:
+        lyr_specific_region = mapnik.Layer('Geometry from PostGIS')
+        lyr_specific_region.srs = '+proj=latlong +datum=WGS84'
+        BUFFERED_TABLE = '(SELECT geometry FROM flooding_embankment_unit WHERE type=0 AND region_id=%i) specific_region' % region_id
+        lyr_specific_region.datasource = mapnik.PostGIS(host=settings.DATABASE_HOST, user=settings.DATABASE_USER, password=settings.DATABASE_PASSWORD, dbname=settings.DATABASE_NAME, table=str(BUFFERED_TABLE))
+        lyr_specific_region.styles.append('Line Style Specific Region')
+        m.layers.append(lyr_specific_region)
     
     #### Get layer for a  region (boundary)    
     lyr_region = mapnik.Layer('Geometry from PostGIS')
@@ -1041,9 +1043,13 @@ def service(request):
             width =  query.get('WIDTH', None)
             height =  query.get('HEIGHT', None)
             strategy_id = query.get('STRATEGY_ID', -1)
-            region_id = query.get('REGION_ID', -1)               
+            region_id = query.get('REGION_ID', -1)
+            if query.get('ONLY_SELECTION', False) == 'TRUE':
+                only_selected = True
+            else:
+                only_selected = False
             return service_get_existing_embankments_shape(request, int(width), int(height), \
-                                                          tuple([float(value) for value in bbox.split(',')]), int(region_id), int(strategy_id))
+                                                          tuple([float(value) for value in bbox.split(',')]), int(region_id), int(strategy_id), only_selected)
         elif action_name == 'import_embankment_shape':
             return service_import_embankment_shape()
         elif action_name == 'get_externalwater_graph_session':
