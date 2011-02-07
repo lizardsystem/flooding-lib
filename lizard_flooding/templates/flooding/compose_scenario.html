@@ -543,7 +543,10 @@
 			if (formScenarioSettings.getValue('useManualInput') == true) {
 				args.useManualInput = formScenarioSettings.getValue('useManualInput');
 				args.timeserie = formScenarioSettings.getValue('waterlevelInput').replace(/\r\n/g,'|').replace(/\n/g,'|');
-						
+				if (args.timeserie.length > 0 && args.timeserie[args.timeserie.length-1]=="|")
+					{
+						args.timeserie = args.timeserie.substring(0, args.timeserie.length-1)
+					}						
 			}
 			{% endif %}
 			var url = '{% url root_url %}flooding/service/?';
@@ -585,10 +588,6 @@
 				                	}
 				                }
 				        });			
-				        
-				        
-				        
-      		
       	} else {
       		//do nothing
       	}

@@ -218,23 +218,6 @@ def service_get_wms_of_shape(
                     lyrl.styles.append('Line Style')
                     m.layers.append(lyrl)
 
-            if pl.flowscenario.count() > 0:
-                scenario = pl.flowscenario.get()
-                log.debug( 'scenario: ' + str(spt.id) )
-                layers = PresentationLayer.objects.filter(presentationtype=spt, flowscenario=scenario)
-
-
-                if len(layers)>0:
-                    log.debug('supportive layer found for this presentationlayer')
-                    layer = layers[0]
-
-                    lyrl = mapnik.Layer('lines',spherical_mercator)
-                    lyrl.datasource = mapnik.Shapefile(file=external_file_location(layer.presentationshape.geo_source.file_location))
-
-                    lyrl.styles.append('Line Style')
-                    m.layers.append(lyrl)
-
-
 
     #for geo_source in geo_sources:
     #    lyrl.datasource = mapnik.Shapefile(file=str(presentation_dir + '\\' + geo_source.file_location))
@@ -258,7 +241,7 @@ def service_get_wms_of_shape(
         points = []
 
         drv = ogr.GetDriverByName('ESRI Shapefile')
-        shapefile_name = external_file_location(pl.presentationshape.geo_source.file_location)
+        shapefile_name = external_file_location(external_file_location(pl.presentationshape.geo_source.file_location))
         ds = drv.Open(shapefile_name)
         layer = ds.GetLayer()
 
@@ -285,7 +268,7 @@ def service_get_wms_of_shape(
                     else:
                         filename = input_file.filelist[0].filename
 
-                    his = HISFile(Stream(input_file.read(filename)))
+                    his = HISFile(Stream(input_file.read(external_file_location(filename))))
                     input_file.close()
                     log.debug( 'ready reading hisfile' + str(datetime.datetime.now()))
                     cache.set('his_' + str(presentationlayer_id) , his , 3000)
@@ -382,7 +365,7 @@ def service_get_wms_of_shape(
 
         rds = mapnik.Projection("+proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.999908 +x_0=155000 +y_0=463000 +ellps=bessel +towgs84=565.237,50.0087,465.658,-0.406857,0.350733,-1.87035,4.0812 +units=m +no_defs")
         lyrl = mapnik.Layer('lines', rds)
-        lyrl.datasource = mapnik.Shapefile(file=str(presentation_dir + '\\' + pl.presentationshape.geo_source.file_location))
+        lyrl.datasource = mapnik.Shapefile(file=external_file_location(str(presentation_dir + '\\' + pl.presentationshape.geo_source.file_location)))
         lyrl.styles.append('Line Style2')
         m.layers.append(lyrl)
 
@@ -458,7 +441,7 @@ def service_get_shapes(
     shapefile_name = external_file_location(pl.presentationshape.geo_source.file_location)
 
     drv = ogr.GetDriverByName('ESRI Shapefile')
-    ds = drv.Open(shapefile_name)
+    ds = drv.Open(external_file_location(shapefile_name))
     layer = layer = ds.GetLayer()
     layer.SetSpatialFilterRect(x-precision, y-precision,x+precision,y+precision)
 
@@ -622,7 +605,7 @@ def read_his_file(sobek_id, presentationlayer):
         else:
             filename = input_file.filelist[0].filename
 
-        his = HISFile(Stream(input_file.read(filename)))
+        his = HISFile(Stream(input_file.read(external_file_location(filename))))
         input_file.close()
         cache.set('his_' + str(presentationlayer.id) , his , 30)
 

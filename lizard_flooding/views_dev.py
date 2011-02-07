@@ -9,7 +9,7 @@ from django.utils import simplejson
 from lizard_flooding import calc
 from lizard_flooding.models import Breach, WaterlevelSet, Measure
 from lizard_flooding.models import ExternalWater, UserPermission, Project
-from lizard_flooding.models import Scenario, SobekModel
+from lizard_flooding.models import Scenario, SobekModel, Strategy
 from lizard_flooding.models import ScenarioCutoffLocation, CutoffLocation
 from lizard_flooding.models import TaskType, Task, Waterlevel,ScenarioBreach
 from lizard_flooding.permission_manager import PermissionManager
@@ -168,26 +168,33 @@ def service_save_new_scenario(request):
             cutoffloc_id = cutoffloc.split('|')[0]
             cutoffloc_tclose = cutoffloc.split('|')[1]
             ScenarioCutoffLocation.objects.create(cutofflocation = CutoffLocation.objects.get(pk = cutoffloc_id), scenario = scenario, tclose = to_intervalfloat(cutoffloc_tclose))
-
-
     
     measures = query.get("measures").split(';')
     strategy_id = query.get("strategyId")
-     
+ 
     if len(measures)>0:
-         for measure_input in measures:
-             measure_part = measure_input.split('|')
-             measure = Measure.objects.get(pk=measure_part[0])
-             measure.name = measure_part[1]
-             measure.reference_adjustment = measure_part[2]
-             measure.adjustment = measure_part[3]
-             measure.save()
-         
-         
+        strategy = Strategy.objects.create()
+        strategy.save()
+        
+        scenario.strategy_id = strategy.id
+        scenario.save()
+        
+        for measure_input in measures:
+            measure_part = measure_input.split('|')
+            measure = Measure.objects.get(pk=measure_part[0])
+            measure_new = Measure.objects.create(name=measure_part[1], reference_adjustment=measure_part[2], adjustment=measure_part[3])
+            measure.save()
+            
+            measure_new.strategy.add(strategy)
+            a = dir(measure)
+            print a
+            
+            for embankment in measure.embankmentunit_set.all():
+                measure_new.embankmentunit_set.add(embankment)
+                
     else:
         Strategy.objects.get(pk=strategy_id).delete()
-         
-
+ 
     task.tfinished = datetime.datetime.now()
     task.successful = True
     task.save()

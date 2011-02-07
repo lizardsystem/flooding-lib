@@ -150,8 +150,6 @@ def infowindow_information(request, scenario_id):
     attachment_list.append((_('Externalwater model attachments'), brea_atts))
 
 
-
-
     #Get breach 'set' information
     breachset_info_list = list()
 

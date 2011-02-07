@@ -587,9 +587,10 @@ def service_get_existing_embankments_shape(request, width, height, bbox, region_
     rule_2 = mapnik.Rule()
 
     rule_stk = mapnik.Stroke()
+    rule_stk.add_dash(10.0, 10.0)
     rule_stk.color = mapnik.Color(200,0,0)
     rule_stk.line_cap = mapnik.line_cap.ROUND_CAP
-    rule_stk.width = 2.0
+    rule_stk.width = 3.0
     rule_2.symbols.append(mapnik.LineSymbolizer(rule_stk))
     s2.rules.append(rule_2)
     m.append_style('Line Style New Embankment', s2)
@@ -599,9 +600,10 @@ def service_get_existing_embankments_shape(request, width, height, bbox, region_
     rule_3 = mapnik.Rule()
 
     rule_stk = mapnik.Stroke()
-    rule_stk.color = mapnik.Color(0,200,0)
+    rule_stk.add_dash(5.0, 5.0)
+    rule_stk.color = mapnik.Color(255,128,0)
     rule_stk.line_cap = mapnik.line_cap.ROUND_CAP
-    rule_stk.width = 2.0
+    rule_stk.width = 3.0
     rule_3.symbols.append(mapnik.LineSymbolizer(rule_stk))
     s3.rules.append(rule_3)
     m.append_style('Line Style Polygon Selection', s3)
@@ -629,22 +631,8 @@ def service_get_existing_embankments_shape(request, width, height, bbox, region_
     rule_5.symbols.append(mapnik.LineSymbolizer(rule_stk))
     s5.rules.append(rule_5)
     m.append_style('Line Style Region Boundary', s5)
-        
-    #### Get layer for shape file    
-    #lyrl = mapnik.Layer('lines', rds)
-    #lyrl.datasource = mapnik.Shapefile(file='C:/repo/gisdata/Verhoogde_lijnelementen_c3_split200.shp')
-    #lyrl.styles.append('Line Style')
-    #m.layers.append(lyrl)
-    
-    #### Get layer for a specific region (embankment units)
-    if not only_selected:
-        lyr_specific_region = mapnik.Layer('Geometry from PostGIS')
-        lyr_specific_region.srs = '+proj=latlong +datum=WGS84'
-        BUFFERED_TABLE = '(SELECT geometry FROM flooding_embankment_unit WHERE type=0 AND region_id=%i) specific_region' % region_id
-        lyr_specific_region.datasource = mapnik.PostGIS(host=settings.DATABASE_HOST, user=settings.DATABASE_USER, password=settings.DATABASE_PASSWORD, dbname=settings.DATABASE_NAME, table=str(BUFFERED_TABLE))
-        lyr_specific_region.styles.append('Line Style Specific Region')
-        m.layers.append(lyr_specific_region)
-    
+
+
     #### Get layer for a  region (boundary)    
     lyr_region = mapnik.Layer('Geometry from PostGIS')
     lyr_region.srs = '+proj=latlong +datum=WGS84'
@@ -700,48 +688,208 @@ def service_get_existing_embankments_shape(request, width, height, bbox, region_
     response['Content-type'] = 'image/png'
     return response
 
+
+def service_get_extra_shapes(request, width, height, bbox, region_id):
+    """
+    width = int
+    height = int
+    bbox = tuple
+    """
+    
+    #################### set up map ###################################
+    m = mapnik.Map(width, height)
+    spherical_mercator = '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs +over'
+    rds = "+proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.999908 +x_0=155000 +y_0=463000 +ellps=bessel +towgs84=565.237,50.0087,465.658,-0.406857,0.350733,-1.87035,4.0812 +units=m +no_defs"
+    m.srs = spherical_mercator
+    m.background = mapnik.Color('transparent')
+    #p = mapnik.Projection(spherical_mercator)
+
+    #### Line style for existing embankments
+    sl = mapnik.Style()
+    rule_l = mapnik.Rule()
+
+    rule_stk = mapnik.Stroke()
+    rule_stk.color = mapnik.Color(0,0,200)
+    rule_stk.line_cap = mapnik.line_cap.ROUND_CAP
+    rule_stk.width = 3.0
+    rule_l.symbols.append(mapnik.LineSymbolizer(rule_stk))
+    sl.rules.append(rule_l)
+    m.append_style('Line Style Primaire Keringen', sl)
+    
+    #### Line style for new embankments
+    s2 = mapnik.Style()
+    rule_2 = mapnik.Rule()
+
+    rule_stk = mapnik.Stroke()
+    rule_stk.color = mapnik.Color(200,0,0)
+    rule_stk.line_cap = mapnik.line_cap.ROUND_CAP
+    rule_stk.width = 3.0
+    rule_2.symbols.append(mapnik.LineSymbolizer(rule_stk))
+    s2.rules.append(rule_2)
+    m.append_style('Line Style Regionale Keringen Met Functie', s2)
+    
+    #### Line style for polygon selections
+    s3 = mapnik.Style()
+    rule_3 = mapnik.Rule()
+
+    rule_stk = mapnik.Stroke()
+    rule_stk.color = mapnik.Color(0,200,0)
+    rule_stk.line_cap = mapnik.line_cap.ROUND_CAP
+    rule_stk.width = 3.0
+    rule_3.symbols.append(mapnik.LineSymbolizer(rule_stk))
+    s3.rules.append(rule_3)
+    m.append_style('Line Style Regionale Keringen Zonder Functie', s3)
+        
+    #### Line style for polygon selections
+    s4 = mapnik.Style()
+    rule_4 = mapnik.Rule()
+
+    rule_stk = mapnik.Stroke()
+    rule_stk.color = mapnik.Color(235,235,50)
+    rule_stk.line_cap = mapnik.line_cap.ROUND_CAP
+    rule_stk.width = 3.0
+    rule_4.symbols.append(mapnik.LineSymbolizer(rule_stk))
+    s4.rules.append(rule_4)
+    m.append_style('Line Style Keringen Buiten De Provincie', s4)
+        
+    #### Get layer for shape file    
+    lyrl = mapnik.Layer('lines', rds)
+    lyrl.datasource = mapnik.Shapefile(file = os.path.join(settings.GIS_DIR,'primairekering.shp'))
+    lyrl.styles.append('Line Style Primaire Keringen')
+    m.layers.append(lyrl)
+    
+    lyr2 = mapnik.Layer('lines', rds)
+    lyr2.datasource = mapnik.Shapefile(file= os.path.join(settings.GIS_DIR,'kering_buitenprov.shp'))
+    lyr2.styles.append('Line Style Keringen Buiten De Provincie')
+    m.layers.append(lyr2)
+            
+    lyr4 = mapnik.Layer('lines', rds)
+    lyr4.datasource = mapnik.Shapefile(file= os.path.join(settings.GIS_DIR,'regio_zonder_functie.shp'))
+    lyr4.styles.append('Line Style Regionale Keringen Zonder Functie')
+    m.layers.append(lyr4)
+    
+    lyr3 = mapnik.Layer('lines', rds)
+    lyr3.datasource = mapnik.Shapefile(file= os.path.join(settings.GIS_DIR,'ontwerp_Regionale_keringen.shp'))
+    lyr3.styles.append('Line Style Regionale Keringen Met Functie')
+    m.layers.append(lyr3)    
+      
+    ##################### render map #############################
+    m.zoom_to_box(mapnik.Envelope(*bbox))
+    #m.zoom_to_box(lyrl.envelope())
+    
+    img = mapnik.Image(width,height)
+    mapnik.render(m,img)
+
+    # you can use this if you want te modify image with PIL
+    imgPIL = PIL.Image.fromstring('RGBA', (width,height), img.tostring())
+    #imgPIL = imgPIL.convert('RGB')
+    buffer = StringIO.StringIO()
+    imgPIL.save(buffer, 'png')#,transparency = 10
+    buffer.seek(0)
+
+    response = HttpResponse(buffer.read())
+    response['Content-type'] = 'image/png'
+    return response
+
+def service_get_extra_grid_shapes(request, width, height, bbox, region_id):
+    """
+    width = int
+    height = int
+    bbox = tuple
+    """
+    
+    #################### set up map ###################################
+    m = mapnik.Map(width, height)
+    spherical_mercator = '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs +over'
+    rds = "+proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.999908 +x_0=155000 +y_0=463000 +ellps=bessel +towgs84=565.237,50.0087,465.658,-0.406857,0.350733,-1.87035,4.0812 +units=m +no_defs"
+    m.srs = spherical_mercator
+    m.background = mapnik.Color('transparent')
+    #p = mapnik.Projection(spherical_mercator)
+    
+    s = mapnik.Style()
+    r = mapnik.Rule()
+    rs = mapnik.RasterSymbolizer()
+    r.symbols.append(rs)
+    s.rules.append(r)
+    #styles['geotiff'] = s
+    m.append_style('geotiff', s)
+ 
+    #### Get layer for shape file    
+    raster = mapnik.Gdal(file= os.path.join(settings.GIS_DIR, 'ahn5_medtot_gm_trans.tif'))
+    lyrl = mapnik.Layer('Tiff Layer', spherical_mercator)
+    lyrl.datasource = raster
+    #lyrl.styles.append('Geotiff Style')
+    lyrl.styles.append('geotiff')
+    m.layers.append(lyrl)
+          
+    ##################### render map #############################
+    m.zoom_to_box(mapnik.Envelope(*bbox))
+    #m.zoom_to_box(lyrl.envelope())
+    
+    img = mapnik.Image(width,height)
+    mapnik.render(m,img)
+
+    # you can use this if you want te modify image with PIL
+    imgPIL = PIL.Image.fromstring('RGBA', (width,height), img.tostring())
+    #imgPIL = imgPIL.convert('RGB')
+    buffer = StringIO.StringIO()
+    imgPIL.save(buffer, 'png')#,transparency = 10
+    buffer.seek(0)
+
+    response = HttpResponse(buffer.read())
+    response['Content-type'] = 'image/png'
+    return response
+
 def service_save_drawn_embankment(geometries, strategy_id, region_id):
     
     selected_strategy = Strategy.objects.get(pk=strategy_id)
     selected_measure = selected_strategy.measure_set.create(name='Ingetekend')
     
     region=Region.objects.get(pk=region_id)
-       
-    for geometry in geometries.split(';'):
-        line = GEOSGeometry(geometry, srid=900913)     
-        embankment_unit = EmbankmentUnit(unit_id=-999,
-                                         type = EmbankmentUnit.TYPE_NEW,
-                                         original_height=-999,
-                                         region=region,
-                                         geometry=line)
-        embankment_unit.save()
-        selected_measure.embankmentunit_set.add(embankment_unit)
     
-    answer = {'successful':True, 'id':selected_measure.id, 'name': selected_measure.name, 'number_embankment_units': selected_measure.embankmentunit_set.all().count()  }
-    return HttpResponse(simplejson.dumps(answer), mimetype="application/json")
+    if len(geometries) > 0:
+        for geometry in geometries.split(';'):
+            line = GEOSGeometry(geometry, srid=900913)     
+            embankment_unit = EmbankmentUnit(unit_id=-999,
+                                             type = EmbankmentUnit.TYPE_NEW,
+                                             original_height=-999,
+                                             region=region,
+                                             geometry=line)
+            embankment_unit.save()
+            selected_measure.embankmentunit_set.add(embankment_unit)
+        
+        answer = {'successful':True, 'id':selected_measure.id, 'name': selected_measure.name, 'number_embankment_units': selected_measure.embankmentunit_set.all().count()  }
+        return HttpResponse(simplejson.dumps(answer), mimetype="application/json")
+    else:
+        answer = {'successful':False }
+        return HttpResponse(simplejson.dumps(answer), mimetype="application/json") 
 
 def select_existing_embankments_by_polygon(geometries, strategy_id, region_id):
-    geometries = geometries.split(';')
-
-    joining_polygon = []
-    for i in range(0, len(geometries)):
-        joining_polygon.append(GEOSGeometry(geometries[i], srid=900913))
+    if len(geometries) > 0:
+        geometries = geometries.split(';')
     
-    multi_polygon = MultiPolygon(joining_polygon)
-    multi_polygon.srid = 900913
+        joining_polygon = []
+        for i in range(0, len(geometries)):
+            joining_polygon.append(GEOSGeometry(geometries[i], srid=900913))
     
-    selected_strategy = Strategy.objects.get(pk=strategy_id)
-    selected_measure = selected_strategy.measure_set.create(name='test')
-    selected_measure.name = "Bestaand (%i)" %  selected_measure.id
-    selected_measure.save()   
-       
-    selected_embankment_units = EmbankmentUnit.objects.filter(region=region_id, type=EmbankmentUnit.TYPE_EXISTING)\
-                                .exclude(measure=selected_measure).filter(geometry__intersects=multi_polygon)
-                                
-    selected_measure.embankmentunit_set.add(*selected_embankment_units)
     
-    answer = {'successful':True, 'id':selected_measure.id, 'name': selected_measure.name, 'number_embankment_units': selected_measure.embankmentunit_set.all().count()  }
-    return HttpResponse(simplejson.dumps(answer), mimetype="application/json")
+        multi_polygon = MultiPolygon(joining_polygon)
+        multi_polygon.srid = 900913
+    
+        selected_strategy = Strategy.objects.get(pk=strategy_id)
+        selected_measure = selected_strategy.measure_set.create(name='test')
+        selected_measure.name = "Bestaand (%i)" %  selected_measure.id
+        selected_measure.save()   
+           
+        selected_embankment_units = EmbankmentUnit.objects.filter(region=region_id, type=EmbankmentUnit.TYPE_EXISTING)\
+                                    .exclude(measure=selected_measure).filter(geometry__intersects=multi_polygon)
+        selected_measure.embankmentunit_set.add(*selected_embankment_units)
+        
+        answer = {'successful':True, 'id':selected_measure.id, 'name': selected_measure.name, 'number_embankment_units': selected_measure.embankmentunit_set.all().count()  }
+        return HttpResponse(simplejson.dumps(answer), mimetype="application/json")
+    else:
+        answer = {'successful':False}
+        return HttpResponse(simplejson.dumps(answer), mimetype="application/json")
 
 def service_delete_measure(measure_ids):
         
@@ -1044,7 +1192,7 @@ def service(request):
             height =  query.get('HEIGHT', None)
             strategy_id = query.get('STRATEGY_ID', -1)
             region_id = query.get('REGION_ID', -1)
-            if query.get('ONLY_SELECTION', False) == 'TRUE':
+            if query.get('ONLY_SELECTED', False) == 'TRUE':
                 only_selected = True
             else:
                 only_selected = False
@@ -1054,6 +1202,26 @@ def service(request):
             return service_import_embankment_shape()
         elif action_name == 'get_externalwater_graph_session':
             return get_externalwater_graph_session(request)        
+       
+       
+        elif  action_name == 'get_extra_shapes':
+            bbox =  query.get('BBOX', None)
+            width =  query.get('WIDTH', None)
+            height =  query.get('HEIGHT', None)
+            region_id = query.get('REGION_ID', -1)
+
+            return service_get_extra_shapes(request, int(width), int(height), \
+                                                          tuple([float(value) for value in bbox.split(',')]), int(region_id))
+        elif  action_name == 'get_extra_grid_shapes':
+            bbox =  query.get('BBOX', None)
+            width =  query.get('WIDTH', None)
+            height =  query.get('HEIGHT', None)
+            region_id = query.get('REGION_ID', -1)
+
+            return service_get_extra_grid_shapes(request, int(width), int(height), \
+                                                          tuple([float(value) for value in bbox.split(',')]), int(region_id))
+ 
+        
         else:
             #pass
             raise Http404
