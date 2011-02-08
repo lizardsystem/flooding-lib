@@ -193,7 +193,8 @@ def service_save_new_scenario(request):
                 measure_new.embankmentunit_set.add(embankment)
                 
     else:
-        Strategy.objects.get(pk=strategy_id).delete()
+        pass
+        #Strategy.objects.get(pk=strategy_id).delete()
  
     task.tfinished = datetime.datetime.now()
     task.successful = True

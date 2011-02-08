@@ -587,8 +587,7 @@ def service_get_existing_embankments_shape(request, width, height, bbox, region_
     rule_2 = mapnik.Rule()
 
     rule_stk = mapnik.Stroke()
-    rule_stk.add_dash(10.0, 10.0)
-    rule_stk.color = mapnik.Color(200,0,0)
+    rule_stk.color = mapnik.Color(128,0,128)
     rule_stk.line_cap = mapnik.line_cap.ROUND_CAP
     rule_stk.width = 3.0
     rule_2.symbols.append(mapnik.LineSymbolizer(rule_stk))
@@ -600,8 +599,7 @@ def service_get_existing_embankments_shape(request, width, height, bbox, region_
     rule_3 = mapnik.Rule()
 
     rule_stk = mapnik.Stroke()
-    rule_stk.add_dash(5.0, 5.0)
-    rule_stk.color = mapnik.Color(255,128,0)
+    rule_stk.color = mapnik.Color(255,0,128)
     rule_stk.line_cap = mapnik.line_cap.ROUND_CAP
     rule_stk.width = 3.0
     rule_3.symbols.append(mapnik.LineSymbolizer(rule_stk))
@@ -615,7 +613,7 @@ def service_get_existing_embankments_shape(request, width, height, bbox, region_
     rule_stk = mapnik.Stroke()
     rule_stk.color = mapnik.Color(200,200,200)
     rule_stk.line_cap = mapnik.line_cap.ROUND_CAP
-    rule_stk.width = 6.0
+    rule_stk.width = 1.0
     rule_4.symbols.append(mapnik.LineSymbolizer(rule_stk))
     s4.rules.append(rule_4)
     m.append_style('Line Style Specific Region', s4)
@@ -640,6 +638,14 @@ def service_get_existing_embankments_shape(request, width, height, bbox, region_
     lyr_region.datasource = mapnik.PostGIS(host=settings.DATABASE_HOST, user=settings.DATABASE_USER, password=settings.DATABASE_PASSWORD, dbname=settings.DATABASE_NAME, table=str(BUFFERED_TABLE))
     lyr_region.styles.append('Line Style Region Boundary')
     m.layers.append(lyr_region)
+    
+    #### Get layer for a specific region (embankment units)    
+    lyr_specific_region = mapnik.Layer('Geometry from PostGIS')
+    lyr_specific_region.srs = '+proj=latlong +datum=WGS84'
+    BUFFERED_TABLE = '(SELECT geometry FROM flooding_embankment_unit WHERE type=0 AND region_id=%i) specific_region' % region_id
+    lyr_specific_region.datasource = mapnik.PostGIS(host=settings.DATABASE_HOST, user=settings.DATABASE_USER, password=settings.DATABASE_PASSWORD, dbname=settings.DATABASE_NAME, table=str(BUFFERED_TABLE))
+    lyr_specific_region.styles.append('Line Style Specific Region')
+    m.layers.append(lyr_specific_region)
     
     #### Get layer for new embankments
     lyr_new_embankments = mapnik.Layer('Geometry from PostGIS')
