@@ -1171,9 +1171,6 @@ def service(request):
                                         use_manual_input,
                                         timeserie)
 
-        elif action_name == 'post_newscenario':
-            return service_save_new_scenario(request)
-
         elif  action_name == 'get_raw_result':
             presentationlayer = int(query.get('presentationlayer',None))
             return service_get_raw_result(request,

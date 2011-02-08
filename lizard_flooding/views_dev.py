@@ -64,7 +64,7 @@ def service_save_new_scenario(request):
         else:
             return float(value)/(24*60*60*1000)
 
-    query = request.GET
+    query = request.POST
 
     tsim = to_intervalfloat(query.get('tsim_ms'))
     breach = Breach.objects.get(pk = query.get('breach_id'))
@@ -172,7 +172,7 @@ def service_save_new_scenario(request):
     measures = query.get("measures").split(';')
     strategy_id = query.get("strategyId")
  
-    if len(measures)>0:
+    if len(query.get("measures"))>0:
         strategy = Strategy.objects.create()
         strategy.save()
         

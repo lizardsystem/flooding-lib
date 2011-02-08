@@ -50,7 +50,7 @@
         border: "1px solid grey",
         dataSource: dsPostScenario,
 		canSubmit: true,
-		method: "GET",
+		method: "POST",
         colWidths: [100, 200, 100, 200, 100],
         fields: [
         { name: "action", _constructor: "HiddenItem", defaultValue: 'post_newscenario' },
@@ -503,6 +503,9 @@
 				formScenarioSettings.getField('tdeltaphase_ms').setValue(intervalReader(formScenarioSettings.getValue('tdeltaphase')).getTime());
 				formScenarioSettings.getField('tmaxdepth_ms').setValue(intervalReader(formScenarioSettings.getValue('tmaxdepth')).getTime());
                 
+                var waterlevels_with_return = formScenarioSettings.getValue('waterlevelInput')
+                
+                formScenarioSettings.getField('waterlevelInput').setValue(formScenarioSettings.getValue('waterlevelInput').replace(/\r\n/g,'|').replace(/\n/g,'|'));
                 
                 formScenarioSettings.saveData(function(dsResponse, data, dsRequest) {
                 	if (dsResponse.httpResponseCode == 200) {
@@ -510,10 +513,12 @@
                 			alert(data.save_log);
                 			windowsettings.hide();
                 		} else {
+                			formScenarioSettings.getField('waterlevelInput').setValue(waterlevels_with_return);
                 			alert('error saving: ' + data.save_log)
-                			
+                 			
                 		}
                 	} else {
+                		formScenarioSettings.getField('waterlevelInput').setValue(waterlevels_with_return);
                 		alert('server error, scenario niet opgeslagen')
                 	}
                 });
