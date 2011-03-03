@@ -2,7 +2,7 @@ Changelog of lizard-flooding
 ===================================================
 
 
-1.7 (unreleased)
+1.7 (2011-03-03)
 ----------------
 
 - Nothing changed yet.
