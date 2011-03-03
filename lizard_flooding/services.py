@@ -769,10 +769,10 @@ def service_get_extra_shapes(request, width, height, bbox, region_id):
     lyr2.styles.append('Line Style Keringen Buiten De Provincie')
     m.layers.append(lyr2)
             
-    lyr4 = mapnik.Layer('lines', rds)
-    lyr4.datasource = mapnik.Shapefile(file= os.path.join(settings.GIS_DIR,'regio_zonder_functie.shp'))
-    lyr4.styles.append('Line Style Regionale Keringen Zonder Functie')
-    m.layers.append(lyr4)
+    #lyr4 = mapnik.Layer('lines', rds)
+    #lyr4.datasource = mapnik.Shapefile(file= os.path.join(settings.GIS_DIR,'regio_zonder_functie.shp'))
+    #lyr4.styles.append('Line Style Regionale Keringen Zonder Functie')
+    #m.layers.append(lyr4)
     
     lyr3 = mapnik.Layer('lines', rds)
     lyr3.datasource = mapnik.Shapefile(file= os.path.join(settings.GIS_DIR,'ontwerp_Regionale_keringen.shp'))

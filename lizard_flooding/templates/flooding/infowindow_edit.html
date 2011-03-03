@@ -11,7 +11,7 @@
 {% block content %}
 <a href="{% url root_url %}flooding/infowindow/?scenarioid={{scenario_id}}&action=showattachments&relatedto=inundationmodel" onclick="popupwindow=window.open('{% url root_url %}flooding/infowindow/?scenarioid={{scenario_id}}&action=showattachments&relatedto=inundationmodel','popupwindow','height=600,width=800,top=10,left=10,resizable');popupwindow.focus();return false;">{% trans 'Attachment for inundation model' %}</a>
 <br>
-<a href="{% url root_url %}flooding/infowindow/?scenarioid={{scenario_id}}&action=showattachments&relatedto=breachmodel" onclick="popupwindow=window.open('{% url root_url %}flooding/infowindow/?scenarioid={{scenario_id}}&action=showattachments&relatedto=breachmodel','popupwindow','height=600,width=800,top=10,left=10,resizable');popupwindow.focus();return false;">{% trans 'Attachment for breach model' %}</a>
+<a href="{% url root_url %}flooding/infowindow/?scenarioid={{scenario_id}}&action=showattachments&relatedto=breachmodel" onclick="popupwindow=window.open('{% url root_url %}flooding/infowindow/?scenarioid={{scenario_id}}&action=showattachments&relatedto=breachmodel','popupwindow','height=600,width=800,top=10,left=10,resizable');popupwindow.focus();return false;">{% trans 'Attachment for external water model' %}</a>
 <br>
 <a href="{% url root_url %}flooding/infowindow/?scenarioid={{scenario_id}}&action=showattachments&relatedto=scenario" onclick="popupwindow=window.open('{% url root_url %}flooding/infowindow/?scenarioid={{scenario_id}}&action=showattachments&relatedto=scenario','popupwindow','height=600,width=800,top=10,left=10,resizable');popupwindow.focus();return false;">{% trans 'Attachment for scenario' %}</a>
 <br>
