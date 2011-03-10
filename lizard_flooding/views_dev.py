@@ -160,7 +160,8 @@ def service_save_new_scenario(request):
                                     tstorm = to_intervalfloat(query.get('tstorm_ms', None)),
                                     tpeak = to_intervalfloat(query.get('tpeak_ms', None)),
                                     tdeltaphase = to_intervalfloat(query.get('tdeltaphase_ms', None)),
-                                    code =  scenario.code)
+                                    code =  scenario.code,
+                                    manualwaterlevelinput = useManualInput)
 
     loccutoffs = query.get("loccutoffs").split(',')
     if len(loccutoffs[0]) > 0:

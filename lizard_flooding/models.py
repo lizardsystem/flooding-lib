@@ -873,7 +873,7 @@ class ScenarioBreach(models.Model):
     tstorm = models.FloatField(null=True, blank=True, default=None)
     tpeak = models.FloatField(null=True, blank=True, default=None)
     tdeltaphase = models.FloatField(null=True, blank=True, default=None)
-
+    manualwaterlevelinput = models.BooleanField(default=False)
     code = models.CharField(max_length=15, null=True, blank=True)
 
     class Meta:

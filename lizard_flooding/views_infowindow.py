@@ -179,15 +179,25 @@ def infowindow_information(request, scenario_id):
 
         extw_info_list.append((_('Externalwater name'), br.externalwater.name))
         extw_info_list.append((_('Externalwater type'), br.externalwater.get_type_display()))
-        extw_info_list.append((_('Maximal water level'), scenariobreach.extwmaxlevel))
-        extw_info_list.append((_('Repeating period duration'), scenariobreach.extwrepeattime))
+        if scenariobreach.manualwaterlevelinput:
+            extw_info_list.append((_('Maximal water level'), _('manual input used')))
+            extw_info_list.append((_('Repeating period duration'), _('manual input used')))            
+        else:    
+            extw_info_list.append((_('Maximal water level'), scenariobreach.extwmaxlevel))
+            extw_info_list.append((_('Repeating period duration'), scenariobreach.extwrepeattime))
+        
         extw_info_list.append((_('Bottom level breach'), scenariobreach.bottomlevelbreach))
         extw_info_list.append((_('Pit depth'), scenariobreach.pitdepth))
 
         if br.externalwater.type == ExternalWater.TYPE_SEA:
-            extw_info_list.append((_('Duration storm'), get_intervalstring_from_dayfloat(scenariobreach.tstorm)))
-            extw_info_list.append((_('Duration peak'), get_intervalstring_from_dayfloat(scenariobreach.tpeak)))
-            extw_info_list.append((_('Tide shift'), get_intervalstring_from_dayfloat(scenariobreach.tdeltaphase)))
+            if scenariobreach.manualwaterlevelinput:
+                extw_info_list.append((_('Duration storm'), _('manual input used')))
+                extw_info_list.append((_('Duration peak'), _('manual input used')))
+                extw_info_list.append((_('Tide shift'), _('manual input used')))
+            else:
+                extw_info_list.append((_('Duration storm'), get_intervalstring_from_dayfloat(scenariobreach.tstorm)))
+                extw_info_list.append((_('Duration peak'), get_intervalstring_from_dayfloat(scenariobreach.tpeak)))
+                extw_info_list.append((_('Tide shift'), get_intervalstring_from_dayfloat(scenariobreach.tdeltaphase)))
             if scenariobreach.tide != None:
                 extw_info_list.append((_('Tide properties'), scenariobreach.tide.name))
         elif br.externalwater.type == ExternalWater.TYPE_LAKE:

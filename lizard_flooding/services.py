@@ -599,7 +599,7 @@ def service_get_existing_embankments_shape(request, width, height, bbox, region_
     rule_3 = mapnik.Rule()
 
     rule_stk = mapnik.Stroke()
-    rule_stk.color = mapnik.Color(255,0,128)
+    rule_stk.color = mapnik.Color(0,255,0)
     rule_stk.line_cap = mapnik.line_cap.ROUND_CAP
     rule_stk.width = 3.0
     rule_3.symbols.append(mapnik.LineSymbolizer(rule_stk))
@@ -1205,7 +1205,8 @@ def service(request):
             return service_import_embankment_shape()
         elif action_name == 'get_externalwater_graph_session':
             return get_externalwater_graph_session(request)        
-       
+        elif action_name == 'get_strategy_id':
+            return service_get_strategy_id()
        
         elif  action_name == 'get_extra_shapes':
             bbox =  query.get('BBOX', None)
@@ -1244,9 +1245,7 @@ def service(request):
             geometry = query.get('geometry')
             strategy_id = query.get('strategy_id', -1)
             region_id = query.get('region_id', -1)
-            return select_existing_embankments_by_polygon(geometry, strategy_id, region_id)
-        elif action_name == 'get_strategy_id':
-            return service_get_strategy_id()
+            return select_existing_embankments_by_polygon(geometry, strategy_id, region_id)    
         elif action_name == 'delete_measure':
             measure_ids = query.get('measure_ids', -1)    
             return service_delete_measure (measure_ids)
