@@ -59,7 +59,7 @@
 	        {% ifnotequal extw_infodetail.1 None %}    
 	    	<tr class="{% cycle 'cellDark' 'cell'%}">
 		    	<td>{{extw_infodetail.0}}</td>
-		    	<td>{{extw_infodetail.1}}</td>    	
+		    	<td>{% autoescape off %}{{extw_infodetail.1}}{% endautoescape %}</td>    	
 		    </tr>
 		    {% endifnotequal %}    
 	    {% endfor %}   

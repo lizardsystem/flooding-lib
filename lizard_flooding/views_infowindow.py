@@ -8,6 +8,7 @@ import string
 from django.contrib.auth.decorators import login_required
 from django.contrib.contenttypes.models import ContentType
 from django.core.files.base import ContentFile
+from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import render_to_response, get_object_or_404
@@ -19,6 +20,7 @@ from lizard_flooding.models import Attachment, ExternalWater, Scenario
 from lizard_flooding.models import ScenarioBreach, SobekModel, Task, TaskType
 from lizard_flooding.models import UserPermission, ExtraInfoField
 from lizard_flooding.permission_manager import PermissionManager
+from lizard_flooding.views_dev import get_externalwater_graph_infowindow
 from lizard_flooding.tools.approvaltool.views import approvaltable
 from lizard_presentation.models import Animation
 
@@ -77,6 +79,7 @@ def get_intervalstring_from_dayfloat(input):
 
     if input <0:
         sign = '-'
+        input = input * -1
     else:
         sign = ''
 
@@ -193,13 +196,18 @@ def infowindow_information(request, scenario_id):
             if scenariobreach.manualwaterlevelinput:
                 extw_info_list.append((_('Duration storm'), _('manual input used')))
                 extw_info_list.append((_('Duration peak'), _('manual input used')))
-                extw_info_list.append((_('Tide shift'), _('manual input used')))
+                extw_info_list.append((_('Tide shift'), _('manual input used')))              
             else:
                 extw_info_list.append((_('Duration storm'), get_intervalstring_from_dayfloat(scenariobreach.tstorm)))
                 extw_info_list.append((_('Duration peak'), get_intervalstring_from_dayfloat(scenariobreach.tpeak)))
                 extw_info_list.append((_('Tide shift'), get_intervalstring_from_dayfloat(scenariobreach.tdeltaphase)))
             if scenariobreach.tide != None:
                 extw_info_list.append((_('Tide properties'), scenariobreach.tide.name))
+            if len(scenariobreach.waterlevelset.waterlevel_set.all())>0:
+                image_src = reverse('flooding_service') + \
+                    "?action=get_externalwater_graph_infowindow&width=350&height=400&scenariobreach_id=" + \
+                    str(scenariobreach.id)              
+                extw_info_list.append((_('External water graph'), '<img src="' + image_src +' " />'))
         elif br.externalwater.type == ExternalWater.TYPE_LAKE:
             extw_info_list.append((_('Duration storm'), get_intervalstring_from_dayfloat(scenariobreach.tstorm)))
             extw_info_list.append((_('Duration peak'), get_intervalstring_from_dayfloat(scenariobreach.tpeak)))
@@ -216,8 +224,12 @@ def infowindow_information(request, scenario_id):
             extw_info_list.append((_('Duration storm'), get_intervalstring_from_dayfloat(scenariobreach.tstorm)))
             extw_info_list.append((_('Duration peak'), get_intervalstring_from_dayfloat(scenariobreach.tpeak)))
             if scenariobreach.tide != None:
-                extw_info_list.append((_('Tide properties'), scenariobreach.tide.name))
-
+                extw_info_list.append((_('Tide properties'), scenariobreach.tide.name))     
+        
+               
+        
+        
+        
         extrafields = scenario.extrascenarioinfo_set.filter(extrainfofield__header = ExtraInfoField.HEADER_EXTERNALWATER,
                                         extrainfofield__use_in_scenario_overview = True).order_by('-extrainfofield__position')
         for field in extrafields:

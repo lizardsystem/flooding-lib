@@ -8,7 +8,7 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.views.decorators.cache import never_cache
 from django.contrib.gis.geos import GEOSGeometry, MultiPolygon
 
-from lizard_flooding.views_dev import service_compose_scenario, get_externalwater_graph, get_externalwater_graph_session, service_save_new_scenario, get_externalwater_csv
+from lizard_flooding.views_dev import service_compose_scenario, get_externalwater_graph, get_externalwater_graph_session, get_externalwater_graph_infowindow, service_save_new_scenario, get_externalwater_csv
 from lizard_base.models import Setting
 from lizard_flooding.models import Breach, CutoffLocationSet, \
     ExternalWater, EmbankmentUnit, Measure, RegionSet,  \
@@ -1143,7 +1143,8 @@ def service(request):
                                         tide_id,
                                         extwbaselevel,
                                         use_manual_input,
-                                        timeserie)
+                                        timeserie,
+                                        True)
         
         elif action_name == 'get_externalwater_csv':
             mid = 24*60*60*1000
@@ -1216,7 +1217,7 @@ def service(request):
 
             return service_get_extra_shapes(request, int(width), int(height), \
                                                           tuple([float(value) for value in bbox.split(',')]), int(region_id))
-        elif  action_name == 'get_extra_grid_shapes':
+        elif action_name == 'get_extra_grid_shapes':
             bbox =  query.get('BBOX', None)
             width =  query.get('WIDTH', None)
             height =  query.get('HEIGHT', None)
@@ -1225,7 +1226,11 @@ def service(request):
             return service_get_extra_grid_shapes(request, int(width), int(height), \
                                                           tuple([float(value) for value in bbox.split(',')]), int(region_id))
  
-        
+        elif action_name == 'get_externalwater_graph_infowindow': 
+            width = int(query.get('width',None))
+            height = int(query.get('height',None))
+            scenariobreach_id= int(query.get('scenariobreach_id',None))
+            return get_externalwater_graph_infowindow(request, width, height, scenariobreach_id)
         else:
             #pass
             raise Http404
@@ -1287,7 +1292,8 @@ def service(request):
                                         tide_id,
                                         extwbaselevel,
                                         use_manual_input,
-                                        timeserie)
+                                        timeserie, 
+                                        True)
         else:
             raise Http404
 

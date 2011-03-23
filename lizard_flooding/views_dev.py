@@ -25,7 +25,38 @@ def service_result(request, object_id, location_nr, parameter_nr):
         {'data': his.get_timeseries_by_index(int(location_nr), int(parameter_nr))}
         )
 
-def get_externalwater_graph(request, width, height, breach_id, extwmaxlevel, tpeak, tstorm, tsim, tstartbreach=0, tdeltaphase = None, tide_id = None, extwbaselevel = None, useManualInput = False, manualTimeserie = ""):
+
+def get_externalwater_graph_infowindow(request, width, height, scenario_breach_id):
+    """  """
+    scenario_breach = get_object_or_404(ScenarioBreach, pk=scenario_breach_id)
+    if not scenario_breach.tstartbreach:
+        scenario_breach.tstartbreach = 0
+    if not scenario_breach.tide:
+        scenario_breach_tide_id = None
+    else:
+        scenario_breach_tide_id = scenario_breach.tide.id
+ 
+    if scenario_breach.manualwaterlevelinput:
+        waterlevels = scenario_breach.waterlevelset.waterlevel_set.all()
+        time_values = []        
+        for wl in waterlevels:
+            time_values += [','.join([str(wl.time), str(wl.value)])]
+        manual_timeserie = '|'.join(time_values)            
+    else:
+        manual_timeserie = ""    
+        
+    
+        
+    return get_externalwater_graph(request, width, height, scenario_breach.breach.id,
+                            scenario_breach.extwmaxlevel, scenario_breach.tpeak, 
+                            scenario_breach.tstorm, scenario_breach.scenario.tsim, 
+                            scenario_breach.tstartbreach, scenario_breach.tdeltaphase,
+                            scenario_breach_tide_id, scenario_breach.extwbaselevel, 
+                            scenario_breach.manualwaterlevelinput, manual_timeserie,
+                            False)
+ 
+
+def get_externalwater_graph(request, width, height, breach_id, extwmaxlevel, tpeak, tstorm, tsim, tstartbreach=0, tdeltaphase = None, tide_id = None, extwbaselevel = None, useManualInput = False, manualTimeserie = "", save_in_session = True):
     """  """
     breach =  get_object_or_404(Breach, pk=breach_id)
     if not useManualInput:
@@ -33,10 +64,13 @@ def get_externalwater_graph(request, width, height, breach_id, extwmaxlevel, tpe
     else:
         waterlevel = calc.BoundaryConditions(breach, extwmaxlevel, tpeak, tstorm, tsim, tstartbreach, tdeltaphase, tide_id, extwbaselevel)
         waterlevel.set_waterlevels(manualTimeserie)
-       
-    response = HttpResponse(content_type='image/png  ')  # image/png  
-    request.session['external_water_graph'] = waterlevel.get_graph(response, width, height)
-    return HttpResponse('Grafiek opgeslagen in sessie')
+    
+    response = HttpResponse(content_type='image/png')  # image/png
+    if save_in_session:        
+        request.session['external_water_graph'] = waterlevel.get_graph(response, width, height)
+        return HttpResponse('Grafiek opgeslagen in sessie')
+    else:                
+        return waterlevel.get_graph(response, width, height)       
     
 def get_externalwater_graph_session(request):    
     return request.session['external_water_graph']
