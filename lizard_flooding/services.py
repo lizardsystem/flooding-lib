@@ -629,8 +629,8 @@ def service_get_existing_embankments_shape(request, width, height, bbox, region_
     rule_5.symbols.append(mapnik.LineSymbolizer(rule_stk))
     s5.rules.append(rule_5)
     m.append_style('Line Style Region Boundary', s5)
-
-
+    
+    
     #### Get layer for a  region (boundary)    
     lyr_region = mapnik.Layer('Geometry from PostGIS')
     lyr_region.srs = '+proj=latlong +datum=WGS84'
