@@ -370,7 +370,7 @@ def service_get_wms_of_shape(
         m.layers.append(lyrl)
 
     ##################### render map #############################
-    m.zoom_to_box(lyrl.envelope())#mapnik.Envelope(*bbox)
+    m.zoom_to_box(mapnik.Envelope(*bbox)) #lyrl.envelope
 
     log.debug(  'start render map ' + str(datetime.datetime.now()) )
     img = mapnik.Image(width,height)
