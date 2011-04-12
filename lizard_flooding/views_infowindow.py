@@ -207,7 +207,7 @@ def infowindow_information(request, scenario_id):
                 image_src = reverse('flooding_service') + \
                     "?action=get_externalwater_graph_infowindow&width=350&height=400&scenariobreach_id=" + \
                     str(scenariobreach.id)              
-                extw_info_list.append((_('External water graph'), '<img src="' + image_src +' " />'))
+                extw_info_list.append((_('External water graph'), '<img src="' + image_src +' " width=350 height=400/>'))
         elif br.externalwater.type == ExternalWater.TYPE_LAKE:
             extw_info_list.append((_('Duration storm'), get_intervalstring_from_dayfloat(scenariobreach.tstorm)))
             extw_info_list.append((_('Duration peak'), get_intervalstring_from_dayfloat(scenariobreach.tpeak)))
