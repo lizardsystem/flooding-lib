@@ -557,6 +557,11 @@ def service_get_import_scenario_uploaded_file(request, path):
 @never_cache
 def service_get_existing_embankments_shape(request, width, height, bbox, region_id, strategy_id, only_selected = False):
     """
+    Returns a png with:
+    - the existing embankments (that are splitted in several units that are selectable)
+    - the new drawn embankments
+    - the selecte embankments (by polygon selection)
+    
     width = int
     height = int
     bbox = tuple
@@ -570,18 +575,7 @@ def service_get_existing_embankments_shape(request, width, height, bbox, region_
     m.background = mapnik.Color('transparent')
     #p = mapnik.Projection(spherical_mercator)
 
-    #### Line style for existing embankments
-    sl = mapnik.Style()
-    rule_l = mapnik.Rule()
-
-    rule_stk = mapnik.Stroke()
-    rule_stk.color = mapnik.Color(0,0,200)
-    rule_stk.line_cap = mapnik.line_cap.ROUND_CAP
-    rule_stk.width = 2.0
-    rule_l.symbols.append(mapnik.LineSymbolizer(rule_stk))
-    sl.rules.append(rule_l)
-    m.append_style('Line Style', sl)
-    
+      
     #### Line style for new embankments
     s2 = mapnik.Style()
     rule_2 = mapnik.Rule()
@@ -606,14 +600,14 @@ def service_get_existing_embankments_shape(request, width, height, bbox, region_
     s3.rules.append(rule_3)
     m.append_style('Line Style Polygon Selection', s3)
         
-    #### Line style for polygon selections
+    #### Line style for the embankment units that can be selected
     s4 = mapnik.Style()
     rule_4 = mapnik.Rule()
 
     rule_stk = mapnik.Stroke()
     rule_stk.color = mapnik.Color(200,200,200)
     rule_stk.line_cap = mapnik.line_cap.ROUND_CAP
-    rule_stk.width = 1.0
+    rule_stk.width = 2
     rule_4.symbols.append(mapnik.LineSymbolizer(rule_stk))
     s4.rules.append(rule_4)
     m.append_style('Line Style Specific Region', s4)
@@ -697,6 +691,8 @@ def service_get_existing_embankments_shape(request, width, height, bbox, region_
 
 def service_get_extra_shapes(request, width, height, bbox, region_id):
     """
+    Return the Keringen-shapes that already exist.
+    
     width = int
     height = int
     bbox = tuple
@@ -710,7 +706,7 @@ def service_get_extra_shapes(request, width, height, bbox, region_id):
     m.background = mapnik.Color('transparent')
     #p = mapnik.Projection(spherical_mercator)
 
-    #### Line style for existing embankments
+    #### Line style for Primaire keringen
     sl = mapnik.Style()
     rule_l = mapnik.Rule()
 
@@ -722,7 +718,7 @@ def service_get_extra_shapes(request, width, height, bbox, region_id):
     sl.rules.append(rule_l)
     m.append_style('Line Style Primaire Keringen', sl)
     
-    #### Line style for new embankments
+    #### Line style for Regionale keringen met Functie
     s2 = mapnik.Style()
     rule_2 = mapnik.Rule()
 
@@ -734,19 +730,8 @@ def service_get_extra_shapes(request, width, height, bbox, region_id):
     s2.rules.append(rule_2)
     m.append_style('Line Style Regionale Keringen Met Functie', s2)
     
-    #### Line style for polygon selections
-    s3 = mapnik.Style()
-    rule_3 = mapnik.Rule()
-
-    rule_stk = mapnik.Stroke()
-    rule_stk.color = mapnik.Color(0,200,0)
-    rule_stk.line_cap = mapnik.line_cap.ROUND_CAP
-    rule_stk.width = 3.0
-    rule_3.symbols.append(mapnik.LineSymbolizer(rule_stk))
-    s3.rules.append(rule_3)
-    m.append_style('Line Style Regionale Keringen Zonder Functie', s3)
-        
-    #### Line style for polygon selections
+            
+    #### Line style for Keringen buiten de provincie
     s4 = mapnik.Style()
     rule_4 = mapnik.Rule()
 
@@ -768,11 +753,6 @@ def service_get_extra_shapes(request, width, height, bbox, region_id):
     lyr2.datasource = mapnik.Shapefile(file= os.path.join(settings.GIS_DIR,'kering_buitenprov.shp'))
     lyr2.styles.append('Line Style Keringen Buiten De Provincie')
     m.layers.append(lyr2)
-            
-    #lyr4 = mapnik.Layer('lines', rds)
-    #lyr4.datasource = mapnik.Shapefile(file= os.path.join(settings.GIS_DIR,'regio_zonder_functie.shp'))
-    #lyr4.styles.append('Line Style Regionale Keringen Zonder Functie')
-    #m.layers.append(lyr4)
     
     lyr3 = mapnik.Layer('lines', rds)
     lyr3.datasource = mapnik.Shapefile(file= os.path.join(settings.GIS_DIR,'ontwerp_Regionale_keringen.shp'))
@@ -802,6 +782,8 @@ def service_get_extra_grid_shapes(request, width, height, bbox, region_id):
     width = int
     height = int
     bbox = tuple
+    
+    Returns the Elevation model
     """
     
     #################### set up map ###################################
