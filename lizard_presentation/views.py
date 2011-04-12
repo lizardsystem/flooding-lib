@@ -241,7 +241,7 @@ def service_get_wms_of_shape(
         points = []
 
         drv = ogr.GetDriverByName('ESRI Shapefile')
-        shapefile_name = external_file_location(external_file_location(pl.presentationshape.geo_source.file_location))
+        shapefile_name = external_file_location(pl.presentationshape.geo_source.file_location)
         ds = drv.Open(shapefile_name)
         layer = ds.GetLayer()
 
@@ -268,7 +268,7 @@ def service_get_wms_of_shape(
                     else:
                         filename = input_file.filelist[0].filename
 
-                    his = HISFile(Stream(input_file.read(external_file_location(filename))))
+                    his = HISFile(Stream(input_file.read(filename)))
                     input_file.close()
                     log.debug( 'ready reading hisfile' + str(datetime.datetime.now()))
                     cache.set('his_' + str(presentationlayer_id) , his , 3000)
@@ -441,7 +441,7 @@ def service_get_shapes(
     shapefile_name = external_file_location(pl.presentationshape.geo_source.file_location)
 
     drv = ogr.GetDriverByName('ESRI Shapefile')
-    ds = drv.Open(external_file_location(shapefile_name))
+    ds = drv.Open(shapefile_name)
     layer = layer = ds.GetLayer()
     layer.SetSpatialFilterRect(x-precision, y-precision,x+precision,y+precision)
 
