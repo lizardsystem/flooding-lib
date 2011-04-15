@@ -1164,6 +1164,10 @@ class Strategy(models.Model):
     """
     
     name = models.CharField(max_length=100)
+    region = models.ForeignKey(Region, blank=True, null=True)
+    visible_for_loading =  models.BooleanField(default=False)
+    user = models.ForeignKey(User, blank=True, null=True)
+    save_date = models.DateTimeField(blank=True, null=True)
     
     class Meta:
         db_table = 'flooding_strategy'     

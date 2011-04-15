@@ -8,7 +8,7 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.views.decorators.cache import never_cache
 from django.contrib.gis.geos import GEOSGeometry, MultiPolygon
 
-from lizard_flooding.views_dev import service_compose_scenario, get_externalwater_graph, get_externalwater_graph_session, get_externalwater_graph_infowindow, service_save_new_scenario, get_externalwater_csv
+from lizard_flooding.views_dev import service_compose_scenario, get_externalwater_graph, get_externalwater_graph_session, get_externalwater_graph_infowindow, service_save_new_scenario, get_externalwater_csv, service_select_strategy
 from lizard_base.models import Setting
 from lizard_flooding.models import Breach, CutoffLocationSet, \
     ExternalWater, EmbankmentUnit, Measure, RegionSet,  \
@@ -884,7 +884,32 @@ def service_delete_measure(measure_ids):
     measure_ids = [int(id) for id in measure_ids.split(';')]
     Measure.objects.filter(id__in = measure_ids).delete()
     answer = {'successful':True }
-    return HttpResponse(simplejson.dumps(answer), mimetype="application/json")        
+    return HttpResponse(simplejson.dumps(answer), mimetype="application/json")   
+
+def service_load_strategies(current_strategy, strategies):
+    selected_strategies_ids = strategies.split(';')
+    new_measures = []
+    for strategy_id in selected_strategies_ids:
+        strat = Strategy.objects.get(pk = strategy_id)
+        for measure in strat.measure_set.all():
+            measure_new = Measure.objects.create(name=measure.name,
+                                                 reference_adjustment=measure.reference_adjustment,
+                                                 adjustment=measure.adjustment)
+            for embankment in measure.embankmentunit_set.all():
+                measure_new.embankmentunit_set.add(embankment)
+            measure_new.strategy.add(current_strategy)
+            measure_new.save()
+            new_measures += [measure_new]
+            
+    answer = {'successful':True, 'measures':[] }
+    
+    for measure in new_measures:
+        answer['measures'].append({'id':measure.id, 'name': measure.name, \
+                                  'number_embankment_units': measure.embankmentunit_set.all().count(),\
+                                  'adjustment': measure.adjustment, 'reference': measure.reference_adjustment})
+    
+    return HttpResponse(simplejson.dumps(answer), mimetype="application/json")
+            
 
 def service_get_strategy_id():
     
@@ -1093,7 +1118,10 @@ def service(request):
             return service_compose_scenario(request,
                                                breach_id=breach_id)
 
-
+        elif action_name == 'select_strategy':
+            region_id= query.get('region_id', None)
+            return service_select_strategy(request,
+                                               region_id=region_id)
 
         elif action_name == 'get_externalwater_graph':
             mid = 24*60*60*1000
@@ -1236,6 +1264,10 @@ def service(request):
         elif action_name == 'delete_measure':
             measure_ids = query.get('measure_ids', -1)    
             return service_delete_measure (measure_ids)
+        elif action_name == 'post_load_strategies':            
+            current_strategy = query.get('current_strategy')
+            strategies = query.get('strategies')
+            return service_load_strategies(current_strategy, strategies)
         elif action_name == 'get_externalwater_graph':
             mid = 24*60*60*1000
 

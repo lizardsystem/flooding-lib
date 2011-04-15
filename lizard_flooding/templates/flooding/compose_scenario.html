@@ -417,9 +417,9 @@
             max: 2,
             step: 0.1,
             width: 100
-        }
+        },
         {% if sea %}
-        , {
+        {
             name: "useManualInput",
             title: "Gebruik handmatige invoer",
             type: "checkbox",
@@ -464,9 +464,32 @@
                 
                 window.open(get_waterlevel_csv_url());
             }
-        }
-
+        },
         {% endif %}
+        {
+            name: "saveStrategy",
+            title: "Sla maatregelen aan keringen op",
+            type: "checkbox",
+            required: true,
+            endRow: true,
+            showIf: "form.getValue('showAdvancedSettings') == true",
+            changed: function(form, item, value){
+                if (value == true) {
+                	formScenarioSettings.getField('strategyName').setEnabled(true);
+                } else {
+                  	formScenarioSettings.getField('strategyName').setEnabled(false);   
+                }
+            }
+        },
+ 		{
+            name: "strategyName",
+            title: "Maatregelenset naam",
+            editorType: "TextAreaItem",
+            showIf: "form.getValue('showAdvancedSettings') == true",
+            required: false,
+            disabled: true,
+            colSpan: 1, width: 150, height: 38, endRow: false
+        }        
         ],
         //canDragResize: true,
         autoDraw: false

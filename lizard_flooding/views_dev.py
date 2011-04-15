@@ -7,13 +7,14 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.utils import simplejson
 
 from lizard_flooding import calc
-from lizard_flooding.models import Breach, WaterlevelSet, Measure
+from lizard_flooding.models import Breach, WaterlevelSet, Measure, Region
 from lizard_flooding.models import ExternalWater, UserPermission, Project
 from lizard_flooding.models import Scenario, SobekModel, Strategy
 from lizard_flooding.models import ScenarioCutoffLocation, CutoffLocation
 from lizard_flooding.models import TaskType, Task, Waterlevel,ScenarioBreach
 from lizard_flooding.permission_manager import PermissionManager
 from nens.sobek import SobekHIS
+from django.views.decorators.cache import never_cache
 
 #--------------------- services for sobek his results ---------------
 
@@ -206,9 +207,20 @@ def service_save_new_scenario(request):
     
     measures = query.get("measures").split(';')
     strategy_id = query.get("strategyId")
+
+        
  
     if len(query.get("measures"))>0:
-        strategy = Strategy.objects.create()
+        strategy = Strategy.objects.create(name="scen: %s"%scenario.name[:30])
+
+        
+        if query.get('saveStrategy'):
+            strategy.name = query.get('strategyName', "-")
+            strategy.region = breach.region
+            strategy.visible_for_loading = True
+            strategy.user = request.user
+            strategy.save_date = datetime.datetime.now()
+
         strategy.save()
         
         scenario.strategy_id = strategy.id
@@ -221,9 +233,7 @@ def service_save_new_scenario(request):
             measure.save()
             
             measure_new.strategy.add(strategy)
-            a = dir(measure)
-            print a
-            
+                      
             for embankment in measure.embankmentunit_set.all():
                 measure_new.embankmentunit_set.add(embankment)
                 
@@ -241,6 +251,24 @@ def service_save_new_scenario(request):
     return HttpResponse(simplejson.dumps(answer), mimetype="application/json")
 
 
+
+@never_cache
+def service_select_strategy(request, region_id):
+    """  """
+    region = Region.objects.get(pk = region_id)
+    #data[0].tdeltaphase = intervalFormatter(intervalReader("0 00:00"));
+    strategies = Strategy.objects.filter(visible_for_loading=True, region=region).order_by('name')
+
+    pm = PermissionManager(request.user)
+
+    return render_to_response(
+        'flooding/select_strategy.html',
+        {
+         'region': region,
+         'strategies':strategies, 
+         'current_strategy':12, 
+         })
+    
 def service_compose_scenario(request, breach_id):
     """  """
     breach = Breach.objects.get(pk = breach_id)
