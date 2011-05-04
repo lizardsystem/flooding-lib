@@ -212,9 +212,8 @@ def service_save_new_scenario(request):
  
     if len(query.get("measures"))>0:
         strategy = Strategy.objects.create(name="scen: %s"%scenario.name[:30])
-
-        
-        if query.get('saveStrategy'):
+                
+        if query.get('saveStrategy')=='true':
             strategy.name = query.get('strategyName', "-")
             strategy.region = breach.region
             strategy.visible_for_loading = True

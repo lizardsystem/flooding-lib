@@ -86,8 +86,8 @@
                 
             }
             
-            
-            RPCManager.sendRequest({
+            if (selected_strategies.length > 0)
+            	{RPCManager.sendRequest({
 							 actionURL: '{% url root_url %}flooding/service/',
 							 useSimpleHttp: true,
 							 showPrompt:true,	    					 					 
@@ -112,7 +112,8 @@
 				                    console.log("Fout bij het opslaan van gegevens.");                   
 				                }
 				            }
-				        });		
+				        });
+		        }		
             
         },
         autoDraw: false
