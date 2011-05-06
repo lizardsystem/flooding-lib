@@ -6,7 +6,7 @@ from lizard_flooding.models import (Attachment, Breach, BreachSobekModel,
                     CutoffLocationSobekModelSetting, Dike,
                     PermissionProjectGridDataLegend,
                     PermissionProjectShapeDataLegend,
-                    Project, ProjectGroupPermission, Region, RegionSet,
+                    Project, ProjectGroupPermission, Region, RegionSet, Map,
                     Result, ResultType,
                     ResultType_PresentationType, Scenario, ScenarioBreach,
                     ScenarioCutoffLocation,
@@ -20,10 +20,10 @@ class ProjectGroupPermissionInline(admin.TabularInline):
     model = ProjectGroupPermission
     extra = 8
 
-
 class RegionAdmin(OSMGeoAdmin):
     list_filter = ('active', 'sobekmodels', )
     search_fields = ['name', 'longname', ]
+    filter_vertical = ['maps']
 
 class SobekmodelAdmin(admin.ModelAdmin):
     list_filter = ('active', 'sobekmodeltype', 'regions', )
@@ -87,6 +87,7 @@ admin.site.register(Dike)
 admin.site.register(ExternalWater)
 admin.site.register(ExtraInfoField)
 admin.site.register(ExtraScenarioInfo)
+admin.site.register(Map)
 admin.site.register(PermissionProjectGridDataLegend)
 admin.site.register(PermissionProjectShapeDataLegend)
 admin.site.register(Project, ProjectAdmin)

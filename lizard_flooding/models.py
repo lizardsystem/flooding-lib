@@ -325,6 +325,26 @@ class Waterlevel(models.Model):
         return u'%s: %s, %f'%(self.waterlevelset.__unicode__(),
                               str(datetime.timedelta(self.time)), self.value)
 
+class Map(models.Model):
+    """Stores wms entries"""
+    name = models.CharField(max_length=200)
+    remarks = models.TextField(blank=True, null=True)
+    active = models.BooleanField(default=True)
+    index = models.IntegerField(default=100)
+
+    url = models.CharField(max_length=200)
+    layers = models.CharField(max_length=200) #layernames seperated with comma
+    transparent = models.NullBooleanField(default=None)
+    tiled = models.NullBooleanField(default=None)
+    srs = models.CharField(max_length=50, default='EPSG:900913')
+
+    class Meta:
+        db_table = 'flooding_map'
+    
+    def __unicode__(self):
+        return self.name
+
+
 class Region(models.Model):
     """region properties:
 
@@ -337,6 +357,7 @@ class Region(models.Model):
     longname = models.CharField(max_length=200)
     active = models.BooleanField(default=True)
 
+    maps = models.ManyToManyField(Map, blank=True)
     sobekmodels = models.ManyToManyField(SobekModel, blank=True)
     cutofflocations = models.ManyToManyField(CutoffLocation, blank=True)
 
@@ -448,6 +469,8 @@ class Breach(models.Model):
         verbose_name = _('Breach')
         verbose_name_plural = _('Breaches')
         db_table = 'flooding_breach'
+        ordering = ["name"]
+
 
     def get_all_projects(self):
         """find out all projects that the current breach is part of"""

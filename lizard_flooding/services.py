@@ -96,6 +96,33 @@ def service_get_region_tree(request, permission=UserPermission.PERMISSION_SCENAR
     return HttpResponse(simplejson.dumps(object_list), mimetype="application/json")
 #render_to_response('flooding/regiontree.json', {'object_list': object_list})
 
+
+def service_get_region_maps(request, 
+                            region_id):
+    """Get maps linked to scenario's
+
+    """
+    
+    region = get_object_or_404(Region, pk=region_id)
+    print str(region)
+    object_list = []
+    for map in region.maps.filter(active=True).order_by('index'):
+        print map
+        object_list.append({'id': map.id,
+                            'name': map.name,
+                            'url': map.url,
+                            'layers': map.layers,
+                            'transparent': map.transparent,
+                            'tiled': map.tiled,
+                            'srs': map.srs
+                            })
+
+    response = HttpResponse(simplejson.dumps(object_list), mimetype="application/json")
+    response['Cache-Control'] = 'max-age=0'
+    return response
+
+
+
 @never_cache
 def service_get_breach_tree(request, permission=UserPermission.PERMISSION_SCENARIO_VIEW,
                             region_id=None, filter_onlyscenariobreaches=False, filter_scenario=None, filter_active=None):
@@ -1072,6 +1099,9 @@ def service(request):
             permission = int(query.get('permission',
                                        UserPermission.PERMISSION_SCENARIO_VIEW))
             return service_get_regions(request, regionset_id, permission=permission)
+        elif action_name == 'get_region_maps':
+            region_id = query.get('region_id', None)
+            return service_get_region_maps(request, region_id)        
         elif action_name == 'get_cutofflocations':
             inundationmodel_id = query.get('inundationmodel_id', None)
             extwatermodel_id = query.get('extwatermodel_id', None)
