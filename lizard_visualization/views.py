@@ -111,12 +111,16 @@ def legend_shapedata(request):
             file_location = pl.presentationgrid.png_default_legend.file_location
             file_folder = file_location[:file_location.rfind('\\')]            
             color_mapping = file_folder + '\colormapping.csv'
-               
-            with open(external_file_location(color_mapping), 'rb') as f:
+            
+            f = open(external_file_location(color_mapping), 'rb')
+            try:                
                 reader = list(csv.DictReader(f))
                 legend_data = [(float(r['leftbound']), r['colour']) for r in reader]
+            finally:
+                f.close()
         except:
             legend_data=[]
+        
                 
         return render_to_response('visualization/legend_shapedata_grid.html',
                                   {'title': shapedatalegend.name,
