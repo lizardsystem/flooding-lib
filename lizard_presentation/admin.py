@@ -2,6 +2,7 @@
 from lizard_presentation.models import Animation, Classified, ClassifiedNr, CustomIndicator, Derivative, Field, FieldChoice, PresentationGrid, PresentationLayer, PresentationNoGeom, PresentationShape, PresentationSource, PresentationType, PresentationValueTable, SupportLayers
 from lizard_flooding.models import Scenario_PresentationLayer, ResultType_PresentationType
 from django.contrib import admin
+from django.contrib.gis.admin import OSMGeoAdmin
 
 class FieldInline(admin.TabularInline):
     model = Field
@@ -65,8 +66,20 @@ class ClassifiedAdmin(admin.ModelAdmin):
 class PresentationSourceAdmin(admin.ModelAdmin):
     list_display = ('type','file_location','t_origin', 't_source', )
 
-class PresentationGridAdmin(admin.ModelAdmin):
-    list_display = ('presentationlayer', 'rownr', 'colnr', 'gridsize', 'png_indexed_palette', 'png_default_legend', 'location_netcdf_file', )
+class PresentationGridAdmin(OSMGeoAdmin):
+    list_display = ('id', 'presentationlayer', 'rownr', 'colnr', 'gridsize', 'png_indexed_palette', 'png_default_legend', 'location_netcdf_file', )
+    search_fields = ['id',]
+    ordering = ['png_indexed_palette',]
+    fieldsets = (
+        (None, {
+            'fields': ('extent','bbox_orignal_srid' )
+        }),
+        ('bla', {
+            'fields': ('gridsize', )
+        })
+        )
+
+
 
 class PresentationShapeAdmin(admin.ModelAdmin):
     list_display = ('presentationlayer', 'geo_source', 'value_source',)

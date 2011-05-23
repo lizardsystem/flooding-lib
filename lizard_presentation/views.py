@@ -96,10 +96,12 @@ def service_get_presentationlayer_settings(
         rec['bounds']['projection'] = pl.presentationgrid.bbox_orignal_srid
 
         if pl.presentationgrid.bbox_orignal_srid == 28992:
-            rec['bounds']['south'], rec['bounds']['west'], rec['bounds']['north'], rec['bounds']['east']  = pl.presentationgrid.extent.extent;
+            rec['bounds']['south'], rec['bounds']['west'], rec['bounds']['north'], rec['bounds']['east']  = pl.presentationgrid.extent.extent
+            rec['bounds']['projection'] = 28992
         else:
-            rec['bounds']['west'], rec['bounds']['south'], rec['bounds']['east'], rec['bounds']['north'] = pl.presentationgrid.extent.extent;
-
+            rec['bounds']['west'], rec['bounds']['south'], rec['bounds']['east'], rec['bounds']['north'] = pl.presentationgrid.extent.extent
+            rec['bounds']['projection'] = 4326
+            
         rec['height'] = pl.presentationgrid.rownr
         rec['width'] = pl.presentationgrid.colnr
         rec['gridsize'] = pl.presentationgrid.gridsize
@@ -134,10 +136,8 @@ def service_get_presentationlayer_settings(
         #WMS service, start caching results for later requests
         service_get_wms_of_shape(request,  2,  2, (-1,-1,0,0,), pl_id, default_legend.id,  0 )
 
-
         anim['lastnr'] = pl.animation.lastnr
         pass
-
 
     log.debug( 'json dump van info' )
     log.debug( simplejson.dumps(info) )

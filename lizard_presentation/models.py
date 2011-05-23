@@ -285,6 +285,7 @@ class PresentationGrid(models.Model):
     png_indexed_palette = models.ForeignKey(PresentationSource, related_name = 'png_indexed_palette', null = True, blank = True)
     png_default_legend = models.ForeignKey(PresentationSource, related_name = 'png_default_legend',null = True, blank = True)
     location_netcdf_file = models.ForeignKey(PresentationSource, related_name = 'location_netcdf_file',null = True, blank = True)
+    objects = models.GeoManager()
     
     class Meta:        
         db_table = 'presentation_presentationgrid'
