@@ -403,7 +403,7 @@ def service_get_cutofflocations(
     resp = []
     for obj in cl_list:
         loc = obj.geom #.transform(900913,True)
-        resp.append({'id':obj.id, 'name': obj.name,'type':obj.type, 'tdef': obj.deftclose, 'x': loc.x, 'y': loc.y })
+        resp.append({'id':obj.id, 'name': obj.name,'type':obj.type, 'action': 1, 'tdef': obj.deftclose, 'x': loc.x, 'y': loc.y })
     return HttpResponse(simplejson.dumps(resp), mimetype='application/json')
 
 @never_cache
@@ -458,7 +458,6 @@ def service_get_result_settings(
     pgwfile.close()
 
     gridsize, a, b, c, west, north = [float(s) for s in pgwfields]
-
 
     picture = Image.open( png_name )
     width, height = picture.size

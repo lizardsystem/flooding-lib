@@ -121,7 +121,7 @@ def service_save_new_scenario(request):
                                 tstart = datetime.datetime.now())
 
     useManualInput = query.get("useManualInput", False)
-    if useManualInput == 'false':
+    if useManualInput == 'false' or useManualInput == False:
         useManualInput = False
     else:
         useManualInput = True
@@ -202,8 +202,9 @@ def service_save_new_scenario(request):
     if len(loccutoffs[0]) > 0:
         for cutoffloc in loccutoffs:
             cutoffloc_id = cutoffloc.split('|')[0]
-            cutoffloc_tclose = cutoffloc.split('|')[1]
-            ScenarioCutoffLocation.objects.create(cutofflocation = CutoffLocation.objects.get(pk = cutoffloc_id), scenario = scenario, tclose = to_intervalfloat(cutoffloc_tclose))
+            cutoffloc_action = int(cutoffloc.split('|')[1])
+            cutoffloc_tclose = cutoffloc.split('|')[2]
+            ScenarioCutoffLocation.objects.create(cutofflocation = CutoffLocation.objects.get(pk=cutoffloc_id), scenario=scenario, action=cutoffloc_action, tclose=to_intervalfloat(cutoffloc_tclose))
     
     measures = query.get("measures").split(';')
     strategy_id = query.get("strategyId")

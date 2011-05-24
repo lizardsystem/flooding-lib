@@ -943,8 +943,8 @@ class ScenarioCutoffLocation(models.Model):
     """
     scenario = models.ForeignKey(Scenario)
     cutofflocation = models.ForeignKey(CutoffLocation)
-
-    tclose = models.FloatField() #interval timedelta
+    action = models.IntegerField(null=True, blank=True, default=1) #1 = dicht, 2 = open
+    tclose = models.FloatField() #interval timedelta // tclose can ook topen zijn, afhankelijk van action
 
     class Meta:
         unique_together = (("scenario", "cutofflocation"),)

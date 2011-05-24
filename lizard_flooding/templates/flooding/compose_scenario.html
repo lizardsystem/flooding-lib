@@ -526,9 +526,10 @@
 				formScenarioSettings.getField('tdeltaphase_ms').setValue(intervalReader(formScenarioSettings.getValue('tdeltaphase')).getTime());
 				formScenarioSettings.getField('tmaxdepth_ms').setValue(intervalReader(formScenarioSettings.getValue('tmaxdepth')).getTime());
                 
+                {% if sea %}
                 var waterlevels_with_return = formScenarioSettings.getValue('waterlevelInput')
-                
                 formScenarioSettings.getField('waterlevelInput').setValue(formScenarioSettings.getValue('waterlevelInput').replace(/\r\n/g,'|').replace(/\n/g,'|'));
+                {% endif %}
                 
                 formScenarioSettings.saveData(function(dsResponse, data, dsRequest) {
                 	if (dsResponse.httpResponseCode == 200) {
@@ -710,7 +711,7 @@
         var loccutoffs = "";
         var endRow = listLoccutoffs.data.getLength();
         for (var i = 0; i < endRow ; i++ ){
-            loccutoffs += listLoccutoffs.data[i].id + "|" + intervalReader(listLoccutoffs.data[i].tclose).getTime() ;
+            loccutoffs += listLoccutoffs.data[i].id + "|" + listLoccutoffs.data[i].action + "|" + intervalReader(listLoccutoffs.data[i].tclose).getTime() ;
             if (i != endRow -1) {
                 loccutoffs += ",";
             }
