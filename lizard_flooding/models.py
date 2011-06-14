@@ -812,7 +812,7 @@ class Scenario(models.Model):
 
     def get_rel_destdir(self):
         leading_breach = self.breaches.all()[0]
-        return os.path.join(leading_breach.region.path, self.id)
+        return os.path.join(leading_breach.region.path, str(self.id))
 
     def get_status(self):
         """Get status of scenario by looking at tasks
