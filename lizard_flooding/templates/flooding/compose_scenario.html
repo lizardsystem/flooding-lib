@@ -109,7 +109,7 @@
                 "10": "laag",
                 "20": "gemiddeld",
                 "30": "hoog",
-                "40": "zeer hoog"
+                "40": "zeer hoog (calamiteit)"
             },
             defaultValue: "20",
             endRow: true
@@ -275,14 +275,14 @@
         {
             ID: "frmbottomlevelbreach",
             name: "bottomlevelbreach",
-            title: "diepte van de doorbraak",
+            title: "niveau van de doorbraak",
             editorType: "spinner",
             required: true,
             hint: "m NAP",
             change: function(form, item, value){
                 if (value < frmpitdepth.getValue()) {
                 	if (!donebottombreachalert) { 
-                		alert("'niveau wiel' moet lager zijn dan 'diepte van de doorbraak'.");
+                		alert("'niveau wiel' moet lager zijn dan 'niveau van de doorbraak'.");
                 		donebottombreachalert = true;
                 	}
                 	if ( value > frmpitdepth.min && value < frmpitdepth.max) {
@@ -309,7 +309,7 @@
             change: function(form, item, value){
                 if (value > frmbottomlevelbreach.getValue()) {
                 	if (!donepitalert) { 
-                		alert("'niveau wiel' moet lager zijn dan 'diepte van de doorbraak'.");
+                		alert("'niveau wiel' moet lager zijn dan 'niveau van de doorbraak'.");
                 		donepitalert = true;
                 	}
                 	if ( value > frmbottomlevelbreach.min && value < frmbottomlevelbreach.max) {

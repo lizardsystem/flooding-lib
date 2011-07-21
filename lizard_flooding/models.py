@@ -811,7 +811,7 @@ class Scenario(models.Model):
         return datetime.datetime(self.tsim)
 
     def get_rel_destdir(self):
-        leading_breach = self.breaches.all()[0]
+        leading_breach = self.breaches.all()[0]        
         return os.path.join(leading_breach.region.path, str(self.id))
 
     def get_status(self):

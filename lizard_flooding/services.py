@@ -1309,7 +1309,10 @@ def service(request):
             tsim=  float(query.get('tsim',0))/mid
             tstartbreach=  float(query.get('tstartbreach',0))/mid
             tdeltaphase=  float(query.get('tdeltaphase',0))/mid
-            tide_id= int(query.get('tide_id',0))
+            try:
+                tide_id= int(query.get('tide_id',0))
+            except:
+                tide_id= None
             try:
                 extwbaselevel= float(query.get('extwbaselevel',-999))
             except:
