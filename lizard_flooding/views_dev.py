@@ -38,7 +38,7 @@ def get_externalwater_graph_infowindow(request, width, height, scenario_breach_i
         scenario_breach_tide_id = scenario_breach.tide.id
  
     if scenario_breach.manualwaterlevelinput:
-        waterlevels = scenario_breach.waterlevelset.waterlevel_set.all()
+        waterlevels = scenario_breach.waterlevelset.waterlevel_set.all().order_by('time')
         time_values = []        
         for wl in waterlevels:
             time_values += [','.join([str(wl.time), str(wl.value)])]
