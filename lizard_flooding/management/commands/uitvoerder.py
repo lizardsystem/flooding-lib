@@ -31,18 +31,18 @@ if sys.version_info < (2, 4):
     print "I think I need version python2.4 and I was called from %d.%d" % sys.version_info[:2]
 
 import logging, threading, time, datetime, random, math
+from tasks import threaded_program 
+from SimpleXMLRPCServer import SimpleXMLRPCServer
+import socket
 
-sys.path.append('..')
-
-from django.core.management import setup_environ
-import lizard.settings
-setup_environ(lizard.settings)
-
-
+from django.core.management.base import BaseCommand
 from django.db import connection as django_connection
 import  django.db.transaction
-import lizard.flooding.models
-log = logging.getLogger('nens.lizard.kadebreuk.uitvoerder') 
+
+import lizard_flooding.models
+from perform_task import perform_task
+
+log = logging.getLogger('nens.lizard.flooding.uitvoerder') 
 
 TASK_ADMIN_CREATES_SCENARIO_050   =  50
 TASK_COMPUTE_SOBEK_MODEL_120      = 120
@@ -80,13 +80,12 @@ def geometric(p):
    G = int(math.floor(math.log(U, 1.0 - p)))
    return G
 
-import threaded_program
-
 class uitvoerder(threaded_program.threaded_program):
 
     def __init__(self, connection, capabilities, ip, port=8000, hostname=None, seq=None,
                  scenario_range=[0, -1],
                  hisssm_location='c:/Program Files/HIS-SSMv2.4/', hisssm_year=2008,
+                 tmp_location='c:/temp/', max_hours=72
                  ):
 
         threaded_program.threaded_program.__init__(self)
@@ -100,6 +99,8 @@ class uitvoerder(threaded_program.threaded_program):
         self.living = True
         self.hisssm_year = hisssm_year
         self.hisssm_location = hisssm_location
+        self.max_hours = max_hours
+        self.tmp_location = tmp_location
 
     def thread_loop(self):
         "main loop...  never ending"
@@ -116,102 +117,23 @@ class uitvoerder(threaded_program.threaded_program):
             else: 
                 self.last_id, self.task, self.scenario = choice
 
-                try:
-                    log.info("task %s-%s(%s): starting" % (self.scenario, self.task, self.last_id))
-                    success_code = False
-                    if self.task == TASK_COMPUTE_SOBEK_MODEL_120:
-                        log.debug("execute TASK_COMPUTE_SOBEK_MODEL_120")
-                        import openbreach
-                        remarks = 'openbreach-' + openbreach.__revision__
-                        success_code = openbreach.compute_sobek_model(
-                            self.scenario, 'c:/temp/%02d/'%self.sequential)
-                        pass
-                    elif self.task == TASK_PERFORM_SOBEK_SIMULATION_130:
-                        log.debug("execute TASK_PERFORM_SOBEK_SIMULATION_130")
-                        import spawn
-                        remarks = 'spawn-' + spawn.__revision__
-                        result = spawn.perform_sobek_simulation(
-                            self.connection, self.scenario, self.last_id, 3600, 'lzfl_%03d'%self.sequential)
-                        log.debug("spawing returned %s" % (result,))
-                        success_code = (result[0] == 0)
-                        pass
-                    elif self.task == TASK_SOBEK_PNG_GENERATION_150:
-                        log.debug("execute TASK_SOBEK_PNG_GENERATION_150")
-                        import png_generation
-                        remarks = 'png_generation-' + png_generation.__revision__
-                        success_code = png_generation.sobek(self.connection, self.scenario, 'c:/temp/%02d/'%self.sequential)
-                        pass
-                    elif self.task == TASK_COMPUTE_RISE_SPEED_132:
-                        log.debug("execute TASK_COMPUTE_RISE_SPEED_132")
-                        import calculaterisespeed_132
-                        remarks = 'calculaterisespeed_132-' + calculaterisespeed_132.__revision__
-                        success_code = calculaterisespeed_132.perform_calculation(
-                            self.connection, 'c:/temp/%02d/'%self.sequential, self.scenario, self.hisssm_year)
-                        pass
-                    elif self.task == TASK_COMPUTE_MORTALITY_GRID_134:
-                        log.debug("execute TASK_COMPUTE_MORTALITY_GRID_134")
-                        import calculatemortalitygrid_134
-                        remarks = 'calculatemortalitygrid_134-' + calculatemortalitygrid_134.__revision__
-                        success_code = calculatemortalitygrid_134.perform_calculation(
-                            self.connection, 'c:/temp/%02d/'%self.sequential, self.scenario, self.hisssm_year)
-                        pass
-                    elif self.task == TASK_SOBEK_PRESENTATION_GENERATION_155:
-                        log.debug("execute TASK_SOBEK_PRESENTATION_GENERATION_155")
-                        import presentationlayer_generation
-                        remarks = 'presentationlayer_generation-' + presentationlayer_generation.__revision__
-                        success_code = presentationlayer_generation.perform_presentation_generation(lizard.settings, self.scenario)
-                        pass
-                    elif self.task == TASK_HISSSM_SIMULATION_160:
-                        log.debug("execute TASK_HISSSM_SIMULATION_160")
-                        import hisssm_160
-                        remarks = 'hisssm_160-' + hisssm_160.__revision__
-                        success_code = hisssm_160.perform_HISSSM_calculation(
-                            self.connection, self.hisssm_location, self.scenario, self.hisssm_year)
-                        pass
-                    elif self.task == TASK_SOBEK_EMBANKMENT_DAMAGE_162:
-                        log.debug("execute TASK_SOBEK_EMBANKMENT_DAMAGE_162")
-                        import kadeschade_module
-                        remarks = 'kadeschade_module-' + kadeschade_module.__revision__
-                        success_code, extra_remarks = kadeschade_module.calc_damage(self.scenario)
-                        remarks = extra_remarks + remarks
-                        pass
-                    elif self.task == TASK_HISSSM_PNG_GENERATION_180:
-                        log.debug("execute TASK_HISSSM_PNG_GENERATION_180")
-                        import png_generation
-                        remarks = 'png_generation-' + png_generation.__revision__
-                        success_code = png_generation.his_ssm(self.connection, self.scenario, 'c:/temp/%02d/'%self.sequential)
-                        pass
-                    elif self.task == TASK_HISSSM_PRESENTATION_GENERATION_185:
-                        log.debug("execute TASK_HISSSM_PRESENTATION_GENERATION_185")
-                        import presentationlayer_generation
-                        remarks = 'presentationlayer_generation-' + presentationlayer_generation.__revision__
-                        success_code = presentationlayer_generation.perform_presentation_generation(lizard.settings, self.scenario)
-                        pass
-                    else:
-                        log.warning("selected a '%d' task but don't know what it is" % self.task)
-                        remarks = remarks + '\nunknown task'
-                        pass
+                log.info("task %s-%s(%s): starting" % (self.scenario, self.task, self.last_id))
+                
+                success_code, remarks, error_messages = perform_task(self.scenario,
+                                                                     self.task,
+                                                                     self.sequential,
+                                                                     self.max_hours,
+                                                                     self.hisssm_year,
+                                                                     self.hisssm_location,
+                                                                     self.tmp_directory)
 
-                    time.sleep(10)
-                    log.info("task %s-%s(%s): successful=%s" % (self.scenario, self.task, self.last_id, success_code))
-                    self.close_task(successful=success_code, remarks=remarks)
-                    django.db.transaction.commit_unless_managed()
-                    scen = lizard.flooding.models.Scenario.objects.get(pk = self.scenario)
-                    scen.update_status()
-#                except psycopg2.DatabaseError, e:
-#                    log.warning("a database error occurred: '%s'" % str(e))
-#                    self.connection.rollback()
-                except Exception, e:
-                    from sys import exc_info
-                    from traceback import format_tb
-                    (this_exctype, this_value, this_traceback) = exc_info()
+                time.sleep(10)
+                log.info("task %s-%s(%s): successful=%s" % (self.scenario, self.task, self.last_id, success_code))
+                self.close_task(successful=success_code, remarks=remarks+error_messages)
+                django.db.transaction.commit_unless_managed()
+                scen = lizard.flooding.models.Scenario.objects.get(pk = self.scenario)
+                scen.update_status()
 
-                    log.warning(''.join(['traceback: \n'] + format_tb(this_traceback)))
-                                
-                    log.error("while executing task %s(%s): '%s(%s)'" % 
-                              (self.task, self.last_id, type(e), str(e)))
-                    self.close_task(successful=False, remarks=remarks + '\n' + str(e))
-                    django.db.transaction.commit_unless_managed()
                 self.task = 0
 
     def close_task(self, successful, remarks=None):
@@ -357,7 +279,6 @@ class uitvoerder(threaded_program.threaded_program):
     def thread_serve(self):
         "start the xmlrpc server - returns when server is stopped"
 
-        from SimpleXMLRPCServer import SimpleXMLRPCServer
         server = SimpleXMLRPCServer((self.ip, self.port))
         server.allow_reuse_address = True
         server.allow_none = True
@@ -383,37 +304,37 @@ class uitvoerder(threaded_program.threaded_program):
 
         server.serve_forever()
 
-def main(options, args):
+def main(args, options):
 
     
-    [handler.setLevel(options.loglevel) for handler in logging.getLogger().handlers]
+    [handler.setLevel(options['loglevel']) for handler in logging.getLogger().handlers]
 
     #get cursor at begin of function (otherwise there is nothing committed to the database)
     curs = django_connection.cursor()
     
-    log.debug("looking in DB for uitvoerder %(hostname)s" % options.__dict__)
+    log.debug("looking in DB for uitvoerder %(hostname)s" % options)
     try:
-        if options.sequential:
+        if options['sequential']:
             curs.execute("SELECT id, seq FROM flooding_taskexecutor WHERE name=%(hostname)s AND seq=%(sequential)s", 
-                         options.__dict__)
+                         options)
         else:
             curs.execute("SELECT id, seq FROM flooding_taskexecutor WHERE name=%(hostname)s", 
-                         options.__dict__)
-        options.uit_id, options.sequential = curs.fetchone()
+                         options)
+        options['uit_id'], options['sequential'] = curs.fetchone()
     except TypeError, e:
-        raise ValueError("database contains no taskexecutor where name[/seq]=(name=%(hostname)s AND seq=%(sequential)s)" % options.__dict__)
+        raise ValueError("database contains no taskexecutor where name[/seq]=(name=%(hostname)s AND seq=%(sequential)s)" % options)
     if curs.fetchone():
-        raise ValueError("database contains multiple uitvoerders matching name/seq=%(hostname)s/seq=%(sequential)s" % options.__dict__)
+        raise ValueError("database contains multiple uitvoerders matching name/seq=%(hostname)s/seq=%(sequential)s" % options)
 
-    if options.capabilities:
+    if options['capabilities']:
         log.debug("capabilities were specified: update the database")
         curs.execute("DELETE FROM flooding_taskexecutor_tasktypes WHERE taskexecutor_id=%(uit_id)s", 
-                     options.__dict__)
+                     options)
         curs.executemany("""\
 INSERT INTO flooding_taskexecutor_tasktypes
 (taskexecutor_id, tasktype_id) VALUES (%(uit_id)s, %(tt)s)""", 
-                         [{'uit_id': options.uit_id, 'tt': tt} 
-                          for tt in options.capabilities])
+                         [{'uit_id': options['uit_id'], 'tt': tt} 
+                          for tt in options['capabilities']])
         django.db.transaction.commit_unless_managed()
     else:
         log.debug("capabilities were not specified: retrieve from database")
@@ -421,86 +342,94 @@ INSERT INTO flooding_taskexecutor_tasktypes
 SELECT tasktype_id 
 FROM flooding_taskexecutor_tasktypes
 WHERE taskexecutor_id=%(uit_id)s""", 
-                     options.__dict__)
-        options.capabilities = [i[0] for i in curs.fetchall()]
+                     options)
+        options['capabilities'] = [i[0] for i in curs.fetchall()]
         pass
 
-    if options.x_port:
+    if options['x_port']:
         log.debug("x-port was specified: update the database")
         curs.execute("UPDATE flooding_taskexecutor SET port=%(x_port)s WHERE id=%(uit_id)s", 
-                      options.__dict__)
+                      options)
         django.db.transaction.commit_unless_managed()
         pass
     else:
         log.debug("x-port was not specified: retrieve from database")
         curs.execute("SELECT port FROM flooding_taskexecutor WHERE id=%(uit_id)s", 
-                      options.__dict__)
-        options.x_port = curs.fetchone()[0]
+                      options)
+        options['x_port'] = curs.fetchone()[0]
         pass
 
-    import socket
-    options.x_ip = socket.gethostbyname(socket.gethostname())
-    options.revision = __revision__
+    options['x_ip'] = socket.gethostbyname(socket.gethostname())
+    options['revision'] = __revision__
     log.debug("""UPDATE flooding_taskexecutor
                  SET ipaddress=%(x_ip)s, 
                      active=TRUE, 
                      revision=%(revision)s 
-                 WHERE id=%(uit_id)s""" % options.__dict__)
+                 WHERE id=%(uit_id)s""" % options)
     curs.execute("""UPDATE flooding_taskexecutor
                     SET ipaddress=%(x_ip)s, 
                         active=TRUE, 
                         revision=%(revision)s 
                     WHERE id=%(uit_id)s""", 
-                 options.__dict__)
+                 options)
     django.db.transaction.commit_unless_managed()
 
-    if options.capabilities == []:
+    if options['capabilities'] == []:
         raise ValueError("uitvoerder is not able of doing anything - not starting")
 
-    log.info("starting uitvoerder %(uit_id)s:%(hostname)s[%(sequential)s] on tasktypes %(capabilities)s - available at http://%(x_ip)s:%(x_port)s" % options.__dict__)
+    log.info("starting uitvoerder %(uit_id)s:%(hostname)s[%(sequential)s] on tasktypes %(capabilities)s - available at http://%(x_ip)s:%(x_port)s" % options)
 
     log.debug("options = %s" % options)
     u = uitvoerder(connection=django_connection,
-                   capabilities=options.capabilities, 
-                   ip=options.x_ip, 
-                   port=options.x_port, 
-                   hostname=options.hostname,
-                   seq=options.sequential,
-                   scenario_range = options.scenario_range,
-                   hisssm_location = options.hisssm_location,
-                   hisssm_year = options.hisssm_year,
+                   capabilities=options['capabilities'], 
+                   ip=options['x_ip'], 
+                   port=options['x_port'], 
+                   hostname=options['hostname'],
+                   seq=options['sequential'],
+                   scenario_range = options['scenario_range'],
+                   hisssm_location = options['hisssm_location'],
+                   hisssm_year = options['hisssm_year'],
+                   tmp_location = options['tmp_location'],
+                   max_hours = options['max_hours']
                    )
     u.start()
 
+from optparse import make_option
 
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s',) 
-    from optparse import OptionParser
-    parser = OptionParser("""\
+
+class Command(BaseCommand):
+    help = ("""\
 uitvoerder.py [options]
 
 for example:
 ./uitvoerder.py --capabilities 120 --capabilities 130 --scenario-range 50 58 --sequential 1
 """)
 
-    parser.add_option('--info', help='be sanely informative - the default', action='store_const', dest='loglevel', const=logging.INFO, default=logging.INFO)
-    parser.add_option('--debug', help='be verbose', action='store_const', dest='loglevel', const=logging.DEBUG)
-    parser.add_option('--quiet', help='log warnings and errors', action='store_const', dest='loglevel', const=logging.WARNING)
-    parser.add_option('--extreme-debugging', help='be extremely verbose', action='store_const', dest='loglevel', const=0)
-    parser.add_option('--silent', help='log only errors', action='store_const', dest='loglevel', const=logging.ERROR)
+    option_list = BaseCommand.option_list + (
+    make_option('--info', help='be sanely informative - the default', action='store_const', dest='loglevel', const=logging.INFO, default=logging.INFO),
+    make_option('--debug', help='be verbose', action='store_const', dest='loglevel', const=logging.DEBUG),
+    make_option('--quiet', help='log warnings and errors', action='store_const', dest='loglevel', const=logging.WARNING),
+    make_option('--extreme-debugging', help='be extremely verbose', action='store_const', dest='loglevel', const=0),
+    make_option('--silent', help='log only errors', action='store_const', dest='loglevel', const=logging.ERROR),
 
-    parser.add_option('--hisssm-location', default='C:/Program Files/HIS-SSMv2.4/', help='the root of the his-ssm installation')
-    parser.add_option('--hisssm-year', default=2008, help='the year of hisssm simulation data', type='int')
-    parser.add_option('--x-port', help='the xmlrpc server port (if not given, taken from db)', default=None, type='int')
-    parser.add_option('--capabilities', help='tasks that uitvoerder can perform', default=[], action='append', type='int')
+    make_option('--hisssm-location', default='C:/Program Files/HIS-SSMv2.4/', help='the root of the his-ssm installation'),
+    make_option('--hisssm-year', default=2008, help='the year of hisssm simulation data', type='int'),
+    make_option('--x-port', help='the xmlrpc server port (if not given, taken from db)', default=None, type='int'),
+    make_option('--capabilities', help='tasks that uitvoerder can perform', default=[], action='append', type='int'),
 
-    parser.add_option('--scenario-range', help='DEBUG: limit action on these scenarios', nargs=2, type='int', default=[0, -1])
-    parser.add_option('--sequential', help='use this if you need more than one uitvoerder on this workstation', type='int', default=None)
+    make_option('--scenario-range', help='DEBUG: limit action on these scenarios', nargs=2, type='int', default=[0, -1]),
+    make_option('--sequential', help='use this if you need more than one uitvoerder on this workstation', type='int', default=None),
 
-    (options, args) = parser.parse_args()
-    import socket
-    options.hostname = socket.gethostname().lower()
-    if len(options.capabilities) == 0:
-        parser.print_help()
-    else:
-        main(options, args)
+    make_option('--tmp_location', default='C:/temp/', help='the root of the temporary files for task execution'),
+    make_option('--max_hours', help='maximum hours for a single task ', default=72, type='int'))
+
+
+    def handle(self, *args, **options):
+        print options
+        options['hostname'] = socket.gethostname().lower()
+        if len(options['capabilities']) == 0:
+            self.stdout.write(self.help)
+        else:
+            main(args, options)            
+
+
