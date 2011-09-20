@@ -44,21 +44,14 @@ import sys
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-if __name__ == '__main__':
-    sys.path.append('..')
-    
-    import lizard.settings
-    from django.core.management import setup_environ
-    setup_environ(lizard.settings)  
-
-
 import logging, math, os, datetime
 from nens import sobek, asc
-import lizard.flooding.models, lizard.base.models
-from lizard import flooding, base
+
+import lizard_flooding as flooding
+import lizard_base as base
 from osgeo import osr, ogr, gdal
 
-
+#TO DO:
 sobek.log.setLevel(logging.INFO)
 asc.log.setLevel(logging.INFO)
 
@@ -300,7 +293,7 @@ class Scenario:
             to_close.writeToStream(output_file)
         output_file.close()
         
-        result, new = self.scenario.result_set.get_or_create(resulttype=lizard.flooding.models.ResultType.objects.get(pk=26))
+        result, new = self.scenario.result_set.get_or_create(resulttype=flooding.models.ResultType.objects.get(pk=26))
         result.resultloc = os.path.join(self.scenario.get_rel_destdir(),"model.zip")
         result.save()
         
@@ -816,15 +809,18 @@ class Scenario:
 
         log.debug("now we have the grid")
 
-
-
         if elev_grid[self.breach.internalnode.coords] is False:
             raise ValueError("the 'intern' point is really outside of the grid")
         
         if elev_grid[self.breach.internalnode.coords] is None:
-            raise ValueError("the 'intern' point is on an invalid pixel of the grid")
+            print 'ooo'
+            #raise ValueError("the 'intern' point is on an invalid pixel of the grid")
+
+        log.info(str(elev_grid[self.breach.externalnode.coords]))
+        print type(str(elev_grid[self.breach.externalnode.coords]))
 
         if elev_grid[self.breach.externalnode.coords] not in (False, None):
+
             if self.breach.externalwater.type == DB_CANAL or self.breach.externalwater.type == DB_INNER_CANAL:
                 log.debug("external point at valid grid pixel.  this is acceptable for DB_CANAL and DB_INNER_CANAL")
             else:

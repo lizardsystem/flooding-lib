@@ -44,6 +44,14 @@ Add to the system environment variables:
 - GDAL_DATA (to the right folder)
 - PATH (Gdal\bin)
 
+install matplotlib
+
+
+
 Comment or uncomment the EXTERNAL_MOUNTED_DIR in settings.py:
 Uncommented-> this folder is used for the external files
 Commented-> the settings in the admin interface (like 'presentation_dir') are used.   
+
+Settings:
+# Use the different settings in localsettings.py if you need them.
+
