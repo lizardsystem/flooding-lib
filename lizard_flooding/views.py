@@ -119,7 +119,6 @@ def scenario_addedit(request, object_id=None):
             scenario = form.save(commit=False)
             scenario.owner = user
             scenario.save()
-            print "----------------scenario added--------------------"
             next = reverse('flooding_scenarios_url')
             return HttpResponseRedirect(next)
 

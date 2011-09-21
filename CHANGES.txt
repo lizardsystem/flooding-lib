@@ -5,7 +5,9 @@ Changelog of lizard-flooding
 1.14 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Added 'lizard_flooding_task' app.
+- Moved tasks dir to 'lizard_flooding_app'.
+- Moved 'perform_task' management command to 'lizard_flooding_worker'.
 
 
 1.13 (2011-05-25)
