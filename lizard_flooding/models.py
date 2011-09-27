@@ -51,7 +51,7 @@ class Attachment(models.Model):
         verbose_name = _('Attachment')
         verbose_name_plural = _('Attachments')
         db_table = 'flooding_attachment'
-          
+
     def __unicode__(self):
         return self.name
 
@@ -84,7 +84,7 @@ class SobekModel(models.Model):
     - is related to 0 or more scenario's*
 
     """
-        
+
     SOBEKMODELTYPE_CHOICES = (
         (1, _('canal')),
         (2, _('inundation')),
@@ -106,11 +106,11 @@ class SobekModel(models.Model):
     model_vardescription = models.CharField(max_length=200, null=True, blank=True)
     remarks = models.TextField(null=True)
     attachments = generic.GenericRelation(Attachment)
-    
+
     embankment_damage_shape = models.CharField(max_length=200, null=True, blank=True)
-    
+
     code = models.CharField(max_length=15, null=True, blank=True)
-    
+
     def __unicode__(self):
         try:
             if self.sobekmodeltype == self.SOBEKMODELTYPE_CANAL:
@@ -119,7 +119,7 @@ class SobekModel(models.Model):
                                                     str(self.model_case),
                                                     self.model_version)
 
-            else: 
+            else:
                 return 'inund. model, code: %s, project %s, case  %s, version: %s'%(self.code,
                                                     self.project_fileloc,
                                                     str(self.model_case),
@@ -132,7 +132,7 @@ class SobekModel(models.Model):
         verbose_name = _('Sobek model')
         verbose_name_plural = _('Sobek models')
         db_table = 'flooding_sobekmodel'
-        
+
     def __unicode__(self):
         return 'type: %s case: %d version: %s'%(self.TYPE_DICT[self.sobekmodeltype],
                                                 self.model_case,
@@ -187,7 +187,7 @@ class CutoffLocation(models.Model):
         verbose_name = _('Cutoff location')
         verbose_name_plural = _('Cutoff locations')
         db_table = 'flooding_cutofflocation'
-        
+
     def __unicode__(self):
         return self.name
 
@@ -272,7 +272,7 @@ class Dike(models.Model):
         verbose_name = _('Dike')
         verbose_name_plural = _('Dikes')
         db_table = 'flooding_dike'
-        
+
     def __unicode__(self):
         return self.name
 
@@ -300,7 +300,7 @@ class WaterlevelSet(models.Model):
         verbose_name = _('Waterlevel set')
         verbose_name_plural = _('Waterlevel sets')
         db_table = 'flooding_waterlevelset'
-        
+
     def __unicode__(self):
         return self.name
 
@@ -320,7 +320,7 @@ class Waterlevel(models.Model):
         verbose_name = _('Waterlevel')
         verbose_name_plural = _('Waterlevels')
         db_table = 'flooding_waterlevel'
-        
+
     def __unicode__(self):
         return u'%s: %s, %f'%(self.waterlevelset.__unicode__(),
                               str(datetime.timedelta(self.time)), self.value)
@@ -340,7 +340,7 @@ class Map(models.Model):
 
     class Meta:
         db_table = 'flooding_map'
-    
+
     def __unicode__(self):
         return self.name
 
@@ -375,7 +375,7 @@ class Region(models.Model):
         verbose_name = _('Region')
         verbose_name_plural = _('Regions')
         db_table = 'flooding_region'
-        
+
     def __unicode__(self):
         if self.longname:
             return self.longname
@@ -401,7 +401,7 @@ class RegionSet(AL_Node):
         verbose_name = _('Region set')
         verbose_name_plural = _('Region sets')
         db_table = 'flooding_regionset'
-        
+
     def get_all_regions(self, filter_active=True):
         """get all regions from all descendants.
 
@@ -527,7 +527,7 @@ class CutoffLocationSet(models.Model):
         verbose_name = _('Cutoff location set')
         verbose_name_plural = _('Cutoff location sets')
         db_table = 'flooding_cutofflocationset'
-        
+
     def __unicode__(self):
         return self.name
 
@@ -657,7 +657,7 @@ class ProjectGroupPermission(models.Model):
         verbose_name = _('Project group permission')
         verbose_name_plural = _('Project group permissions')
         db_table = 'flooding_projectgrouppermission'
-        
+
     def __unicode__(self):
         return u'%s - %s (%s)'%(self.group.__unicode__(),
                                 self.project.__unicode__(),
@@ -673,7 +673,7 @@ class PermissionProjectShapeDataLegend(models.Model):
         verbose_name = _('Permission project shapedatalegend')
         verbose_name_plural = _('Permissions project shapedatalegend')
         db_table = 'flooding_permissionprojectshapedatalegend'
-        
+
     def __unicode__(self):
         return u'view %s - %s'%(self.project.__unicode__(), self.shapedatalegend.__unicode__())
 
@@ -687,7 +687,7 @@ class PermissionProjectGridDataLegend(models.Model):
         verbose_name = _('Permission project griddatalegend')
         verbose_name_plural = _('Permissions project griddatalegend')
         db_table = 'flooding_permissinoprojectgriddatalegend'
-        
+
     def __unicode__(self):
         return u'view %s - %s'%(self.project.__unicode__(), self.griddatalegend.__unicode__())
 
@@ -716,7 +716,7 @@ class ExtraInfoField(models.Model):
 
     class Meta:
         db_table = 'flooding_extrainfofield'
-        
+
     def __unicode__(self):
         return self.name
 
@@ -798,6 +798,10 @@ class Scenario(models.Model):
 
     code = models.CharField(max_length=15, null=True)
 
+    workflow_template = models.ForeignKey(
+        'lizard_flooding_worker.WorkflowTemplate',
+        db_column='workflow_template')
+
     class Meta:
         ordering = ('name', 'project', 'owner', )
         verbose_name = _('Scenario')
@@ -811,7 +815,7 @@ class Scenario(models.Model):
         return datetime.datetime(self.tsim)
 
     def get_rel_destdir(self):
-        leading_breach = self.breaches.all()[0]        
+        leading_breach = self.breaches.all()[0]
         return os.path.join(leading_breach.region.path, str(self.id))
 
     def get_status(self):
@@ -904,7 +908,7 @@ class ScenarioBreach(models.Model):
         verbose_name = _('Scenario breach')
         verbose_name_plural = _('Scenario breaches')
         db_table = 'flooding_scenariobreach'
-        
+
     def __unicode__(self):
         return u'%s: %s (%s)'%(self.scenario.__unicode__(), self.breach.__unicode__(),
                                self.waterlevelset.__unicode__())
@@ -951,7 +955,7 @@ class ScenarioCutoffLocation(models.Model):
         verbose_name = _('Scenario cutoff location')
         verbose_name_plural = _('Scenario cutoff locations')
         db_table = 'flooding_scenariocutofflocation'
-        
+
     def __unicode__(self):
         return u'%s: %s'%(self.scenario.__unicode__(),
                           self.cutofflocation.__unicode__())
@@ -974,7 +978,7 @@ class Program(models.Model):
         verbose_name = _('Program')
         verbose_name_plural = _('Programs')
         db_table = 'flooding_program'
-        
+
     def __unicode__(self):
         return self.name
 
@@ -1050,7 +1054,7 @@ class CutoffLocationSobekModelSetting(models.Model):
         verbose_name = _('Cutoff location sobek model setting')
         verbose_name_plural = _('Cutoff location sobek model settings')
         db_table = 'flooding_cutofflocationsobekmodelsetting'
-        
+
     def __unicode__(self):
         return u'%s - %s: %s'%(self.sobekmodel.__unicode__(),
                                self.cutofflocation.__unicode__(),
@@ -1072,7 +1076,7 @@ class TaskType(models.Model):
     TYPE_SCENARIO_DELETE = 200
 
     name = models.CharField(max_length=200)
-    
+
     class Meta:
         verbose_name = _('Task type')
         verbose_name_plural = _('Task types')
@@ -1164,7 +1168,7 @@ class Scenario_PresentationLayer(models.Model):
     scenario = models.ForeignKey(Scenario)
     presentationlayer = models.ForeignKey(PresentationLayer)
 
-    class Meta:    
+    class Meta:
         db_table = 'flooding_scenario_presentationlayer'
 
 
@@ -1174,29 +1178,29 @@ class ResultType_PresentationType(models.Model):
     presentationtype = models.ForeignKey(PresentationType)
     remarks = models.CharField(max_length=100)
 
-    class Meta:    
+    class Meta:
         db_table = 'flooding_resulttype_presentationtype'
 
     def __unicode__(self):
         return self.remarks
 
-    
+
 class Strategy(models.Model):
     """
-    Defines measures that can be taken to reach a certain goal.    
+    Defines measures that can be taken to reach a certain goal.
     """
-    
+
     name = models.CharField(max_length=100)
     region = models.ForeignKey(Region, blank=True, null=True)
     visible_for_loading =  models.BooleanField(default=False)
     user = models.ForeignKey(User, blank=True, null=True)
     save_date = models.DateTimeField(blank=True, null=True)
-    
+
     class Meta:
-        db_table = 'flooding_strategy'     
+        db_table = 'flooding_strategy'
     def __unicode__(self):
-        return self.name    
-    
+        return self.name
+
 
 
 class Measure(models.Model):
@@ -1207,48 +1211,48 @@ class Measure(models.Model):
     TYPE_UNKNOWN = 0
     TYPE_EXISTING_LEVEL = 1
     TYPE_SEA_LEVEL = 2
-        
+
     ADJUSTMENT_TYPES = (
         (TYPE_UNKNOWN, _('unkown')),
         (TYPE_EXISTING_LEVEL, _('existing level')),
-        (TYPE_SEA_LEVEL, _('new level')),        
+        (TYPE_SEA_LEVEL, _('new level')),
     )
-    
+
     name = models.CharField(max_length=100)
     strategy = models.ManyToManyField(Strategy)
     reference_adjustment = models.IntegerField(choices=ADJUSTMENT_TYPES, default=TYPE_UNKNOWN)
     adjustment = models.FloatField(default=0)
-    
+
     class Meta:
-        db_table = 'flooding_measure'            
+        db_table = 'flooding_measure'
     def __unicode__(self):
-        return self.name    
-    
+        return self.name
+
 class EmbankmentUnit(models.Model):
     """
-    Defines a unit of an embankment (e.g. if an embankment is 
+    Defines a unit of an embankment (e.g. if an embankment is
     splitted up in parts of 200 m).
     """
     TYPE_EXISTING = 0
     TYPE_NEW = 1
-        
+
     EMBANKMENTUNIT_TYPES = (
         (TYPE_EXISTING, _('existing')),
-        (TYPE_NEW, _('new')),        
+        (TYPE_NEW, _('new')),
     )
-    
+
     unit_id = models.CharField(max_length=20)
     type = models.IntegerField(choices=EMBANKMENTUNIT_TYPES)
     original_height = models.FloatField()
     region = models.ForeignKey(Region)
     measure = models.ManyToManyField(Measure)
     geometry = models.LineStringField()
-    
+
     objects = models.GeoManager()
-    
-    
+
+
     class Meta:
         db_table = 'flooding_embankment_unit'
     def __unicode__(self):
         return self.unit_id
-    
+

@@ -5,6 +5,7 @@ Changelog of lizard-flooding
 1.14 (unreleased)
 -----------------
 
+- Added workflow_template field to Scenario model.
 - Added 'lizard_flooding_task' app.
 - Moved tasks dir to 'lizard_flooding_app'.
 - Moved 'perform_task' management command to 'lizard_flooding_worker'.
