@@ -2,7 +2,7 @@ Changelog of lizard-flooding
 ===================================================
 
 
-1.14 (unreleased)
+1.14 (2012-02-29)
 -----------------
 
 - Did a release because flooding's buildout is modernized too.
