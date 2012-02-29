@@ -5,6 +5,8 @@ Changelog of lizard-flooding
 1.14 (unreleased)
 -----------------
 
+- Did a release because flooding's buildout is modernized too.
+- Slightly modernized buildout (sysegg for GDAL).
 - Added workflow_template field to Scenario model.
 - Added 'lizard_flooding_task' app.
 - Moved tasks dir to 'lizard_flooding_app'.
