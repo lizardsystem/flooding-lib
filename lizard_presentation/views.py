@@ -126,6 +126,8 @@ def service_get_presentationlayer_settings(
 
     default_legend = ShapeDataLegend.objects.get(pk = pl.presentationtype.default_legend_id)
 
+    log.debug( 'got default legend' )
+
     info = {}
     info['rec'] = rec
     info['anim'] = anim
@@ -134,7 +136,7 @@ def service_get_presentationlayer_settings(
 
     if pl.presentationtype.value_type == PresentationType.VALUE_TYPE_TIME_SERIE and pl.presentationtype.geo_type in [PresentationType.GEO_TYPE_POLYGON, PresentationType.GEO_TYPE_LINE, PresentationType.GEO_TYPE_POINT]:
         #WMS service, start caching results for later requests
-        service_get_wms_of_shape(request,  2,  2, (-1,-1,0,0,), pl_id, default_legend.id,  0 )
+        #service_get_wms_of_shape(request,  2,  2, (-1,-1,0,0,), pl_id, default_legend.id,  0 )
 
         anim['lastnr'] = pl.animation.lastnr
         pass
@@ -408,17 +410,14 @@ def service_get_gridframe(request, presentationlayer_id, legend_id, framenr=0):
     """
     pl = get_object_or_404(PresentationLayer, pk=presentationlayer_id)
 
-    #dir_settings = Setting.objects.get( key = 'presentation_dir' )
-    if True: #legend_id == None :, custom legend not yet implemented
-        #use prefab image
+    log.debug('get png name')
+    png_name = external_file_location(pl.presentationgrid.png_default_legend.file_location)
+    if pl.presentationtype.value_type == 3:
+        log.debug('get png name with number.')
+        numberstring = '%04i' % framenr
+        png_name = png_name.replace('####',numberstring)
 
-        png_name = external_file_location(pl.presentationgrid.png_default_legend.file_location)
-        if pl.presentationtype.value_type == 3:
-            numberstring = '%04i' % framenr
-            png_name = png_name.replace('####',numberstring)
-    else:
-        #todo
-        pass
+    log.debug('load files %s'%png_name)
 
     response = HttpResponse(open(png_name,'rb').read())
     response['Content-type'] = 'image/png'

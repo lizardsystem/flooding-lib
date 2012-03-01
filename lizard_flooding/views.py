@@ -687,6 +687,8 @@ def scenario_list(request):
     search options are stored in the session 'scenario_list' as a dictionary
 
     """
+    if not request.user.is_authenticated():
+        return HttpResponse('Log eerst in')
     is_embedded = request.GET.get('is_embedded', 0)
     search_defaults = scenario_list_search_defaults.copy()
 
@@ -860,14 +862,18 @@ def scenario_list(request):
         #build table data for template
         table_data = []
         for o in page.object_list:
-            delete_field = {'icon': 'delete',
-                            'icontitle': _('delete this item'),
-                            'urlpost': reverse("flooding_scenario_delete", kwargs={"object_id": o.pk}),
-                            'postclickmessage': _('are you sure?'),
-                            }                                                                               \
-                            if pm.check_project_permission(o, UserPermission.PERMISSION_SCENARIO_DELETE)    \
-                            else {'icon': 'delete_disabled',
-                                'icontitle': _('you need permission to delete this item')}
+            if pm.check_project_permission(o, UserPermission.PERMISSION_SCENARIO_DELETE):
+                delete_field = {
+                    'icon': '/static_media/images/icons/delete.png',
+                    'icontitle': _('delete this item'),
+                    'urlpost': reverse("flooding_scenario_delete", kwargs={"object_id": o.pk}),
+                    'postclickmessage': _('are you sure?'),
+                }
+            else:
+                 delete_field = {
+                     'icon': 'delete_disabled',
+                    'icontitle': _('you need permission to delete this item')
+                 }
 
             #calculate breaches_list
             breaches_summary = '\n\n'.join([sb.get_summary_str() for sb in o.scenariobreach_set.all()])

@@ -5,6 +5,7 @@ import os.path
 import Image
 import ImageFilter
 from pkg_resources import resource_filename
+from flooding import settings
 
 log = logging.getLogger('nens.symbol_manager')
 
@@ -14,6 +15,9 @@ class SymbolManager:
         log.debug('Initializing SymbolManager')
         symbol_path = resource_filename('lizard_visualization', 'media/lizard_visualization/symbols')
         self.symbol_path = symbol_path
+        self.generated_icon_path = os.path.join(settings.BUILDOUT_DIR, 'var', 'generated_icons')
+
+
         if not(os.path.exists(self.symbol_path)):
             log.critical('path %s does not exist'%self.symbol_path)
             raise Exception('SymbolManager failed: path %s does not exist'%self.symbol_path)
@@ -66,8 +70,8 @@ class SymbolManager:
             min(255,color[0]*256), min(255,color[1]*256), min(255,color[2]*256),
             sizex, sizey, rotate, shadow_height, fn_orig_extension)
 
-        result_filename = os.path.join(self.symbol_path, 'generated/',
-                                       result_filename_nopath)
+        result_filename = os.path.join(self.generated_icon_path, result_filename_nopath)
+
         if os.path.isfile(result_filename) and force == False:
             log.debug('image already exists, returning filename')
         else:
