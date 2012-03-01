@@ -54,21 +54,21 @@
         colWidths: [100, 200, 100, 200, 100],
         fields: [
         { name: "action", _constructor: "HiddenItem", defaultValue: 'post_newscenario' },
-        { name: "breach_id", _constructor: "HiddenItem", defaultValue: {{ breach.id }} },   
-        { name: "time_rel", _constructor: "HiddenItem" }, 
-        { name: "loccutoffs", _constructor: "HiddenItem" }, 
-        { name: "tpeak_ms", _constructor: "HiddenItem" }, 	
-		{ name: "tstorm_ms", _constructor: "HiddenItem" }, 
-		{ name: "tsim_ms", _constructor: "HiddenItem" }, 
-		{ name: "tstartbreach_ms", _constructor: "HiddenItem" }, 
-		{ name: "tdeltaphase_ms", _constructor: "HiddenItem" }, 
-		{ name: "tmaxdepth_ms", _constructor: "HiddenItem" }, 
-        { name: "inundationmodel", _constructor: "HiddenItem" }, 
-        { name: "externalwatermodel", _constructor: "HiddenItem" }, 
-        { name: "start_calculation", _constructor: "HiddenItem", defaultValue: "0" }, 
+        { name: "breach_id", _constructor: "HiddenItem", defaultValue: {{ breach.id }} },
+        { name: "time_rel", _constructor: "HiddenItem" },
+        { name: "loccutoffs", _constructor: "HiddenItem" },
+        { name: "tpeak_ms", _constructor: "HiddenItem" },
+		{ name: "tstorm_ms", _constructor: "HiddenItem" },
+		{ name: "tsim_ms", _constructor: "HiddenItem" },
+		{ name: "tstartbreach_ms", _constructor: "HiddenItem" },
+		{ name: "tdeltaphase_ms", _constructor: "HiddenItem" },
+		{ name: "tmaxdepth_ms", _constructor: "HiddenItem" },
+        { name: "inundationmodel", _constructor: "HiddenItem" },
+        { name: "externalwatermodel", _constructor: "HiddenItem" },
+        { name: "start_calculation", _constructor: "HiddenItem", defaultValue: "0" },
         { name: "extw_type", _constructor: "HiddenItem", defaultValue: {{ breach.externalwater.type }} },
-        { name: "decheight", _constructor: "HiddenItem", defaultValue: {% if breach.decheight %} {{ breach.decheight }} {% else %} 0 {% endif %} }, 
-        { name: "extwmaxlevel_ini", _constructor: "HiddenItem", defaultValue: {% if breach.levelnormfrequency %} {{ breach.levelnormfrequency }} {% else %} 0 {% endif %} }, 
+        { name: "decheight", _constructor: "HiddenItem", defaultValue: {% if breach.decheight %} {{ breach.decheight }} {% else %} 0 {% endif %} },
+        { name: "extwmaxlevel_ini", _constructor: "HiddenItem", defaultValue: {% if breach.levelnormfrequency %} {{ breach.levelnormfrequency }} {% else %} 0 {% endif %} },
         { name: "extwrepeattime_ini", _constructor: "HiddenItem", defaultValue: {% if breach.region.normfrequency %} {{ breach.region.normfrequency }} {% else %} 1 {% endif %} },
         { name: "strategyId", _constructor: "HiddenItem"},
         { name: "measures", _constructor: "HiddenItem", defaultValue: ""},
@@ -122,7 +122,7 @@
             dateFormatter: intervalFormatter,
             blur: "this.setValue(intervalFormatter(this.getValue()));get_graph();",
             width: 120,
-            startRow: true, 
+            startRow: true,
             defaultValue: intervalFormatter( {{ breach.externalwater.deftsim }} )
         }, {//***************************************************************//
             defaultValue: "Buitenwaterstand",
@@ -145,7 +145,7 @@
             {% endif %}
             width: 100,
             defaultValue: {{ breach.levelnormfrequency }}
-        }, 
+        },
         {% if sealake  %}
         {
             ID: "frmextwrepeattime",
@@ -181,7 +181,7 @@
             blur: "get_graph();",
             step: 0.1,
             width: 100
-        }, 
+        },
         {% endif %}
         {% if sealake  %}
         {
@@ -192,7 +192,7 @@
             required: true,
             dateFormatter: intervalFormatter,
             blur: "this.setValue(intervalFormatter(this.getValue()));get_graph();",
-            width: 120, 
+            width: 120,
             defaultValue: intervalReader( {{ breach.externalwater.deftstorm }} )
         }, {
             name: "tpeak",
@@ -231,7 +231,7 @@
         {
             defaultValue: "Bres",
             type: "header"
-        }, 
+        },
         {% if sea  %}
         {
             name: "methstartbreach",
@@ -252,9 +252,9 @@
                     form.getField('tstartbreach').setDisabled(false);
                  }
             }
-        }, 
+        },
         {% endif %}
-        
+
         {
             name: "tstartbreach",
             title: "moment van doorbreken",
@@ -271,7 +271,7 @@
             blur: "this.setValue(intervalFormatter(this.getValue()));get_graph();",
             disabled: true,
             width: 100
-        }, 
+        },
         {
             ID: "frmbottomlevelbreach",
             name: "bottomlevelbreach",
@@ -281,7 +281,7 @@
             hint: "m NAP",
             change: function(form, item, value){
                 if (value < frmpitdepth.getValue()) {
-                	if (!donebottombreachalert) { 
+                	if (!donebottombreachalert) {
                 		alert("'niveau wiel' moet lager zijn dan 'niveau van de doorbraak'.");
                 		donebottombreachalert = true;
                 	}
@@ -292,7 +292,7 @@
                 	} else if ( value >= frmpitdepth.max) {
                 		item.setValue(frmpitdepth.max+0.01);
                 	}
-   	
+
                 }
             },
             defaultValue: {{ bottomlevelbreach.defaultvalue  }},
@@ -308,7 +308,7 @@
             hint: "m NAP",
             change: function(form, item, value){
                 if (value > frmbottomlevelbreach.getValue()) {
-                	if (!donepitalert) { 
+                	if (!donepitalert) {
                 		alert("'niveau wiel' moet lager zijn dan 'niveau van de doorbraak'.");
                 		donepitalert = true;
                 	}
@@ -428,9 +428,9 @@
             changed: function(form, item, value){
                 if (value == true) {
                 	//buttonGetGraph.setDisabled(true);
-        	
+
                 } else {
-                  	//buttonGetGraph.setDisabled(false);   
+                  	//buttonGetGraph.setDisabled(false);
                 }
             },
             defaultValue: false,
@@ -461,7 +461,7 @@
             width: 150,
             showIf: "form.getValue('showAdvancedSettings') == true",
             click: function(form, item){
-                
+
                 window.open(get_waterlevel_csv_url());
             }
         },
@@ -477,7 +477,7 @@
                 if (value == true) {
                 	formScenarioSettings.getField('strategyName').setEnabled(true);
                 } else {
-                  	formScenarioSettings.getField('strategyName').setEnabled(false);   
+                  	formScenarioSettings.getField('strategyName').setEnabled(false);
                 }
             }
         },
@@ -489,7 +489,7 @@
             required: false,
             disabled: true,
             colSpan: 1, width: 150, height: 38, endRow: false
-        }        
+        }
         ],
         //canDragResize: true,
         autoDraw: false
@@ -518,19 +518,19 @@
 
         showRollOver: false,
         click: function() {
-                    var intervals = {}	
-    			formScenarioSettings.getField('tpeak_ms').setValue(intervalReader(formScenarioSettings.getValue('tpeak')).getTime());	
+                    var intervals = {}
+    			formScenarioSettings.getField('tpeak_ms').setValue(intervalReader(formScenarioSettings.getValue('tpeak')).getTime());
 				formScenarioSettings.getField('tstorm_ms').setValue(intervalReader(formScenarioSettings.getValue('tstorm')).getTime());
 				formScenarioSettings.getField('tsim_ms').setValue(intervalReader(formScenarioSettings.getValue('tsim')).getTime());
 				formScenarioSettings.getField('tstartbreach_ms').setValue(intervalReader(formScenarioSettings.getValue('tstartbreach')).getTime());
 				formScenarioSettings.getField('tdeltaphase_ms').setValue(intervalReader(formScenarioSettings.getValue('tdeltaphase')).getTime());
 				formScenarioSettings.getField('tmaxdepth_ms').setValue(intervalReader(formScenarioSettings.getValue('tmaxdepth')).getTime());
-                
+
                 {% if sea %}
                 var waterlevels_with_return = formScenarioSettings.getValue('waterlevelInput')
                 formScenarioSettings.getField('waterlevelInput').setValue(formScenarioSettings.getValue('waterlevelInput').replace(/\r\n/g,'|').replace(/\n/g,'|'));
                 {% endif %}
-                
+
                 formScenarioSettings.saveData(function(dsResponse, data, dsRequest) {
                 	if (dsResponse.httpResponseCode == 200) {
                 		if (data.successful == true) {
@@ -539,7 +539,7 @@
                 		} else {
                 			formScenarioSettings.getField('waterlevelInput').setValue(waterlevels_with_return);
                 			alert('error saving: ' + data.save_log)
-                 			
+
                 		}
                 	} else {
                 		formScenarioSettings.getField('waterlevelInput').setValue(waterlevels_with_return);
@@ -549,8 +549,8 @@
         },
         autoDraw: false
     });
-    
-    
+
+
     function get_graph() {
 		if (scGraph.isVisible()) {
 			var args = {};
@@ -562,10 +562,10 @@
 			args.tstorm =  intervalReader(formScenarioSettings.getValue('tstorm')).getTime();
 			args.tsim =  intervalReader(formScenarioSettings.getValue('tsim')).getTime();
 			args.tstartbreach =  intervalReader(formScenarioSettings.getValue('tstartbreach')).getTime();
-			args.tdeltaphase =  intervalReader(formScenarioSettings.getValue('tdeltaphase')).getTime(); 
+			args.tdeltaphase =  intervalReader(formScenarioSettings.getValue('tdeltaphase')).getTime();
 			args.tide_id = formScenarioSettings.getValue('loctide');
 			args.extwbaselevel = formScenarioSettings.getValue('extwbaselevel');
-	              
+
 			args.action = 'get_externalwater_graph';
 			args.useManualInput = false;
 			{% if sea %}
@@ -575,25 +575,25 @@
 				if (args.timeserie.length > 0 && args.timeserie[args.timeserie.length-1]=="|")
 					{
 						args.timeserie = args.timeserie.substring(0, args.timeserie.length-1)
-					}						
+					}
 			}
 			{% endif %}
 			var url = '{% url root_url %}flooding/service/?';
-	               		
+
 			var first = true;
 			for (elem in args) {
 				if  (args[elem]!=null) {
-					if (!first) { url+='&' } else {	first = false }	
+					if (!first) { url+='&' } else {	first = false }
 					url+= elem + '=' + args[elem]
 				}
 			}
-			
+
 			RPCManager.sendRequest({
 							 actionURL: '{% url root_url %}flooding/service/',
 							 useSimpleHttp: true,
-							 showPrompt:true,	    					 					 
-							 httpMethod: "POST",			 
-							 params: {action: 'get_externalwater_graph', 
+							 showPrompt:true,
+							 httpMethod: "POST",
+							 params: {action: 'get_externalwater_graph',
 							 		  width: args.width,
             						  height: args.height,
             						  breach_id: args.breach_id,
@@ -606,22 +606,22 @@
             						  tide_id: args.tide_id,
             						  extwbaselevel: args.extwbaselevel,
             						  use_manual_input: args.useManualInput,
-            						  timeserie: args.timeserie}, 
+            						  timeserie: args.timeserie},
 							 callback: function(response, data, request){
-				                if (response.httpResponseCode == 200) {				                	
+				                if (response.httpResponseCode == 200) {
 				                    console.log("Data ophalen gelukt.");
-				                    scGraph.setSrc('{% url root_url %}flooding/service/?action=get_externalwater_graph_session&ct='+(new Date).valueOf())																	                    	                                   
-				                	} 
-				                	else {				                    
-				                    console.log("Fout bij het ophalen van gegevens.");                   
+				                    scGraph.setSrc('{% url root_url %}flooding/service/?action=get_externalwater_graph_session&ct='+(new Date).valueOf())
+				                	}
+				                	else {
+				                    console.log("Fout bij het ophalen van gegevens.");
 				                	}
 				                }
-				        });			
+				        });
       	} else {
       		//do nothing
       	}
     }
-    
+
     function get_waterlevel_csv_url() {
 		var args = {};
 		args.width = scGraph.getWidth();
@@ -632,24 +632,24 @@
 		args.tstorm =  intervalReader(formScenarioSettings.getValue('tstorm')).getTime();
 		args.tsim =  intervalReader(formScenarioSettings.getValue('tsim')).getTime();
 		args.tstartbreach =  intervalReader(formScenarioSettings.getValue('tstartbreach')).getTime();
-		args.tdeltaphase =  intervalReader(formScenarioSettings.getValue('tdeltaphase')).getTime(); 
+		args.tdeltaphase =  intervalReader(formScenarioSettings.getValue('tdeltaphase')).getTime();
 		args.tide_id = formScenarioSettings.getValue('loctide');
 		args.extwbaselevel = formScenarioSettings.getValue('extwbaselevel');
-              
+
 		args.action = 'get_externalwater_csv';
 		var url = '{% url root_url %}flooding/service/?';
-               		
+
 		var first = true;
 		for (elem in args) {
 			if  (args[elem]!=null) {
-				if (!first) { url+='&' } else {	first = false }	
+				if (!first) { url+='&' } else {	first = false }
 				url+= elem + '=' + args[elem]
 			}
 		}
   		return url
 
     }
-    
+
     isc.IButton.create({
         ID: "buttonGetGraph",
         title: "Toon grafiek",
@@ -659,15 +659,15 @@
     	actionType: "checkbox",
         width: 150,
         click: function() {
-        		
+
         		if (this.isSelected()) {
 	        		this.setTitle("Verberg grafiek");
-	        		
+
 	        		//scGraph.setHeight("300");
 	        		scGraph.show();
 	        		scSettingsTotal.redraw();
 	        		get_graph();
-	        		
+
 	        	} else {
 	        		this.setTitle("Toon grafiek");
 	        		scGraph.hide();
@@ -676,7 +676,7 @@
         },
         autoDraw: false
     });
-       
+
 	isc.HLayout.create({
         ID: 'scenarioInfobuttons',
         height: 28,
@@ -705,9 +705,9 @@
         ],
         autoDraw: true
     });
-    
+
     if (typeof(listLoccutoffs)!="undefined") {
-        
+
         var loccutoffs = "";
         var endRow = listLoccutoffs.data.getLength();
         for (var i = 0; i < endRow ; i++ ){
@@ -722,15 +722,15 @@
         console.log("aantal afsluitlocaties aan form toegevoegd: " + endRow )
     }
     if (typeof(strategyId)!="undefined") {
-        
+
         formScenarioSettings.getField('strategyId').setValue(strategyId);
 
         //formScenarioSettings.rememberValues();
         console.log("aantal afsluitlocaties aan form toegevoegd: " + endRow )
     }
-    
+
     if (typeof(listMeasures)!="undefined") {
-        
+
         var measures = "";
         var endRow = listMeasures.data.getLength();
         for (var i = 0; i < endRow ; i++ ){
@@ -744,8 +744,8 @@
         //formScenarioSettings.rememberValues();
         console.log("aantal measures aan form toegevoegd: " + endRow )
     }
-    
-       
+
+
     if (typeof(selectInundationModel)!="undefined") {
     	formScenarioSettings.getField('inundationmodel').setValue( selectInundationModel.getValue() );
     }

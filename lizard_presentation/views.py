@@ -44,9 +44,9 @@ def external_file_location(filename):
     New: look if django setting exists and then assume a mounted directory.
 
     """
-    if hasattr(settings, 'EXTERNAL_MOUNTED_DIR'):
+    if hasattr(settings, 'EXTERNAL_PRESENTATION_MOUNTED_DIR'):
         # smb mounted on linux.
-        base_dir = settings.EXTERNAL_MOUNTED_DIR
+        base_dir = settings.EXTERNAL_PRESENTATION_MOUNTED_DIR
         filename = filename.replace('\\', '/')
         full_name = os.path.join(base_dir, filename)
     else:
@@ -174,7 +174,7 @@ def service_get_wms_of_shape(
     if mpl == None:
         sdl = get_object_or_404(ShapeDataLegend, pk=legend_id)
         if pl.presentationtype.geo_type in [PresentationType.GEO_TYPE_POLYGON, PresentationType.GEO_TYPE_LINE, PresentationType.GEO_TYPE_POINT]:
-            sm = SymbolManager(settings.SYMBOLS_DIR)
+            sm = SymbolManager('media/lizard_presentation/symbols/')
             mpl = MapnikPointLegend(sdl, sm)
             cache.set('legend_' + str(legend_id), mpl , 300)
 

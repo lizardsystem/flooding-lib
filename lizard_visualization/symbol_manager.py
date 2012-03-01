@@ -4,6 +4,7 @@ import os.path
 
 import Image
 import ImageFilter
+from pkg_resources import resource_filename
 
 log = logging.getLogger('nens.symbol_manager')
 
@@ -11,6 +12,7 @@ log = logging.getLogger('nens.symbol_manager')
 class SymbolManager:
     def __init__(self, symbol_path):
         log.debug('Initializing SymbolManager')
+        symbol_path = resource_filename('lizard_visualization', 'media/lizard_visualization/symbols')
         self.symbol_path = symbol_path
         if not(os.path.exists(self.symbol_path)):
             log.critical('path %s does not exist'%self.symbol_path)

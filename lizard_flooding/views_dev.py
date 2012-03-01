@@ -288,16 +288,25 @@ def service_compose_scenario(request, breach_id):
         pitdepth['max'] = breach.groundlevel
 
     pm = PermissionManager(request.user)
-    projects = pm.get_projects(UserPermission.PERMISSION_SCENARIO_ADD).filter(Q(regionsets__regions__breach = breach) | Q(regions__breach = breach)).distinct().order_by('name')
+    projects = pm.get_projects(UserPermission.PERMISSION_SCENARIO_ADD).filter(regions__breach = breach).distinct().values_list('id', flat=True)
+    projects2 = pm.get_projects(UserPermission.PERMISSION_SCENARIO_ADD).filter(regionsets__regions__breach = breach).distinct().values_list('id', flat=True)
 
+    projects = Project.objects.filter(Q(id__in=projects)|Q(id__in=projects2)).distinct().order_by('name')
+
+    sealake = breach.externalwater.type == ExternalWater.TYPE_SEA or breach.externalwater.type == ExternalWater.TYPE_LAKE
+    lake = breach.externalwater.type == ExternalWater.TYPE_LAKE
+    sea = breach.externalwater.type == ExternalWater.TYPE_SEA
+    loctide = WaterlevelSet.objects.filter( type = WaterlevelSet.WATERLEVELSETTYPE_TIDE ).order_by('name')
+
+    print 'ready to respond'
     return render_to_response(
         'flooding/compose_scenario.html',
         {
          'projects': projects,
-         'sealake': breach.externalwater.type == ExternalWater.TYPE_SEA or breach.externalwater.type == ExternalWater.TYPE_LAKE,
-         'lake': breach.externalwater.type == ExternalWater.TYPE_LAKE,
-         'sea': breach.externalwater.type == ExternalWater.TYPE_SEA,
-         'loctide': WaterlevelSet.objects.filter( type = WaterlevelSet.WATERLEVELSETTYPE_TIDE ).order_by('name'),
+         'sealake': sealake,
+         'lake': lake,
+         'sea': sea,
+         'loctide': loctide,
          'pitdepth':pitdepth,
          'bottomlevelbreach': bottomlevelbreach,
          'breach':breach

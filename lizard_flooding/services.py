@@ -23,6 +23,26 @@ import StringIO
 #-------------------- Services ----------------
 
 
+def external_file_location(filename):
+    """Return full filename of file that's on smb (currently)
+
+    Old: look in database for config value and request smb file from windows.
+
+    New: look if django setting exists and then assume a mounted directory.
+
+    """
+    if hasattr(settings, 'EXTERNAL_RESULT_MOUNTED_DIR'):
+        # smb mounted on linux.
+        base_dir = settings.EXTERNAL_RESULT_MOUNTED_DIR
+        filename = filename.replace('\\', '/')
+        full_name = os.path.join(base_dir, filename)
+    else:
+        # Windows direct smb link.
+        base_dir = Setting.objects.get( key = 'destination_dir' ).value
+        full_name = os.path.join(base_dir, filename.lstrip('\\').lstrip('/'))
+    return str(full_name)
+
+
 @never_cache
 def service_get_region_tree(request, permission=UserPermission.PERMISSION_SCENARIO_VIEW, filter_through_scenario=False, filter_has_model=False ):
     """Get a tree of regionsets and regions
@@ -521,10 +541,9 @@ def service_get_raw_result(
     '''
 
     '''
-
     result = Result.objects.filter(resulttype__presentationtype__presentationlayer = presentationlayer, scenario__presentationlayer = presentationlayer)
     if (result.count() == 1):
-        file_name = os.path.join(Setting.objects.get( key = 'destination_dir' ).value,  result[0].resultloc.lstrip('\\').lstrip('/'))
+        file_name =  external_file_location(result[0].resultloc)
 
         response = HttpResponse(open(file_name,'rb').read())
         response['Content-type'] = 'application/zip'

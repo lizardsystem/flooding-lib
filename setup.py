@@ -17,7 +17,8 @@ install_requires = [
     'lizard-base',
     'django-treebeard',
     'nens',
-    'GDAL'
+    'GDAL',
+    'django-debug-toolbar'
     ],
 
 tests_require = [

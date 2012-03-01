@@ -5,7 +5,12 @@ Changelog of lizard-flooding
 1.15 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- performance improvement for compose form
+
+- made link for linux to resultaten database (bug fix load import)
+
+- create a link to the symbols for visualization (bug fix for channel results)
+
 
 
 1.14 (2012-02-29)
