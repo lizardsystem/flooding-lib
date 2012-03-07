@@ -13,6 +13,8 @@ from treebeard.al_tree import AL_Node #Adjacent list implementation
 from lizard_presentation.models import PresentationLayer, PresentationType
 from lizard_visualization.models import ShapeDataLegend, ValueVisualizerMap
 from lizard_flooding.tools.approvaltool.models import ApprovalObject
+from django.db.models.signals import post_delete
+from django.db.models.signals import post_save
 
 #------------- helper functions ------------------
 def convert_color_to_hex(color_tuple):
@@ -1117,9 +1119,9 @@ class Task(models.Model):
     def get_absolute_url(self):
         return reverse('flooding_task_detail', kwargs={'object_id': self.id})
 
-    def save(self, force_insert=None):
+    def save(self, **kwargs):
         """After saving, update scenario status"""
-        super(Task, self).save(force_insert=force_insert)
+        super(Task, self).save(**kwargs)
         self.scenario.update_status()
 
     def delete(self):
