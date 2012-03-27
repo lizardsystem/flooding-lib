@@ -5,7 +5,7 @@ Changelog of lizard-flooding
 1.18 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Fixed database settings in services.py.
 
 
 1.17 (2012-03-07)
