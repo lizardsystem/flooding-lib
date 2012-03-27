@@ -25,6 +25,7 @@ import matplotlib.pyplot as plt
 from lizard_base.models import Setting
 from lizard_presentation.models import Field, SupportLayers
 from lizard_presentation.models import PresentationType, PresentationLayer
+from lizard_presentation.models import PresentationGrid
 from lizard_presentation.permission_manager import PermissionManager
 from lizard_visualization.mapnik_legend import MapnikPointLegend
 from lizard_visualization.models import ShapeDataLegend
@@ -90,6 +91,11 @@ def service_get_presentationlayer_settings(
     if not pm.check_permission(pl, PermissionManager.PERMISSION_PRESENTATIONLAYER_VIEW):
         raise Http404
 
+    try:
+        pl.presentationgrid
+    except PresentationGrid.DoesNotExist:
+        return HttpResponse(simplejson.dumps({}), mimetype="application/json")
+
     rec = {}
     if pl.presentationtype.geo_type == PresentationType.GEO_TYPE_GRID:
         rec['bounds'] = {}
@@ -101,13 +107,11 @@ def service_get_presentationlayer_settings(
         else:
             rec['bounds']['west'], rec['bounds']['south'], rec['bounds']['east'], rec['bounds']['north'] = pl.presentationgrid.extent.extent
             rec['bounds']['projection'] = 4326
-            
+
         rec['height'] = pl.presentationgrid.rownr
         rec['width'] = pl.presentationgrid.colnr
         rec['gridsize'] = pl.presentationgrid.gridsize
 
-    elif pl.presentationtype.geo_type in [PresentationType.GEO_TYPE_POLYGON, PresentationType.GEO_TYPE_LINE, PresentationType.GEO_TYPE_POINT]:
-        pass
     anim = {}
     # Added False at the end of the line to be sure for testing that it will never execute the code and False
     if pl.presentationtype.value_type == PresentationType.VALUE_TYPE_TIME_SERIE:
@@ -305,7 +309,7 @@ def service_get_wms_of_shape(
                 if pl.presentationtype.absolute:
                     try:
                         input_dict[his_field.name_in_source] = abs(values.get(id, None))
-                        if values.get(id, None) > 1:                            
+                        if values.get(id, None) > 1:
                             pass
 
                     except TypeError:
