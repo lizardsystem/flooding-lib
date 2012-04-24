@@ -339,7 +339,7 @@ def save_uploadfile_in_zipfile_groupimport(upload_zipfile, re_filenames_in_uploa
 
     zf = upload_zipfile
 
-    reg_ex = '([0-9]*)'.join([b for b in re_filenames_in_upload_file.split('#')if b != '']).replace('\\','/').replace('+','\+').replace('(','\(').replace(')','\)')
+    reg_ex = '([0-9]*)'.join([b for b in re_filenames_in_upload_file.split('#') if b != '']).replace('\\','/').replace('+','\+').replace('(','\(').replace(')','\)')
 
     reg_ex = re.compile(reg_ex , re.I)
     found = False
@@ -473,70 +473,7 @@ def group_import(request):
 
             try:
                 if method == 1:
-
-
-                    import pyExcelerator as excel
-                    wb = excel.parse_xls(groupimport.table.path)
-                    sb = wb[0][1]
-
-                    nr_rows = max([key[0] for key in sb.keys()])
-                    nr_cols = max([key[1] for key in sb.keys()])
-
-                    #get_fields
-                    fields = [(key[1],fieldname) for key,fieldname in sb.items() if key[0] == 1] #read first row
-
-                    #combine fields with ImportField
-
-                    field_dict = {}
-                    for colnr, fieldname in fields:
-                        if colnr > 0:
-                            try:
-                                inputfield = InputField.objects.get(name = fieldname)
-                                field_dict[colnr] = inputfield
-
-                            except InputField.DoesNotExist, e:
-                                remarks.append('veld ' +fieldname+ ' komt niet voor in de database')
-
-                    active_rows = [key[0] for key,fieldcontent in sb.items() if fieldcontent == 'x' and key[0] > 3 and key[1] == 0]
-
-                    zip_file = ZipFile(groupimport.results.path, "r")
-                    for row in active_rows:
-                        # eerst een import scenario maken
-                        scenario_name = ""
-                        approvalobject = ApprovalObject.objects.create(name =  scenario_name)
-                        approvalobject.approvalobjecttype.add(ApprovalObjectType.objects.get(pk = 1))
-                        importscenario = ImportScenario.objects.create(owner=request.user, name =  scenario_name, approvalobject = approvalobject, groupimport = groupimport )
-
-                        scenario_fields = [(key[1], fieldname) for key,fieldname in sb.items() if key[1] in field_dict.keys()  and key[0] == row]
-                        #vervolgens de velden opslaan
-                        for col_nr,value in scenario_fields:
-                            importscenario_inputfield, new = ImportScenarioInputField.objects.get_or_create(importscenario = importscenario, inputfield = field_dict[col_nr])
-                            try:
-                                importscenario_inputfield.setValue(value)
-                            except ValueError, e:
-                                remarks.append('Value error. Rij %i, kollom  \'%s\' van type %s. Waarde is: \'%s\'. error: %s'%(row, field_dict[col_nr].name, field_dict[col_nr].get_type_display(), str(value), e))
-                            except TypeError, e:
-                                remarks.append('Type error. Rij %i, kollom  \'%s\' van type %s. Waarde is: \'%s\'. error: %s'%(row, field_dict[col_nr].name, field_dict[col_nr].get_type_display(), str(value), e))
-
-
-                            if field_dict[col_nr].type == InputField.TYPE_FILE:
-
-                                try:
-                                    filevalue, new = FileValue.objects.get_or_create(importscenario_inputfield = importscenario_inputfield)
-                                    #create empty file. replace it later with zipfile
-                                    filevalue.value.save(value.replace('\\','/').split('/')[-1] + '.zip', ContentFile(""))
-                                    filevalue.save()
-                                    filevalue.value.close()
-
-                                    destination =  filevalue.value.file.name
-                                    save_uploadfile_in_zipfile_groupimport(zip_file, value, destination, field_dict[col_nr].destination_filename)
-
-                                except KeyError, e:
-                                    remarks.append('File \'%s\' niet gevonden in zipfile. Rij %i, kollom  \'%s\'. '%( str(value),row, field_dict[col_nr].name))
-                                    filevalue.delete()
-
-
-                        importscenario.update_scenario_name()
+                    pass
                 else:
 
                     import xlrd
@@ -597,7 +534,7 @@ def group_import(request):
                                             filevalue.value.close()
 
                                             destination =  filevalue.value.file.name
-                                            save_uploadfile_in_zipfile_groupimport(zip_file, value, destination, field_dict[col_nr].destination_filename)
+                                            save_uploadfile_in_zipfile_groupimport(zip_file, field.value, destination, field_dict[col_nr].destination_filename)
 
                                         except KeyError, e:
                                             remarks.append('File \'%s\' niet gevonden in zipfile. Rij %i, kollom  \'%s\'. '%( str(field.value),rownr, field_dict[col_nr].name))
@@ -613,7 +550,7 @@ def group_import(request):
             except BadZipfile, e:
                 remarks.append("error bij inlezen. De zip-file kan niet gelezen worden. De gegevens zijn wel opgeslagen, maar kunnen niet verwerkt worden. Neem contact op met de applicatiebeheerder en vermeld het group-import nummer %i"%groupimport.id)
             except Exception, e:
-                remarks.append("error bij inlezen. De gegevens zijn wel opgeslagen, maar kunnen niet verwerkt worden. Neem contact op met de applicatiebeheerder en vermeld het group-import nummer %i"%groupimport.id)
+                remarks.append("error bij inlezen: %s. De gegevens zijn wel opgeslagen, maar kunnen niet verwerkt worden. Neem contact op met de applicatiebeheerder en vermeld het group-import nummer %i"% (str(e), groupimport.id))
 
             remarks.append('<a href="%s">ga terug naar importoverzicht</a>'%reverse('flooding_tools_import_overview'))
 
