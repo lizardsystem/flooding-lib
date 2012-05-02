@@ -91,13 +91,13 @@ def service_get_presentationlayer_settings(
     if not pm.check_permission(pl, PermissionManager.PERMISSION_PRESENTATIONLAYER_VIEW):
         raise Http404
 
-    try:
-        pl.presentationgrid
-    except PresentationGrid.DoesNotExist:
-        return HttpResponse(simplejson.dumps({}), mimetype="application/json")
-
     rec = {}
     if pl.presentationtype.geo_type == PresentationType.GEO_TYPE_GRID:
+        try:
+            pl.presentationgrid
+        except PresentationGrid.DoesNotExist:
+            return HttpResponse(simplejson.dumps({}), mimetype="application/json")
+
         rec['bounds'] = {}
         rec['bounds']['projection'] = pl.presentationgrid.bbox_orignal_srid
 
