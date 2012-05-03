@@ -90,6 +90,10 @@ urlpatterns = patterns(
         'lizard_flooding.views.result_list',
         name='flooding_result_list'),
 
+    url(r'^result_download/(?P<result_id>\d+)/$',
+        'lizard_flooding.views.result_download',
+        name='result_download'),
+
     url(r'^task/$',
         'lizard_flooding.views.task_list',
         name='flooding_task_list'),

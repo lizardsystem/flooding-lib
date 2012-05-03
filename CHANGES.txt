@@ -5,7 +5,9 @@ Changelog of lizard-flooding
 1.20 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- 'Export' button leads to a page with download results for the entire scenario.
+
+- Download file view uses Nginx accelerated redirect to serve the files.
 
 
 1.19 (2012-04-24)

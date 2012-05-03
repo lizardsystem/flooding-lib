@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-
-
 from django.http import HttpResponse, Http404
 from django.utils import simplejson
 from django.conf import settings
+from django.core.urlresolvers import reverse
 from django.shortcuts import render_to_response, get_object_or_404
 from django.views.decorators.cache import never_cache
 from django.contrib.gis.geos import GEOSGeometry, MultiPolygon
@@ -1010,6 +1009,18 @@ def service_import_embankment_shape():
 
     return HttpResponse("Gelukt")
 
+def get_raw_result_scenario(request, scenarioid):
+    scenario = get_object_or_404(Scenario, id=scenarioid)
+
+    return render_to_response("flooding/results_scenario.html", {
+            "results": [{
+                    "url": reverse('result_download', kwargs={
+                            'result_id': result.id
+                            }),
+                    "result": result
+                    } for result in scenario.result_set.all()]
+            })
+
 def service(request):
     """Calls other service functions
 
@@ -1259,6 +1270,10 @@ def service(request):
             presentationlayer = int(query.get('presentationlayer',None))
             return service_get_raw_result(request,
                                    presentationlayer)
+        elif action_name == 'get_raw_result_scenario':
+            scenarioid = int(query.get('scenarioid', None))
+            return get_raw_result_scenario(request, scenarioid)
+
         elif  action_name == 'get_import_scenario_uploaded_file':
             path = query.get('path', '')
             return service_get_import_scenario_uploaded_file(request, path)

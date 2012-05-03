@@ -2,6 +2,7 @@
 from math import cos, sin
 import csv
 import datetime
+import os
 import string
 
 from django.conf import settings
@@ -12,6 +13,7 @@ from django.db.models import Q
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.utils.translation import ugettext as _
+from django.views.static import serve
 import Image
 import ImageDraw
 
@@ -1185,4 +1187,28 @@ def fractal(request):
 
     response = HttpResponse(mimetype="image/png")
     image.save(response, "PNG")
+    return response
+
+def result_download(request, result_id):
+    result = get_object_or_404(Result, id=result_id)
+
+    resultloc = result.resultloc.replace('\\', '/')
+
+    # See etc/nginx.conf.in of flooding
+    nginx_path = os.path.join('/download_results/', resultloc)
+    file_path = os.path.join(settings.EXTERNAL_RESULT_MOUNTED_DIR, resultloc)
+
+    if settings.DEBUG:
+        # When debugging, let Django serve the file
+        return serve(request, file_path, '/')
+
+    # Otherwise do it by letting Apache or Nginx serve it for us
+    response = HttpResponse()
+    response['X-Sendfile'] = file_path  # Apache
+    response['X-Accel-Redirect'] = nginx_path  # Nginx
+
+    # Unset the Content-Type as to allow for the webserver
+    # to determine it.
+    response['Content-Type'] = ''
+
     return response

@@ -1,0 +1,13 @@
+<!doctype html>
+<html>
+<head>
+<title>Result downloads</title>
+<body>
+<p><strong>Te downloaden resultaten:</strong></p>
+<ul>
+{% for result in results %}
+<li><a href="{{ result.url }}">{{ result.result.resulttype.name }}</a></li>
+{% endfor %}
+</ul>
+</body>
+</html>
