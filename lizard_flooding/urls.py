@@ -90,7 +90,10 @@ urlpatterns = patterns(
         'lizard_flooding.views.result_list',
         name='flooding_result_list'),
 
-    url(r'^result_download/(?P<result_id>\d+)/$',
+    # Note -- no $ at the end! There is a file name there, which we
+    # ignore. It's only there so that the downloading web browser
+    # knows what to call the file.
+    url(r'^result_download/(?P<result_id>\d+)/',
         'lizard_flooding.views.result_download',
         name='result_download'),
 

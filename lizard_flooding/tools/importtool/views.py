@@ -30,6 +30,9 @@ from shutil import copyfile
 from cStringIO import StringIO
 #from StringIO import StringIO
 
+import logging
+logger = logging.getLogger(__name__)
+
 def overview(request):
     """
     Renders Lizard-flooding import page, contains among others
@@ -783,6 +786,8 @@ def import_scenario_into_flooding(request, importscenario):
         result.resultloc =  dest_file_rel
         result.save()
 
+        logger.debug("VALUE = "+value)
+        logger.debug("DEST_FILE = "+dest_file)
         copyfile(value, dest_file)
 
 

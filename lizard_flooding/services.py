@@ -1012,13 +1012,29 @@ def service_import_embankment_shape():
 def get_raw_result_scenario(request, scenarioid):
     scenario = get_object_or_404(Scenario, id=scenarioid)
 
+    results = []
+    for result in scenario.result_set.all():
+        resultloc = result.resultloc.replace('\\', '/')
+        file_path = os.path.join(settings.EXTERNAL_RESULT_MOUNTED_DIR, resultloc)
+        if not os.path.exists(file_path):
+            # Skip
+            continue
+
+        view_url = reverse('result_download', kwargs={
+                'result_id': result.id,
+                })
+
+        # Add filename at the end of the URL so that the browser knows what to call
+        # the file it is served. This part of the URL is ignored by urls.py.
+        url = view_url + os.path.basename(file_path)
+
+        results.append({
+                "url": url,
+                "result": result,
+                })
+
     return render_to_response("flooding/results_scenario.html", {
-            "results": [{
-                    "url": reverse('result_download', kwargs={
-                            'result_id': result.id
-                            }),
-                    "result": result
-                    } for result in scenario.result_set.all()]
+            "results": results
             })
 
 def service(request):

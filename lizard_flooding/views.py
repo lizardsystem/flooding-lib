@@ -2,6 +2,7 @@
 from math import cos, sin
 import csv
 import datetime
+import logging
 import os
 import string
 
@@ -25,6 +26,7 @@ from lizard_flooding.forms import ScenarioForm, ScenarioCutoffLocationForm
 from lizard_flooding.forms import ScenarioNameRemarksForm
 from lizard_flooding.permission_manager import PermissionManager
 
+logger = logging.getLogger(__name__)
 
 #-----------------------'constants' - make a copy when using them--------------------
 """
@@ -1197,6 +1199,9 @@ def result_download(request, result_id):
     # See etc/nginx.conf.in of flooding
     nginx_path = os.path.join('/download_results/', resultloc)
     file_path = os.path.join(settings.EXTERNAL_RESULT_MOUNTED_DIR, resultloc)
+
+    logger.debug("NGINX PATH: "+nginx_path)
+    logger.debug("FILE PATH: "+file_path)
 
     if settings.DEBUG:
         # When debugging, let Django serve the file
