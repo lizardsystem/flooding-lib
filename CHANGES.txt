@@ -2,10 +2,10 @@ Changelog of lizard-flooding
 ===================================================
 
 
-1.21 (unreleased)
+1.21 (2012-05-04)
 -----------------
 
-- Nothing changed yet.
+- Fixed that download view...
 
 
 1.20 (2012-05-03)
