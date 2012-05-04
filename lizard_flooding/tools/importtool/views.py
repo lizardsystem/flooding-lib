@@ -778,8 +778,12 @@ def import_scenario_into_flooding(request, importscenario):
 
 
         dest_file_rel = os.path.join(scenario.get_rel_destdir(), os.path.split(value)[1])
-        dest_path = os.path.join(Setting.objects.get( key = 'destination_dir' ).value, scenario.get_rel_destdir())
+
         dest_file = os.path.join(Setting.objects.get( key = 'destination_dir' ).value, dest_file_rel)
+        dest_file = dest_file.replace('\\', '/')
+
+        dest_path = os.path.dirname(dest_file)
+
         if not os.path.isdir( dest_path ):
             os.makedirs( dest_path )
 
