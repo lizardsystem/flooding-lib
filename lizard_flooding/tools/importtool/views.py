@@ -786,6 +786,15 @@ def import_scenario_into_flooding(request, importscenario):
         result.resultloc =  dest_file_rel
         result.save()
 
+        # Replace \ by / so that it works on both Linux and Windows
+
+        # The directory
+        # /p-flod-fs-00-d1.external-nens.local/flod-share/ was created
+        # on both flooding webservers to make a path like that work on
+        # both sides.
+        value = value.replace('\\', '/')
+        dest_file = dest_file.replace('\\', '/')
+
         logger.debug("VALUE = "+value)
         logger.debug("DEST_FILE = "+dest_file)
         copyfile(value, dest_file)
