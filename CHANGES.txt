@@ -2,7 +2,7 @@ Changelog of lizard-flooding
 ===================================================
 
 
-1.25 (unreleased)
+1.25 (2012-05-10)
 -----------------
 
 - Made a field check case insensitive.
