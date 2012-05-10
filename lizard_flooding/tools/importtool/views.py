@@ -492,7 +492,8 @@ def group_import(request):
                     colnr = 1
                     for fieldname in sheet.row_slice(1,1):
                         try:
-                            inputfield = InputField.objects.get(name = fieldname.value)
+                            # Use name__iexact so case doesn't have to be exactly right
+                            inputfield = InputField.objects.get(name__iexact = fieldname.value)
                             field_dict[colnr] = inputfield
 
                         except InputField.DoesNotExist, e:
