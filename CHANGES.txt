@@ -2,10 +2,10 @@ Changelog of lizard-flooding
 ===================================================
 
 
-1.24 (unreleased)
+1.24 (2012-05-10)
 -----------------
 
-- Nothing changed yet.
+- Added extra extra info field headers.
 
 
 1.23 (2012-05-04)

@@ -697,6 +697,14 @@ class PermissionProjectGridDataLegend(models.Model):
 class ExtraInfoField(models.Model):
     """extra informatie velden voor scenarios
     """
+
+    # New headers added 20120510
+    HEADER_SCENARIO = 1
+    HEADER_LOCATION = 2
+    HEADER_MODEL = 4
+    HEADER_OTHER = 5
+    HEADER_FILES = 6
+
     HEADER_GENERAL = 10
     HEADER_METADATA = 20
     HEADER_BREACH = 30
@@ -704,6 +712,11 @@ class ExtraInfoField(models.Model):
     HEADER_NONE = 70
 
     HEADER_CHOICES = (
+        (HEADER_SCENARIO, _('scenario')),
+        (HEADER_LOCATION, _('location')),
+        (HEADER_MODEL, _('model')),
+        (HEADER_OTHER, _('other')),
+        (HEADER_FILES, _('files')),
         (HEADER_GENERAL, _('general')),
         (HEADER_METADATA, _('metadata')),
         (HEADER_BREACH, _('breaches')),
