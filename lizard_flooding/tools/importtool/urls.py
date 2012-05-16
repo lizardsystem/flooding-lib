@@ -27,10 +27,6 @@ urlpatterns = patterns(
         'lizard_flooding.tools.importtool.views.group_import_example_csv',
         name='flooding_tools_import_group_download_csv'),
 
-    url(r'^groupimport/download_example_excel$',
-        'lizard_flooding.tools.importtool.views.group_import_example_excel',
-        name='flooding_tools_import_group_download_excel'),
-
     url(r'^newimport/(?P<import_scenario_id>\d+)/uploadfiles$',
         'lizard_flooding.tools.importtool.views.upload_import_scenario_files',
         name='flooding_tools_upload_files'),
