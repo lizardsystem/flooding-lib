@@ -14,7 +14,7 @@ long_description = '\n\n'.join([
 install_requires = [
     'Django',
     'django-staticfiles',
-    'lizard-base',
+    'flooding-base',
     'django-treebeard',
     'nens',
     'GDAL',

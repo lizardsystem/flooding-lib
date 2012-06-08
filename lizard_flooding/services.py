@@ -8,7 +8,7 @@ from django.views.decorators.cache import never_cache
 from django.contrib.gis.geos import GEOSGeometry, MultiPolygon
 
 from lizard_flooding.views_dev import service_compose_scenario, get_externalwater_graph, get_externalwater_graph_session, get_externalwater_graph_infowindow, service_save_new_scenario, get_externalwater_csv, service_select_strategy
-from lizard_base.models import Setting
+from flooding_base.models import Setting
 from lizard_flooding.models import Breach, CutoffLocationSet, \
     ExternalWater, EmbankmentUnit, Measure, RegionSet,  \
     Project, Result, Region, Scenario, UserPermission, Strategy, SobekModel

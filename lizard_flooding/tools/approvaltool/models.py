@@ -2,7 +2,7 @@
 from django.contrib.gis.db import models
 from django.utils.translation import ugettext as _
 
-from lizard_base.models import Setting
+from flooding_base.models import Setting
 
 
 class ApprovalObjectType(models.Model):

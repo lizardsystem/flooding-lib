@@ -4,7 +4,7 @@ from django.utils.translation import ugettext as _
 import os.path
 
 from lizard_flooding.models import Region, Scenario
-from lizard_base.models import Setting as BaseSetting
+from flooding_base.models import Setting as BaseSetting
 
 class ExportRun(models.Model):
     """

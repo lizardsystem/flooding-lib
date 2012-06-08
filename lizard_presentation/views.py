@@ -22,7 +22,7 @@ import PIL.Image
 import mapnik
 import matplotlib.pyplot as plt
 
-from lizard_base.models import Setting
+from flooding_base.models import Setting
 from lizard_presentation.models import Field, SupportLayers
 from lizard_presentation.models import PresentationType, PresentationLayer
 from lizard_presentation.models import PresentationGrid

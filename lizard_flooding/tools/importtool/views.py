@@ -1,7 +1,7 @@
 
 from lizard_flooding.tools.importtool.forms import GroupImportForm
 from lizard_flooding.tools.importtool.models import ImportScenario, InputField, ImportScenarioInputField, IntegerValue, FloatValue, StringValue, TextValue, GroupImport
-from lizard_base.models import Setting
+from flooding_base.models import Setting
 from lizard_flooding.tools.approvaltool.models import ApprovalObject, ApprovalObjectType
 from lizard_flooding.models import Breach, Project, Scenario, SobekModel, SobekVersion, Region, Task, TaskType, WaterlevelSet, ScenarioBreach, ExtraInfoField, \
                         ExtraScenarioInfo, Result, ResultType
