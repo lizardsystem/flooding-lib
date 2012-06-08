@@ -1,0 +1,53 @@
+{% extends "lizard/infowindow_base.html" %}
+{% load i18n %}
+
+{% block title %}
+{% trans 'Scenario approval' %}
+{% endblock %}
+{% block header %}
+{% trans 'Scenario approval' %}
+{% endblock %}
+
+{% block content %}
+<table class="timeseriesWrapper"><tr><td>
+<table class="timeseries" summary="timeseries">
+	<thead class="headerTitle">
+		<td width="65"><b>{% trans "Date" %}</b></td>
+		<td width="75"><b>{% trans "By" %}</b></td>
+		<td width="50"><b>{% trans "Approved" %}</b></td>
+		<td width="130"><b>{% trans "Remarks" %}</b></td>
+	</thead>
+	<tbody>
+	{% if  ordered_approved_tasks %}
+ 		{% for task in ordered_approved_tasks %}	        
+		    <tr class="{% cycle 'cellDark' 'cell'%}">
+	    		<td>{{task.tfinished|date:"d-m-Y"}}</td>
+	    		<td>{{task.creatorlog}}</td>
+	    		<td>
+		    		{% ifequal task.successful None %}
+		    			<img src="{% url root_url %}static_media/images/question.png" />
+		    		{% else %}
+			    		{% if task.successful %}
+				    		<img src="{% url root_url %}static_media/images/icons/checked.png" />
+				    	{% else %}
+				    		<img src="{% url root_url %}static_media/images/false.gif" />
+		    			{% endif %}
+		    		{% endifequal %}		    			
+	    		</td>
+	    		<td>{{task.remarks}}</td>
+	    	</tr>	     
+    	{% endfor %}
+    {% else %}
+      <tr class='cellDark'><td COLSPAN=4> - </td></tr>
+    {% endif %} 
+    </tbody>   
+</table>
+</table>
+
+<form id="{{form_id}}" action='javascript: {{callbackfunction}};'>	
+    <table>
+        {{ form.as_table }}
+        <tr><td><input type="submit" value="Verzenden" /></td></tr>
+    </table>
+</form>
+{% endblock content %}

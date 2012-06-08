@@ -1,9 +1,0 @@
-{# 20090217 k.k.ha template for json result file #}
-{% spaceless %}
-{identifier:'id',items:[
-  {% for r in result_list %}
-  {id:{{ r.id }},name:'{{ r.resulttype.shortname_dutch }}{% ifnotequal r.value None %}: {{ r.value }} {{ r.unit }} {% endifnotequal %}',resulttypeid:{{ r.resulttype.id }},type:'{{ r.resulttype.overlaytype }}', firstnr:{{ r.firstnr }},lastnr:{{ r.lastnr }},startnr:{{ r.startnr }}}
-  {% ifequal forloop.last 0 %},{% endifequal %}
-  {% endfor %}
-]}
-{% endspaceless %}

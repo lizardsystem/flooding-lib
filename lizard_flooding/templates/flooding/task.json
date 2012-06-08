@@ -1,9 +1,0 @@
-{# 20090407 k.k.ha template for json task file #}
-{% spaceless %}
-{identifier:'id',items:[
-  {% for o in object_list %}
-  {id:{{ o.id }},scenario_id:{{ o.scenario.pk }}}
-  {% ifequal forloop.last 0 %},{% endifequal %}
-  {% endfor %}
-]}
-{% endspaceless %}

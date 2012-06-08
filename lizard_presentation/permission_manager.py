@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from lizard_presentation.models import PresentationLayer
 from lizard_visualization.models import ShapeDataLegend
-from lizard_flooding.permission_manager import PermissionManager as PermissionManagerFlooding
-from lizard_flooding.models import UserPermission as UserPermissionFlooding
+from flooding_lib.permission_manager import PermissionManager as PermissionManagerFlooding
+from flooding_lib.models import UserPermission as UserPermissionFlooding
 
 
 class PermissionManager:

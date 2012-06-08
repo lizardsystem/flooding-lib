@@ -1,0 +1,22 @@
+{% extends "lizard/infowindow_base.html" %}
+{% load i18n %}
+
+{% block title %}
+{% trans 'Edit' %}
+{% endblock %}
+{% block header %}
+{% trans 'Edit' %}
+{% endblock %}
+
+{% block content %}
+<a href="{% url root_url %}flooding/infowindow/?scenarioid={{scenario_id}}&action=showattachments&relatedto=inundationmodel" onclick="popupwindow=window.open('{% url root_url %}flooding/infowindow/?scenarioid={{scenario_id}}&action=showattachments&relatedto=inundationmodel','popupwindow','height=600,width=800,top=10,left=10,resizable');popupwindow.focus();return false;">{% trans 'Attachment for inundation model' %}</a>
+<br>
+<a href="{% url root_url %}flooding/infowindow/?scenarioid={{scenario_id}}&action=showattachments&relatedto=breachmodel" onclick="popupwindow=window.open('{% url root_url %}flooding/infowindow/?scenarioid={{scenario_id}}&action=showattachments&relatedto=breachmodel','popupwindow','height=600,width=800,top=10,left=10,resizable');popupwindow.focus();return false;">{% trans 'Attachment for external water model' %}</a>
+<br>
+<a href="{% url root_url %}flooding/infowindow/?scenarioid={{scenario_id}}&action=showattachments&relatedto=scenario" onclick="popupwindow=window.open('{% url root_url %}flooding/infowindow/?scenarioid={{scenario_id}}&action=showattachments&relatedto=scenario','popupwindow','height=600,width=800,top=10,left=10,resizable');popupwindow.focus();return false;">{% trans 'Attachment for scenario' %}</a>
+<br>
+<a href="{% url root_url %}flooding/infowindow/?scenarioid={{scenario_id}}&action=showattachments&relatedto=project" onclick="popupwindow=window.open('{% url root_url %}flooding/infowindow/?scenarioid={{scenario_id}}&action=showattachments&relatedto=project','popupwindow','height=600,width=800,top=10,left=10,resizable');popupwindow.focus();return false;">{% trans 'Attachment for project' %}</a>
+<br>
+<br>
+<a href="{% url root_url %}flooding/infowindow/?scenarioid={{scenario_id}}&action=editproperties" onclick="popupwindow=window.open('{% url root_url %}flooding/infowindow/?scenarioid={{scenario_id}}&action=editproperties','popupwindow','height=600,width=800,top=10,left=10,resizable');popupwindow.focus();return false;">{% trans 'Edit scenario properties' %}</a>
+{% endblock content %}

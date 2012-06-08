@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from lizard_presentation.models import Animation, Classified, ClassifiedNr, CustomIndicator, Derivative, Field, FieldChoice, PresentationGrid, PresentationLayer, PresentationNoGeom, PresentationShape, PresentationSource, PresentationType, PresentationValueTable, SupportLayers
-from lizard_flooding.models import Scenario_PresentationLayer, ResultType_PresentationType
+from flooding_lib.models import Scenario_PresentationLayer, ResultType_PresentationType
 from django.contrib import admin
 from django.contrib.gis.admin import OSMGeoAdmin
 

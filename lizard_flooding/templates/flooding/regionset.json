@@ -1,9 +1,0 @@
-{# 20090217 k.k.ha template for json region sets #}
-{% spaceless %}
-{identifier:'id',label:'name',items:[
-  {% for rs in regionset_list %}
-  {id:{{ rs.id }},name:'{{ rs.name }}',parent:{% firstof rs.parent.id -1 %}}
-  {% ifequal forloop.last 0 %},{% endifequal %}
-  {% endfor %}
-]}
-{% endspaceless %}

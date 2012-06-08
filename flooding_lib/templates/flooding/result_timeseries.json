@@ -1,0 +1,9 @@
+{# 20090312 k.k.ha template for json timeseries #}
+{% spaceless %}
+{items:[
+  {% for row in data %}
+  {datetime:'{{ row.datetime }}',value:{{ row.value }}}
+  {% ifequal forloop.last 0 %},{% endifequal %}
+  {% endfor %}
+]}
+{% endspaceless %}

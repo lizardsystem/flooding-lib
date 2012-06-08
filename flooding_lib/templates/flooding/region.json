@@ -1,0 +1,9 @@
+{# 20090216 k.k.ha template for json region file #}
+{% spaceless %}
+{identifier:'id',label:'name',items:[
+  {% for r in region_list %}
+  {id:{{ r.id }},name:'{{ r.name }}'}
+  {% ifequal forloop.last 0 %},{% endifequal %}
+  {% endfor %}
+]}
+{% endspaceless %}

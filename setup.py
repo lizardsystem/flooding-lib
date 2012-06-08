@@ -5,7 +5,7 @@ version = '1.28.dev0'
 
 long_description = '\n\n'.join([
     open('README.txt').read(),
-    open(os.path.join('lizard_flooding', 'USAGE.txt')).read(),
+    open(os.path.join('flooding_lib', 'USAGE.txt')).read(),
     open('TODO.txt').read(),
     open('CREDITS.txt').read(),
     open('CHANGES.txt').read(),
@@ -27,7 +27,7 @@ install_requires = [
 tests_require = [
     ]
 
-setup(name='lizard-flooding',
+setup(name='flooding-lib',
       version=version,
       description="TODO",
       long_description=long_description,
@@ -40,7 +40,7 @@ setup(name='lizard-flooding',
       author_email='TODO@nelen-schuurmans.nl',
       url='',
       license='GPL',
-      packages=['lizard_flooding',
+      packages=['flooding_lib',
                 'lizard_presentation',
                 'lizard_visualization'],
       include_package_data=True,

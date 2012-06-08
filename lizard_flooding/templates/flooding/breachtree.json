@@ -1,9 +1,0 @@
-{# 20090420 k.k.ha template for json breach tree #}
-{% spaceless %}
-{identifier:'bid',items:[
-  {% for o in object_list %}
-  { {% if o.isbreach %}id:{{ o.breachid }}{% else %}id:-{{ o.externalwaterid }}{% endif %},name:'{{ o.name }}',{% if o.isbreach %}{% else %}type: {{o.type}},{% endif %} parentid:{% ifnotequal o.parentid None %}-{% endifnotequal %}{{ o.parentid }},isbreach:{{ o.isbreach }}{% if o.isbreach %},x:{{ o.x }},y:{{ o.y }}{% endif %}}
-  {% ifequal forloop.last 0 %},{% endifequal %}
-  {% endfor %}
-]}
-{% endspaceless %}

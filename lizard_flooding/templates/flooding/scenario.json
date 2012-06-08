@@ -1,9 +1,0 @@
-{# 20090217 k.k.ha template for json region file #}
-{% spaceless %}
-{identifier:'id',label:'name',items:[
-  {% for s in scenario_list %}
-  {id:{{ s.id }},name:'{{ s.name }}',projectid:{{ s.project.pk }}}
-  {% ifequal forloop.last 0 %},{% endifequal %}
-  {% endfor %}
-]}
-{% endspaceless %}

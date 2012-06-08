@@ -1,9 +1,0 @@
-{# 20090408 k.k.ha template for json cutofflocations. objects are scenariocutofflocations #}
-{% spaceless %}
-{identifier:'id',items:[
-  {% for o in object_list %}
-  {id:{{ o.cutofflocation.id }},name:'{{ o.cutofflocation.name }}',bottomlevel:{{ o.cutofflocation.bottomlevel }},width:{{ o.cutofflocation.width}},type:{{ o.cutofflocation.type }},tclose:{{ o.get_tclose_seconds }},x:{{ o.cutofflocation.geom.x }},y:{{ o.cutofflocation.geom.y }},isinternal:{{ o.cutofflocation.isinternal }}}
-  {% ifequal forloop.last 0 %},{% endifequal %}
-  {% endfor %}
-]}
-{% endspaceless %}

@@ -1,11 +1,15 @@
-Changelog of lizard-flooding
+Changelog of flooding-lib
 ===================================================
 
 
 1.28 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- RENAMED lizard-flooding TO flooding_lib
+
+- Moved stuff to Github
+
+- Got tests etc to work
 
 
 1.27 (2012-05-16)

@@ -1,9 +1,0 @@
-{# 20090217 b.roos template for json node file #}
-{% spaceless %}
-{identifier:'id',label:'name',items:[
-  {% for id in ids %}
-  {id:'{{ id }}'}
-  {% ifequal forloop.last 0 %},{% endifequal %}
-  {% endfor %}
-]}
-{% endspaceless %}

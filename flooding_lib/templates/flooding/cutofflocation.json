@@ -1,0 +1,9 @@
+{# 20090504 k.k.ha template for json cutofflocations. #}
+{% spaceless %}
+{identifier:'id',items:[
+  {% for o in object_list %}
+  {id:{{ o.id }},name:'{{ o.name }}',type:{{ o.type }},deftclose:{{ o.get_deftclose_seconds }},x:{{ o.geom.x }},y:{{ o.geom.y }} }
+  {% ifequal forloop.last 0 %},{% endifequal %}
+  {% endfor %}
+]}
+{% endspaceless %}

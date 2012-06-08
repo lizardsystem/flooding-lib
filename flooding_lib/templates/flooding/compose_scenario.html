@@ -1,0 +1,760 @@
+<!DOCTYPE html "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7"> 
+    <title>Lizard</title>
+	<link rel="shortcut icon" href="static_media/images/lizard_webinterface_favicon2.ico">
+
+	<script> 
+	var isomorphicDir="{% url root_url %}static_media/weblib/isomorphic/"; // abs path to isomorphic, needed to locate SmartClient CSS
+	</script>
+
+	<SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/weblib/isomorphic/system/modules/ISC_Core.js"></SCRIPT>
+    <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/weblib/isomorphic/system/modules/ISC_Foundation.js"></SCRIPT>
+    <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/weblib/isomorphic/system/modules/ISC_Containers.js"></SCRIPT>
+    <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/weblib/isomorphic/system/modules/ISC_Grids.js"></SCRIPT>
+    <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/weblib/isomorphic/system/modules/ISC_Forms.js"></SCRIPT>
+    <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/weblib/isomorphic/system/modules/ISC_DataBinding.js"></SCRIPT>
+	<SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/Isomorphic_NenS_skin/load_skin.js"></SCRIPT>
+	<SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/weblib/SCpatch.js"></SCRIPT>
+	<SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/scripts/shared/lib/NGeneral.js"></SCRIPT>
+
+</head>
+<body>
+<script>
+
+    /************************Form**********************************/
+	donepitalert = false;
+	donebottombreachalert = false;
+
+	isc.DataSource.create({
+	    ID:"dsPostScenario",
+	    dataFormat:"json",
+	    dataURL: '{% url root_url %}flooding/service/',
+        requestProperties: { httpMethod: "POST" },
+	    autoDraw:false
+	});
+
+
+    isc.DynamicForm.create({
+        ID: "formScenarioSettings",
+        width: "100%",
+        height: '100%',
+        padding: 5,
+        minHeigh: 150,
+        overflow: "auto",
+        minColWidth: 80,
+        numCols: 5,
+        border: "1px solid grey",
+        dataSource: dsPostScenario,
+		canSubmit: true,
+		method: "POST",
+        colWidths: [100, 200, 100, 200, 100],
+        fields: [
+        { name: "action", _constructor: "HiddenItem", defaultValue: 'post_newscenario' },
+        { name: "breach_id", _constructor: "HiddenItem", defaultValue: {{ breach.id }} },
+        { name: "time_rel", _constructor: "HiddenItem" },
+        { name: "loccutoffs", _constructor: "HiddenItem" },
+        { name: "tpeak_ms", _constructor: "HiddenItem" },
+		{ name: "tstorm_ms", _constructor: "HiddenItem" },
+		{ name: "tsim_ms", _constructor: "HiddenItem" },
+		{ name: "tstartbreach_ms", _constructor: "HiddenItem" },
+		{ name: "tdeltaphase_ms", _constructor: "HiddenItem" },
+		{ name: "tmaxdepth_ms", _constructor: "HiddenItem" },
+        { name: "inundationmodel", _constructor: "HiddenItem" },
+        { name: "externalwatermodel", _constructor: "HiddenItem" },
+        { name: "start_calculation", _constructor: "HiddenItem", defaultValue: "0" },
+        { name: "extw_type", _constructor: "HiddenItem", defaultValue: {{ breach.externalwater.type }} },
+        { name: "decheight", _constructor: "HiddenItem", defaultValue: {% if breach.decheight %} {{ breach.decheight }} {% else %} 0 {% endif %} },
+        { name: "extwmaxlevel_ini", _constructor: "HiddenItem", defaultValue: {% if breach.levelnormfrequency %} {{ breach.levelnormfrequency }} {% else %} 0 {% endif %} },
+        { name: "extwrepeattime_ini", _constructor: "HiddenItem", defaultValue: {% if breach.region.normfrequency %} {{ breach.region.normfrequency }} {% else %} 1 {% endif %} },
+        { name: "strategyId", _constructor: "HiddenItem"},
+        { name: "measures", _constructor: "HiddenItem", defaultValue: ""},
+        {
+            name: "location_name",
+            type: "header",
+            defaultvalue: '{{ breach.region.name }} - {{ breach.name }}'
+        }, {
+            name: "name",
+            title: "scenario naam",
+            editorType: "TextAreaItem",
+            required: true,
+            colSpan: 1, width: 150, height: 38, endRow: false
+        }, {
+            name: "remarks",
+            title: "scenario beschrijving",
+            editorType: "TextAreaItem",
+            //_constructor: "TextAreaItem",
+            //showTitle: true,
+            defaultValue: "-",
+            colSpan: 2, width: 300, height: 50, endRow: true
+        }, {
+            name: "project_fk",
+            title: "project",
+            type: "select",
+            required: true,
+            valueMap: {
+			{% for project in projects %}
+            	{{ project.id }}:'{{ project.name }}'
+            	{% ifequal forloop.last 0 %},{% endifequal %}
+            {% endfor %} }
+        },  {
+            name: "calcpriority",
+            title: "doorreken prioriteit",
+            type: "select",
+            required: true,
+            valueMap: {
+                "10": "laag",
+                "20": "gemiddeld",
+                "30": "hoog",
+                "40": "zeer hoog (calamiteit)"
+            },
+            defaultValue: "20",
+            endRow: true
+        }, {
+            name: "tsim",
+            title: "simulatie duur",
+            editorType: "text",
+            required: true,
+            hint: "dd hh:mm",
+            dateFormatter: intervalFormatter,
+            blur: "this.setValue(intervalFormatter(this.getValue()));get_graph();",
+            width: 120,
+            startRow: true,
+            defaultValue: intervalFormatter( {{ breach.externalwater.deftsim }} )
+        }, {//***************************************************************//
+            defaultValue: "Buitenwaterstand",
+            type: "header"
+        }, {
+            ID: "frmextwmaxlevel",
+            name: "extwmaxlevel",
+            title: "maximum peil",
+            editorType: "spinner",
+            required: true,
+            min: {{ breach.externalwater.minlevel }},
+            max: {{ breach.externalwater.maxlevel }},
+            step: 0.1,
+            hint: "m NAP",
+            blur: "get_graph();",
+            {% if sealake  %}
+            change: function(form, item, value){
+                frmextwrepeattime.setValue((Math.pow(10, (value - form.getValue("extwmaxlevel_ini")) / form.getValue("decheight")) * form.getValue("extwrepeattime_ini")).toFixed(0));
+            },
+            {% endif %}
+            width: 100,
+            defaultValue: {{ breach.levelnormfrequency }}
+        },
+        {% if sealake  %}
+        {
+            ID: "frmextwrepeattime",
+            name: "extwrepeattime",
+            title: "herhalingstijd",
+            editorType: "spinner",
+            required: true,
+            min: 1,
+            max: 4000000,
+            step: 100,
+            blur: "get_graph();",
+            change: function(form, item, value){
+                frmextwmaxlevel.setValue((Math.LOG10E * Math.log((value / form.getValue("extwrepeattime_ini"))) * form.getValue("decheight") + form.getValue("extwmaxlevel_ini") * 1).toFixed(2));
+                if (form.getValue('extwtype') == (2)) {
+                    frmextwbaselevel.setValue((Math.LOG10E * Math.log((value / form.getValue("extwrepeattime_ini"))) * form.getValue("decheightbaselevel") + form.getValue("baselevel_ini") * 1).toFixed(2));
+                }
+                get_graph();
+            },
+            width: 100,
+            defaultValue: {{ breach.region.normfrequency }}
+        },
+        {% endif %}
+        {% if  lake %}
+        {
+            ID: "frmextwbaselevel",
+            name: "extwbaselevel",
+            title: "meerpeil",
+            editorType: "spinner",
+            required: true,
+            defaultValue: {% if breach.defbaselevel %} {{ breach.defbaselevel }} {% else %} {{ breach.levelnormfrequency }} {% endif %} ,
+            min: {{ breach.externalwater.minlevel }},
+            max: {{ breach.externalwater.maxlevel }},
+            blur: "get_graph();",
+            step: 0.1,
+            width: 100
+        },
+        {% endif %}
+        {% if sealake  %}
+        {
+            name: "tstorm",
+            title: "storm duur",
+            editorType: "text",
+            hint: "dd hh:mm",
+            required: true,
+            dateFormatter: intervalFormatter,
+            blur: "this.setValue(intervalFormatter(this.getValue()));get_graph();",
+            width: 120,
+            defaultValue: intervalReader( {{ breach.externalwater.deftstorm }} )
+        }, {
+            name: "tpeak",
+            title: "piek duur",
+            editorType: "text",
+            hint: "dd hh:mm",
+            required: true,
+            dateFormatter: intervalFormatter,
+            blur: "this.setValue(intervalFormatter(intervalReader(this.getValue())));get_graph();",
+            width: 120,
+            defaultValue: intervalReader( {{  breach.externalwater.deftpeak }} )
+        },
+        {% endif %}
+        {% if sea   %}
+        {
+            name: "loctide",
+            title: "Getijdenlocatie",
+            type: "select",
+            required: true,
+			valueMap: {
+			{% for loc in loctide %} {{ loc.id }}:"{{ loc.name|escape }}"   {% ifequal forloop.last 0 %},{% endifequal %} {% endfor %} },
+            defaultValue: {{ breach.defaulttide_id }},
+            blur: "get_graph();",
+            width: 150
+        }, {
+            name: "tdeltaphase",
+            title: "Tijdsverschuiving getij piek tov storm piek",
+            editorType: "text",
+            hint: "+/- dd hh:mm",
+            defaultValue: intervalReader("0 00:00"),
+            dateFormatter: intervalFormatter,
+            blur: "this.setValue(intervalFormatter(this.getValue()));get_graph();",
+            width: 120
+        },
+        {% endif %}
+        {
+            defaultValue: "Bres",
+            type: "header"
+        },
+        {% if sea  %}
+        {
+            name: "methstartbreach",
+            title: "Moment van doorbreken",
+            _constructor: "SelectItem",
+            prompt: "Methode waarmee het moment van doorbreken wordt bepaald",
+            showIf: "form.getValue('extwtype') == (1)",
+            valueMap: ["maximum waterstand", "tijdstip"],
+            defaultValue: "maximum waterstand",
+            multiple: false,
+            width: 150,
+            endRow: true,//animatePickList:true,
+            change: function(form, item, value){
+                if (value == 'maximum waterstand') {
+                    form.getField('tstartbreach').setDisabled(true);
+                }
+                else if (value == 'tijdstip') {
+                    form.getField('tstartbreach').setDisabled(false);
+                 }
+            }
+        },
+        {% endif %}
+
+        {
+            name: "tstartbreach",
+            title: "moment van doorbreken",
+            {% if sealake %}
+            	editorType: "text",
+            {% else %}
+            	_constructor: "HiddenItem",
+            {% endif %}
+            hint: "+/- dd hh:mm",
+            required: true,
+            defaultValue: "00:00",
+            prompt: "tijd tussen doorbreken en maximale waterstand",
+            dateFormatter: intervalFormatter,
+            blur: "this.setValue(intervalFormatter(this.getValue()));get_graph();",
+            disabled: true,
+            width: 100
+        },
+        {
+            ID: "frmbottomlevelbreach",
+            name: "bottomlevelbreach",
+            title: "niveau van de doorbraak",
+            editorType: "spinner",
+            required: true,
+            hint: "m NAP",
+            change: function(form, item, value){
+                if (value < frmpitdepth.getValue()) {
+                	if (!donebottombreachalert) {
+                		alert("'niveau wiel' moet lager zijn dan 'niveau van de doorbraak'.");
+                		donebottombreachalert = true;
+                	}
+                	if ( value > frmpitdepth.min && value < frmpitdepth.max) {
+                		frmpitdepth.setValue(value - 0.01);
+                	} else if (value <= frmpitdepth.min){
+                		item.setValue(frmpitdepth.min+0.01);
+                	} else if ( value >= frmpitdepth.max) {
+                		item.setValue(frmpitdepth.max+0.01);
+                	}
+
+                }
+            },
+            defaultValue: {{ bottomlevelbreach.defaultvalue  }},
+            min: {{ bottomlevelbreach.min  }},
+            max: 15,
+            step: 0.1,
+            width: 100,
+            startRow: true
+        }, {
+            ID: "frmpitdepth",
+            name: "pitdepth",
+            title: "niveau wiel",
+            hint: "m NAP",
+            change: function(form, item, value){
+                if (value > frmbottomlevelbreach.getValue()) {
+                	if (!donepitalert) {
+                		alert("'niveau wiel' moet lager zijn dan 'niveau van de doorbraak'.");
+                		donepitalert = true;
+                	}
+                	if ( value > frmbottomlevelbreach.min && value < frmbottomlevelbreach.max) {
+                		frmbottomlevelbreach.setValue(value + 0.01);
+                	} else if (value <= frmbottomlevelbreach.min){
+                		item.setValue(frmbottomlevelbreachh.min-0.01);
+                	} else if ( value >= frmbottomlevelbreach.max) {
+                		item.setValue(frmbottomlevelbreach.max-0.01);
+                	}
+                }
+            },
+            editorType: "spinner",
+            required: true,
+            defaultValue: {{ pitdepth.defaultvalue }},
+            min: -15,
+            max: {{ pitdepth.max }},
+            step: 0.1,
+            width: 100
+        }, {
+            name: "buttonAdvancedSettings",
+            title: "Geavanceerde settings",
+            _constructor: "ButtonItem",
+            showRollOver: false,
+            showDown: true,
+            showFocused: false,
+            colSpan: 3,
+            width: 150,
+            click: function(form, item){
+                var checkbox = form.getField('showAdvancedSettings');
+                checkbox.setValue(!checkbox.getValue());
+                form.redraw();
+            }
+        }, {//hidden checkbox for 'buttonAdvancedSettings'
+            name: "showAdvancedSettings",
+            _constructor: "HiddenItem",
+            //redrawOnChange: true,
+            defaultValue: false,
+            width: 0
+        }, {
+            name: "ucritical",
+            title: "kritieke stroomsnelheid",
+            editorType: "spinner",
+            hint: "m/s",
+
+            required: true,
+            defaultValue: {{ breach.defrucritical }},
+            min: 0.001,
+            max: 500,
+            step: 0.05,
+            showIf: "form.getValue('showAdvancedSettings') == true",
+            width: 100
+        }, {
+            name: "widthbrinit",
+            title: "initiele bresbreedte",
+            editorType: "spinner",
+            hint: "m",
+            required: true,
+            showIf: "form.getValue('showAdvancedSettings') == true",
+            defaultValue: 10,
+            min: 0.1,
+            max: 500,
+            step: 1,
+            width: 100
+        }, {
+            name: "tmaxdepth",
+            title: "duur diepte groei",
+            editorType: "text",
+            hint: "dd hh:mm",
+            required: true,
+            defaultValue: "01:00",
+            dateFormatter: intervalFormatter,
+            blur: "this.setValue(intervalFormatter(this.getValue()));",
+            showIf: "form.getValue('showAdvancedSettings') == true",
+            width: 100
+        }, {
+            name: "brf1",
+            title: "bresgroei factor 1 (alpha)",
+            editorType: "spinner",
+            required: true,
+            showIf: "form.getValue('showAdvancedSettings') == true",
+            defaultValue: 1.3,
+            min: 0.0001,
+            max: 500,
+            step: 0.05,
+            width: 100
+        }, {
+            name: "brf2",
+            title: "bresgroei factor 2 (beta)",
+            editorType: "spinner",
+            required: true,
+            showIf: "form.getValue('showAdvancedSettings') == true",
+            defaultValue: 0.04,
+            min: 0.0001,
+            max: 500,
+            step: 0.01,
+            width: 100
+        }, {
+            name: "brdischcoef",
+            title: "afvoer coefficient",
+            editorType: "spinner",
+            required: true,
+            showIf: "form.getValue('showAdvancedSettings') == true",
+            defaultValue: 1,
+            min: 0.1,
+            max: 2,
+            step: 0.1,
+            width: 100
+        },
+        {% if sea %}
+        {
+            name: "useManualInput",
+            title: "Gebruik handmatige invoer",
+            type: "checkbox",
+            required: true,
+            showIf: "form.getValue('showAdvancedSettings') == true",
+            changed: function(form, item, value){
+                if (value == true) {
+                	//buttonGetGraph.setDisabled(true);
+
+                } else {
+                  	//buttonGetGraph.setDisabled(false);
+                }
+            },
+            defaultValue: false,
+            endRow:true,
+            min: 0.1,
+            max: 2,
+            step: 0.1,
+            width: 100
+        },
+        {
+            name: "waterlevelInput",
+            title: "invoeren waterlevels (komma gescheiden)",
+            editorType: "TextAreaItem",
+            //_constructor: "TextAreaItem",
+            //showTitle: true,
+            defaultValue: "",
+            showIf: "form.getValue('showAdvancedSettings') == true",
+            colSpan: 2, width: 300, height: 50
+        },
+        {
+            name: "buttonLoadWaterlevels",
+            title: "Download buitenwaterstand",
+            _constructor: "ButtonItem",
+            showRollOver: false,
+            //showDown: true,
+            showFocused: false,
+            colSpan: 2,
+            width: 150,
+            showIf: "form.getValue('showAdvancedSettings') == true",
+            click: function(form, item){
+
+                window.open(get_waterlevel_csv_url());
+            }
+        },
+        {% endif %}
+        {
+            name: "saveStrategy",
+            title: "Sla maatregelen aan keringen op",
+            type: "checkbox",
+            required: false,
+            endRow: true,
+            showIf: "form.getValue('showAdvancedSettings') == true",
+            changed: function(form, item, value){
+                if (value == true) {
+                	formScenarioSettings.getField('strategyName').setEnabled(true);
+                } else {
+                  	formScenarioSettings.getField('strategyName').setEnabled(false);
+                }
+            }
+        },
+ 		{
+            name: "strategyName",
+            title: "Maatregelenset naam",
+            editorType: "TextAreaItem",
+            showIf: "form.getValue('showAdvancedSettings') == true",
+            required: false,
+            disabled: true,
+            colSpan: 1, width: 150, height: 38, endRow: false
+        }
+        ],
+        //canDragResize: true,
+        autoDraw: false
+    });
+
+    //HTMLPane
+    isc.Img.create({
+        ID: "scGraph",
+        width: "100%",
+        height: "300",
+        border: "1px solid blue",
+        overflow: "hidden",
+    	imageType: "center",
+    	canDragResize: true,
+        autordraw:false
+    });
+    scGraph.hide();
+
+    isc.IButton.create({
+        ID: "buttonSubmitSave",
+        title: "Opslaan en in wachtrij plaatsen",
+        showRollOver: false,
+        showDown: true,
+        showFocused: false,
+        width: 150,
+
+        showRollOver: false,
+        click: function() {
+                    var intervals = {}
+    			formScenarioSettings.getField('tpeak_ms').setValue(intervalReader(formScenarioSettings.getValue('tpeak')).getTime());
+				formScenarioSettings.getField('tstorm_ms').setValue(intervalReader(formScenarioSettings.getValue('tstorm')).getTime());
+				formScenarioSettings.getField('tsim_ms').setValue(intervalReader(formScenarioSettings.getValue('tsim')).getTime());
+				formScenarioSettings.getField('tstartbreach_ms').setValue(intervalReader(formScenarioSettings.getValue('tstartbreach')).getTime());
+				formScenarioSettings.getField('tdeltaphase_ms').setValue(intervalReader(formScenarioSettings.getValue('tdeltaphase')).getTime());
+				formScenarioSettings.getField('tmaxdepth_ms').setValue(intervalReader(formScenarioSettings.getValue('tmaxdepth')).getTime());
+
+                {% if sea %}
+                var waterlevels_with_return = formScenarioSettings.getValue('waterlevelInput')
+                formScenarioSettings.getField('waterlevelInput').setValue(formScenarioSettings.getValue('waterlevelInput').replace(/\r\n/g,'|').replace(/\n/g,'|'));
+                {% endif %}
+
+                formScenarioSettings.saveData(function(dsResponse, data, dsRequest) {
+                	if (dsResponse.httpResponseCode == 200) {
+                		if (data.successful == true) {
+                			alert(data.save_log);
+                			windowsettings.hide();
+                		} else {
+                			formScenarioSettings.getField('waterlevelInput').setValue(waterlevels_with_return);
+                			alert('error saving: ' + data.save_log)
+
+                		}
+                	} else {
+                		formScenarioSettings.getField('waterlevelInput').setValue(waterlevels_with_return);
+                		alert('server error, scenario niet opgeslagen')
+                	}
+                });
+        },
+        autoDraw: false
+    });
+
+
+    function get_graph() {
+		if (scGraph.isVisible()) {
+			var args = {};
+			args.width = scGraph.getWidth();
+			args.height = scGraph.getHeight();
+			args.breach_id = formScenarioSettings.getValue('breach_id');
+			args.extwmaxlevel = formScenarioSettings.getValue('extwmaxlevel');
+			args.tpeak =  intervalReader(formScenarioSettings.getValue('tpeak')).getTime();
+			args.tstorm =  intervalReader(formScenarioSettings.getValue('tstorm')).getTime();
+			args.tsim =  intervalReader(formScenarioSettings.getValue('tsim')).getTime();
+			args.tstartbreach =  intervalReader(formScenarioSettings.getValue('tstartbreach')).getTime();
+			args.tdeltaphase =  intervalReader(formScenarioSettings.getValue('tdeltaphase')).getTime();
+			args.tide_id = formScenarioSettings.getValue('loctide');
+			args.extwbaselevel = formScenarioSettings.getValue('extwbaselevel');
+
+			args.action = 'get_externalwater_graph';
+			args.useManualInput = false;
+			{% if sea %}
+			if (formScenarioSettings.getValue('useManualInput') == true) {
+				args.useManualInput = formScenarioSettings.getValue('useManualInput');
+				args.timeserie = formScenarioSettings.getValue('waterlevelInput').replace(/\r\n/g,'|').replace(/\n/g,'|');
+				if (args.timeserie.length > 0 && args.timeserie[args.timeserie.length-1]=="|")
+					{
+						args.timeserie = args.timeserie.substring(0, args.timeserie.length-1)
+					}
+			}
+			{% endif %}
+			var url = '{% url root_url %}flooding/service/?';
+
+			var first = true;
+			for (elem in args) {
+				if  (args[elem]!=null) {
+					if (!first) { url+='&' } else {	first = false }
+					url+= elem + '=' + args[elem]
+				}
+			}
+
+			RPCManager.sendRequest({
+							 actionURL: '{% url root_url %}flooding/service/',
+							 useSimpleHttp: true,
+							 showPrompt:true,
+							 httpMethod: "POST",
+							 params: {action: 'get_externalwater_graph',
+							 		  width: args.width,
+            						  height: args.height,
+            						  breach_id: args.breach_id,
+            						  extwmaxlevel: args.extwmaxlevel,
+            						  tpeak: args.tpeak,
+            						  tstorm: args.tstorm,
+            						  tsim: args.tsim,
+            						  tstartbreach: args.tstartbreach,
+            						  tdeltaphase: args.tdeltaphase,
+            						  tide_id: args.tide_id,
+            						  extwbaselevel: args.extwbaselevel,
+            						  use_manual_input: args.useManualInput,
+            						  timeserie: args.timeserie},
+							 callback: function(response, data, request){
+				                if (response.httpResponseCode == 200) {
+				                    console.log("Data ophalen gelukt.");
+				                    scGraph.setSrc('{% url root_url %}flooding/service/?action=get_externalwater_graph_session&ct='+(new Date).valueOf())
+				                	}
+				                	else {
+				                    console.log("Fout bij het ophalen van gegevens.");
+				                	}
+				                }
+				        });
+      	} else {
+      		//do nothing
+      	}
+    }
+
+    function get_waterlevel_csv_url() {
+		var args = {};
+		args.width = scGraph.getWidth();
+		args.height = scGraph.getHeight();
+		args.breach_id = formScenarioSettings.getValue('breach_id');
+		args.extwmaxlevel = formScenarioSettings.getValue('extwmaxlevel');
+		args.tpeak =  intervalReader(formScenarioSettings.getValue('tpeak')).getTime();
+		args.tstorm =  intervalReader(formScenarioSettings.getValue('tstorm')).getTime();
+		args.tsim =  intervalReader(formScenarioSettings.getValue('tsim')).getTime();
+		args.tstartbreach =  intervalReader(formScenarioSettings.getValue('tstartbreach')).getTime();
+		args.tdeltaphase =  intervalReader(formScenarioSettings.getValue('tdeltaphase')).getTime();
+		args.tide_id = formScenarioSettings.getValue('loctide');
+		args.extwbaselevel = formScenarioSettings.getValue('extwbaselevel');
+
+		args.action = 'get_externalwater_csv';
+		var url = '{% url root_url %}flooding/service/?';
+
+		var first = true;
+		for (elem in args) {
+			if  (args[elem]!=null) {
+				if (!first) { url+='&' } else {	first = false }
+				url+= elem + '=' + args[elem]
+			}
+		}
+  		return url
+
+    }
+
+    isc.IButton.create({
+        ID: "buttonGetGraph",
+        title: "Toon grafiek",
+    	showRollOver: false,
+    	showDown: true,
+    	showFocused: false,
+    	actionType: "checkbox",
+        width: 150,
+        click: function() {
+
+        		if (this.isSelected()) {
+	        		this.setTitle("Verberg grafiek");
+
+	        		//scGraph.setHeight("300");
+	        		scGraph.show();
+	        		scSettingsTotal.redraw();
+	        		get_graph();
+
+	        	} else {
+	        		this.setTitle("Toon grafiek");
+	        		scGraph.hide();
+	        	}
+
+        },
+        autoDraw: false
+    });
+
+	isc.HLayout.create({
+        ID: 'scenarioInfobuttons',
+        height: 28,
+        padding: 2,
+        membersMargin: 5,
+        backgroundColor: 'grey',
+        overflow: "visible",
+        border: "1px solid grey",
+        resizeBarTarget: "next",
+        members: [
+       		buttonSubmitSave,
+       		buttonGetGraph
+        ],
+        autoDraw: false
+    })
+
+    isc.VLayout.create({
+        ID: 'scSettingsTotal',
+        width: "100%",
+        height:"100%",
+        overflow: "hidden",
+        members: [
+            formScenarioSettings,
+            scGraph,
+            scenarioInfobuttons
+        ],
+        autoDraw: true
+    });
+
+    if (typeof(listLoccutoffs)!="undefined") {
+
+        var loccutoffs = "";
+        var endRow = listLoccutoffs.data.getLength();
+        for (var i = 0; i < endRow ; i++ ){
+            loccutoffs += listLoccutoffs.data[i].id + "|" + listLoccutoffs.data[i].action + "|" + intervalReader(listLoccutoffs.data[i].tclose).getTime() ;
+            if (i != endRow -1) {
+                loccutoffs += ",";
+            }
+        }
+        formScenarioSettings.getField('loccutoffs').setValue(loccutoffs);
+
+        //formScenarioSettings.rememberValues();
+        console.log("aantal afsluitlocaties aan form toegevoegd: " + endRow )
+    }
+    if (typeof(strategyId)!="undefined") {
+
+        formScenarioSettings.getField('strategyId').setValue(strategyId);
+
+        //formScenarioSettings.rememberValues();
+        console.log("aantal afsluitlocaties aan form toegevoegd: " + endRow )
+    }
+
+    if (typeof(listMeasures)!="undefined") {
+
+        var measures = "";
+        var endRow = listMeasures.data.getLength();
+        for (var i = 0; i < endRow ; i++ ){
+            measures += listMeasures.data[i].id + "|" + listMeasures.data[i].name + "|" + listMeasures.data[i].reference + "|" + listMeasures.data[i].adjustment;
+            if (i != endRow -1) {
+                measures += ";";
+            }
+        }
+        formScenarioSettings.getField('measures').setValue(measures);
+
+        //formScenarioSettings.rememberValues();
+        console.log("aantal measures aan form toegevoegd: " + endRow )
+    }
+
+
+    if (typeof(selectInundationModel)!="undefined") {
+    	formScenarioSettings.getField('inundationmodel').setValue( selectInundationModel.getValue() );
+    }
+    if (typeof(selectExtwaterModel)!="undefined") {
+    	formScenarioSettings.getField('externalwatermodel').setValue( selectExtwaterModel.getValue() );
+    }
+
+    
+    </script>
+</body>
+
+

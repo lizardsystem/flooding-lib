@@ -1,0 +1,6 @@
+{# 20090430 B.Roos template for json result settings file #}
+{% spaceless %}
+{identifier:'id',items:
+  {id:{{ result.id }},firstnr:{{ result.firstnr }},lastnr:{{ result.lastnr }},startnr:{{ result.startnr }},north:{{ pictureinfo.north }},south:{{ pictureinfo.south }},west:{{ pictureinfo.west }},east:{{ pictureinfo.east }},projection:'{{ pictureinfo.projection }}',gridsize:{{ pictureinfo.gridsize }},width:{{ pictureinfo.width }},height:{{ pictureinfo.height }}}
+}
+{% endspaceless %}

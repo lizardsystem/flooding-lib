@@ -1,9 +1,0 @@
-{# 20090420 k.k.ha template for json scenario tree #}
-{% spaceless %}
-{identifier:'sid',items:[
-  {% for o in object_list %}
-  { {% if o.isscenario %}sid:{{ o.sid }}{% else %}pid:{{ o.pid }}{% endif %},name:'{{ o.name }}',parentid:{{ o.parentid }},isscenario:{{ o.isscenario }},status:{{ o.status }}}
-  {% ifequal forloop.last 0 %},{% endifequal %}
-  {% endfor %}
-]}
-{% endspaceless %}

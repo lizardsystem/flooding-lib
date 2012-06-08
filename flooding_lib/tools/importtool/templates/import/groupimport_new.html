@@ -1,0 +1,27 @@
+{% extends "lizard/base.html" %}
+{% load i18n %}
+{% block title %}Lizard import tool{% endblock %}
+{% block stylesheets %}
+		<link rel="shortcut icon" href="{{ url_favicon }}">
+		<link href="{% url root_url %}static_media/style/style.css" media="screen" type="text/css" rel="stylesheet">
+		<link href="{% url root_url %}static_media/style/forms.css" media="screen" type="text/css" rel="stylesheet">
+
+{% endblock stylesheets %}
+{% block bodyarguments %}{% endblock %}
+{% block content %}
+		<BR>
+
+		<ul>
+		<li><a href="/static_media/examples/Groupimport_type1.xls">Voorbeeld Excel groepimport type 1</a></li>
+		<li><a href="/static_media/examples/Groupimport_type2.xls">Voorbeeld Excel groepimport type 2</a></li>
+		<li><a href="/static_media/examples/Groupimport_type3.xls">Voorbeeld Excel groepimport type 3</a></li>
+		</ul>
+
+		<BR>
+		<form action="{% url flooding_tools_import_group %}" enctype="multipart/form-data" method="post">
+    		<table>
+        		{{ form.as_table }}
+        		<tr><td><input type="submit" value="{% trans 'Submit' %}" /></td></tr>
+    		</table>
+		</form>
+{% endblock content %}
