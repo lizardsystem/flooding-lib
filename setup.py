@@ -17,6 +17,8 @@ install_requires = [
     'flooding-base',
     'lizard-flooding-worker',
     'django-treebeard',
+    'django-extensions',
+    'django-nose',
     'nens',
     'GDAL',
     'django-debug-toolbar'

@@ -1,0 +1,8 @@
+# Include docs in the root.
+include *.rst
+include *.txt
+# Include everything in our project directory.
+graft lizard_flooding
+graft lizard_presentation
+graft lizard_visualization
+

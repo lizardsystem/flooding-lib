@@ -8,6 +8,8 @@ INSTALLED_APPS = [
     'lizard_presentation',
     'lizard_visualization',
     'lizard_flooding_worker',
+    'django_extensions',
+    'django_nose',
     'flooding_base',
     'staticfiles',
     'django.contrib.gis',

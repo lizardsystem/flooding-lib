@@ -19,8 +19,8 @@ Usage:
 
 And we've got tools
 
-    >>> import lizard_flooding.views.tools.urls
-    >>> import lizard_flooding.views.tools.views
+    >>> import lizard_flooding.tools.importtool.urls
+    >>> import lizard_flooding.tools.importtool.views
 
 
 Show how to import the main classes and how to use them.
