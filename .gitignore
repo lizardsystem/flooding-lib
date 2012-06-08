@@ -1,0 +1,10 @@
+.installed.cfg
+bin
+develop-eggs
+*.egg-info
+*.pyc
+parts
+dist
+nosetests.xml
+.mr.developer.cfg
+test.db
