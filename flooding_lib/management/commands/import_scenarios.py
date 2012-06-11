@@ -45,7 +45,9 @@ for example:
 """)
     option_list = BaseCommand.option_list
 
-    option_list += make_option('--csv-location', help='file location of csv-file with scenario information')
+    option_list += (
+        make_option('--csv-location',
+                    help='file location of csv-file with scenario information'),)
 
     def handle(self, *args, **options):
         print(dir(args))

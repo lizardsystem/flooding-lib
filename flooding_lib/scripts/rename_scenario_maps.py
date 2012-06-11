@@ -26,168 +26,163 @@
 
 __revision__ = "$Rev: 7947 $"[6:-2]
 
-import sys
-sys.path.append('..\\..')
+if __name__ == '__main__':
+    import sys
+    sys.path.append('..\\..')
 
-import settings
-from django.core.management import setup_environ
-setup_environ(settings)
+    import settings
 
-from flooding_lib.models import Project, UserPermission, \
-    ProjectGroupPermission, Scenario, Region, RegionSet, Breach, \
-    ScenarioCutoffLocation, \
-    ScenarioBreach, Result, ResultType, Task, TaskType, \
-    ExternalWater, CutoffLocation, CutoffLocationSet, SobekModel, \
-    Scenario_PresentationLayer, ResultType_PresentationType
+    from django.core.management import setup_environ
+    setup_environ(settings)
 
-from lizard_presentation.models import SourceLinkType, SourceLink, \
-    PresentationSource, PresentationType, PresentationLayer, \
-    PresentationShape, PresentationValueTable, PresentationGrid, Animation, Field
+    from flooding_lib.models import Project, UserPermission, \
+        ProjectGroupPermission, Scenario, Region, RegionSet, Breach, \
+        ScenarioCutoffLocation, \
+        ScenarioBreach, Result, ResultType, Task, TaskType, \
+        ExternalWater, CutoffLocation, CutoffLocationSet, SobekModel, \
+        Scenario_PresentationLayer, ResultType_PresentationType
 
-from django.contrib.gis.geos import MultiPolygon, Point, Polygon
-import Image
-import shutil
-import re
+    from lizard_presentation.models import SourceLinkType, SourceLink, \
+        PresentationSource, PresentationType, PresentationLayer, \
+        PresentationShape, PresentationValueTable, PresentationGrid, Animation, Field
 
-import settings
-from base.models import Setting
-from zipfile import ZipFile, ZIP_DEFLATED
-import os, datetime
+    from django.contrib.gis.geos import MultiPolygon, Point, Polygon
+    import Image
+    import shutil
+    import re
 
-from nens import sobek
-from zipfile import ZipFile, ZIP_DEFLATED
-from django.contrib.gis.geos import Point
-#from osgeo import ogr, osr
-from nens.mock import Stream
-from nens.sobek import HISFile
+    from flooding_base.models import Setting
+    from zipfile import ZipFile, ZIP_DEFLATED
+    import os, datetime
 
-source_dir = Setting.objects.get( key = 'source_dir' ).value
-dest_dir = Setting.objects.get( key = 'destination_dir' ).value
-presentation_dir = Setting.objects.get( key = 'presentation_dir' ).value
+    from nens import sobek
+    from zipfile import ZipFile, ZIP_DEFLATED
+    from django.contrib.gis.geos import Point
+    #from osgeo import ogr, osr
+    from nens.mock import Stream
+    from nens.sobek import HISFile
 
-
-import logging
-log = logging.getLogger('nens.web.tools')
+    source_dir = Setting.objects.get( key = 'source_dir' ).value
+    dest_dir = Setting.objects.get( key = 'destination_dir' ).value
+    presentation_dir = Setting.objects.get( key = 'presentation_dir' ).value
 
 
-#settings
-#always_create_new_derivative = False
-#check_timestamp_original_sourcefile = False
-
-'''
-To do:
-get_or_create_presentation_sources:
-* his-files toevoegen
-* return aanpassen
-
-* PresentationShape maken (nu worden alleen de sources gemaakt).
+    import logging
+    log = logging.getLogger('nens.web.tools')
 
 
-Later:
-* check of parameter aanwezig is in his-file
-* verkrijgen van animatie gegevens
+    #settings
+    #always_create_new_derivative = False
+    #check_timestamp_original_sourcefile = False
+
+    '''
+    To do:
+    get_or_create_presentation_sources:
+    * his-files toevoegen
+    * return aanpassen
+
+    * PresentationShape maken (nu worden alleen de sources gemaakt).
 
 
-nog wat mee doen:
-* file_content = file_content.replace('\r\n', '\n')
-
-'''
-
+    Later:
+    * check of parameter aanwezig is in his-file
+    * verkrijgen van animatie gegevens
 
 
-import sys
-if sys.version_info < (2, 5):
-    print "I think I need version python2.6 and I was called from %d.%d" % sys.version_info[:2]
+    nog wat mee doen:
+    * file_content = file_content.replace('\r\n', '\n')
 
-import logging
-
-log = logging.getLogger('nens.web.flooding.presentationlayer_generation')
-
-source_dir = '\\\\192.168.1.14\\BackupFlooding\\resultaten'
-dest_dir = '\\\\192.168.1.14\\BackupFlooding\\resultaten_new'
-
-for scenario in Scenario.objects.filter(migrated = None).exclude(id__in=[7007,7006]):
-    print "scenario: " + str(scenario.id)
-    region = Region.objects.filter(breach__scenario = scenario)[0]
-    #create directory
-    new_scenario_dir = os.path.join(region.path, str(scenario.id) )+"\\"
-    if not os.path.isdir(os.path.join(dest_dir,new_scenario_dir)):
-        os.makedirs(os.path.join(dest_dir,new_scenario_dir))
+    '''
 
 
 
-    for result in scenario.result_set.all():
+    import sys
+    if sys.version_info < (2, 5):
+        print "I think I need version python2.6 and I was called from %d.%d" % sys.version_info[:2]
+
+    import logging
+
+    log = logging.getLogger('nens.web.flooding.presentationlayer_generation')
+
+    source_dir = '\\\\192.168.1.14\\BackupFlooding\\resultaten'
+    dest_dir = '\\\\192.168.1.14\\BackupFlooding\\resultaten_new'
+
+    for scenario in Scenario.objects.filter(migrated = None).exclude(id__in=[7007,7006]):
+        print "scenario: " + str(scenario.id)
+        region = Region.objects.filter(breach__scenario = scenario)[0]
+        #create directory
+        new_scenario_dir = os.path.join(region.path, str(scenario.id) )+"\\"
+        if not os.path.isdir(os.path.join(dest_dir,new_scenario_dir)):
+            os.makedirs(os.path.join(dest_dir,new_scenario_dir))
+
+        for result in scenario.result_set.all():
         #print "result: " + str(result.resulttype.id)
-        try:
-            if result.resulttype.id == 16:
-                if scenario.result_set.filter(resulttype=26).count()==0:
-                    source_filename = result.resultloc.replace('simulatie_rapport.zip', 'model.zip').replace('/', '\\')
-                    project_dir = re.match(r'(\d+\\)+' , source_filename)
+            try:
+                if result.resulttype.id == 16:
+                    if scenario.result_set.filter(resulttype=26).count()==0:
+                        source_filename = result.resultloc.replace('simulatie_rapport.zip', 'model.zip').replace('/', '\\')
+                        project_dir = re.match(r'(\d+\\)+' , source_filename)
+                        new_filename = source_filename.replace(project_dir.group(),new_scenario_dir)
+
+                        source = os.path.join(source_dir, source_filename)
+                        dest = os.path.join(dest_dir, new_filename)
+                        #print "new model - move %s to %s"%(source, dest)
+                        shutil.move(source, dest)
+
+                        Result.objects.create(scenario=scenario, resulttype=ResultType.objects.get(pk=26), resultloc=new_filename)
+            except AttributeError, e:
+                print "error: %s"%e
+            except IOError,e:
+                print "can't find model of scenario %i: %s"%(scenario.id, e)
+                result.unit = 'error'
+                result.save()
+
+            try:
+                if not (result.resultloc == None or result.resultloc == ""):
+                    #get new file name
+                    source_filename = result.resultloc.replace('/', '\\')
+                    project_dir = re.match(r'(\d+\\)+', source_filename )
                     new_filename = source_filename.replace(project_dir.group(),new_scenario_dir)
 
                     source = os.path.join(source_dir, source_filename)
                     dest = os.path.join(dest_dir, new_filename)
-                    #print "new model - move %s to %s"%(source, dest)
+                    #print "move %s to %s"%(source, dest)
                     shutil.move(source, dest)
 
-                    Result.objects.create(scenario=scenario, resulttype=ResultType.objects.get(pk=26), resultloc=new_filename)
-        except AttributeError, e:
-            print "error: %s"%e
-        except IOError,e:
-            print "can't find model of scenario %i: %s"%(scenario.id, e)
-            result.unit = 'error'
-            result.save()
-
-
-        try:
-            if not (result.resultloc == None or result.resultloc == ""):
-                #get new file name
-                source_filename = result.resultloc.replace('/', '\\')
-                project_dir = re.match(r'(\d+\\)+', source_filename )
-                new_filename = source_filename.replace(project_dir.group(),new_scenario_dir)
-
-                source = os.path.join(source_dir, source_filename)
-                dest = os.path.join(dest_dir, new_filename)
-                #print "move %s to %s"%(source, dest)
-                shutil.move(source, dest)
-
-                result.resultloc = new_filename
+                    result.resultloc = new_filename
+                    result.save()
+            except AttributeError, e:
+                print "error: %s"%e
+            except IOError,e:
+                print "can't find resulttype %i of scenario %i: %s"%(result.resulttype.id, scenario.id, e)
+                result.unit = 'error'
                 result.save()
-        except AttributeError, e:
-            print "error: %s"%e
-        except IOError,e:
-            print "can't find resulttype %i of scenario %i: %s"%(result.resulttype.id, scenario.id, e)
-            result.unit = 'error'
-            result.save()
 
-        try:
-            if not (result.resultpngloc == None or result.resultpngloc == ""):
-                #get new file name
-                source_filename = result.resultpngloc.replace('/', '\\')
-                project_dir = re.match(r'(\d+\\)+' , source_filename)
-                new_filename = source_filename.replace(project_dir.group(),new_scenario_dir)
+            try:
+                if not (result.resultpngloc == None or result.resultpngloc == ""):
+                    #get new file name
+                    source_filename = result.resultpngloc.replace('/', '\\')
+                    project_dir = re.match(r'(\d+\\)+' , source_filename)
+                    new_filename = source_filename.replace(project_dir.group(),new_scenario_dir)
 
+                    source = os.path.join(source_dir, os.path.split(source_filename)[0])
+                    dest = os.path.join(dest_dir, os.path.split(new_filename)[0])
+                    #print "------------move %s to %s"%(source, dest)
+                    shutil.move(source, dest)
 
-                source = os.path.join(source_dir, os.path.split(source_filename)[0])
-                dest = os.path.join(dest_dir, os.path.split(new_filename)[0])
-                #print "------------move %s to %s"%(source, dest)
-                shutil.move(source, dest)
-
-                result.resultpngloc = new_filename
+                    result.resultpngloc = new_filename
+                    result.save()
+            except AttributeError, e:
+                print "error: %s"%e
+            except IOError,e:
+                print "can't find resulttype %i of scenario %i: %s"%(result.resulttype.id, scenario.id, e)
+                result.unit = 'error-png'
                 result.save()
-        except AttributeError, e:
-            print "error: %s"%e
-        except IOError,e:
-            print "can't find resulttype %i of scenario %i: %s"%(result.resulttype.id, scenario.id, e)
-            result.unit = 'error-png'
-            result.save()
 
-        #create model result
+            #create model result
 
-
-
-    scenario.migrated = True
-    scenario.save()
+        scenario.migrated = True
+        scenario.save()
 
 #voor alle scenario's:
 #- resultaten tabel aanpassen

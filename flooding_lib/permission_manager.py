@@ -17,7 +17,7 @@ class PermissionManager:
 
     >>> from django.contrib.auth.models import User
     >>> from models import UserPermission
-    >>> u = User.objects.get(username='jack')
+    >>> u, _ = User.objects.get_or_create(username='jack')
     >>> pm = PermissionManager(u)
     >>> pm.check_permission(UserPermission.PERMISSION_SCENARIO_VIEW)
     True

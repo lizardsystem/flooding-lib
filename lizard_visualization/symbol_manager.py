@@ -5,7 +5,8 @@ import os.path
 import Image
 import ImageFilter
 from pkg_resources import resource_filename
-from flooding import settings
+
+from django.conf import settings
 
 log = logging.getLogger('nens.symbol_manager')
 
