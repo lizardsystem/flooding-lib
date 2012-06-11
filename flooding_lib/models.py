@@ -814,7 +814,7 @@ class Scenario(models.Model):
     code = models.CharField(max_length=15, null=True)
 
     workflow_template = models.ForeignKey(
-        'flooding_worker.models.WorkflowTemplate',
+        'flooding_worker.WorkflowTemplate',
         db_column='workflow_template')
 
     class Meta:
