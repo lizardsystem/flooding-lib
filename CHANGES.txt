@@ -5,7 +5,7 @@ Changelog of flooding-lib
 1.28.2 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Now using flooding-worker instead of lizard-flooding-worker.
 
 
 1.28.1 (2012-06-11)

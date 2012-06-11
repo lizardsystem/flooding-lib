@@ -7,7 +7,7 @@ INSTALLED_APPS = [
     'flooding_lib',
     'lizard_presentation',
     'lizard_visualization',
-    'lizard_flooding_worker',
+    'flooding_worker',
     'django_extensions',
     'django_nose',
     'flooding_base',
