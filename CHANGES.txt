@@ -2,7 +2,7 @@ Changelog of flooding-lib
 ===================================================
 
 
-1.28 (unreleased)
+1.28 (2012-06-11)
 -----------------
 
 - RENAMED lizard-flooding TO flooding_lib
