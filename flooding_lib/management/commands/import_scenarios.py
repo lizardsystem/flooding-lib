@@ -67,70 +67,61 @@ for example:
 
 
 
+# This is in the source code just like this. What's up?
 
-name	test automatisch uploaden
-remarks	test automatisch uploaden
+# name	test automatisch uploaden
+# remarks	test automatisch uploaden
 
-project_fk	9
-breach_id	10481
-inundationmodel	239
+# project_fk	9
+# breach_id	10481
+# inundationmodel	239
 
-#optional calculated
-extwmaxlevel	automatisch
-extwrepeattime	4000
+# #optional calculated
+# extwmaxlevel	automatisch
+# extwrepeattime	4000
 
-extwbaselevel	automatisch
-pitdepth	automatisch
+# extwbaselevel	automatisch
+# pitdepth	automatisch
 
-#from database
-decheight	automatisch
-extw_type	2
-extwrepeattime_ini	4000
+# #from database
+# decheight	automatisch
+# extw_type	2
+# extwrepeattime_ini	4000
 
-#optional, otherwise default
-calcpriority	20
+# #optional, otherwise default
+# calcpriority	20
 
-strategyId	322
+# strategyId	322
 
-brdischcoef	1
-brf1	1,3
-brf2	0,04
-ucritical	0,2
+# brdischcoef	1
+# brf1	1,3
+# brf2	0,04
+# ucritical	0,2
 
-tsim	1 d 0:00
-tsim_ms	86400000
-start_calculation	0
+# tsim	1 d 0:00
+# tsim_ms	86400000
+# start_calculation	0
 
-tstorm	1970-01-02T10:59:59
-tstorm_ms	125999999
-tpeak	1970-01-01T04:00:00
-tpeak_ms	14400000
+# tstorm	1970-01-02T10:59:59
+# tstorm_ms	125999999
+# tpeak	1970-01-01T04:00:00
+# tpeak_ms	14400000
 
-tdeltaphase_ms	0
-
-
-bottomlevelbreach	koppeling breach?
-
-extwmaxlevel_ini	automatisch
-widthbrinit	10
-tmaxdepth	1:00
-tmaxdepth_ms	3600000
-tstartbreach	0:00
-tstartbreach_ms	0
+# tdeltaphase_ms	0
 
 
+# bottomlevelbreach	koppeling breach?
 
-
-#not supported yet
-loccutoffs
-measures
+# extwmaxlevel_ini	automatisch
+# widthbrinit	10
+# tmaxdepth	1:00
+# tmaxdepth_ms	3600000
+# tstartbreach	0:00
+# tstartbreach_ms	0
 
 
 
 
-
-
-
-
-
-
+# #not supported yet
+# loccutoffs
+# measures
