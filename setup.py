@@ -14,7 +14,7 @@ long_description = '\n\n'.join([
 install_requires = [
     'Django',
     'django-staticfiles',
-    'flooding-base',
+    'flooding-base >= 1.23',
     'flooding-worker',
     'django-treebeard',
     'django-extensions',
