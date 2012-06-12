@@ -3,112 +3,117 @@
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
     <head>
-    	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-    	<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7">
+        <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+        <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7">
 
-    	<title>Lizard import tool</title>
-		
-		<!-- Load styles -->
-		<link rel="shortcut icon" href="{{ url_favicon }}">
-		<!-- link href="{% url root_url %}static_media/style/style.css" media="screen" type="text/css" rel="stylesheet"-->	
-		<link href="{% url root_url %}static_media/Isomorphic_NenS_skin/skin_styles.css" media="screen" type="text/css" rel="stylesheet">
-	<style type="text/css" >
-		html, body {
-		    overflow: hidden;
-		    width:"100%";
-			height:"100%";
-		}
-		.approved {
-			color: green;
-		}
-		.disapproved {
-			color: red;
-		}
-	</style>
-	<script> 
-	var isomorphicDir="{% url root_url %}static_media/weblib/isomorphic/"; // abs path to isomorphic, needed to locate SmartClient CSS
-	</script>
+        <title>Lizard import tool</title>
 
-	<SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/weblib/isomorphic/system/modules/ISC_Core.js"></SCRIPT>
+        <!-- Load styles -->
+        <link rel="shortcut icon" href="{{ url_favicon }}">
+        <!-- link href="{% url root_url %}static_media/style/style.css" media="screen" type="text/css" rel="stylesheet"-->
+        <link href="{% url root_url %}static_media/Isomorphic_NenS_skin/skin_styles.css" media="screen" type="text/css" rel="stylesheet">
+    <style type="text/css" >
+        html, body {
+            overflow: hidden;
+            width:"100%";
+            height:"100%";
+        }
+        .approved {
+            color: green;
+        }
+        .disapproved {
+            color: red;
+        }
+    </style>
+    <script>
+    var isomorphicDir="{% url root_url %}static_media/weblib/isomorphic/"; // abs path to isomorphic, needed to locate SmartClient CSS
+    </script>
+
+    <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/weblib/isomorphic/system/modules/ISC_Core.js"></SCRIPT>
     <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/weblib/isomorphic/system/modules/ISC_Foundation.js"></SCRIPT>
     <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/weblib/isomorphic/system/modules/ISC_Containers.js"></SCRIPT>
     <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/weblib/isomorphic/system/modules/ISC_Grids.js"></SCRIPT>
     <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/weblib/isomorphic/system/modules/ISC_Forms.js"></SCRIPT>
     <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/weblib/isomorphic/system/modules/ISC_DataBinding.js"></SCRIPT>
-	<SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/Isomorphic_NenS_skin/load_skin.js"></SCRIPT>
-	<SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/weblib/SCpatch.js"></SCRIPT>
-	<SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/scripts/shared/lib/NGeneral.js"></SCRIPT>	
-	</head>
-	<body>
+    <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/Isomorphic_NenS_skin/load_skin.js"></SCRIPT>
+    <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/weblib/SCpatch.js"></SCRIPT>
+    <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/scripts/shared/lib/NGeneral.js"></SCRIPT>
+    </head>
+    <body>
 
-	
-	<script>
-	
-	Date.setInputFormat("DMY")
-	
-	isc.Canvas.create({
-		ID:'breadcrumbs',
-		height:"15",
-		contents: '{% spaceless %} <div class="breadcrumbs"> {% if breadcrumbs %}&rsaquo;{% endif %} {% for blitem in breadcrumbs %}{% if blitem.url %}<a href="{{ blitem.url }}">	{{ blitem.name }}</a> {% else %}{{ blitem.name }}{% endif %}{% ifnotequal forloop.revcounter0 0 %}&rsaquo;{% endifnotequal %} {% endfor %} </div>'
+
+    <script>
+
+    Date.setInputFormat("DMY")
+
+    isc.Canvas.create({
+        ID:'breadcrumbs',
+        height:"15",
+        contents: '{% spaceless %} <div class="breadcrumbs"> {% if breadcrumbs %}&rsaquo;{% endif %} {% for blitem in breadcrumbs %}{% if blitem.url %}<a href="{{ blitem.url }}">    {{ blitem.name }}</a> {% else %}{{ blitem.name }}{% endif %}{% ifnotequal forloop.revcounter0 0 %}&rsaquo;{% endifnotequal %} {% endfor %} </div>'
            ,{% endspaceless %}
     autodraw:false
-	});
-	
+    });
 
-	
-	
-	
-	isc.DataSource.create({
-	    ID:"dsPostScenario",
-	    dataFormat:"json",
-	    dataURL: '{{ post_url }}',
-        requestProperties: { httpMethod: "POST" },
-	    autoDraw:false
-	});
+    isc.Canvas.create({
+        ID: "helptext",
+        autodraw: true,
+        padding: 15,
+        contents: "{% autoescape off %}{{ legend_html }}{% endautoescape %}"
+    });
+
+    isc.DataSource.create({
+        ID:"dsPostScenario",
+        dataFormat:"json",
+        dataURL: '{{ post_url }}',
+            requestProperties: { httpMethod: "POST" },
+        autoDraw:false
+    });
 
 
     isc.DynamicForm.create({
-        ID: "formScenarioSettings",
-        width: "100%",
-        height: '100%',
-        padding: 5,
-        minHeigh: 150,
-        overflow: "visible",
-        //minColWidth: 80,
-        {%ifequal action 'approve' %}
-        numCols: 7,
-        {% else %}
-        numCols: 5,
-        {% endifequal %}
-        border: "1px solid grey",
-        dataSource: dsPostScenario,
-		canSubmit: true,
-		method: "POST",
+            ID: "formScenarioSettings",
+            width: "100%",
+            height: "100%",
+            padding: 5,
+            minHeigh: 150,
+            overflow: "visible",
+            {% ifequal action 'approve' %}
+            numCols: 7,
+            {% else %}
+            numCols: 5,
+            {% endifequal %}
+            border: "1px solid grey",
+            dataSource: dsPostScenario,
+        canSubmit: true,
+        method: "POST",
         colWidths: [50, 50, 50, 50, 100, 50,50],
         fields: [
         {% for part in fields %}
-        	{% if part.fields  %}	
-	        	{% ifnotequal part.id 90 %}
-		        	{ type: "header", defaultValue: '{{ part.title}}' },
-		        	{% for field in part.fields %}
-		            	{% if static_editor %}
-		            		{{ field.get_static_editor_json|safe }},
-		            	{% else %}
-		            	   	{{ field.get_editor_json|safe }},
-		            	{% endif %}
-		            	{%ifequal action 'verify' %}
-		            		{{ field.get_statestring_json|safe }},
-		            	{% endifequal %}
-		            	{%ifequal action 'approve' %}
-		            		{{ field.get_approve_statuseditor_json|safe }},
-		            		{{ field.get_approve_remarkeditor_json|safe }},
-		            	{% endifequal %}
-		            {% endfor %}
-		        {% endifnotequal %}
-	        {% endif %}
-        {% endfor %} 
+            {% if part.fields  %}
+                {% comment %}
+                part.id 90 is HEADER_FILES, zie importtool.models.InputField
+                {% endcomment %}
+                {% ifnotequal part.id 90 %}
+                    { type: "header", defaultValue: '{{ part.title}}' },
+                    {% for field in part.fields %}
+                        {% if static_editor %}
+                            {{ field.get_static_editor_json|safe }},
+                        {% else %}
+                               {{ field.get_editor_json|safe }},
+                        {% endif %}
+                        {% ifequal action 'verify' %}
+                            {{ field.get_statestring_json|safe }},
+                        {% endifequal %}
+                        {% ifequal action 'approve' %}
+                            {{ field.get_approve_statuseditor_json|safe }},
+                            {{ field.get_approve_remarkeditor_json|safe }},
+                        {% endifequal %}
+                    {% endfor %}
+                {% endifnotequal %}
+            {% endif %}
+        {% endfor %}
        { name: "action", _constructor: "HiddenItem", defaultValue: 'scenariodata' }
-		],
+        ],
         //canDragResize: true,
         autoDraw: false
     });
@@ -122,28 +127,28 @@
         width: 150,
 
         showRollOver: false,
-        click: function() {        	
+        click: function() {
                 formScenarioSettings.saveData(function(dsResponse, data, dsRequest) {
-                	if (dsResponse.httpResponseCode == 200) {
-                		if (data.successful == "true") {                			
-                			// user 123456789 as a dummy, to replace
-                			// needs to be filled with a real value due to Django filling of data
-                			// can not just be data.id
-                			window.location="{% url flooding_tools_upload_files 123456789%}".replace('123456789', data.id);
-                		} else {
-                			alert('error saving: ' + data.remarks)
-                		}
-                	} else {
-                		alert('server error, scenario niet opgeslagen')
-                	}
+                    if (dsResponse.httpResponseCode == 200) {
+                        if (data.successful == "true") {
+                            // user 123456789 as a dummy, to replace
+                            // needs to be filled with a real value due to Django filling of data
+                            // can not just be data.id
+                            window.location="{% url flooding_tools_upload_files 123456789%}".replace('123456789', data.id);
+                        } else {
+                            alert('error saving: ' + data.remarks)
+                        }
+                    } else {
+                        alert('server error, scenario niet opgeslagen')
+                    }
                 });
-                
+
         },
         autoDraw: false
     });
-    
-  
-	isc.HLayout.create({
+
+
+    isc.HLayout.create({
         ID: 'scenarioInfobuttons',
         height: 28,
         padding: 2,
@@ -153,78 +158,78 @@
         border: "1px solid grey",
         resizeBarTarget: "next",
         members: [
-       		buttonSubmitSave
+               buttonSubmitSave
         ],
         autoDraw: false
     })
-    
+
     {{ approvaltable|safe }}
-{% if approvaltable %} scApprovalTotal.overflow = 'visible'  
+{% if approvaltable %} scApprovalTotal.overflow = 'visible'
 {% endif %}
 
 
 
 {% if import_admin %}
 
-	isc.DataSource.create({
-	    ID:"dsPostAdmin",
-	    dataFormat:"json",
-	    dataURL: '{{ post_url }}',
+    isc.DataSource.create({
+        ID:"dsPostAdmin",
+        dataFormat:"json",
+        dataURL: '{{ post_url }}',
         requestProperties: { httpMethod: "POST" },
-	    autoDraw:false
-	});
-	
-	
-	isc.DataSource.create({
+        autoDraw:false
+    });
+
+
+    isc.DataSource.create({
         ID: "dsRegion",
         dataFormat: "json",
         dataURL: '{% url flooding_service %}',
         transformRequest : function (dsRequest) {
-        	if (dsRequest.operationType == "fetch") {
-           		var params = {action : 'get_all_regions'};
-            	// combine paging parameters with criteria
-            	return isc.addProperties({}, dsRequest.data, params);
-        	}
-    	},
+            if (dsRequest.operationType == "fetch") {
+                   var params = {action : 'get_all_regions'};
+                // combine paging parameters with criteria
+                return isc.addProperties({}, dsRequest.data, params);
+            }
+        },
         autoDraw: false
-        
+
     });
-	isc.DataSource.create({
+    isc.DataSource.create({
         ID: "dsBreach",
         dataFormat: "json",
         dataURL:  '{% url flooding_service %}',
         transformRequest : function (dsRequest) {
-        	if (dsRequest.operationType == "fetch") {
-           		
-           		regionSelect.getValue()
-           		var params = {action : 'get_breaches' };
-           		
-            	// combine paging parameters with criteria
-            	return isc.addProperties({}, dsRequest.data, params);
-        	}
-    	},
-    	
+            if (dsRequest.operationType == "fetch") {
+
+                   regionSelect.getValue()
+                   var params = {action : 'get_breaches' };
+
+                // combine paging parameters with criteria
+                return isc.addProperties({}, dsRequest.data, params);
+            }
+        },
+
         autoDraw: false
     });
     isc.DataSource.create({
         ID: "dsProject",
         recordXPath: "items",
         transformRequest : function (dsRequest) {
-        	if (dsRequest.operationType == "fetch") {
-           		var params = {action : 'get_projects'};
-            	// combine paging parameters with criteria
-            	return isc.addProperties({}, dsRequest.data, params);
-        	}
-    	},
+            if (dsRequest.operationType == "fetch") {
+                   var params = {action : 'get_projects'};
+                // combine paging parameters with criteria
+                return isc.addProperties({}, dsRequest.data, params);
+            }
+        },
         dataFormat: "json",
         dataURL:  '{% url flooding_service %}',
         autoDraw: false
-    });	
+    });
 
 
     isc.DynamicForm.create({
         ID: "formAdminSettings",
-        encoding: "multipart",        
+        encoding: "multipart",
         width: 380,
         height: '100%',
         padding: 5,
@@ -234,75 +239,75 @@
         numCols: 3,
         border: "1px solid grey",
         dataSource: dsPostAdmin,
-		canSubmit: true,
-		method: "POST",
+        canSubmit: true,
+        method: "POST",
         colWidths: [50, 50, 50, 50, 100],
         fields: [
-        	{ type: "header", defaultValue: 'Import Admin' },
+            { type: "header", defaultValue: 'Import Admin' },
             {
-            	name: "state",
-            	title: "status",
-            	type: "select",
-            	required: true,
-            	valueMap: {{state_valuemap|safe }},
-            	defaultValue: "{{ state }}",
-            	startRow: true
-        	},
-        	{
-            	name: "remarks",
-            	title: "opmerkingen",
-            	type: "TextAreaItem",
-            	required: false,
-            	defaultValue: "{{ importscenario.validation_remarks }}",
-            	startRow: true	
-        	},
+                name: "state",
+                title: "status",
+                type: "select",
+                required: true,
+                valueMap: {{state_valuemap|safe }},
+                defaultValue: "{{ state }}",
+                startRow: true
+            },
             {
-            	ID:"regionSelect",
-            	name: "region",
-            	title: "Regio",
-            	type: "select",
-            	optionDataSource: "dsRegion",
-            	valueField: "id",
-            	displayField: "name",
-            	required: false,
-            	startRow: true,
-            	{% if importscenario.region %} defaultValue: {{ importscenario.region.id }}, {% endif %} 
-            	change: function(form, item, value){
- 					breachSelect.setValue("");
- 					breachSelect.fetchData(null, {data:{region_id:value}});
+                name: "remarks",
+                title: "opmerkingen",
+                type: "TextAreaItem",
+                required: false,
+                defaultValue: "{{ importscenario.validation_remarks }}",
+                startRow: true
+            },
+            {
+                ID:"regionSelect",
+                name: "region",
+                title: "Regio",
+                type: "select",
+                optionDataSource: "dsRegion",
+                valueField: "id",
+                displayField: "name",
+                required: false,
+                startRow: true,
+                {% if importscenario.region %} defaultValue: {{ importscenario.region.id }}, {% endif %}
+                change: function(form, item, value){
+                     breachSelect.setValue("");
+                     breachSelect.fetchData(null, {data:{region_id:value}});
                  }
-            },      	
+            },
             {
-            	ID:"breachSelect",
-            	name: "breach",
-            	title: "Doorbraaklocatie",
-            	type: "select",
-            	optionDataSource: "dsBreach",
-            	valueField: "id",
-            	displayField: "name", 
-            	{% if importscenario.breach %} defaultValue: {{ importscenario.breach.id }}, {% endif %}            	
-            	autoFetchData: false,
-            	required: false,
-            	startRow: true
-        	},        
+                ID:"breachSelect",
+                name: "breach",
+                title: "Doorbraaklocatie",
+                type: "select",
+                optionDataSource: "dsBreach",
+                valueField: "id",
+                displayField: "name",
+                {% if importscenario.breach %} defaultValue: {{ importscenario.breach.id }}, {% endif %}
+                autoFetchData: false,
+                required: false,
+                startRow: true
+            },
             {
-            	name: "project",
-            	title: "Project",
-            	optionDataSource: "dsProject",
-            	valueField: "id",
-            	displayField: "name",            	
-            	type: "select",
-            	{% if importscenario.project %} defaultValue: {{ importscenario.project.id }}, {% endif %} 
-            	required: false,
-            	startRow: true
-        	},        
-        
+                name: "project",
+                title: "Project",
+                optionDataSource: "dsProject",
+                valueField: "id",
+                displayField: "name",
+                type: "select",
+                {% if importscenario.project %} defaultValue: {{ importscenario.project.id }}, {% endif %}
+                required: false,
+                startRow: true
+            },
+
        { name: "action", _constructor: "HiddenItem", defaultValue: 'save_admin' }
-		],
+        ],
         //canDragResize: true,
         autoDraw: false
     });
-    
+
 
     isc.IButton.create({
         ID: "buttonAdminSave",
@@ -311,25 +316,25 @@
         showDown: true,
         showFocused: false,
         width: 150,
-		overflow: "visible",
+        overflow: "visible",
         showRollOver: false,
         click: function() {
                 formAdminSettings.getField('action').setValue('save_admin');
                 formAdminSettings.saveData(function(dsResponse, data, dsRequest) {
-                	if (dsResponse.httpResponseCode == 200) {
-                		if (data.successful == "true") {
-                			alert(data.post_remarks)
-                		} else {
-                			alert('error saving: ' + data.post_remarks)
-                		}
-                	} else {
-                		alert('server error, scenario niet opgeslagen')
-                	}
+                    if (dsResponse.httpResponseCode == 200) {
+                        if (data.successful == "true") {
+                            alert(data.post_remarks)
+                        } else {
+                            alert('error saving: ' + data.post_remarks)
+                        }
+                    } else {
+                        alert('server error, scenario niet opgeslagen')
+                    }
                 });
         },
         autoDraw: false
     });
-    
+
     isc.IButton.create({
         ID: "importIntoFlooding",
         title: "Scenario importeren",
@@ -342,21 +347,21 @@
         click: function() {
                 formAdminSettings.getField('action').setValue('save_and_import');
                 formAdminSettings.saveData(function(dsResponse, data, dsRequest) {
-                	if (dsResponse.httpResponseCode == 200) {
-                		if (data.successful == true) {
-                			alert(data.save_log)
-                		} else {
-                			alert('error saving: ' + data.save_log)
-                		}
-                	} else {
-                		alert('server error, scenario niet opgeslagen')
-                	}
+                    if (dsResponse.httpResponseCode == 200) {
+                        if (data.successful == true) {
+                            alert(data.save_log)
+                        } else {
+                            alert('error saving: ' + data.save_log)
+                        }
+                    } else {
+                        alert('server error, scenario niet opgeslagen')
+                    }
                 });
         },
         autoDraw: false
     });
 
-	isc.HLayout.create({
+    isc.HLayout.create({
         ID: 'scImportAdmin',
         height: 28,
         padding: 2,
@@ -366,21 +371,21 @@
         border: "1px solid grey",
         resizeBarTarget: "next",
         members: [
-       		buttonAdminSave,
-       		importIntoFlooding
+               buttonAdminSave,
+               importIntoFlooding
         ],
         autoDraw: false
     })
-    {% if importscenario.region %}  
+    {% if importscenario.region %}
     breachSelect.fetchData(null, {data:{region_id:{{ importscenario.region.id }} }})
-	{% endif %}
+    {% endif %}
 {% endif %}
 
-	isc.Canvas.create({
-		ID:'lastrow',
-		height:"10",
+    isc.Canvas.create({
+        ID:'lastrow',
+        height:"10",
     autodraw:false
-	});
+    });
 
 
     isc.VLayout.create({
@@ -388,17 +393,18 @@
         width: "100%",
         height:"100%",
         overflow: "auto",
-        members: [        		
-				breadcrumbs,
-				formScenarioSettings,				
-				scenarioInfobuttons ,
-				{% if import_admin %}  ,isc.Canvas.create({height:"20"}) ,formAdminSettings,scImportAdmin,  {% endif %}
-				{% if approvaltable %} ,isc.Canvas.create({height:"20"}) ,scApprovalTotal  ,{% endif %}
-				lastrow		       
-		        ]
+        members: [
+                breadcrumbs,
+                helptext,
+                formScenarioSettings,
+                scenarioInfobuttons ,
+                {% if import_admin %}  ,isc.Canvas.create({height:"20"}) ,formAdminSettings,scImportAdmin,  {% endif %}
+                {% if approvaltable %} ,isc.Canvas.create({height:"20"}) ,scApprovalTotal  ,{% endif %}
+                lastrow
+                ]
     });
-   
-    
+
+
     </script>
     </body>
     </html>

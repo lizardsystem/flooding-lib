@@ -16,6 +16,7 @@ from django.utils import simplejson
 from django.utils.translation import ugettext as _
 
 from flooding_base.models import Setting
+from flooding_base.models import Text
 from flooding_lib.models import Breach
 from flooding_lib.models import ExtraInfoField
 from flooding_lib.models import ExtraScenarioInfo
@@ -368,6 +369,8 @@ def new_import(request):
                               {'fields': form_fields,
                                'post_url': post_url,
                                'breadcrumbs': breadcrumbs,
+                               'legend_html': Text.get('importnewscenario',
+                                                       request=request),
                                })
 
 
