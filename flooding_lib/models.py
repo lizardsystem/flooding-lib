@@ -8,19 +8,19 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.gis.db import models
 from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext as _
-from treebeard.al_tree import AL_Node #Adjacent list implementation
+from treebeard.al_tree import AL_Node  # Adjacent list implementation
 
 from lizard_presentation.models import PresentationLayer, PresentationType
 from lizard_visualization.models import ShapeDataLegend, ValueVisualizerMap
 from flooding_lib.tools.approvaltool.models import ApprovalObject
-from django.db.models.signals import post_delete
-from django.db.models.signals import post_save
+
 
 #------------- helper functions ------------------
 def convert_color_to_hex(color_tuple):
     """Converts a tuple (r, g, b) to hex representation of tuple #AABBCC """
     r, g, b = color_tuple
-    return '#%02X%02X%02X'%(r,g,b)
+    return '#%02X%02X%02X' % (r, g, b)
+
 
 #------------ the classes ---------------------
 def get_attachment_path(instance, filename):
@@ -28,15 +28,15 @@ def get_attachment_path(instance, filename):
     Method that functions as a callback method to set dynamically the path of
     the uploaded file of an attachment.
     """
-    return 'attachments/' + str(instance.content_type) + '/' + str(instance.object_id) + '/' + filename
+    return ('attachments/' + str(instance.content_type) + '/' +
+            str(instance.object_id) + '/' + filename)
+
 
 class Attachment(models.Model):
     """An attachment
 
     An attachment can be related to any object due to generic relations.
-
     """
-
 
     #Fields needed for generic relation
     content_type = models.ForeignKey(ContentType)
@@ -45,8 +45,9 @@ class Attachment(models.Model):
 
     name = models.CharField(max_length=200, blank=False)
     remarks = models.TextField(null=True, blank=True)
-    file = models.FileField(upload_to = get_attachment_path, blank = True, null = True)
-    uploaded_by = models.CharField(max_length = 200, blank = False)
+    file = models.FileField(
+        upload_to=get_attachment_path, blank=True, null=True)
+    uploaded_by = models.CharField(max_length=200, blank=False)
     uploaded_date = models.DateTimeField(blank=True, null=True)
 
     class Meta:
@@ -56,6 +57,7 @@ class Attachment(models.Model):
 
     def __unicode__(self):
         return self.name
+
 
 class SobekVersion(models.Model):
     """Sobek version"""
@@ -75,6 +77,7 @@ class SobekVersion(models.Model):
     def __unicode__(self):
         return self.name
 
+
 class SobekModel(models.Model):
     """sobekmodel properties:
 
@@ -93,8 +96,10 @@ class SobekModel(models.Model):
         )
     SOBEKMODELTYPE_CANAL = 1
     SOBEKMODELTYPE_INUNDATION = 2
-    TYPE_DICT = {1: u'%s'%_('canal'),
-                 2: u'%s'%_('inundation'),}
+    TYPE_DICT = {
+        1: u'%s' % _('canal'),
+        2: u'%s' % _('inundation'),
+        }
     sobekversion = models.ForeignKey(SobekVersion)
     sobekmodeltype = models.IntegerField(choices=SOBEKMODELTYPE_CHOICES)
 
@@ -105,30 +110,15 @@ class SobekModel(models.Model):
     model_srid = models.IntegerField()
 
     model_varname = models.CharField(max_length=40, null=True, blank=True)
-    model_vardescription = models.CharField(max_length=200, null=True, blank=True)
+    model_vardescription = models.CharField(
+        max_length=200, null=True, blank=True)
     remarks = models.TextField(null=True)
     attachments = generic.GenericRelation(Attachment)
 
-    embankment_damage_shape = models.CharField(max_length=200, null=True, blank=True)
+    embankment_damage_shape = models.CharField(
+        max_length=200, null=True, blank=True)
 
     code = models.CharField(max_length=15, null=True, blank=True)
-
-    def __unicode__(self):
-        try:
-            if self.sobekmodeltype == self.SOBEKMODELTYPE_CANAL:
-                return 'extw. model, code: %s, project %s, case  %s, version: %s'%(self.code,
-                                                    self.project_fileloc,
-                                                    str(self.model_case),
-                                                    self.model_version)
-
-            else:
-                return 'inund. model, code: %s, project %s, case  %s, version: %s'%(self.code,
-                                                    self.project_fileloc,
-                                                    str(self.model_case),
-                                                    self.model_version)
-        except Exception, e:
-            return 'error: %s'%e
-
 
     class Meta:
         verbose_name = _('Sobek model')
@@ -136,18 +126,23 @@ class SobekModel(models.Model):
         db_table = 'flooding_sobekmodel'
 
     def __unicode__(self):
-        return 'type: %s case: %d version: %s'%(self.TYPE_DICT[self.sobekmodeltype],
-                                                self.model_case,
-                                                self.model_version)
+        return ('type: %s case: %d version: %s' %
+                (self.TYPE_DICT[self.sobekmodeltype],
+                 self.model_case,
+                 self.model_version))
 
     def get_summary_str(self):
         """Return object summary in str, with markdown layout
         """
         summary = ''
-        summary += '* %s: %s\n'%(_('type'), self.TYPE_DICT[self.sobekmodeltype])
-        summary += '* %s: %d\n'%(_('case'), self.model_case)
-        summary += '* %s: %s'%(_('version'), self.model_version)
+        summary += ('* %s: %s\n' %
+                    (_('type'), self.TYPE_DICT[self.sobekmodeltype]))
+        summary += ('* %s: %d\n' %
+                    (_('case'), self.model_case))
+        summary += ('* %s: %s' %
+                    (_('version'), self.model_version))
         return summary
+
 
 class CutoffLocation(models.Model):
     """cutofflocation properties:
@@ -159,12 +154,12 @@ class CutoffLocation(models.Model):
 
     """
     TYPE_CHOICES = (
-        (1, _('lock')), #sluis
-        (2, _('culvert')), #duiker
-        (3, _('weir')), #stuw
-        (4, _('bridge')), #brug
+        (1, _('lock')),     # sluis
+        (2, _('culvert')),  # duiker
+        (3, _('weir')),     # stuw
+        (4, _('bridge')),   # brug
         (5, _('undefined')),
-        (6, _('generic_internal')), #kan vanalles zijn, intern
+        (6, _('generic_internal')),  # kan vanalles zijn, intern
         )
 
     CUTOFFLOCATION_TYPE_LOCK = 1
@@ -177,11 +172,12 @@ class CutoffLocation(models.Model):
     name = models.CharField(max_length=200)
     bottomlevel = models.FloatField()
     width = models.FloatField()
-    deftclose = models.FloatField(blank=True, null=True) #deltatime
-    type = models.IntegerField(choices = TYPE_CHOICES)
+    deftclose = models.FloatField(blank=True, null=True)  # deltatime
+    type = models.IntegerField(choices=TYPE_CHOICES)
     geom = models.PointField('node itself', srid=4326)
 
-    sobekmodels = models.ManyToManyField(SobekModel, through='CutoffLocationSobekModelSetting')
+    sobekmodels = models.ManyToManyField(
+        SobekModel, through='CutoffLocationSobekModelSetting')
 
     code = models.CharField(max_length=15, null=True)
 
@@ -209,7 +205,8 @@ class CutoffLocation(models.Model):
         return None
 
     def get_deftclose_seconds(self):
-        return int(self.deftclose*86400)
+        return int(self.deftclose * 86400)
+
 
 class ExternalWater(models.Model):
     """externalwater properties:
@@ -219,14 +216,14 @@ class ExternalWater(models.Model):
 
     """
     TYPE_CHOICES = (
-        (1,_('sea')),
-        (2,_('lake')),
-        (3,_('canal')),
-        (4,_('internal_lake')),
-        (5,_('internal_canal')),
-        (6,_('river')),
-        (7,_('unknown')),
-        (8,_('lower_river')),
+        (1, _('sea')),
+        (2, _('lake')),
+        (3, _('canal')),
+        (4, _('internal_lake')),
+        (5, _('internal_canal')),
+        (6, _('river')),
+        (7, _('unknown')),
+        (8, _('lower_river')),
         )
     TYPE_SEA = 1
     TYPE_LAKE = 2
@@ -245,12 +242,12 @@ class ExternalWater(models.Model):
     type = models.IntegerField(choices=TYPE_CHOICES)
     area = models.IntegerField(blank=True, null=True)
 
-    deftstorm = models.FloatField(blank=True, null=True) #deltatime
-    deftpeak = models.FloatField(blank=True, null=True) #deltatime
-    deftsim = models.FloatField() #deltatime
+    deftstorm = models.FloatField(blank=True, null=True)  # deltatime
+    deftpeak = models.FloatField(blank=True, null=True)   # deltatime
+    deftsim = models.FloatField()  # deltatime
 
-    minlevel = models.FloatField(default= -10)
-    maxlevel = models.FloatField(default = 15)
+    minlevel = models.FloatField(default=-10)
+    maxlevel = models.FloatField(default=15)
 
     code = models.CharField(max_length=15, null=True)
 
@@ -261,6 +258,7 @@ class ExternalWater(models.Model):
 
     def __unicode__(self):
         return self.name
+
 
 class Dike(models.Model):
     """dike properties:
@@ -277,6 +275,7 @@ class Dike(models.Model):
 
     def __unicode__(self):
         return self.name
+
 
 class WaterlevelSet(models.Model):
     """waterlevelset properties:
@@ -306,14 +305,16 @@ class WaterlevelSet(models.Model):
     def __unicode__(self):
         return self.name
 
+
 class Waterlevel(models.Model):
     """waterlevel properties:
 
-    - represents 2d graphs with datetime and values, where each row is 1 waterlevel
+    - represents 2d graphs with datetime and values, where each row is
+      1 waterlevel
     - belongs to a waterlevel set
 
     """
-    time = models.FloatField() #interval
+    time = models.FloatField()  # interval
     value = models.FloatField()
     waterlevelset = models.ForeignKey(WaterlevelSet)
 
@@ -324,8 +325,10 @@ class Waterlevel(models.Model):
         db_table = 'flooding_waterlevel'
 
     def __unicode__(self):
-        return u'%s: %s, %f'%(self.waterlevelset.__unicode__(),
-                              str(datetime.timedelta(self.time)), self.value)
+        return (u'%s: %s, %f' %
+                (self.waterlevelset.__unicode__(),
+                 str(datetime.timedelta(self.time)), self.value))
+
 
 class Map(models.Model):
     """Stores wms entries"""
@@ -335,7 +338,7 @@ class Map(models.Model):
     index = models.IntegerField(default=100)
 
     url = models.CharField(max_length=200)
-    layers = models.CharField(max_length=200) #layernames seperated with comma
+    layers = models.CharField(max_length=200)  # separated with comma
     transparent = models.NullBooleanField(default=None)
     tiled = models.NullBooleanField(default=None)
     srs = models.CharField(max_length=50, default='EPSG:900913')
@@ -384,13 +387,16 @@ class Region(models.Model):
         else:
             return self.name
 
+
 class RegionSet(AL_Node):
     """regionset properties:
 
     - is a tree of nodes, representing hierarchy in regionsets
     - is related to 0 or more regions
     - is related to 0 or more projects
-    note: nog niet alle velden onder de knie.. dit is een django-treebeard implementatie
+
+    note: nog niet alle velden onder de knie.. dit is een
+    django-treebeard implementatie
 
     """
     name = models.CharField(max_length=200)
@@ -419,7 +425,7 @@ class RegionSet(AL_Node):
             for r in d.regions.all():
                 if filter_active is None or r.active == filter_active:
                     all_regions[r.id] = r
-        return Region.objects.filter(id__in = all_regions.keys())
+        return Region.objects.filter(id__in=all_regions.keys())
 
     @models.permalink
     def get_absolute_url(self):
@@ -427,6 +433,7 @@ class RegionSet(AL_Node):
 
     def __unicode__(self):
         return self.name
+
 
 class Breach(models.Model):
     """breach properties:
@@ -446,7 +453,7 @@ class Breach(models.Model):
     active = models.BooleanField(default=True)
 
     dike = models.ForeignKey(Dike)
-    defaulttide = models.ForeignKey(WaterlevelSet) #must be of correct type
+    defaulttide = models.ForeignKey(WaterlevelSet)  # must be of correct type
 
     levelnormfrequency = models.FloatField()
     canalbottomlevel = models.FloatField(null=True, blank=True)
@@ -457,11 +464,12 @@ class Breach(models.Model):
     decheight = models.FloatField(null=True, blank=True)
     decheightbaselevel = models.FloatField(null=True, blank=True)
 
-    sobekmodels = models.ManyToManyField(SobekModel, through='BreachSobekModel')
+    sobekmodels = models.ManyToManyField(
+        SobekModel, through='BreachSobekModel')
 
-    internalnode = models.PointField('internal node',srid=4326)
-    externalnode = models.PointField('external node',srid=4326)
-    geom = models.PointField('node itself',srid=4326)
+    internalnode = models.PointField('internal node', srid=4326)
+    externalnode = models.PointField('external node', srid=4326)
+    geom = models.PointField('node itself', srid=4326)
 
     code = models.CharField(max_length=20, null=True)
 
@@ -472,7 +480,6 @@ class Breach(models.Model):
         verbose_name_plural = _('Breaches')
         db_table = 'flooding_breach'
         ordering = ["name"]
-
 
     def get_all_projects(self):
         """find out all projects that the current breach is part of"""
@@ -491,6 +498,7 @@ class Breach(models.Model):
 
     def __unicode__(self):
         return self.name
+
 
 class BreachSobekModel(models.Model):
     """
@@ -512,8 +520,9 @@ class BreachSobekModel(models.Model):
         db_table = 'flooding_breachsobekmodel'
 
     def __unicode__(self):
-        return "%s - %s: %s"%(self.sobekmodel.__unicode__(), self.breach.__unicode__(),
-                              self.sobekid)
+        return ("%s - %s: %s" %
+                (self.sobekmodel.__unicode__(), self.breach.__unicode__(),
+                 self.sobekid))
 
 
 class CutoffLocationSet(models.Model):
@@ -532,6 +541,7 @@ class CutoffLocationSet(models.Model):
 
     def __unicode__(self):
         return self.name
+
 
 class Project(models.Model):
     """project properties:
@@ -578,7 +588,9 @@ class Project(models.Model):
         return self.friendlyname
 
     def get_absolute_url(self):
-        return reverse("flooding_project_detail", kwargs={"object_id": self.id})
+        return reverse(
+            "flooding_project_detail", kwargs={"object_id": self.id})
+
 
 class UserPermission(models.Model):
     """userpermission
@@ -626,7 +638,8 @@ class UserPermission(models.Model):
 #        (PERMISSION_TASK_DELETE, _('delete_task')),
 #        (PERMISSION_IMPORT_ADD, _('add import scenarios')),
 #        (PERMISSION_IMPORT_APPROVE, _('approve Import scenarios')),
-#        (PERMISSION_IMPORT_TO_MAINDATABASE, _('Import scenario to maindatabase')),
+#        (PERMISSION_IMPORT_TO_MAINDATABASE,
+#             _('Import scenario to maindatabase')),
 #        (PERMISSION_EXPORT_ADD, _('add export')),
 #        (PERMISSION_EXPORT_VIEW, _('view exports')),
         )
@@ -641,8 +654,10 @@ class UserPermission(models.Model):
         db_table = 'flooding_userpermission'
 
     def __unicode__(self):
-        return u'%s: %s'%(self.user.__unicode__(),
-                          self.get_permission_display())
+        return (u'%s: %s' %
+                (self.user.__unicode__(),
+                 self.get_permission_display()))
+
 
 class ProjectGroupPermission(models.Model):
     """grouppermission properties:
@@ -661,9 +676,11 @@ class ProjectGroupPermission(models.Model):
         db_table = 'flooding_projectgrouppermission'
 
     def __unicode__(self):
-        return u'%s - %s (%s)'%(self.group.__unicode__(),
-                                self.project.__unicode__(),
-                                self.get_permission_display())
+        return (u'%s - %s (%s)' %
+                (self.group.__unicode__(),
+                 self.project.__unicode__(),
+                 self.get_permission_display()))
+
 
 class PermissionProjectShapeDataLegend(models.Model):
     """View permissions for visualization.models.ShapeDataLegend
@@ -677,7 +694,9 @@ class PermissionProjectShapeDataLegend(models.Model):
         db_table = 'flooding_permissionprojectshapedatalegend'
 
     def __unicode__(self):
-        return u'view %s - %s'%(self.project.__unicode__(), self.shapedatalegend.__unicode__())
+        return (u'view %s - %s' %
+                (unicode(self.project), unicode(self.shapedatalegend)))
+
 
 class PermissionProjectGridDataLegend(models.Model):
     """View permissions for visualization.models.ValueVisualizerMap
@@ -691,7 +710,8 @@ class PermissionProjectGridDataLegend(models.Model):
         db_table = 'flooding_permissinoprojectgriddatalegend'
 
     def __unicode__(self):
-        return u'view %s - %s'%(self.project.__unicode__(), self.griddatalegend.__unicode__())
+        return (u'view %s - %s' %
+                (unicode(self.project), unicode(self.griddatalegend)))
 
 
 class ExtraInfoField(models.Model):
@@ -724,9 +744,10 @@ class ExtraInfoField(models.Model):
         (HEADER_NONE, _('none')),
     )
 
-    name = models.CharField(max_length=200, unique = True)
-    use_in_scenario_overview = models.BooleanField(default = False)
-    header = models.IntegerField(choices=HEADER_CHOICES, default=HEADER_METADATA)
+    name = models.CharField(max_length=200, unique=True)
+    use_in_scenario_overview = models.BooleanField(default=False)
+    header = models.IntegerField(
+        choices=HEADER_CHOICES, default=HEADER_METADATA)
     position = models.IntegerField(default=0)
 
     class Meta:
@@ -734,6 +755,7 @@ class ExtraInfoField(models.Model):
 
     def __unicode__(self):
         return self.name
+
 
 class ExtraScenarioInfo(models.Model):
     """De extra metadata waarden van een scenario
@@ -747,7 +769,9 @@ class ExtraScenarioInfo(models.Model):
         db_table = 'flooding_extrascenarioinfo'
 
     def __unicode__(self):
-        return self.scenario.__unicode__() + ', ' + self.extrainfofield.__unicode__() + ': ' + str(self.value)
+        return (unicode(self.scenario) + ', ' +
+                unicode(self.extrainfofield) + ': ' + str(self.value))
+
 
 class Scenario(models.Model):
     """scenario properties:
@@ -772,7 +796,7 @@ class Scenario(models.Model):
     STATUS_DELETED = 10
     STATUS_APPROVED = 20
     STATUS_DISAPPROVED = 30
-    STATUS_CALCULATED = 40 #but not yet approved
+    STATUS_CALCULATED = 40  # but not yet approved
     STATUS_ERROR = 50
     STATUS_WAITING = 60
     STATUS_NONE = 70
@@ -789,27 +813,32 @@ class Scenario(models.Model):
 
     name = models.CharField(_('name'), max_length=200)
     owner = models.ForeignKey(User)
-    remarks = models.TextField(_('remarks'), blank=True, null=True, default=None)
+    remarks = models.TextField(
+        _('remarks'), blank=True, null=True, default=None)
     project = models.ForeignKey(Project)
     attachments = generic.GenericRelation(Attachment)
-    approvalobject = models.ForeignKey(ApprovalObject,blank=True, null=True, default=None)
+    approvalobject = models.ForeignKey(
+        ApprovalObject, blank=True, null=True, default=None)
 
     breaches = models.ManyToManyField(Breach, through='ScenarioBreach')
-    cutofflocations = models.ManyToManyField(CutoffLocation,
-                                             through='ScenarioCutoffLocation',
-                                             blank=True) #optional
-    strategy = models.ForeignKey('Strategy',blank=True, null=True, default=None)
+    cutofflocations = models.ManyToManyField(
+        CutoffLocation, through='ScenarioCutoffLocation',
+        blank=True)  # optional
+    strategy = models.ForeignKey(
+        'Strategy', blank=True, null=True, default=None)
 
     sobekmodel_inundation = models.ForeignKey(SobekModel)
 
-    tsim = models.FloatField() #datetime object, time in days
+    tsim = models.FloatField()  # datetime object, time in days
     calcpriority = models.IntegerField(choices=CALCPRIORITY_CHOICES,
                                        default=CALCPRIORITY_LOW)
 
-    status_cache = models.IntegerField(choices=STATUS_CHOICES, default=None, null=True)
-    presentationlayer = models.ManyToManyField(PresentationLayer, through = 'Scenario_PresentationLayer')
+    status_cache = models.IntegerField(
+        choices=STATUS_CHOICES, default=None, null=True)
+    presentationlayer = models.ManyToManyField(
+        PresentationLayer, through='Scenario_PresentationLayer')
 
-    migrated = models.NullBooleanField(blank = True, null=True)
+    migrated = models.NullBooleanField(blank=True, null=True)
 
     code = models.CharField(max_length=15, null=True)
 
@@ -837,10 +866,12 @@ class Scenario(models.Model):
         """Get status of scenario by looking at tasks
 
         see:
-        http://twiki.nelen-schuurmans.nl/cgi-bin/twiki/view/ITOntwikkeling/LizardFloodingDocumentatie
+        ITOntwikkeling/LizardFloodingDocumentatie on TWiki
+
         todo: yet to be implemented
         """
-        tasks = self.task_set.all().order_by('-tasktype','-tstart') #reverse order!
+        tasks = (self.task_set.all().
+                 order_by('-tasktype', '-tstart'))  # reverse order!
         if not(tasks):
             return self.STATUS_NONE
 
@@ -851,9 +882,12 @@ class Scenario(models.Model):
                 return self.STATUS_APPROVED
             elif task.tasktype.id == 190 and task.successful == False:
                 return self.STATUS_DISAPPROVED
-            elif task.tasktype.id in [150,155,170,180,185] and task.successful:
+            elif (task.tasktype.id in [150, 155, 170, 180, 185] and
+                  task.successful):
                 return self.STATUS_CALCULATED
-            elif (task.tasktype.id in [120, 130, 150]) and task.tfinished is None and task.successful is None:
+            elif ((task.tasktype.id in [120, 130, 150]) and
+                  task.tfinished is None and
+                  task.successful is None):
                 return self.STATUS_ERROR
             elif task.tasktype.id == 50 and task.successful:
                 return self.STATUS_WAITING
@@ -871,7 +905,9 @@ class Scenario(models.Model):
         self.save()
 
     def get_absolute_url(self):
-        return reverse('flooding_scenario_detail', kwargs={'object_id': self.pk})
+        return reverse('flooding_scenario_detail',
+                       kwargs={'object_id': self.pk})
+
 
 class ScenarioBreach(models.Model):
     """scenario breach properties:
@@ -893,11 +929,12 @@ class ScenarioBreach(models.Model):
     scenario = models.ForeignKey(Scenario)
     breach = models.ForeignKey(Breach)
     waterlevelset = models.ForeignKey(WaterlevelSet)
-    sobekmodel_externalwater = models.ForeignKey(SobekModel, null=True, blank=True)
+    sobekmodel_externalwater = models.ForeignKey(
+        SobekModel, null=True, blank=True)
     #bres
     widthbrinit = models.FloatField()
     methstartbreach = models.IntegerField(choices=METHOD_START_BREACH_CHOICES)
-    tstartbreach = models.FloatField() #datetime.timedelta
+    tstartbreach = models.FloatField()  # datetime.timedelta
     hstartbreach = models.FloatField()
     brdischcoef = models.FloatField()
     brf1 = models.FloatField()
@@ -905,7 +942,7 @@ class ScenarioBreach(models.Model):
     bottomlevelbreach = models.FloatField()
     ucritical = models.FloatField()
     pitdepth = models.FloatField()
-    tmaxdepth = models.FloatField() #datetime.timedelta
+    tmaxdepth = models.FloatField()  # datetime.timedelta
     #waterlevels
     extwmaxlevel = models.FloatField()
     extwbaselevel = models.FloatField(null=True, blank=True, default=None)
@@ -925,8 +962,9 @@ class ScenarioBreach(models.Model):
         db_table = 'flooding_scenariobreach'
 
     def __unicode__(self):
-        return u'%s: %s (%s)'%(self.scenario.__unicode__(), self.breach.__unicode__(),
-                               self.waterlevelset.__unicode__())
+        return (u'%s: %s (%s)' %
+                (unicode(self.scenario), unicode(self.breach),
+                 unicode(self.waterlevelset)))
 
     def get_tstartbreach(self):
         """
@@ -944,12 +982,18 @@ class ScenarioBreach(models.Model):
         """Returns str summary of object, with markdown layout
         """
         sb_summary = ''
-        sb_summary += '* %s: %s\n'%(('location'), self.breach)
-        sb_summary += '* %s: %s\n'%(_('external water'), self.breach.externalwater)
-        sb_summary += '* %s: %s\n'%(_('external water period'), self.extwrepeattime)
-        sb_summary += '* %s: %s\n'%(_('external water max waterlevel'),self.extwmaxlevel)
-        sb_summary += '* %s: %s\n'%(_('storm duration'), self.tstorm)
-        sb_summary += '* %s: %s'%(_('pitdepth'), self.pitdepth)
+        sb_summary += ('* %s: %s\n' %
+                       (('location'), self.breach))
+        sb_summary += ('* %s: %s\n' %
+                       (_('external water'), self.breach.externalwater))
+        sb_summary += ('* %s: %s\n' %
+                       (_('external water period'), self.extwrepeattime))
+        sb_summary += ('* %s: %s\n' %
+                       (_('external water max waterlevel'), self.extwmaxlevel))
+        sb_summary += ('* %s: %s\n' %
+                       (_('storm duration'), self.tstorm))
+        sb_summary += ('* %s: %s' %
+                       (_('pitdepth'), self.pitdepth))
         return sb_summary
 
 
@@ -962,8 +1006,10 @@ class ScenarioCutoffLocation(models.Model):
     """
     scenario = models.ForeignKey(Scenario)
     cutofflocation = models.ForeignKey(CutoffLocation)
-    action = models.IntegerField(null=True, blank=True, default=1) #1 = dicht, 2 = open
-    tclose = models.FloatField() #interval timedelta // tclose can ook topen zijn, afhankelijk van action
+    action = models.IntegerField(
+        null=True, blank=True, default=1)  # 1 = dicht, 2 = open
+    #interval timedelta // tclose can ook topen zijn, afhankelijk van action
+    tclose = models.FloatField()
 
     class Meta:
         unique_together = (("scenario", "cutofflocation"),)
@@ -972,8 +1018,8 @@ class ScenarioCutoffLocation(models.Model):
         db_table = 'flooding_scenariocutofflocation'
 
     def __unicode__(self):
-        return u'%s: %s'%(self.scenario.__unicode__(),
-                          self.cutofflocation.__unicode__())
+        return (u'%s: %s' %
+                (unicode(self.scenario), unicode(self.cutofflocation)))
 
     def get_tclose(self):
         return datetime.timedelta(self.tclose)
@@ -983,7 +1029,8 @@ class ScenarioCutoffLocation(models.Model):
         - Returns tclose as number of seconds
         """
         t = self.get_tclose()
-        return t.seconds + t.days*24*60*60
+        return t.seconds + t.days * 24 * 60 * 60
+
 
 class Program(models.Model):
     """Program meta info: Sobek, Ascii2Png, etc"""
@@ -997,16 +1044,19 @@ class Program(models.Model):
     def __unicode__(self):
         return self.name
 
+
 class ResultType(models.Model):
     """Resulttype."""
     name = models.CharField(max_length=50)
     shortname_dutch = models.CharField(max_length=20, blank=True, null=True)
     overlaytype = models.CharField(max_length=20, blank=True, null=True)
-    unit = models.CharField(max_length=15, blank=True, null=True)#mag weg
-    color_mapping_name = models.CharField(max_length=256, blank=True, null=True)
+    unit = models.CharField(max_length=15, blank=True, null=True)  # mag weg
+    color_mapping_name = models.CharField(
+        max_length=256, blank=True, null=True)
     program = models.ForeignKey(Program)
     content_names_re = models.CharField(max_length=256, blank=True, null=True)
-    presentationtype = models.ManyToManyField(PresentationType, through = 'ResultType_PresentationType')
+    presentationtype = models.ManyToManyField(
+        PresentationType, through='ResultType_PresentationType')
 
     class Meta:
         verbose_name = _('Result type')
@@ -1015,6 +1065,7 @@ class ResultType(models.Model):
 
     def __unicode__(self):
         return self.shortname_dutch
+
 
 class Result(models.Model):
     """result properties:
@@ -1028,15 +1079,16 @@ class Result(models.Model):
     resulttype = models.ForeignKey(ResultType)
 
     resultloc = models.CharField(max_length=200)
-    deltat = models.FloatField( null=True, blank=True) #datetime.timedelta
+    deltat = models.FloatField(null=True, blank=True)  # datetime.timedelta
 
     resultpngloc = models.CharField(max_length=200, null=True, blank=True)
-    startnr = models.IntegerField(blank=True, null=True)#mag weg
+    startnr = models.IntegerField(blank=True, null=True)  # mag weg
     firstnr = models.IntegerField(blank=True, null=True)
     lastnr = models.IntegerField(blank=True, null=True)
     unit = models.CharField(max_length=10, blank=True, null=True)
     value = models.FloatField(null=True, blank=True)
-    bbox = models.MultiPolygonField('Result Border', srid=4326, blank=True, null=True)
+    bbox = models.MultiPolygonField(
+        'Result Border', srid=4326, blank=True, null=True)
 
     class Meta:
         unique_together = (("scenario", "resulttype"),)
@@ -1057,7 +1109,6 @@ class CutoffLocationSobekModelSetting(models.Model):
 
     """
 
-
     cutofflocation = models.ForeignKey(CutoffLocation)
     sobekmodel = models.ForeignKey(SobekModel)
 
@@ -1071,9 +1122,10 @@ class CutoffLocationSobekModelSetting(models.Model):
         db_table = 'flooding_cutofflocationsobekmodelsetting'
 
     def __unicode__(self):
-        return u'%s - %s: %s'%(self.sobekmodel.__unicode__(),
-                               self.cutofflocation.__unicode__(),
-                               self.sobekid)
+        return (u'%s - %s: %s' %
+                (unicode(self.sobekmodel), unicode(self.cutofflocation),
+                 self.sobekid))
+
 
 class TaskType(models.Model):
     """tasktypes.
@@ -1098,7 +1150,8 @@ class TaskType(models.Model):
         db_table = 'flooding_tasktype'
 
     def __unicode__(self):
-        return u'%s (%d)'%(self.name, self.id)
+        return u'%s (%d)' % (self.name, self.id)
+
 
 class Task(models.Model):
     """task properties:
@@ -1118,7 +1171,7 @@ class Task(models.Model):
 
     tfinished = models.DateTimeField(blank=True, null=True)
     errorlog = models.TextField(blank=True, null=True)
-    successful = models.NullBooleanField(blank = True, null=True)
+    successful = models.NullBooleanField(blank=True, null=True)
 
     class Meta:
         verbose_name = _('Task')
@@ -1127,7 +1180,8 @@ class Task(models.Model):
         db_table = 'flooding_task'
 
     def __unicode__(self):
-        return u'Scenario %s (tasktype %d %s)'%(self.scenario.__unicode__(), self.tasktype.id, self.tasktype)
+        return (u'Scenario %s (tasktype %d %s)' %
+                (unicode(self.scenario), self.tasktype.id, self.tasktype))
 
     def get_absolute_url(self):
         return reverse('flooding_task_detail', kwargs={'object_id': self.id})
@@ -1172,11 +1226,12 @@ class TaskExecutor(models.Model):
     class Meta:
         verbose_name = _('Task executor')
         verbose_name_plural = _('Task executors')
-        unique_together = (("ipaddress", "port"),("name", "seq"))
+        unique_together = (("ipaddress", "port"), ("name", "seq"))
         db_table = 'flooding_taskexecutor'
 
     def __unicode__(self):
         return self.name
+
 
 class Scenario_PresentationLayer(models.Model):
     """link to presentation.PresentationLayer """
@@ -1207,15 +1262,15 @@ class Strategy(models.Model):
 
     name = models.CharField(max_length=100)
     region = models.ForeignKey(Region, blank=True, null=True)
-    visible_for_loading =  models.BooleanField(default=False)
+    visible_for_loading = models.BooleanField(default=False)
     user = models.ForeignKey(User, blank=True, null=True)
     save_date = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         db_table = 'flooding_strategy'
+
     def __unicode__(self):
         return self.name
-
 
 
 class Measure(models.Model):
@@ -1235,13 +1290,16 @@ class Measure(models.Model):
 
     name = models.CharField(max_length=100)
     strategy = models.ManyToManyField(Strategy)
-    reference_adjustment = models.IntegerField(choices=ADJUSTMENT_TYPES, default=TYPE_UNKNOWN)
+    reference_adjustment = models.IntegerField(
+        choices=ADJUSTMENT_TYPES, default=TYPE_UNKNOWN)
     adjustment = models.FloatField(default=0)
 
     class Meta:
         db_table = 'flooding_measure'
+
     def __unicode__(self):
         return self.name
+
 
 class EmbankmentUnit(models.Model):
     """
@@ -1265,9 +1323,8 @@ class EmbankmentUnit(models.Model):
 
     objects = models.GeoManager()
 
-
     class Meta:
         db_table = 'flooding_embankment_unit'
+
     def __unicode__(self):
         return self.unit_id
-
