@@ -16,7 +16,9 @@ from django.utils import simplejson
 from django.views.decorators.cache import never_cache
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.ticker import Formatter
-from matplotlib.ticker import MultipleLocator, FormatStrFormatter, LinearLocator
+from matplotlib.ticker import MultipleLocator
+from matplotlib.ticker import FormatStrFormatter
+from matplotlib.ticker import LinearLocator
 from osgeo import ogr
 import PIL.Image
 import mapnik
@@ -36,7 +38,6 @@ from nens.sobek import HISFile
 log = logging.getLogger('nens.web.presentation.views')
 
 
-
 def external_file_location(filename):
     """Return full filename of file that's on smb (currently)
 
@@ -52,7 +53,7 @@ def external_file_location(filename):
         full_name = os.path.join(base_dir, filename)
     else:
         # Windows direct smb link.
-        base_dir = Setting.objects.get( key = 'presentation_dir' ).value
+        base_dir = Setting.objects.get(key='presentation_dir').value
         full_name = os.path.join(base_dir, filename.lstrip('\\').lstrip('/'))
     return str(full_name)
 
@@ -61,13 +62,22 @@ def service_get_presentationlayer_settings(
     request, pl_id):
     """get_settings of presentationlayer
     return:
-        overlaytype: presentationtype_overlaytype - integer - (wms, map, general, (point, line))
-        type: presentationtype_valuetype - integer - (timeserie, classification, singlevalue, static)
-        has_value_source (kan ik waarden of grafieken van een punt opvragen??)
+
+        overlaytype: presentationtype_overlaytype - integer - (wms,
+        map, general, (point, line))
+
+        type: presentationtype_valuetype - integer - (timeserie,
+        classification, singlevalue, static)
+
+        has_value_source (kan ik waarden of grafieken van een punt
+        opvragen??)
+
         legend: array of legends with:
                 id:
                 name:
-                in case of default: dtype (0=personal default, 1=project default, 2=presentationType default)
+                in case of default: dtype (0=personal default,
+                1=project default, 2=presentationType default)
+
     in case of grid:
         extent (in original srid) - north, south, west,east
         srid
@@ -86,9 +96,10 @@ def service_get_presentationlayer_settings(
         array of class boundaries
         voor resultaten met figuren, haalt afmetingen en extents op
     """
-    pl = get_object_or_404(PresentationLayer, pk = pl_id)
+    pl = get_object_or_404(PresentationLayer, pk=pl_id)
     pm = PermissionManager(request.user)
-    if not pm.check_permission(pl, PermissionManager.PERMISSION_PRESENTATIONLAYER_VIEW):
+    if not pm.check_permission(
+        pl, PermissionManager.PERMISSION_PRESENTATIONLAYER_VIEW):
         raise Http404
 
     rec = {}
@@ -96,16 +107,20 @@ def service_get_presentationlayer_settings(
         try:
             pl.presentationgrid
         except PresentationGrid.DoesNotExist:
-            return HttpResponse(simplejson.dumps({}), mimetype="application/json")
+            return HttpResponse(
+                simplejson.dumps({}), mimetype="application/json")
 
         rec['bounds'] = {}
         rec['bounds']['projection'] = pl.presentationgrid.bbox_orignal_srid
 
+        extent = pl.presentationgrid.extent.extent
         if pl.presentationgrid.bbox_orignal_srid == 28992:
-            rec['bounds']['south'], rec['bounds']['west'], rec['bounds']['north'], rec['bounds']['east']  = pl.presentationgrid.extent.extent
+            (rec['bounds']['south'], rec['bounds']['west'],
+             rec['bounds']['north'], rec['bounds']['east']) = extent
             rec['bounds']['projection'] = 28992
         else:
-            rec['bounds']['west'], rec['bounds']['south'], rec['bounds']['east'], rec['bounds']['north'] = pl.presentationgrid.extent.extent
+            (rec['bounds']['west'], rec['bounds']['south'],
+             rec['bounds']['east'], rec['bounds']['north']) = extent
             rec['bounds']['projection'] = 4326
 
         rec['height'] = pl.presentationgrid.rownr
@@ -113,8 +128,9 @@ def service_get_presentationlayer_settings(
         rec['gridsize'] = pl.presentationgrid.gridsize
 
     anim = {}
-    # Added False at the end of the line to be sure for testing that it will never execute the code and False
-    if pl.presentationtype.value_type == PresentationType.VALUE_TYPE_TIME_SERIE:
+
+    if (pl.presentationtype.value_type ==
+        PresentationType.VALUE_TYPE_TIME_SERIE):
         anim['firstnr'] = pl.animation.firstnr
         anim['lastnr'] = pl.animation.lastnr
         anim['options'] = {}
@@ -122,36 +138,41 @@ def service_get_presentationlayer_settings(
         if (pl.animation.delta_timestep > 0):
             anim['options']['delta'] = pl.animation.delta_timestep * 24 * 3600
 
-    #legends = ShapeDataLegend.objects.filter(presentationtype = pl.presentationtype)
     legends = pm.get_legends(pl)
 
-    #legendObjects = [(l.id, l.name) for l in legends]
     legend_objects = [{'id': l.id, 'name': l.name} for l in legends]
 
-    default_legend = ShapeDataLegend.objects.get(pk = pl.presentationtype.default_legend_id)
+    default_legend = ShapeDataLegend.objects.get(
+        pk=pl.presentationtype.default_legend_id)
 
-    log.debug( 'got default legend' )
+    log.debug('got default legend')
 
     info = {}
     info['rec'] = rec
     info['anim'] = anim
     info['legends'] = legend_objects
-    info['default_legend'] = {'id': default_legend.id, 'name': default_legend.name}
+    info['default_legend'] = {
+        'id': default_legend.id,
+        'name': default_legend.name
+    }
 
-    if pl.presentationtype.value_type == PresentationType.VALUE_TYPE_TIME_SERIE and pl.presentationtype.geo_type in [PresentationType.GEO_TYPE_POLYGON, PresentationType.GEO_TYPE_LINE, PresentationType.GEO_TYPE_POINT]:
-        #WMS service, start caching results for later requests
-        #service_get_wms_of_shape(request,  2,  2, (-1,-1,0,0,), pl_id, default_legend.id,  0 )
+    if ((pl.presentationtype.value_type ==
+         PresentationType.VALUE_TYPE_TIME_SERIE) and
+        pl.presentationtype.geo_type in [
+            PresentationType.GEO_TYPE_POLYGON,
+            PresentationType.GEO_TYPE_LINE,
+            PresentationType.GEO_TYPE_POINT]):
 
         anim['lastnr'] = pl.animation.lastnr
         pass
 
-    log.debug( 'json dump van info' )
-    log.debug( simplejson.dumps(info) )
+    log.debug('json dump van info')
+    log.debug(simplejson.dumps(info))
     return HttpResponse(simplejson.dumps(info), mimetype="application/json")
 
 
 def service_get_wms_of_shape(
-    request, width, height, bbox, presentationlayer_id, legend_id, timestep ):
+    request, width, height, bbox, presentationlayer_id, legend_id, timestep):
     """
     width = int
     height = int
@@ -164,7 +185,7 @@ def service_get_wms_of_shape(
     #presentation_dir = Setting.objects.get( key = 'presentation_dir' ).value
 
     #################### set up map ###################################
-    log.debug( 'start setting up map ' + str(datetime.datetime.now()))
+    log.debug('start setting up map ' + str(datetime.datetime.now()))
 
     m = mapnik.Map(width, height)
     spherical_mercator = '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs +over'

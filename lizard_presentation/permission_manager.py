@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from lizard_presentation.models import PresentationLayer
 from lizard_visualization.models import ShapeDataLegend
-from flooding_lib.permission_manager import PermissionManager as PermissionManagerFlooding
+from flooding_lib.permission_manager import PermissionManager as \
+    PermissionManagerFlooding
 from flooding_lib.models import UserPermission as UserPermissionFlooding
 
 
@@ -14,7 +15,8 @@ class PermissionManager:
     >>> user = get_object_or_404(User, username='jack')
     >>> pl = get_object_or_404(PresentationLayer, pk=1)
     >>> pm = PermissionManager(user)
-    >>> pm.check_permission(pl, PermissionManager.PERMISSION_PRESENTATIONLAYER_VIEW)
+    >>> pm.check_permission(
+    ...     pl, PermissionManager.PERMISSION_PRESENTATIONLAYER_VIEW)
     True
 
     """
@@ -26,7 +28,6 @@ class PermissionManager:
         2: 'PRESENTATIONLAYER_EDIT',
         }
 
-
     def __init__(self, user):
         self.user = user
         #we gaan er even van uit dat Flooding aanwezig is
@@ -35,12 +36,15 @@ class PermissionManager:
         #except ImportError:
         #    self.pm_flooding = None
 
-    def check_permission_flooding(self, permission_level, permission, presentationlayer=None):
-        """Mapping from presentationtype to flooding permissions. Returns True if permitted
+    def check_permission_flooding(
+        self, permission_level, permission, presentationlayer=None):
+        """Mapping from presentationtype to flooding
+        permissions. Returns True if permitted
 
         An example mapping function is implemented now
         """
         result = False
+
         def always_true(*args, **kwargs):
             return True
 
@@ -52,7 +56,8 @@ class PermissionManager:
             then return True, else False
             """
             for scenario in presentationlayer.scenario_set.all():
-                if self.pm_flooding.check_project_permission(scenario.project, flooding_permission):
+                if self.pm_flooding.check_project_permission(
+                    scenario.project, flooding_permission):
                     return True
             return False
 
@@ -64,19 +69,27 @@ class PermissionManager:
 
         if permission == self.PERMISSION_PRESENTATIONLAYER_VIEW:
             if permission_level == 1:
-                fp = UserPermissionFlooding.PERMISSION_SCENARIO_VIEW #flooding permission
-                result = self.pm_flooding.check_permission(permission=fp) and project_permission(presentationlayer, fp)
+                # flooding permission
+                fp = UserPermissionFlooding.PERMISSION_SCENARIO_VIEW
+                result = (self.pm_flooding.check_permission(permission=fp) and
+                          project_permission(presentationlayer, fp))
             elif permission_level == 2:
-                fp = UserPermissionFlooding.PERMISSION_SCENARIO_VIEW #flooding permission
-                result = self.pm_flooding.check_permission(permission=fp) and project_permission(presentationlayer, fp)
+                # flooding permission
+                fp = UserPermissionFlooding.PERMISSION_SCENARIO_VIEW
+                result = (self.pm_flooding.check_permission(permission=fp) and
+                          project_permission(presentationlayer, fp))
 
         elif permission == self.PERMISSION_PRESENTATIONLAYER_EDIT:
+            # flooding permission
             if permission_level == 1:
-                fp = UserPermissionFlooding.PERMISSION_SCENARIO_EDIT #flooding permission
-                result = self.pm_flooding.check_permission(permission=fp) and project_permission(presentationlayer, fp)
+                fp = UserPermissionFlooding.PERMISSION_SCENARIO_EDIT
+                result = (self.pm_flooding.check_permission(permission=fp) and
+                          project_permission(presentationlayer, fp))
             elif permission_level == 2:
-                fp = UserPermissionFlooding.PERMISSION_PROJECT_ADD #flooding permission
-                result = self.pm_flooding.check_permission(permission=fp) and project_permission(presentationlayer, fp)
+                # flooding permission
+                fp = UserPermissionFlooding.PERMISSION_PROJECT_ADD
+                result = (self.pm_flooding.check_permission(permission=fp) and
+                          project_permission(presentationlayer, fp))
 
         return result
 
@@ -95,8 +108,9 @@ class PermissionManager:
         if app_code == PresentationLayer.SOURCE_APPLICATION_NONE:
             return True
         elif app_code == PresentationLayer.SOURCE_APPLICATION_FLOODING:
-            return self.check_permission_flooding(permission_level, permission,
-                                                  presentationlayer=presentationlayer)
+            return self.check_permission_flooding(
+                permission_level, permission,
+                presentationlayer=presentationlayer)
         return False
 
     def check_permission(self, presentationlayer, permission):
@@ -118,12 +132,16 @@ class PermissionManager:
         sa = presentationlayer.source_application
         #pt = presentationlayer.presentationtype
         #pl = pt.permission_level
-        if self.user.is_staff or sa == PresentationLayer.SOURCE_APPLICATION_NONE:
+        if (self.user.is_staff or
+            sa == PresentationLayer.SOURCE_APPLICATION_NONE):
 
-            result = ShapeDataLegend.objects.filter(presentationtype=presentationlayer.presentationtype)
+            result = ShapeDataLegend.objects.filter(
+                presentationtype=presentationlayer.presentationtype)
         elif sa == PresentationLayer.SOURCE_APPLICATION_FLOODING:
-            if self.check_permission(presentationlayer, self.PERMISSION_PRESENTATIONLAYER_VIEW):
-                result = ShapeDataLegend.objects.filter(presentationtype=presentationlayer.presentationtype)
+            if self.check_permission(
+                presentationlayer, self.PERMISSION_PRESENTATIONLAYER_VIEW):
+                result = ShapeDataLegend.objects.filter(
+                    presentationtype=presentationlayer.presentationtype)
             else:
                 result = []
 

@@ -11,6 +11,6 @@ def suite():
         'USAGE.txt',
         #'TODO_several_more_tests.txt',
         module_relative=True,
-        optionflags=(doctest.NORMALIZE_WHITESPACE|
-                     doctest.ELLIPSIS|
+        optionflags=(doctest.NORMALIZE_WHITESPACE |
+                     doctest.ELLIPSIS |
                      doctest.REPORT_NDIFF))

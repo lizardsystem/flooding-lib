@@ -29,55 +29,58 @@ class PresentationType(models.Model):
     VALUE_TYPE_TIME_SERIE = 3
     VALUE_TYPE_CLASS_SERIE = 4
 
-    active = models.BooleanField(default = True)
+    active = models.BooleanField(default=True)
 
     code = models.CharField(max_length=35)
     name = models.CharField(max_length=35)
     object = models.CharField(max_length=35)
     parameter = models.CharField(max_length=35)
     remarks = models.TextField(blank=True)
-    custom_indicator = models.ForeignKey('CustomIndicator', null=True, blank=True) #for selecting subselection
+    custom_indicator = models.ForeignKey(
+        'CustomIndicator', null=True, blank=True)  # for selecting subselection
     order_index = models.IntegerField()
 
-    absolute = models.BooleanField(default = False)
+    absolute = models.BooleanField(default=False)
 
-    geo_type = models.IntegerField(choices = GEO_TYPE)#grid, location, value
-    value_type = models.IntegerField(choices = VALUE_TYPE)#static, value, time_serie, class_serie,
+    geo_type = models.IntegerField(choices=GEO_TYPE)  # grid, location, value
+    value_type = models.IntegerField(
+        choices=VALUE_TYPE)  # static, value, time_serie, class_serie,
 
     unit = models.CharField(max_length=20)
-    class_unit = models.CharField(max_length=20, blank = True)
-    value_source_parameter_name = models.CharField(max_length=30, blank = True)
-    value_source_id_prefix = models.CharField(max_length=30, blank = True)
+    class_unit = models.CharField(max_length=20, blank=True)
+    value_source_parameter_name = models.CharField(max_length=30, blank=True)
+    value_source_id_prefix = models.CharField(max_length=30, blank=True)
 
-    generation_geo_source = models.CharField(max_length=30, blank = True)
-    generation_geo_source_part = models.CharField(max_length=30, blank = True)
-    geo_source_filter = models.CharField(max_length=80, blank = True)
+    generation_geo_source = models.CharField(max_length=30, blank=True)
+    generation_geo_source_part = models.CharField(max_length=30, blank=True)
+    geo_source_filter = models.CharField(max_length=80, blank=True)
 
-    #numeric permission level; meaning is given by permission_manager
+    # numeric permission level; meaning is given by permission_manager
     permission_level = models.IntegerField(default=1)
-    default_legend_id = models.IntegerField(blank = False)
-    
-    class Meta:        
+    default_legend_id = models.IntegerField(blank=False)
+
+    class Meta:
         db_table = 'presentation_presentationtype'
-        
+
     def __unicode__(self):
         return self.name
-
 
 
 class CustomIndicator(models.Model):
     """ A label for a group of PresentationTypes """
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
-    
-    class Meta:        
+
+    class Meta:
         db_table = 'presentation_customindicator'
-    
+
     def __unicode__(self):
         return self.name
 
+
 class Derivative(models.Model):
-    """ Information how to create a PresentionLayer based on another PresentaionLayer """
+    """Information how to create a PresentionLayer based on another
+    PresentationLayer """
 
     COMBINE_TYPE = (
         (1, _('timeserie')),
@@ -103,23 +106,30 @@ class Derivative(models.Model):
     FUNCTION_TYPE_SUM = 4
     FUNCTION_TYPE_SUM_MULTIPLIED_BY_DT = 5
 
-    source_presentationtype = models.ForeignKey('PresentationType',related_name = 'source_presentationtype')
+    source_presentationtype = models.ForeignKey(
+        'PresentationType', related_name='source_presentationtype')
     dest_presentationtype = models.ForeignKey('PresentationType')
-    combine_on = models.IntegerField(choices = COMBINE_TYPE) #
-    function_derivative = models.IntegerField(choices = FUNCTION_TYPE)# # max, sum, sum_multiplied_by_dt, min, mean
-    
-    class Meta:        
-        db_table = 'presentation_derivative'
-    
-class SupportLayers(models.Model):
-    """ Information how to create a PresentionLayer based on another PresentaionLayer """
+    combine_on = models.IntegerField(choices=COMBINE_TYPE)
+    function_derivative = models.IntegerField(
+        choices=FUNCTION_TYPE)   # max, sum, sum_multiplied_by_dt, min, mean
 
-    presentationtype = models.OneToOneField('PresentationType',related_name = 'supported_presentationtype')
-    supportive_presentationtype = models.ManyToManyField('PresentationType',related_name = 'supportive_presentationtypes')
-    
-    class Meta:        
+    class Meta:
+        db_table = 'presentation_derivative'
+
+
+class SupportLayers(models.Model):
+    """ Information how to create a PresentionLayer based on another
+    PresentationLayer """
+
+    presentationtype = models.OneToOneField(
+        'PresentationType', related_name='supported_presentationtype')
+    supportive_presentationtype = models.ManyToManyField(
+        'PresentationType', related_name='supportive_presentationtypes')
+
+    class Meta:
         db_table = 'presentation_supportlayers'
-    
+
+
 class Field(models.Model):
     """ Fields of a PresentaionType """
 
@@ -147,28 +157,30 @@ class Field(models.Model):
 
     presentationtype = models.ForeignKey(PresentationType)
     friendlyname = models.CharField(max_length=50)
-    source_type = models.IntegerField(choices = SOURCE_TYPE)
+    source_type = models.IntegerField(choices=SOURCE_TYPE)
     is_main_value_field = models.BooleanField(default=False)
     name_in_source = models.CharField(max_length=80)
-    field_type = models.IntegerField(choices = DATA_TYPE)
-    
-    class Meta:        
+    field_type = models.IntegerField(choices=DATA_TYPE)
+
+    class Meta:
         db_table = 'presentation_field'
 
     def __unicode__(self):
-        return self.presentationtype.name +': ' + self.friendlyname
+        return self.presentationtype.name + ': ' + self.friendlyname
+
 
 class FieldChoice(models.Model):
     """ Possible choices of a Field """
     field = models.ForeignKey(Field)
     friendlyname = models.CharField(max_length=50)
     fieldname_source = models.CharField(max_length=80)
-    
-    class Meta:        
+
+    class Meta:
         db_table = 'presentation_fieldchoice'
 
     def __unicode__(self):
         return self.friendlyname
+
 
 class PresentationLayer(models.Model):
     """Presentation layer - the root for all presentation stuff.
@@ -184,44 +196,52 @@ class PresentationLayer(models.Model):
     SOURCE_APPLICATION_FLOODING = 2
 
     presentationtype = models.ForeignKey(PresentationType)
-    source_application = models.IntegerField(choices=SOURCE_APPLICATION_CHOICES, default=SOURCE_APPLICATION_NONE)
-    value = models.FloatField(blank = True, null = True)
-    
-    class Meta:        
+    source_application = models.IntegerField(
+        choices=SOURCE_APPLICATION_CHOICES, default=SOURCE_APPLICATION_NONE)
+    value = models.FloatField(blank=True, null=True)
+
+    class Meta:
         db_table = 'presentation_presentationlayer'
 
     def __unicode__(self):
-        return '%s - %s'%(self.presentationtype.__unicode__(),
-                          self.SOURCE_APPLICATION_DICT[self.source_application])
+        return ('%s - %s' %
+                (unicode(self.presentationtype),
+                 self.SOURCE_APPLICATION_DICT[self.source_application]))
+
 
 class Animation(models.Model):
     """ Information about the PresentationLayer's timeserie of data """
-    presentationlayer = models.OneToOneField(PresentationLayer, unique=True) #must be unique
+    presentationlayer = models.OneToOneField(
+        PresentationLayer, unique=True)  # must be unique
     firstnr = models.IntegerField()
     lastnr = models.IntegerField()
     startnr = models.IntegerField(blank=True)
-    delta_timestep = models.FloatField() #datetime object, time in days
-    
-    class Meta:        
+    delta_timestep = models.FloatField()  # datetime object, time in days
+
+    class Meta:
         db_table = 'presentation_animation'
+
 
 class Classified(models.Model):
     """ Information about the PresentationLayer's classes """
-    presentationlayer = models.OneToOneField(PresentationLayer, unique=True) #must be unique
+    presentationlayer = models.OneToOneField(
+        PresentationLayer, unique=True)  # must be unique
     firstnr = models.IntegerField()
     lastnr = models.IntegerField()
-    
-    class Meta:        
+
+    class Meta:
         db_table = 'presentation_classified'
+
 
 class ClassifiedNr(models.Model):
     """ classes of a Classified PresentationLayer """
-    classes = models.ForeignKey(Classified) #must be unique
+    classes = models.ForeignKey(Classified)  # must be unique
     nr = models.IntegerField()
     boundary = models.FloatField()
-    
-    class Meta:        
+
+    class Meta:
         db_table = 'presentation_classifiednr'
+
 
 class PresentationSource(models.Model):
     """ A data source for presentation """
@@ -244,14 +264,14 @@ class PresentationSource(models.Model):
     SOURCE_TYPE_PNG_FILE_INDEXED_PALLETTE = 7
     SOURCE_TYPE_SERIE_PNG_FILE_INDEXED_PALLETTE = 8
 
-    type = models.IntegerField(choices = SOURCE_TYPE)
-    file_location = models.CharField(max_length=150,blank=True, null=True)
+    type = models.IntegerField(choices=SOURCE_TYPE)
+    file_location = models.CharField(max_length=150, blank=True, null=True)
     t_source = models.DateTimeField(blank=True, null=True)
     t_origin = models.DateTimeField(blank=True, null=True)
 
-    class Meta:        
+    class Meta:
         db_table = 'presentation_presentationsource'
-    
+
     def __unicode__(self):
         return str(self.file_location)
 
@@ -262,62 +282,81 @@ class SourceLink(models.Model):
     sourcelinktype = models.ForeignKey('SourceLinkType')
     link_id = models.CharField(max_length=50)
     type = models.CharField(max_length=50)
-    
-    class Meta:        
+
+    class Meta:
         db_table = 'presentation_sourcelink'
 
+
 class SourceLinkType(models.Model):
-    ''' A label for a group of PresentationSources. Most of the time based on the origin of the data '''
+    ''' A label for a group of PresentationSources. Most of the time
+    based on the origin of the data '''
     name = models.CharField(max_length=50)
-    
-    class Meta:        
+
+    class Meta:
         db_table = 'presentation_sourcelinktype'
+
 
 class PresentationGrid(models.Model):
     ''' Information about a PresentationLayer of the type grid '''
-    presentationlayer = models.OneToOneField(PresentationLayer, unique=True) #must be unique
+    presentationlayer = models.OneToOneField(
+        PresentationLayer, unique=True)  # must be unique
 
-    extent = models.MultiPolygonField('Result Border', srid=4326, blank = True, null = True)
-    bbox_orignal_srid = models.IntegerField(blank = True, null = True)
+    extent = models.MultiPolygonField(
+        'Result Border', srid=4326, blank=True, null=True)
+    bbox_orignal_srid = models.IntegerField(blank=True, null=True)
     rownr = models.IntegerField()
     colnr = models.IntegerField()
     gridsize = models.IntegerField()
-    png_indexed_palette = models.ForeignKey(PresentationSource, related_name = 'png_indexed_palette', null = True, blank = True)
-    png_default_legend = models.ForeignKey(PresentationSource, related_name = 'png_default_legend',null = True, blank = True)
-    location_netcdf_file = models.ForeignKey(PresentationSource, related_name = 'location_netcdf_file',null = True, blank = True)
+    png_indexed_palette = models.ForeignKey(
+        PresentationSource, related_name='png_indexed_palette',
+        null=True, blank=True)
+    png_default_legend = models.ForeignKey(
+        PresentationSource, related_name='png_default_legend',
+        null=True, blank=True)
+    location_netcdf_file = models.ForeignKey(
+        PresentationSource, related_name='location_netcdf_file',
+        null=True, blank=True)
     objects = models.GeoManager()
-    
-    class Meta:        
+
+    class Meta:
         db_table = 'presentation_presentationgrid'
+
 
 class PresentationShape(models.Model):
     ''' Information about a PresentationLayer of the type shape '''
-    presentationlayer = models.OneToOneField(PresentationLayer, unique=True) #must be unique
+    presentationlayer = models.OneToOneField(
+        PresentationLayer, unique=True)  # must be unique
 
-    geo_source = models.ForeignKey(PresentationSource, related_name = 'geo_source', null = True, blank = True)
-    value_source = models.ForeignKey(PresentationSource, related_name = 'value_source', null = True, blank = True)
-    
-    class Meta:        
+    geo_source = models.ForeignKey(
+        PresentationSource, related_name='geo_source', null=True, blank=True)
+    value_source = models.ForeignKey(
+        PresentationSource, related_name='value_source', null=True, blank=True)
+
+    class Meta:
         db_table = 'presentation_presentationshape'
+
 
 class PresentationNoGeom(models.Model):
     ''' Information about a PresentationLayer of the type no geom '''
-    presentationlayer = models.OneToOneField(PresentationLayer, unique=True) #must be unique
-    value_source = models.ForeignKey(PresentationSource, null = True, blank = True)
-    
-    class Meta:        
+    presentationlayer = models.OneToOneField(
+        PresentationLayer, unique=True)  # must be unique
+    value_source = models.ForeignKey(
+        PresentationSource, null=True, blank=True)
+
+    class Meta:
         db_table = 'presentation_presentationnogeom'
+
 
 class PresentationValueTable(models.Model):
     ''' table for storing values '''
-    presentationsource = models.ForeignKey(PresentationSource, null = True)
-    location_id = models.CharField(max_length=20, null = True, blank = True)
-    parameter = models.CharField(max_length=20, null = True, blank = True,)
-    time = models.FloatField(null = True, blank = True)
+    presentationsource = models.ForeignKey(PresentationSource, null=True)
+    location_id = models.CharField(max_length=20, null=True, blank=True)
+    parameter = models.CharField(max_length=20, null=True, blank=True,)
+    time = models.FloatField(null=True, blank=True)
     value = models.FloatField()
 
-    class Meta:        
+    class Meta:
         db_table = 'presentation_presentationvaluetable'
-        
+
     def __unicode__(self):
         return str(self.presentationsource) + ' ' + str(self.location_id)
