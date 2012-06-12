@@ -2,8 +2,8 @@ Changelog of flooding-lib
 ===================================================
 
 
-1.28.4 (unreleased)
--------------------
+1.29 (2012-06-12)
+-----------------
 
 - Renamed lizard_presentation to flooding_presentation.
 
