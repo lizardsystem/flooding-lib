@@ -22,7 +22,7 @@ from flooding_lib.models import UserPermission, ExtraInfoField
 from flooding_lib.permission_manager import PermissionManager
 from flooding_lib.views_dev import get_externalwater_graph_infowindow
 from flooding_lib.tools.approvaltool.views import approvaltable
-from lizard_presentation.models import Animation
+from flooding_presentation.models import Animation
 
 
 def format_timedelta(t_delta):

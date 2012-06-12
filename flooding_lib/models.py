@@ -10,8 +10,8 @@ from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext as _
 from treebeard.al_tree import AL_Node  # Adjacent list implementation
 
-from lizard_presentation.models import PresentationLayer, PresentationType
-from lizard_visualization.models import ShapeDataLegend, ValueVisualizerMap
+from flooding_presentation.models import PresentationLayer, PresentationType
+from flooding_visualization.models import ShapeDataLegend, ValueVisualizerMap
 from flooding_lib.tools.approvaltool.models import ApprovalObject
 
 

@@ -5,11 +5,11 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.http import HttpResponse, Http404
 from django.conf import settings
 
-from lizard_visualization.symbol_manager import SymbolManager
-from lizard_visualization.mapnik_legend import MapnikPointLegend
-from lizard_visualization.models import ShapeDataLegend
-from lizard_presentation.models import PresentationType, PresentationLayer
-from lizard_presentation.views import external_file_location
+from flooding_visualization.symbol_manager import SymbolManager
+from flooding_visualization.mapnik_legend import MapnikPointLegend
+from flooding_visualization.models import ShapeDataLegend
+from flooding_presentation.models import PresentationType, PresentationLayer
+from flooding_presentation.views import external_file_location
 
 
 def get_symbol(request, symbol):
@@ -65,7 +65,7 @@ def legend_shapedata(request):
     input: GET['object_id']: ShapeDataLegend.id
     output: png image of the legend
     """
-    
+
     shapedatalegend = get_object_or_404(ShapeDataLegend, pk=request.GET['object_id'])
     geo_type = shapedatalegend.presentationtype.geo_type
     if geo_type == PresentationType.GEO_TYPE_POINT:
@@ -106,22 +106,22 @@ def legend_shapedata(request):
                                   {'title': title, 'blocks': blocks})
 
     elif geo_type == PresentationType.GEO_TYPE_GRID:
-        try:            
+        try:
             pl = get_object_or_404(PresentationLayer, pk=request.GET['presentationlayer_id'])
             file_location = pl.presentationgrid.png_default_legend.file_location
-            file_folder = file_location[:file_location.rfind('\\')]            
+            file_folder = file_location[:file_location.rfind('\\')]
             color_mapping = file_folder + '\colormapping.csv'
-            
+
             f = open(external_file_location(color_mapping), 'rb')
-            try:                
+            try:
                 reader = list(csv.DictReader(f))
                 legend_data = [(float(r['leftbound']), r['colour']) for r in reader]
             finally:
                 f.close()
         except:
             legend_data=[]
-        
-                
+
+
         return render_to_response('visualization/legend_shapedata_grid.html',
                                   {'title': shapedatalegend.name,
                                    'content': legend_data})

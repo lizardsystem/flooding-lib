@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 from django.contrib import admin
 
-from lizard_visualization.models import ShapeDataLegend
-from lizard_visualization.models import ValueVisualizerMap
-from lizard_visualization.models import ValueVisualizerMapFloatColor
-from lizard_visualization.models import ValueVisualizerMapFloatFloat
-from lizard_visualization.models import ValueVisualizerMapFloatInteger
-from lizard_visualization.models import ValueVisualizerMapFloatSize
-from lizard_visualization.models import ValueVisualizerMapFloatString
-from lizard_visualization.models import ValueVisualizerMapStringString
+from flooding_visualization.models import ShapeDataLegend
+from flooding_visualization.models import ValueVisualizerMap
+from flooding_visualization.models import ValueVisualizerMapFloatColor
+from flooding_visualization.models import ValueVisualizerMapFloatFloat
+from flooding_visualization.models import ValueVisualizerMapFloatInteger
+from flooding_visualization.models import ValueVisualizerMapFloatSize
+from flooding_visualization.models import ValueVisualizerMapFloatString
+from flooding_visualization.models import ValueVisualizerMapStringString
 
 
 class ValueVisualizerMapFloatColorInline(admin.TabularInline):

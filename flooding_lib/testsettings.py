@@ -5,8 +5,8 @@ DATABASE_NAME = 'test.db'
 SITE_ID = 1
 INSTALLED_APPS = [
     'flooding_lib',
-    'lizard_presentation',
-    'lizard_visualization',
+    'flooding_presentation',
+    'flooding_visualization',
     'flooding_worker',
     'django_extensions',
     'django_nose',

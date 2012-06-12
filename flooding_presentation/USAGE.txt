@@ -1,0 +1,14 @@
+Usage of lizard-presentation
+============================
+
+
+Usage:
+
+    >>> import flooding_presentation
+    >>> import flooding_presentation.admin
+    >>> import flooding_presentation.models
+    >>> import flooding_presentation.permission_manager
+    >>> import flooding_presentation.urls
+    >>> import flooding_presentation.views
+
+Show how to import the main classes and how to use them.

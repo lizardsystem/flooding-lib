@@ -2,7 +2,7 @@
 from django.db import models
 from django.utils.translation import ugettext as _
 
-from lizard_presentation.models import Field, PresentationType
+from flooding_presentation.models import Field, PresentationType
 
 class ValueVisualizerMap(models.Model):
     """Maps a value from the source to a visualizable value (i.e. color, size)
@@ -46,7 +46,7 @@ class ValueVisualizerMap(models.Model):
     interpolation = models.IntegerField(choices=INTERPOLATION_CHOICES)
     visualizertype = models.IntegerField(choices=VISUALIZERTYPE_CHOICES)
 
-    class Meta:        
+    class Meta:
         db_table = 'visualization_valuevisualizermap'
 
     def __unicode__(self):
@@ -127,7 +127,7 @@ class ValueVisualizerMapFloatColor(models.Model):
     r, g, b, a is in the range of 0..1
     """
     class Meta:
-        ordering = ('value_in',)        
+        ordering = ('value_in',)
         db_table = 'visualization_valuevisualizermapfloatcolor'
 
     valuevisualizermap = models.ForeignKey(ValueVisualizerMap)
@@ -166,7 +166,7 @@ class ValueVisualizerMapFloatSize(models.Model):
     y = models.IntegerField()
 
     class Meta:
-        ordering = ('value_in',)        
+        ordering = ('value_in',)
         db_table = 'visualization_valuevisualizermapfloatsize'
 
     def __unicode__(self):
@@ -193,7 +193,7 @@ class ValueVisualizerMapFloatFloat(models.Model):
     value_in = models.FloatField(blank=True, null=True)
     value_out = models.FloatField()
 
-    class Meta:        
+    class Meta:
         db_table = 'visualization_valuevisualizermapfloatfloat'
 
     def __unicode__(self):
@@ -219,8 +219,8 @@ class ValueVisualizerMapFloatInteger(models.Model):
     valuevisualizermap = models.ForeignKey(ValueVisualizerMap)
     value_in = models.FloatField(blank=True, null=True)
     value_out = models.IntegerField()
-    
-    class Meta:        
+
+    class Meta:
         db_table = 'visualization_valuevisualizermapfloatinteger'
 
     def __unicode__(self):
@@ -244,8 +244,8 @@ class ValueVisualizerMapFloatString(models.Model):
     valuevisualizermap = models.ForeignKey(ValueVisualizerMap)
     value_in = models.FloatField(blank=True, null=True)
     value_out = models.CharField(max_length=200)
-    
-    class Meta:        
+
+    class Meta:
         db_table = 'visualization_valuevisualizermapfloatstring'
 
     def __unicode__(self):
@@ -269,8 +269,8 @@ class ValueVisualizerMapStringString(models.Model):
     valuevisualizermap = models.ForeignKey(ValueVisualizerMap)
     value_in = models.CharField(max_length=200, blank=True, null=True)
     value_out = models.CharField(max_length=200)
-    
-    class Meta:        
+
+    class Meta:
         db_table = 'visualization_valuevisualizermapstringstring'
 
     def __unicode__(self):
@@ -321,7 +321,7 @@ class ShapeDataLegend(models.Model):
     shadowheight_field = models.ForeignKey(Field, related_name='shadowheight_field_set',
                                            blank=True, null=True)
 
-    class Meta:        
+    class Meta:
         db_table = 'visualization_shapedatalegend'
 
     def __unicode__(self):

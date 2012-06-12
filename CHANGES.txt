@@ -5,8 +5,9 @@ Changelog of flooding-lib
 1.28.4 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Renamed lizard_presentation to flooding_presentation.
 
+- Renamed lizard_visualization to flooding_visualization.
 
 1.28.3 (2012-06-11)
 -------------------

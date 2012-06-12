@@ -25,13 +25,13 @@ import mapnik
 import matplotlib.pyplot as plt
 
 from flooding_base.models import Setting
-from lizard_presentation.models import Field, SupportLayers
-from lizard_presentation.models import PresentationType, PresentationLayer
-from lizard_presentation.models import PresentationGrid
-from lizard_presentation.permission_manager import PermissionManager
-from lizard_visualization.mapnik_legend import MapnikPointLegend
-from lizard_visualization.models import ShapeDataLegend
-from lizard_visualization.symbol_manager import SymbolManager
+from flooding_presentation.models import Field, SupportLayers
+from flooding_presentation.models import PresentationType, PresentationLayer
+from flooding_presentation.models import PresentationGrid
+from flooding_presentation.permission_manager import PermissionManager
+from flooding_visualization.mapnik_legend import MapnikPointLegend
+from flooding_visualization.models import ShapeDataLegend
+from flooding_visualization.symbol_manager import SymbolManager
 from nens.mock import Stream
 from nens.sobek import HISFile
 
@@ -201,7 +201,7 @@ def service_get_wms_of_shape(
     if mpl == None:
         sdl = get_object_or_404(ShapeDataLegend, pk=legend_id)
         if pl.presentationtype.geo_type in [PresentationType.GEO_TYPE_POLYGON, PresentationType.GEO_TYPE_LINE, PresentationType.GEO_TYPE_POINT]:
-            sm = SymbolManager('media/lizard_presentation/symbols/')
+            sm = SymbolManager('media/flooding_presentation/symbols/')
             mpl = MapnikPointLegend(sdl, sm)
             cache.set('legend_' + str(legend_id), mpl , 300)
 

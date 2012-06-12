@@ -14,7 +14,7 @@ log = logging.getLogger('nens.symbol_manager')
 class SymbolManager:
     def __init__(self, symbol_path):
         log.debug('Initializing SymbolManager')
-        symbol_path = resource_filename('lizard_visualization', 'media/lizard_visualization/symbols')
+        symbol_path = resource_filename('flooding_visualization', 'media/flooding_visualization/symbols')
         self.symbol_path = symbol_path
         self.generated_icon_path = os.path.join(settings.BUILDOUT_DIR, 'var', 'generated_icons')
 

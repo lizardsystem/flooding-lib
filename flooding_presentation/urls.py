@@ -5,10 +5,10 @@ urlpatterns = patterns(
     '',
 
     url(r'^service/$',
-        'lizard_presentation.views.uber_service',
+        'flooding_presentation.views.uber_service',
         name='presentation'),
 
     url(r'^permissions/$',
-        'lizard_presentation.views.overview_permissions',
+        'flooding_presentation.views.overview_permissions',
         name='presentation_permissions'),
 )

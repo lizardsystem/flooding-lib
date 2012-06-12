@@ -5,7 +5,7 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.ticker import FormatStrFormatter, LinearLocator
 
 from flooding_lib.models import WaterlevelSet, ExternalWater
-from lizard_presentation.views import get_time_step_locators, TimestepFormatter
+from flooding_presentation.views import get_time_step_locators, TimestepFormatter
 
 log = logging.getLogger('nens.web.flooding.calc')
 

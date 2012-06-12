@@ -3,6 +3,6 @@ include *.rst
 include *.txt
 # Include everything in our project directory.
 graft flooding_lib
-graft lizard_presentation
-graft lizard_visualization
+graft flooding_presentation
+graft flooding_visualization
 

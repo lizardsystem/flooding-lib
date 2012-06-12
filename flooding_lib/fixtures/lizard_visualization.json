@@ -1,7 +1,7 @@
 [
   {
     "pk": 1,
-    "model": "lizard_visualization.valuevisualizermap",
+    "model": "flooding_visualization.valuevisualizermap",
     "fields": {
       "valuetype": 1,
       "name": "Default color",
@@ -11,7 +11,7 @@
   },
   {
     "pk": 4,
-    "model": "lizard_visualization.valuevisualizermap",
+    "model": "flooding_visualization.valuevisualizermap",
     "fields": {
       "valuetype": 1,
       "name": "Default rotation",
@@ -21,7 +21,7 @@
   },
   {
     "pk": 5,
-    "model": "lizard_visualization.valuevisualizermap",
+    "model": "flooding_visualization.valuevisualizermap",
     "fields": {
       "valuetype": 1,
       "name": "Default shadowheight",
@@ -31,7 +31,7 @@
   },
   {
     "pk": 3,
-    "model": "lizard_visualization.valuevisualizermap",
+    "model": "flooding_visualization.valuevisualizermap",
     "fields": {
       "valuetype": 1,
       "name": "Default symbol",
@@ -41,7 +41,7 @@
   },
   {
     "pk": 6,
-    "model": "lizard_visualization.valuevisualizermap",
+    "model": "flooding_visualization.valuevisualizermap",
     "fields": {
       "valuetype": 1,
       "name": "water op straat default",
@@ -51,7 +51,7 @@
   },
   {
     "pk": 7,
-    "model": "lizard_visualization.valuevisualizermap",
+    "model": "flooding_visualization.valuevisualizermap",
     "fields": {
       "valuetype": 1,
       "name": "stroomsnelheid",
@@ -61,7 +61,7 @@
   },
   {
     "pk": 2,
-    "model": "lizard_visualization.valuevisualizermap",
+    "model": "flooding_visualization.valuevisualizermap",
     "fields": {
       "valuetype": 1,
       "name": "Default size",
@@ -71,7 +71,7 @@
   },
   {
     "pk": 9,
-    "model": "lizard_visualization.valuevisualizermap",
+    "model": "flooding_visualization.valuevisualizermap",
     "fields": {
       "valuetype": 1,
       "name": "single size 12",
@@ -81,7 +81,7 @@
   },
   {
     "pk": 10,
-    "model": "lizard_visualization.valuevisualizermap",
+    "model": "flooding_visualization.valuevisualizermap",
     "fields": {
       "valuetype": 1,
       "name": "single symbol plus",
@@ -91,7 +91,7 @@
   },
   {
     "pk": 11,
-    "model": "lizard_visualization.valuevisualizermap",
+    "model": "flooding_visualization.valuevisualizermap",
     "fields": {
       "valuetype": 1,
       "name": "debiet",
@@ -101,7 +101,7 @@
   },
   {
     "pk": 8,
-    "model": "lizard_visualization.valuevisualizermap",
+    "model": "flooding_visualization.valuevisualizermap",
     "fields": {
       "valuetype": 1,
       "name": "waterstand",
@@ -111,7 +111,7 @@
   },
   {
     "pk": 27,
-    "model": "lizard_visualization.valuevisualizermapfloatcolor",
+    "model": "flooding_visualization.valuevisualizermapfloatcolor",
     "fields": {
       "a": 1.0,
       "b": 0.0,
@@ -123,7 +123,7 @@
   },
   {
     "pk": 26,
-    "model": "lizard_visualization.valuevisualizermapfloatcolor",
+    "model": "flooding_visualization.valuevisualizermapfloatcolor",
     "fields": {
       "a": 1.0,
       "b": 0.0,
@@ -135,7 +135,7 @@
   },
   {
     "pk": 25,
-    "model": "lizard_visualization.valuevisualizermapfloatcolor",
+    "model": "flooding_visualization.valuevisualizermapfloatcolor",
     "fields": {
       "a": 1.0,
       "b": 0.5,
@@ -147,7 +147,7 @@
   },
   {
     "pk": 24,
-    "model": "lizard_visualization.valuevisualizermapfloatcolor",
+    "model": "flooding_visualization.valuevisualizermapfloatcolor",
     "fields": {
       "a": 1.0,
       "b": 1.0,
@@ -159,7 +159,7 @@
   },
   {
     "pk": 23,
-    "model": "lizard_visualization.valuevisualizermapfloatcolor",
+    "model": "flooding_visualization.valuevisualizermapfloatcolor",
     "fields": {
       "a": 1.0,
       "b": 1.0,
@@ -171,7 +171,7 @@
   },
   {
     "pk": 19,
-    "model": "lizard_visualization.valuevisualizermapfloatcolor",
+    "model": "flooding_visualization.valuevisualizermapfloatcolor",
     "fields": {
       "a": 1.0,
       "b": 0.75,
@@ -183,7 +183,7 @@
   },
   {
     "pk": 18,
-    "model": "lizard_visualization.valuevisualizermapfloatcolor",
+    "model": "flooding_visualization.valuevisualizermapfloatcolor",
     "fields": {
       "a": 1.0,
       "b": 0.40000000000000002,
@@ -195,7 +195,7 @@
   },
   {
     "pk": 21,
-    "model": "lizard_visualization.valuevisualizermapfloatcolor",
+    "model": "flooding_visualization.valuevisualizermapfloatcolor",
     "fields": {
       "a": 1.0,
       "b": 1.0,
@@ -207,7 +207,7 @@
   },
   {
     "pk": 4,
-    "model": "lizard_visualization.valuevisualizermapfloatcolor",
+    "model": "flooding_visualization.valuevisualizermapfloatcolor",
     "fields": {
       "a": 0.5,
       "b": 0.10000000000000001,
@@ -219,7 +219,7 @@
   },
   {
     "pk": 9,
-    "model": "lizard_visualization.valuevisualizermapfloatcolor",
+    "model": "flooding_visualization.valuevisualizermapfloatcolor",
     "fields": {
       "a": 1.0,
       "b": 0.10000000000000001,
@@ -231,7 +231,7 @@
   },
   {
     "pk": 17,
-    "model": "lizard_visualization.valuevisualizermapfloatcolor",
+    "model": "flooding_visualization.valuevisualizermapfloatcolor",
     "fields": {
       "a": 1.0,
       "b": 1.0,
@@ -243,7 +243,7 @@
   },
   {
     "pk": 2,
-    "model": "lizard_visualization.valuevisualizermapfloatcolor",
+    "model": "flooding_visualization.valuevisualizermapfloatcolor",
     "fields": {
       "a": 0.0,
       "b": 1.0,
@@ -255,7 +255,7 @@
   },
   {
     "pk": 10,
-    "model": "lizard_visualization.valuevisualizermapfloatcolor",
+    "model": "flooding_visualization.valuevisualizermapfloatcolor",
     "fields": {
       "a": 1.0,
       "b": 0.0,
@@ -267,7 +267,7 @@
   },
   {
     "pk": 11,
-    "model": "lizard_visualization.valuevisualizermapfloatcolor",
+    "model": "flooding_visualization.valuevisualizermapfloatcolor",
     "fields": {
       "a": 1.0,
       "b": 0.5,
@@ -279,7 +279,7 @@
   },
   {
     "pk": 12,
-    "model": "lizard_visualization.valuevisualizermapfloatcolor",
+    "model": "flooding_visualization.valuevisualizermapfloatcolor",
     "fields": {
       "a": 1.0,
       "b": 1.0,
@@ -291,7 +291,7 @@
   },
   {
     "pk": 13,
-    "model": "lizard_visualization.valuevisualizermapfloatcolor",
+    "model": "flooding_visualization.valuevisualizermapfloatcolor",
     "fields": {
       "a": 1.0,
       "b": 1.0,
@@ -303,7 +303,7 @@
   },
   {
     "pk": 14,
-    "model": "lizard_visualization.valuevisualizermapfloatcolor",
+    "model": "flooding_visualization.valuevisualizermapfloatcolor",
     "fields": {
       "a": 1.0,
       "b": 0.5,
@@ -315,7 +315,7 @@
   },
   {
     "pk": 15,
-    "model": "lizard_visualization.valuevisualizermapfloatcolor",
+    "model": "flooding_visualization.valuevisualizermapfloatcolor",
     "fields": {
       "a": 1.0,
       "b": 0.0,
@@ -327,7 +327,7 @@
   },
   {
     "pk": 3,
-    "model": "lizard_visualization.valuevisualizermapfloatcolor",
+    "model": "flooding_visualization.valuevisualizermapfloatcolor",
     "fields": {
       "a": 0.0,
       "b": 0.0,
@@ -339,7 +339,7 @@
   },
   {
     "pk": 22,
-    "model": "lizard_visualization.valuevisualizermapfloatcolor",
+    "model": "flooding_visualization.valuevisualizermapfloatcolor",
     "fields": {
       "a": 1.0,
       "b": 1.0,
@@ -351,7 +351,7 @@
   },
   {
     "pk": 5,
-    "model": "lizard_visualization.valuevisualizermapfloatcolor",
+    "model": "flooding_visualization.valuevisualizermapfloatcolor",
     "fields": {
       "a": 0.5,
       "b": 0.10000000000000001,
@@ -363,7 +363,7 @@
   },
   {
     "pk": 6,
-    "model": "lizard_visualization.valuevisualizermapfloatcolor",
+    "model": "flooding_visualization.valuevisualizermapfloatcolor",
     "fields": {
       "a": 0.5,
       "b": 0.0,
@@ -375,7 +375,7 @@
   },
   {
     "pk": 8,
-    "model": "lizard_visualization.valuevisualizermapfloatcolor",
+    "model": "flooding_visualization.valuevisualizermapfloatcolor",
     "fields": {
       "a": 1.0,
       "b": 0.0,
@@ -387,7 +387,7 @@
   },
   {
     "pk": 20,
-    "model": "lizard_visualization.valuevisualizermapfloatcolor",
+    "model": "flooding_visualization.valuevisualizermapfloatcolor",
     "fields": {
       "a": 1.0,
       "b": 1.0,
@@ -399,7 +399,7 @@
   },
   {
     "pk": 16,
-    "model": "lizard_visualization.valuevisualizermapfloatcolor",
+    "model": "flooding_visualization.valuevisualizermapfloatcolor",
     "fields": {
       "a": 1.0,
       "b": 0.0,
@@ -411,7 +411,7 @@
   },
   {
     "pk": 7,
-    "model": "lizard_visualization.valuevisualizermapfloatcolor",
+    "model": "flooding_visualization.valuevisualizermapfloatcolor",
     "fields": {
       "a": 0.5,
       "b": 0.0,
@@ -423,7 +423,7 @@
   },
   {
     "pk": 1,
-    "model": "lizard_visualization.valuevisualizermapfloatcolor",
+    "model": "flooding_visualization.valuevisualizermapfloatcolor",
     "fields": {
       "a": 0.0,
       "b": 0.0,
@@ -435,7 +435,7 @@
   },
   {
     "pk": 28,
-    "model": "lizard_visualization.valuevisualizermapfloatcolor",
+    "model": "flooding_visualization.valuevisualizermapfloatcolor",
     "fields": {
       "a": 1.0,
       "b": 0.0,
@@ -447,7 +447,7 @@
   },
   {
     "pk": 4,
-    "model": "lizard_visualization.valuevisualizermapfloatsize",
+    "model": "flooding_visualization.valuevisualizermapfloatsize",
     "fields": {
       "y": 24,
       "valuevisualizermap": 2,
@@ -457,7 +457,7 @@
   },
   {
     "pk": 2,
-    "model": "lizard_visualization.valuevisualizermapfloatsize",
+    "model": "flooding_visualization.valuevisualizermapfloatsize",
     "fields": {
       "y": 16,
       "valuevisualizermap": 2,
@@ -467,7 +467,7 @@
   },
   {
     "pk": 3,
-    "model": "lizard_visualization.valuevisualizermapfloatsize",
+    "model": "flooding_visualization.valuevisualizermapfloatsize",
     "fields": {
       "y": 20,
       "valuevisualizermap": 2,
@@ -477,7 +477,7 @@
   },
   {
     "pk": 1,
-    "model": "lizard_visualization.valuevisualizermapfloatsize",
+    "model": "flooding_visualization.valuevisualizermapfloatsize",
     "fields": {
       "y": 12,
       "valuevisualizermap": 2,
@@ -487,7 +487,7 @@
   },
   {
     "pk": 5,
-    "model": "lizard_visualization.valuevisualizermapfloatsize",
+    "model": "flooding_visualization.valuevisualizermapfloatsize",
     "fields": {
       "y": 24,
       "valuevisualizermap": 2,
@@ -497,7 +497,7 @@
   },
   {
     "pk": 6,
-    "model": "lizard_visualization.valuevisualizermapfloatsize",
+    "model": "flooding_visualization.valuevisualizermapfloatsize",
     "fields": {
       "y": 12,
       "valuevisualizermap": 9,
@@ -507,7 +507,7 @@
   },
   {
     "pk": 1,
-    "model": "lizard_visualization.valuevisualizermapfloatinteger",
+    "model": "flooding_visualization.valuevisualizermapfloatinteger",
     "fields": {
       "valuevisualizermap": 4,
       "value_out": 0,
@@ -516,7 +516,7 @@
   },
   {
     "pk": 2,
-    "model": "lizard_visualization.valuevisualizermapfloatinteger",
+    "model": "flooding_visualization.valuevisualizermapfloatinteger",
     "fields": {
       "valuevisualizermap": 5,
       "value_out": 0,
@@ -525,7 +525,7 @@
   },
   {
     "pk": 3,
-    "model": "lizard_visualization.valuevisualizermapfloatstring",
+    "model": "flooding_visualization.valuevisualizermapfloatstring",
     "fields": {
       "valuevisualizermap": 3,
       "value_out": "neerslag_64",
@@ -534,7 +534,7 @@
   },
   {
     "pk": 2,
-    "model": "lizard_visualization.valuevisualizermapfloatstring",
+    "model": "flooding_visualization.valuevisualizermapfloatstring",
     "fields": {
       "valuevisualizermap": 3,
       "value_out": "plus",
@@ -543,7 +543,7 @@
   },
   {
     "pk": 1,
-    "model": "lizard_visualization.valuevisualizermapfloatstring",
+    "model": "flooding_visualization.valuevisualizermapfloatstring",
     "fields": {
       "valuevisualizermap": 3,
       "value_out": "plus",
@@ -552,7 +552,7 @@
   },
   {
     "pk": 4,
-    "model": "lizard_visualization.valuevisualizermapfloatstring",
+    "model": "flooding_visualization.valuevisualizermapfloatstring",
     "fields": {
       "valuevisualizermap": 10,
       "value_out": "plus",
@@ -561,7 +561,7 @@
   },
   {
     "pk": 4,
-    "model": "lizard_visualization.shapedatalegend",
+    "model": "flooding_visualization.shapedatalegend",
     "fields": {
       "shadowheight": 5,
       "name": "pw - waterstand",
@@ -579,7 +579,7 @@
   },
   {
     "pk": 2,
-    "model": "lizard_visualization.shapedatalegend",
+    "model": "flooding_visualization.shapedatalegend",
     "fields": {
       "shadowheight": 5,
       "name": "pw - stroomsnelheid",
@@ -597,7 +597,7 @@
   },
   {
     "pk": 5,
-    "model": "lizard_visualization.shapedatalegend",
+    "model": "flooding_visualization.shapedatalegend",
     "fields": {
       "shadowheight": 5,
       "name": "pw - debiet",
@@ -615,7 +615,7 @@
   },
   {
     "pk": 1,
-    "model": "lizard_visualization.shapedatalegend",
+    "model": "flooding_visualization.shapedatalegend",
     "fields": {
       "shadowheight": 5,
       "name": "Afsluitlocaties crestlevel",
@@ -633,7 +633,7 @@
   },
   {
     "pk": 8,
-    "model": "lizard_visualization.shapedatalegend",
+    "model": "flooding_visualization.shapedatalegend",
     "fields": {
       "shadowheight": 5,
       "name": "bzm - stroomsnelheid2",
@@ -651,7 +651,7 @@
   },
   {
     "pk": 9,
-    "model": "lizard_visualization.shapedatalegend",
+    "model": "flooding_visualization.shapedatalegend",
     "fields": {
       "shadowheight": 5,
       "name": "bzm - stroomsnelheid3",
@@ -669,7 +669,7 @@
   },
   {
     "pk": 10,
-    "model": "lizard_visualization.shapedatalegend",
+    "model": "flooding_visualization.shapedatalegend",
     "fields": {
       "shadowheight": 5,
       "name": "bzm - stroomsnelheid4",
@@ -687,7 +687,7 @@
   },
   {
     "pk": 11,
-    "model": "lizard_visualization.shapedatalegend",
+    "model": "flooding_visualization.shapedatalegend",
     "fields": {
       "shadowheight": 5,
       "name": "max. waterdiepte overstr. gebied",
@@ -705,7 +705,7 @@
   },
   {
     "pk": 12,
-    "model": "lizard_visualization.shapedatalegend",
+    "model": "flooding_visualization.shapedatalegend",
     "fields": {
       "shadowheight": 5,
       "name": "max. stroomsnelheid overstr. gebied",
@@ -723,7 +723,7 @@
   },
   {
     "pk": 13,
-    "model": "lizard_visualization.shapedatalegend",
+    "model": "flooding_visualization.shapedatalegend",
     "fields": {
       "shadowheight": 5,
       "name": "anim. waterdiepte overstr. gebied",
@@ -741,7 +741,7 @@
   },
   {
     "pk": 14,
-    "model": "lizard_visualization.shapedatalegend",
+    "model": "flooding_visualization.shapedatalegend",
     "fields": {
       "shadowheight": 5,
       "name": "anim. stroomsnelh. overst. gebied",
@@ -759,7 +759,7 @@
   },
   {
     "pk": 16,
-    "model": "lizard_visualization.shapedatalegend",
+    "model": "flooding_visualization.shapedatalegend",
     "fields": {
       "shadowheight": 5,
       "name": "flow - waterstand",
@@ -777,7 +777,7 @@
   },
   {
     "pk": 15,
-    "model": "lizard_visualization.shapedatalegend",
+    "model": "flooding_visualization.shapedatalegend",
     "fields": {
       "shadowheight": 5,
       "name": "flow - debiet",
@@ -795,7 +795,7 @@
   },
   {
     "pk": 17,
-    "model": "lizard_visualization.shapedatalegend",
+    "model": "flooding_visualization.shapedatalegend",
     "fields": {
       "shadowheight": 5,
       "name": "flow -water op straat",
@@ -813,7 +813,7 @@
   },
   {
     "pk": 7,
-    "model": "lizard_visualization.shapedatalegend",
+    "model": "flooding_visualization.shapedatalegend",
     "fields": {
       "shadowheight": 5,
       "name": "bzm - debiet",
@@ -831,7 +831,7 @@
   },
   {
     "pk": 3,
-    "model": "lizard_visualization.shapedatalegend",
+    "model": "flooding_visualization.shapedatalegend",
     "fields": {
       "shadowheight": 5,
       "name": "bzm-waterstand",
@@ -849,7 +849,7 @@
   },
   {
     "pk": 6,
-    "model": "lizard_visualization.shapedatalegend",
+    "model": "flooding_visualization.shapedatalegend",
     "fields": {
       "shadowheight": 5,
       "name": "bzm - stroomsnelheid",
