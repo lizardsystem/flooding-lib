@@ -2,6 +2,7 @@ from cStringIO import StringIO
 from shutil import copyfile
 from zipfile import ZipFile, ZIP_DEFLATED, BadZipfile
 import datetime
+import functools
 import operator
 import os
 import re
@@ -41,6 +42,18 @@ from flooding_lib.tools.importtool.models import InputField
 
 import logging
 logger = logging.getLogger(__name__)
+
+
+def checks_permission(permission, message):
+    def permission_checking_decorator(f):
+        @functools.wraps(f)
+        def wrapper(request, *args, **kwargs):
+            if not (request.user.is_authenticated() and
+                    request.user.has_perm(permission)):
+                return HttpResponse(message)
+            return f(request, *args, **kwargs)
+        return wrapper
+    return permission_checking_decorator
 
 
 def overview(request):
@@ -313,16 +326,14 @@ def verify_import(request, import_scenario_id):
          })
 
 
+@checks_permission('importtool.can_upload',
+                   _("No permission to import scenario or login"))
 def new_import(request):
     """
     import_scenario_id = None
     Renders Lizard-flooding page for verifying the data of a proposed
     scenario import. The administrator has to verify the results.
     """
-
-    if not (request.user.is_authenticated() and
-            request.user.has_perm('importtool.can_upload')):
-        return HttpResponse(_("No permission to import scenario or login"))
 
     if request.method == 'POST':
         approvalobject = ApprovalObject.objects.create(
