@@ -336,58 +336,27 @@ def new_import(request):
     """
 
     if request.method == 'POST':
-        approvalobject = ApprovalObject.objects.create(
-            name="vanuit importtool")
-        approvalobject.approvalobjecttype.add(
-            ApprovalObjectType.objects.get(pk=1))
-        importscenario = ImportScenario.objects.create(
-            owner=request.user, name='nog invullen',
-            approvalobject=approvalobject)
+        return post_new_import(request)
 
-        # loop through all posted fields, search the corresponding
-        # input field object. Get or create the importscenario_inputfield
-        # and set the value, given in the POST.
-        for field in request.POST:
-            field_ref = InputField.objects.filter(name=field)
-            if field_ref.count() == 1:
-                field_ref = field_ref[0]
-                importscenario_inputfield, new = (
-                    ImportScenarioInputField.objects.get_or_create(
-                        importscenario=importscenario, inputfield=field_ref))
-                importscenario_inputfield.setValue(request.POST[field])
+    form_fields = []
+    header_listposition_map = {}  # save the position in the
+                                  # form_fields list for each header
 
-        importscenario.state = ImportScenario.IMPORT_STATE_WAITING
-        importscenario.save()
-        importscenario.update_scenario_name()
-        answer = {
-            'successful': 'true',
-            'remarks': 'opgeslagen',
-            'id': importscenario.id}
+    # create the form_fields list (only headers, no fields added) and
+    # save for each header the position in the list
 
-        return HttpResponse(
-            simplejson.dumps(answer),
-            mimetype="application/json")
+    for header_id, header_title in InputField.HEADER_CHOICES:
+        header_listposition_map[header_id] = len(form_fields)
+        form_fields.append(
+            {'id': header_id, 'title': header_title, 'fields': []})
 
-    else:
-        form_fields = []
-        header_listposition_map = {}  # save the position in the
-                                      # form_fields list for each
-                                      # header
+    fields = InputField.objects.all().order_by('-position')
 
-        # create the form_fields list (only headers, no fields added)
-        # and save for each header the position in the list
-        for header in InputField.HEADER_CHOICES:
-            header_listposition_map[header[0]] = len(form_fields)
-            form_fields.append(
-                {'id': header[0], 'title': header[1], 'fields': []})
-
-        fields = InputField.objects.all().order_by('-position')
-
-        # Loop though all the fields an place them and append
-        # them at the fields of the correct tuple (so, you need the header)
-        for field in fields:
-            (form_fields[header_listposition_map[field.header]]['fields'].
-             append(field))
+    # Loop though all the fields an place them and append
+    # them at the fields of the correct tuple (so, you need the header)
+    for field in fields:
+        (form_fields[header_listposition_map[field.header]]['fields'].
+         append(field))
 
     post_url = reverse('flooding_tools_import_new')
 
@@ -401,6 +370,42 @@ def new_import(request):
                                'breadcrumbs': breadcrumbs,
                                })
 
+
+def post_new_import(request):
+    """Handles POSTing of the form. Does no validation, we rely on
+    Javascript for that (!)."""
+
+    approvalobject = ApprovalObject.objects.create(
+        name="vanuit importtool")
+    approvalobject.approvalobjecttype.add(
+        ApprovalObjectType.objects.get(pk=1))
+    importscenario = ImportScenario.objects.create(
+        owner=request.user, name='nog invullen',
+        approvalobject=approvalobject)
+
+    # loop through all posted fields, search the corresponding input
+    # field object. Get or create the importscenario_inputfield and
+    # set the value, given in the POST.
+    for field in request.POST:
+        field_ref = InputField.objects.filter(name=field)
+        if field_ref.count() == 1:
+            field_ref = field_ref[0]
+            importscenario_inputfield, new = (
+                ImportScenarioInputField.objects.get_or_create(
+                    importscenario=importscenario, inputfield=field_ref))
+            importscenario_inputfield.setValue(request.POST[field])
+
+    importscenario.state = ImportScenario.IMPORT_STATE_WAITING
+    importscenario.save()
+    importscenario.update_scenario_name()
+    answer = {
+        'successful': 'true',
+        'remarks': 'opgeslagen',
+        'id': importscenario.id}
+
+    return HttpResponse(
+        simplejson.dumps(answer),
+        mimetype="application/json")
 
 def get_new_filename(filename, dest_filename):
     new_filename = filename
