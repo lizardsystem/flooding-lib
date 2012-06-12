@@ -1,0 +1,158 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2012-06-12 14:38+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+
+#: models.py:15
+msgid "Export run"
+msgstr ""
+
+#: models.py:16
+msgid "Export runs"
+msgstr ""
+
+#: models.py:25
+msgid "Water depth map"
+msgstr ""
+
+#: models.py:35
+msgid "Waiting"
+msgstr ""
+
+#: models.py:39
+msgid "Klaar"
+msgstr ""
+
+#: models.py:113
+msgid "Result"
+msgstr ""
+
+#: models.py:114
+msgid "Results"
+msgstr ""
+
+#: models.py:121
+msgid "Diked area"
+msgstr ""
+
+#: models.py:122
+msgid "Province"
+msgstr ""
+
+#: models.py:123
+msgid "Country"
+msgstr ""
+
+#: views.py:32 views.py:65 views.py:99 views.py:183
+msgid "No permission to download export"
+msgstr ""
+
+#: views.py:53 views.py:82 views.py:105 views.py:124
+msgid "Export tool"
+msgstr ""
+
+#: views.py:83 views.py:106
+msgid "Export detail"
+msgstr ""
+
+#: views.py:107
+msgid "Export detail scenarios and projects"
+msgstr ""
+
+#: views.py:121 views.py:142
+msgid "No permission to create export"
+msgstr ""
+
+#: views.py:125
+msgid "New export"
+msgstr ""
+
+#: templates/export/exports_new.html:18
+msgid "Submit"
+msgstr ""
+
+#: templates/export/exports_overview.html:14
+msgid "Export run overview"
+msgstr ""
+
+#: templates/export/exports_overview.html:20
+#: templates/export/exports_run_detail.html:22
+msgid "Name"
+msgstr ""
+
+#: templates/export/exports_overview.html:21
+#: templates/export/exports_run_detail.html:30
+msgid "Creation date"
+msgstr ""
+
+#: templates/export/exports_overview.html:22
+#: templates/export/exports_run_detail.html:42
+msgid "Description"
+msgstr ""
+
+#: templates/export/exports_overview.html:23
+msgid "State"
+msgstr ""
+
+#: templates/export/exports_overview.html:24
+#: templates/export/exports_overview.html:38
+#: templates/export/exports_run_detail.html:52
+#: templates/export/exports_run_detail.html:69
+msgid "Result file"
+msgstr ""
+
+#: templates/export/exports_overview.html:53
+msgid "New export run"
+msgstr ""
+
+#: templates/export/exports_run_detail.html:15
+#: templates/export/exports_run_detail_scenarios_and_projects.html:14
+msgid "Export run details"
+msgstr ""
+
+#: templates/export/exports_run_detail.html:26
+msgid "Owner"
+msgstr ""
+
+#: templates/export/exports_run_detail.html:34
+msgid "Run date"
+msgstr ""
+
+#: templates/export/exports_run_detail.html:38
+msgid "Approved date"
+msgstr ""
+
+#: templates/export/exports_run_detail.html:46
+msgid "Used scenarios and projects (x out of y)"
+msgstr ""
+
+#: templates/export/exports_run_detail.html:48
+msgid "out of"
+msgstr ""
+
+#: templates/export/exports_run_detail.html:68
+msgid "Area"
+msgstr ""
+
+#: templates/export/exports_run_detail_scenarios_and_projects.html:20
+msgid "Scenario"
+msgstr ""
+
+#: templates/export/exports_run_detail_scenarios_and_projects.html:21
+msgid "Project"
+msgstr ""

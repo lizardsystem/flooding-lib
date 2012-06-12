@@ -1,0 +1,163 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2012-06-12 14:40+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+
+#: models.py:9
+msgid "grid"
+msgstr ""
+
+#: models.py:10
+msgid "polygon"
+msgstr ""
+
+#: models.py:11
+msgid "line"
+msgstr ""
+
+#: models.py:12
+msgid "point"
+msgstr ""
+
+#: models.py:13
+msgid "no geom"
+msgstr ""
+
+#: models.py:22
+msgid "only_geometry"
+msgstr ""
+
+#: models.py:23
+msgid "value"
+msgstr ""
+
+#: models.py:24
+msgid "time_serie"
+msgstr ""
+
+#: models.py:25
+msgid "class_serie"
+msgstr ""
+
+#: models.py:86
+msgid "timeserie"
+msgstr ""
+
+#: models.py:87
+msgid "locations"
+msgstr ""
+
+#: models.py:88
+msgid "timeserie_locations"
+msgstr ""
+
+#: models.py:89
+msgid "custom_comp_damage_embankments"
+msgstr ""
+
+#: models.py:97
+msgid "min"
+msgstr ""
+
+#: models.py:98
+msgid "max"
+msgstr ""
+
+#: models.py:99
+msgid "mean"
+msgstr ""
+
+#: models.py:100
+msgid "sum"
+msgstr ""
+
+#: models.py:101
+msgid "sum_multiplied_by_dt"
+msgstr ""
+
+#: models.py:137
+msgid "float"
+msgstr ""
+
+#: models.py:138
+msgid "integer"
+msgstr ""
+
+#: models.py:139
+msgid "interval"
+msgstr ""
+
+#: models.py:140
+msgid "datetime"
+msgstr ""
+
+#: models.py:141
+msgid "string"
+msgstr ""
+
+#: models.py:142
+msgid "choice"
+msgstr ""
+
+#: models.py:152
+msgid "geo_source_col"
+msgstr ""
+
+#: models.py:153
+msgid "value_source_param"
+msgstr ""
+
+#: models.py:190
+msgid "None"
+msgstr ""
+
+#: models.py:191
+msgid "Flooding"
+msgstr ""
+
+#: models.py:249
+msgid "value_table"
+msgstr ""
+
+#: models.py:250
+msgid "shapefile"
+msgstr ""
+
+#: models.py:251
+msgid "hisfile"
+msgstr ""
+
+#: models.py:252
+msgid "zipped_hisfile"
+msgstr ""
+
+#: models.py:253
+msgid "png_file"
+msgstr ""
+
+#: models.py:254
+msgid "serie_png_files"
+msgstr ""
+
+#: models.py:255
+msgid "png_file_indexed_pallette"
+msgstr ""
+
+#: models.py:256
+msgid "serie_png_file_indexed_pallette"
+msgstr ""

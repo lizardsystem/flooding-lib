@@ -1,0 +1,231 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2012-06-12 07:21-0500\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+
+#: models.py:83
+msgid "Name"
+msgstr "Naam"
+
+#: models.py:84
+msgid "Excel table (.xls)"
+msgstr "Excel tabel (.xls)"
+
+#: models.py:85
+msgid "Results (zipfile)"
+msgstr "Resultaten (zipfile)"
+
+#: models.py:103
+msgid "Import scenario"
+msgstr "Import scenario"
+
+#: models.py:104
+msgid "Import scenarios"
+msgstr "Import scenario's"
+
+#: models.py:114
+msgid "None"
+msgstr "Geen"
+
+#: models.py:115
+msgid "Waiting for validation"
+msgstr ""
+
+#: models.py:116
+msgid "Action required"
+msgstr ""
+
+#: models.py:117
+msgid "Approved for import"
+msgstr ""
+
+#: models.py:118
+msgid "Disapproved for import"
+msgstr ""
+
+#: models.py:119
+msgid "Imported"
+msgstr ""
+
+#: models.py:131
+msgid "The owner of the scenario."
+msgstr "De eigenaar van het scenario."
+
+#: models.py:167
+msgid "Import scenario input field"
+msgstr ""
+
+#: models.py:168
+msgid "Import scenarios input fields"
+msgstr ""
+
+#: models.py:176
+msgid "Waiting"
+msgstr ""
+
+#: models.py:177
+msgid "Approved"
+msgstr ""
+
+#: models.py:178
+msgid "Disapproved"
+msgstr ""
+
+#: models.py:405
+msgid "Import scenario fields"
+msgstr ""
+
+#: models.py:406
+msgid "Import scenarios fields"
+msgstr ""
+
+#: models.py:420
+msgid "Integer"
+msgstr ""
+
+#: models.py:421
+msgid "Float"
+msgstr ""
+
+#: models.py:422
+msgid "String"
+msgstr ""
+
+#: models.py:423
+msgid "Text"
+msgstr ""
+
+#: models.py:424
+msgid "Interval (D d HH:MM)"
+msgstr ""
+
+#: models.py:425
+msgid "Date"
+msgstr ""
+
+#: models.py:426
+msgid "File"
+msgstr ""
+
+#: models.py:427
+msgid "Select"
+msgstr ""
+
+#: models.py:428
+msgid "Boolean (True or False)"
+msgstr ""
+
+#: models.py:442
+msgid "Scenario"
+msgstr "Scenario"
+
+#: models.py:443
+msgid "Meta"
+msgstr "Meta"
+
+#: models.py:444
+msgid "Location"
+msgstr "Locatie"
+
+#: models.py:445
+msgid "Breach"
+msgstr "Bres"
+
+#: models.py:446
+msgid "External Water"
+msgstr "Extern Water"
+
+#: models.py:447
+msgid "Model"
+msgstr "Model"
+
+#: models.py:448
+msgid "Remaining"
+msgstr "Overig"
+
+#: models.py:449
+msgid "Files"
+msgstr "Files"
+
+#: models.py:454
+msgid "Hoe hoger hoe eerder in rij"
+msgstr "Hoe hoger hoe eerder in de rij"
+
+#: models.py:455
+msgid "Name of col. in import csv-file"
+msgstr ""
+
+#: models.py:456
+msgid "Name of table in flooding database"
+msgstr ""
+
+#: models.py:457
+msgid "Name of field in flooding database table"
+msgstr ""
+
+#: models.py:458
+msgid "Name of imported files (match with resulttypes). Use #### for numbers"
+msgstr ""
+
+#: models.py:467
+msgid "help text shown in excel file"
+msgstr ""
+
+#: models.py:468
+msgid "help text shown when hovering over field"
+msgstr ""
+
+#: models.py:469
+msgid "help text shown behind field"
+msgstr ""
+
+#: views.py:68
+msgid "No permission to upload data or login"
+msgstr ""
+
+#: views.py:95 views.py:225 views.py:311 views.py:364 views.py:736
+msgid "Import tool"
+msgstr ""
+
+#: views.py:113 views.py:261
+msgid "No permission to approve scenario or login"
+msgstr ""
+
+#: views.py:227
+msgid "Approve import"
+msgstr ""
+
+#: views.py:313
+msgid "Verify import"
+msgstr ""
+
+#: views.py:330
+msgid "No permission to import scenario or login"
+msgstr ""
+
+#: views.py:366
+msgid "New import"
+msgstr ""
+
+#: views.py:495 views.py:566
+msgid "No permission to import scenarios or login"
+msgstr ""
+
+#: views.py:737
+msgid "Group import"
+msgstr ""
