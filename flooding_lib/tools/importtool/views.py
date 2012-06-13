@@ -488,48 +488,22 @@ def save_uploadfile_in_zipfile(
     nzf.close()
 
 
+@checks_permission('importtool.can_upload',
+                   _("No permission to import scenario or login"))
 def upload_import_scenario_files(request, import_scenario_id):
     """ Returns the HTML-page for uploading files for an import scenario.
 
     """
-    user = request.user
-
-    if not (user.is_authenticated() and
-            user.has_perm('importtool.can_upload')):
-        return HttpResponse(_("No permission to import scenarios or login"))
-
     importscenario = get_object_or_404(ImportScenario, pk=import_scenario_id)
 
     if request.method == 'POST':
+        # Get form from request
         form = ImportScenarioFileUploadForm(request.POST, request.FILES)
+
+        # If it's valid, process it
         if form.is_valid():
-
-            # got it only working with creating explicitly the
-            # contentfile and saving it as 'file'
-            for f in request.FILES:
-                field_ref = InputField.objects.filter(
-                    name=f)[0]  # Assumption: filename is unique
-                file_content = ContentFile(request.FILES[f].read())
-                upload_filename = request.FILES[f].name
-                importscenario_filefield, new = (
-                    ImportScenarioInputField.objects.get_or_create(
-                        importscenario=importscenario, inputfield=field_ref))
-                # create empty file. replace it later with
-                filevalue, new = (
-                    FileValue.objects.get_or_create(
-                        importscenario_inputfield=importscenario_filefield))
-                filevalue.value.save(
-                    request.FILES[f].name + '.zip', ContentFile(""))
-                filevalue.save()
-                filevalue.value.close()
-
-                destination = filevalue.value.file.name
-                save_uploadfile_in_zipfile(
-                    file_content, upload_filename,
-                    destination, field_ref.destination_filename)
-
-            return HttpResponseRedirect(
-                reverse('flooding_tools_import_overview'))
+            return post_upload_import_scenario_files(
+                form, request.FILES, importscenario)
 
     file_inputfields = InputField.objects.filter(type=InputField.TYPE_FILE)
     file_inputfields = file_inputfields.order_by('name').reverse()
@@ -558,6 +532,34 @@ def upload_import_scenario_files(request, import_scenario_id):
                                'import_scenario_id': import_scenario_id,
                                'file_urls': file_urls})
 
+
+def post_upload_import_scenario_files(form, files, importscenario):
+    # got it only working with creating explicitly the
+    # contentfile and saving it as 'file'
+    for filename in files:
+        field_ref = InputField.objects.filter(
+            name=filename)[0]  # Assumption: filename is unique
+        file_content = ContentFile(files[filename].read())
+        upload_filename = files[filename].name
+        importscenario_filefield, new = (
+            ImportScenarioInputField.objects.get_or_create(
+                importscenario=importscenario, inputfield=field_ref))
+        # create empty file. replace it later with
+        filevalue, new = (
+            FileValue.objects.get_or_create(
+                importscenario_inputfield=importscenario_filefield))
+        filevalue.value.save(
+            files[filename].name + '.zip', ContentFile(""))
+        filevalue.save()
+        filevalue.value.close()
+
+        destination = filevalue.value.file.name
+        save_uploadfile_in_zipfile(
+            file_content, upload_filename,
+            destination, field_ref.destination_filename)
+
+    return HttpResponseRedirect(
+        reverse('flooding_tools_import_overview'))
 
 def group_import(request):
     """ Renders a html with the form for creating a new groupimport
