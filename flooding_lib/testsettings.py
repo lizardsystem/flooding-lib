@@ -1,10 +1,19 @@
 DEBUG = True
 TEMPLATE_DEBUG = True
-DATABASE_ENGINE = 'sqlite3'
-DATABASE_NAME = 'test.db'
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.contrib.gis.db.backends.spatialite',
+        'NAME': 'test.db'
+        }
+}
+
 SITE_ID = 1
 INSTALLED_APPS = [
     'flooding_lib',
+    'flooding_lib.tools.importtool',
+    'flooding_lib.tools.exporttool',
+    'flooding_lib.tools.approvaltool',
     'flooding_presentation',
     'flooding_visualization',
     'flooding_worker',
