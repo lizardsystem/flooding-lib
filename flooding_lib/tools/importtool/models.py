@@ -286,10 +286,9 @@ class ImportScenarioInputField(models.Model):
 
 
 class Value(models.Model):
-    """Superclass of the value models, don't use directly"""
+    """Base class for the other *Value classes. Don't use directly"""
     importscenario_inputfield = models.OneToOneField(
         ImportScenarioInputField, primary_key=True)
-
 
 class StringValue(Value):
     """The class responsible for saving Strings"""
@@ -299,12 +298,13 @@ class StringValue(Value):
         self.value = str(value)
 
 
-class DateValue(Value):
+class DateValue(StringValue):
     """The class responsible for saving Dates"""
-    value = models.CharField(max_length=200, blank=True, null=True)
-
     def set(self, value):
         self.value = str(value)
+
+    class Meta:
+        proxy = True
 
 
 class IntegerValue(Value):
@@ -317,11 +317,13 @@ class IntegerValue(Value):
 
 class SelectValue(IntegerValue):
     """The class responsible for saving Selects"""
-    pass
+    class Meta:
+        proxy = True
 
 
 class BooleanValue(IntegerValue):
     """The class responsible for saving Booleans"""
+
     def set(self, value):
         if value.lower() in ['true','yes','ja']:
             self.value = 1
@@ -329,6 +331,9 @@ class BooleanValue(IntegerValue):
             self.value = 0
         else:
             raise ValueError('boolean value is not true or false')
+
+    class Meta:
+        proxy = True
 
 
 class FloatValue(Value):
@@ -345,8 +350,11 @@ class IntervalValue(FloatValue):
         value = get_dayfloat_from_intervalstring(value)
         self.value = float(value)
 
+    class Meta:
+        proxy = True
 
-class TextValue(Value):
+
+class TextValue(models.Model):
     """The class responsible for saving Texts"""
     value = models.TextField(blank=True, null=True)
 
@@ -354,20 +362,20 @@ class TextValue(Value):
         self.value = str(value)
 
 
+def get_import_upload_files_path(instance, filename):
+    """
+    Method that functions as a callback method to set dynamically
+    the path for the result zip-file for the groupimport
+    """
+    return os.path.join(
+        'import',
+        'importscenario',
+        str(instance.importscenario_inputfield.importscenario_id),
+        'files', filename)
+
+
 class FileValue(Value):
     """The class responsible for saving Files"""
-
-    def get_import_upload_files_path(instance, filename):
-        """
-        Method that functions as a callback method to set dynamically
-        the path for the result zip-file for the groupimport
-        """
-        return os.path.join(
-            'import',
-            'importscenario',
-            str(instance.importscenario_inputfield.importscenario_id),
-            'files', filename)
-
     value = models.FileField(
         upload_to=get_import_upload_files_path, blank=True, null=True)
 
