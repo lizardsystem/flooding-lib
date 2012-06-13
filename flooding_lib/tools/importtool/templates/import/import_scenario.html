@@ -131,9 +131,8 @@
                 formScenarioSettings.saveData(function(dsResponse, data, dsRequest) {
                     if (dsResponse.httpResponseCode == 200) {
                         if (data.successful == "true") {
-                            // user 123456789 as a dummy, to replace
-                            // needs to be filled with a real value due to Django filling of data
-                            // can not just be data.id
+                            // use 123456789 as a dummy import_scenario_id, so we can replace it
+                            // with the real one in Javascript
                             window.location="{% url flooding_tools_upload_files 123456789%}".replace('123456789', data.id);
                         } else {
                             alert('error saving: ' + data.remarks)
