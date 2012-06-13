@@ -21,7 +21,8 @@ install_requires = [
     'django-nose',
     'nens',
     'GDAL',
-    'django-debug-toolbar'
+    'django-debug-toolbar',
+    'factory-boy',
     ],
 
 tests_require = [
