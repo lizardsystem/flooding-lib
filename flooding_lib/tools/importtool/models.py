@@ -187,73 +187,31 @@ class ImportScenarioInputField(models.Model):
         return u'%s: %s (%s)'%(self.importscenario.name, self.inputfield.name, self.getValueString())
 
     def getValue(self):
-        if self.inputfield.type in (InputField.TYPE_INTEGER,InputField.TYPE_SELECT, InputField.TYPE_BOOLEAN ,):
-            return self.integervalue.value
-        elif self.inputfield.type in (InputField.TYPE_FLOAT,InputField.TYPE_INTERVAL,) :
-            return self.floatvalue.value
-        elif self.inputfield.type in (InputField.TYPE_STRING, InputField.TYPE_DATE, ):
-            try:
-                return self.stringvalue.value
-            except:
-                return 'Problem returning stringvalue'
-        elif self.inputfield.type in (InputField.TYPE_TEXT,):
-            return self.textvalue.value
-        elif self.inputfield.type in (InputField.TYPE_FILE,):
-            try:
-                return self.filevalue.value.path
-            except FileValue.DoesNotExist:
-                return None
-            except ValueError:
-                return None
+        value_class = self.inputfield.value_class
+        try:
+            value = value_class.objects.get(importscenario_inputfield=self)
+            return value.value
+        except value_class.DoesNotExist:
+            return None
 
     def getValueString(self):
         return str(self.getValue())
 
-
     def setValue(self, value, type='text'):
-        if self.inputfield.type in (InputField.TYPE_INTEGER,InputField.TYPE_SELECT, ):
-            obj, new = IntegerValue.objects.get_or_create(importscenario_inputfield = self)
-            obj.value = int(value)
-            obj.save()
-        elif self.inputfield.type in (InputField.TYPE_BOOLEAN ,):
-            obj, new = IntegerValue.objects.get_or_create(importscenario_inputfield = self)
-            if value.lower() in ['true','yes','ja']:
-                obj.value = 1
-            elif value.lower() in ['false','no','nee']:
-                obj.value = 0
-            else:
-                raise ValueError('boolean value is not true or false')
-            obj.save()
-        elif self.inputfield.type in (InputField.TYPE_FLOAT,InputField.TYPE_INTERVAL,) :
-            obj, new = FloatValue.objects.get_or_create(importscenario_inputfield = self)
-            if self.inputfield.type == InputField.TYPE_INTERVAL:
-                value = get_dayfloat_from_intervalstring(value)
-            obj.value = float(value)
-            obj.save()
-        elif self.inputfield.type in (InputField.TYPE_STRING,):
-            obj, new = StringValue.objects.get_or_create(importscenario_inputfield = self)
-            obj.value = str(value)
-            obj.save()
-
-        elif self.inputfield.type in (InputField.TYPE_DATE,):
+        if self.inputfield.type == InputField.TYPE_DATE:
+            # Hack remaining after refactoring
             if type == 'text':
-                obj, new = StringValue.objects.get_or_create(importscenario_inputfield = self)
-                obj.value = str(value)
-                obj.save()
-            else:#number or xldate
-                obj, new = StringValue.objects.get_or_create(importscenario_inputfield = self)
-                date = datetime.datetime(1900, 1, 1, 0, 0) + datetime.timedelta(int(value))
-                obj.value = str(date)
-                obj.save()
+                value = str(value)
+            else:
+                date = (datetime.datetime(1900, 1, 1, 0, 0) +
+                        datetime.timedelta(int(value)))
+                value = str(date)
 
-        elif self.inputfield.type in (InputField.TYPE_TEXT,):
-            obj, new = TextValue.objects.get_or_create(importscenario_inputfield = self)
-            obj.value = str(value)
-            obj.save()
-        elif self.inputfield.type in (InputField.TYPE_FILE,):
-            #TO DO: Nog niet geimplementeerd!!!!
-            return 'Aanwezig'
-
+        value_class = self.inputfield.value_class
+        value_object, _ = value_class.objects.get_or_create(
+            importscenario_inputfield=self)
+        value_object.set(value)
+        value_object.save()
 
     def get_editor_dict(self):
         item = self.inputfield.get_editor_dict()
@@ -327,64 +285,96 @@ class ImportScenarioInputField(models.Model):
         return simplejson.dumps(self.get_approve_statuseditor_dict())
 
 
-
-class StringValue(models.Model):
-    """ The class responsible for saving Strings
-
-    The class also links the String to an instance of ImportScenarioInputField
-
-    """
-
-    importscenario_inputfield = models.OneToOneField(ImportScenarioInputField, primary_key = True)
-    value = models.CharField(max_length=200, blank=True, null = True)
-
-class IntegerValue(models.Model):
-    """ The class responsible for saving Strings
-
-    The class also links the String to an instance of ImportScenarioInputField
-
-    """
-
-    importscenario_inputfield = models.OneToOneField(ImportScenarioInputField, primary_key = True)
-    value = models.IntegerField(blank=True, null = True)
-
-class FloatValue(models.Model):
-    """ The class responsible for saving Strings
-
-    The class also links the String to an instance of ImportScenarioInputField
-
-    """
-
-    importscenario_inputfield = models.OneToOneField(ImportScenarioInputField, primary_key = True)
-    value = models.FloatField(blank=True, null = True)
-
-class TextValue(models.Model):
-    """ The class responsible for saving Strings
-
-    The class also links the String to an instance of ImportScenarioInputField
-
-    """
-
-    importscenario_inputfield = models.OneToOneField(ImportScenarioInputField, primary_key = True)
-    value = models.TextField(blank=True, null = True)
+class Value(models.Model):
+    """Superclass of the value models, don't use directly"""
+    importscenario_inputfield = models.OneToOneField(
+        ImportScenarioInputField, primary_key=True)
 
 
-def get_import_upload_files_path(instance, filename):
-    """
-    Method that functions as a callback method to set dynamically the path
-    for the result zip-file for the groupimport
-    """
-    return  os.path.join('import', 'importscenario', str(instance.importscenario_inputfield.importscenario_id), 'files', filename)
+class StringValue(Value):
+    """The class responsible for saving Strings"""
+    value = models.CharField(max_length=200, blank=True, null=True)
 
-class FileValue(models.Model):
-    """ The class responsible for saving Strings
+    def set(self, value):
+        self.value = str(value)
 
-    The class also links the String to an instance of ImportScenarioInputField
 
-    """
+class DateValue(Value):
+    """The class responsible for saving Dates"""
+    value = models.CharField(max_length=200, blank=True, null=True)
 
-    importscenario_inputfield = models.OneToOneField(ImportScenarioInputField, primary_key = True)
-    value = models.FileField(upload_to = get_import_upload_files_path, blank = True, null = True)
+    def set(self, value):
+        self.value = str(value)
+
+
+class IntegerValue(Value):
+    """The class responsible for saving Integers"""
+    value = models.IntegerField(blank=True, null=True)
+
+    def set(self, value):
+        self.value = int(value)
+
+
+class SelectValue(IntegerValue):
+    """The class responsible for saving Selects"""
+    pass
+
+
+class BooleanValue(IntegerValue):
+    """The class responsible for saving Booleans"""
+    def set(self, value):
+        if value.lower() in ['true','yes','ja']:
+            self.value = 1
+        elif value.lower() in ['false','no','nee']:
+            self.value = 0
+        else:
+            raise ValueError('boolean value is not true or false')
+
+
+class FloatValue(Value):
+    """The class responsible for saving Floats"""
+    value = models.FloatField(blank=True, null=True)
+
+    def set(self, value):
+        self.value = float(value)
+
+
+class IntervalValue(FloatValue):
+    """The class responsible for saving Intervals"""
+    def set(self, value):
+        value = get_dayfloat_from_intervalstring(value)
+        self.value = float(value)
+
+
+class TextValue(Value):
+    """The class responsible for saving Texts"""
+    value = models.TextField(blank=True, null=True)
+
+    def set(self, value):
+        self.value = str(value)
+
+
+class FileValue(Value):
+    """The class responsible for saving Files"""
+
+    def get_import_upload_files_path(instance, filename):
+        """
+        Method that functions as a callback method to set dynamically
+        the path for the result zip-file for the groupimport
+        """
+        return os.path.join(
+            'import',
+            'importscenario',
+            str(instance.importscenario_inputfield.importscenario_id),
+            'files', filename)
+
+    value = models.FileField(
+        upload_to=get_import_upload_files_path, blank=True, null=True)
+
+    def set(self, value):
+        #TO DO: Nog niet geimplementeerd!!!!
+        return 'Aanwezig'
+
 
 class InputField(models.Model):
     """ A general field that is used for importing scenario properties
@@ -428,6 +418,16 @@ class InputField(models.Model):
          (TYPE_BOOLEAN, _('Boolean (True or False)')),
     )
 
+    TYPE_VALUE_CLASSES = {
+        TYPE_INTEGER: IntegerValue,
+        TYPE_FLOAT: FloatValue,
+        TYPE_STRING: StringValue,
+        TYPE_INTERVAL: IntervalValue,
+        TYPE_DATE: DateValue,
+        TYPE_FILE: FileValue,
+        TYPE_SELECT: SelectValue,
+        TYPE_BOOLEAN: BooleanValue,
+        }
 
     HEADER_SCENARIO = 10
     HEADER_META = 20
@@ -471,6 +471,14 @@ class InputField(models.Model):
 
     def __unicode__(self):
         return u'%s - %s'%( self.get_header_display(), self.name )
+
+    @property
+    def value_class(self):
+        """Return the value class for this input field's type."""
+        if self.type in self.TYPE_VALUE_CLASSES:
+            return self.TYPE_VALUE_CLASSES[self.type]
+        else:
+            raise NotImplementedError("self.type has an unknown value")
 
     def get_editor_dict(self):
 
