@@ -410,6 +410,7 @@ def post_new_import(request):
         simplejson.dumps(answer),
         mimetype="application/json")
 
+
 def get_new_filename(filename, dest_filename):
     new_filename = filename
     if dest_filename != None:
