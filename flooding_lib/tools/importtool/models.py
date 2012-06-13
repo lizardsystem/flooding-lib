@@ -11,9 +11,7 @@ import datetime
 from django.utils import simplejson
 
 
-
 def get_dayfloat_from_intervalstring(input):
-
     input = str(input)
     re_day = re.compile('^(-?\d)d*\s(?!\:)')
     re_hours = hours = re.compile(r'(\d*)\:')
@@ -31,27 +29,28 @@ def get_dayfloat_from_intervalstring(input):
         hours = re_hours.findall(input)[0]
         minutes = re_minutes.findall(input)[0]
     except IndexError:
-        raise ValueError('Interval input format is \'x d hh:mm\'. Error on input \'%s\''%input)
+        raise ValueError(
+            "Interval input format is 'x d hh:mm'. Error on input '%s'" %
+            input)
 
-
-    return float(day) + float(hours)/24 + float(minutes)/(60*24)
+    return float(day) + float(hours) / 24 + float(minutes) / (60 * 24)
 
 
 def get_intervalstring_from_dayfloat(input):
 
-    if input <0:
+    if input < 0:
         sign = '-'
     else:
         sign = ''
 
     days = math.floor(input)
-    input = (input - days)*24
+    input = (input - days) * 24
     hours = math.floor(input)
-    input = (input -  hours)*60
+    input = (input - hours) * 60
     minutes = math.floor(input)
 
-    return  sign + ("%i d "%days) + ("%2i:"%hours).replace(' ', '0') + ("%2i"%minutes).replace(' ', '0')
-
+    return (sign + ("%i d " % days) + ("%2i:" % hours).replace(' ', '0') +
+            ("%2i" % minutes).replace(' ', '0'))
 
 
 def get_groupimport_table_path(instance, filename):
@@ -61,7 +60,9 @@ def get_groupimport_table_path(instance, filename):
 
     """
 
-    return os.path.join('import', 'groupimport', str(instance.id), 'tablefile', filename)
+    return os.path.join(
+        'import', 'groupimport', str(instance.id), 'tablefile', filename)
+
 
 def get_groupimport_result_path(instance, filename):
     """
@@ -70,23 +71,30 @@ def get_groupimport_result_path(instance, filename):
 
     """
 
-    return os.path.join('import', 'groupimport', str(instance.id), 'resultfile', filename)
+    return os.path.join(
+        'import', 'groupimport', str(instance.id), 'resultfile', filename)
+
 
 class GroupImport(models.Model):
     """The import object of a group of scenarios
 
-    table: The csv-files in which the scenarios are defined that are uploaded.
-    results: A zip-file containing all the needed result files form importing a scenario.
-
+    table: The csv-files in which the scenarios are defined that are
+    uploaded.  results: A zip-file containing all the needed result
+    files form importing a scenario.
     """
 
     name = models.CharField(_("Name"), max_length=200)
-    table = models.FileField(_("Excel table (.xls)"), upload_to=get_groupimport_table_path, blank=True, null=True)
-    results = models.FileField(_("Results (zipfile)"), upload_to=get_groupimport_result_path, blank=True, null=True)
+    table = models.FileField(
+        _("Excel table (.xls)"), upload_to=get_groupimport_table_path,
+        blank=True, null=True)
+    results = models.FileField(
+        _("Results (zipfile)"), upload_to=get_groupimport_result_path,
+        blank=True, null=True)
     upload_successful = models.NullBooleanField()
 
     def __unicode__(self):
         return self.name
+
 
 class ImportScenario(models.Model):
     """ A scenario that is offered as an import for the database.
@@ -97,7 +105,6 @@ class ImportScenario(models.Model):
             ("can_upload", "Can upload new scenarios"),
             ("can_approve", "Can approve uploaded scenarios"),
         )
-
 
     class Meta:
         verbose_name = _('Import scenario')
@@ -120,27 +127,31 @@ class ImportScenario(models.Model):
     )
 
     name = models.CharField(max_length=200)
-    scenario = models.OneToOneField(Scenario, null = True, blank = True )
-    region = models.ForeignKey(Region, null = True, blank = True )
-    project = models.ForeignKey(Project, null = True, blank = True )
-    breach = models.ForeignKey(Breach, null = True, blank = True )
+    scenario = models.OneToOneField(Scenario, null=True, blank=True)
+    region = models.ForeignKey(Region, null=True, blank=True)
+    project = models.ForeignKey(Project, null=True, blank=True)
+    breach = models.ForeignKey(Breach, null=True, blank=True)
 
-    groupimport = models.ForeignKey(GroupImport, null = True, blank = True )
-    approvalobject = models.OneToOneField(ApprovalObject, null = True, blank = True )
+    groupimport = models.ForeignKey(GroupImport, null=True, blank=True)
+    approvalobject = models.OneToOneField(
+        ApprovalObject, null=True, blank=True)
 
     owner = models.ForeignKey(User, help_text=_('The owner of the scenario.'))
-    creation_date = models.DateTimeField(auto_now_add = True)
-    state = models.IntegerField(choices=IMPORT_STATE_CHOICES, default=IMPORT_STATE_NONE)
-    action_taker = models.CharField(max_length=200, blank = True, null = True )
+    creation_date = models.DateTimeField(auto_now_add=True)
+    state = models.IntegerField(
+        choices=IMPORT_STATE_CHOICES, default=IMPORT_STATE_NONE)
+    action_taker = models.CharField(max_length=200, blank=True, null=True)
 
-    validation_remarks = models.TextField(blank=True, null = True, default='-')
+    validation_remarks = models.TextField(blank=True, null=True, default='-')
 
     def __unicode__(self):
-        return u'%s (%s)'%(self.name, self.get_state_display())
+        return u'%s (%s)' % (self.name, self.get_state_display())
 
     def update_scenario_name(self):
         try:
-            field = self.importscenarioinputfield_set.get(inputfield__destination_table = "Scenario",inputfield__destination_field = "name" )
+            field = self.importscenarioinputfield_set.get(
+                inputfield__destination_table="Scenario",
+                inputfield__destination_field="name")
             name = field.getValue()
             if name == '':
                 name = '-'
@@ -149,7 +160,6 @@ class ImportScenario(models.Model):
         except ImportScenarioInputField.DoesNotExist:
             self.name = '-'
             self.save()
-
 
 
 class ImportScenarioInputField(models.Model):
@@ -167,7 +177,6 @@ class ImportScenarioInputField(models.Model):
         verbose_name = _('Import scenario input field')
         verbose_name_plural = _('Import scenarios input fields')
 
-
     FIELD_STATE_WAITING = 20
     FIELD_STATE_APPROVED = 30
     FIELD_STATE_DISAPPROVED = 40
@@ -178,13 +187,16 @@ class ImportScenarioInputField(models.Model):
          (FIELD_STATE_DISAPPROVED, _('Disapproved'))
     )
 
-    importscenario = models.ForeignKey(ImportScenario, null = True)
-    inputfield  = models.ForeignKey('InputField', null = True)
-    state = models.IntegerField(choices=FIELD_STATE_CHOICES, default=FIELD_STATE_WAITING)
+    importscenario = models.ForeignKey(ImportScenario, null=True)
+    inputfield = models.ForeignKey('InputField', null=True)
+    state = models.IntegerField(
+        choices=FIELD_STATE_CHOICES, default=FIELD_STATE_WAITING)
     validation_remarks = models.TextField(blank=True)
 
     def __unicode__(self):
-        return u'%s: %s (%s)'%(self.importscenario.name, self.inputfield.name, self.getValueString())
+        return u'%s: %s (%s)' % (
+            self.importscenario.name, self.inputfield.name,
+            self.getValueString())
 
     def getValue(self):
         value_class = self.inputfield.value_class
@@ -216,7 +228,7 @@ class ImportScenarioInputField(models.Model):
     def get_editor_dict(self):
         item = self.inputfield.get_editor_dict()
 
-        item["defaultValue"] =  self.getValue()
+        item["defaultValue"] = self.getValue()
         if self.inputfield.type == InputField.TYPE_BOOLEAN:
             if self.getValue() == 0:
                 item["defaultValue"] = False
@@ -224,15 +236,17 @@ class ImportScenarioInputField(models.Model):
                 item["defaultValue"] = True
 
         if self.inputfield.type == InputField.TYPE_INTERVAL:
-            item["defaultValue"] = get_intervalstring_from_dayfloat(self.getValue())
+            item["defaultValue"] = get_intervalstring_from_dayfloat(
+                self.getValue())
         if self.inputfield.type == InputField.TYPE_DATE:
             a = self.getValue()
             try:
-                item["defaultValue"] = a[8:10] + '/' +a[5:7] + '/' + a[0:4] + ' 3:00'
+                item["defaultValue"] = (a[8:10] + '/' + a[5:7] +
+                                        '/' + a[0:4] + ' 3:00')
             except:
                 pass
         elif self.inputfield.type == InputField.TYPE_FILE:
-            item["type"] =  "StaticTextItem"
+            item["type"] = "StaticTextItem"
             item["required"] = False
         return item
 
@@ -241,15 +255,15 @@ class ImportScenarioInputField(models.Model):
 
     def get_static_editor_json(self):
         item = self.get_editor_dict()
-        item["disabled"] =  True
+        item["disabled"] = True
         return simplejson.dumps(item)
-
 
     def get_statestring_json(self):
         item = {
-            "title":"status",
-            "type": "StaticTextItem",
-            "defaultValue": self.get_state_display()+ ": " + self.validation_remarks
+            "title": "status",
+            "type":  "StaticTextItem",
+            "defaultValue": (self.get_state_display() + ": " +
+                             self.validation_remarks)
         }
 
         if self.state == self.FIELD_STATE_APPROVED:
@@ -258,28 +272,35 @@ class ImportScenarioInputField(models.Model):
             item["cellStyle"] = "disapproved"
 
         if self.inputfield.visibility_dependency_field:
-            item["showIf"] = "["+self.inputfield.visibility_dependency_value+"].contains(form.getValue('"+self.inputfield.visibility_dependency_field.name+"'))"
+            item["showIf"] = (
+                "[" + self.inputfield.visibility_dependency_value +
+                "].contains(form.getValue('" +
+                self.inputfield.visibility_dependency_field.name + "'))")
 
         return simplejson.dumps(item)
 
     def get_approve_remarkeditor_dict(self):
         item = self.inputfield.get_approve_remarkeditor_dict()
-        item["defaultValue"] =  self.validation_remarks,
+        item["defaultValue"] = self.validation_remarks,
         if self.inputfield.visibility_dependency_field:
-            item["showIf"] = "["+self.inputfield.visibility_dependency_value+"].contains(form.getValue('"+self.inputfield.visibility_dependency_field.name+"'))"
+            item["showIf"] = (
+                "[" + self.inputfield.visibility_dependency_value +
+                "].contains(form.getValue('" +
+                self.inputfield.visibility_dependency_field.name + "'))")
         return item
-
 
     def get_approve_remarkeditor_json(self):
         return simplejson.dumps(self.get_approve_remarkeditor_dict())
 
     def get_approve_statuseditor_dict(self):
         item = self.inputfield.get_approve_statuseditor_dict()
-        item["defaultValue"] =  self.state,
+        item["defaultValue"] = self.state,
         if self.inputfield.visibility_dependency_field:
-            item["showIf"] = "["+self.inputfield.visibility_dependency_value+"].contains(form.getValue('"+self.inputfield.visibility_dependency_field.name+"'))"
+            item["showIf"] = (
+                "[" + self.inputfield.visibility_dependency_value +
+                "].contains(form.getValue('" +
+                self.inputfield.visibility_dependency_field.name + "'))")
         return item
-
 
     def get_approve_statuseditor_json(self):
         return simplejson.dumps(self.get_approve_statuseditor_dict())
@@ -289,6 +310,7 @@ class Value(models.Model):
     """Base class for the other *Value classes. Don't use directly"""
     importscenario_inputfield = models.OneToOneField(
         ImportScenarioInputField, primary_key=True)
+
 
 class StringValue(Value):
     """The class responsible for saving Strings"""
@@ -325,9 +347,9 @@ class BooleanValue(IntegerValue):
     """The class responsible for saving Booleans"""
 
     def set(self, value):
-        if value.lower() in ['true','yes','ja']:
+        if value.lower() in ['true', 'yes', 'ja']:
             self.value = 1
-        elif value.lower() in ['false','no','nee']:
+        elif value.lower() in ['false', 'no', 'nee']:
             self.value = 0
         else:
             raise ValueError('boolean value is not true or false')
@@ -405,7 +427,7 @@ class InputField(models.Model):
         ordering = ['header']
 
     TYPE_INTEGER = 10
-    TYPE_FLOAT  = 20
+    TYPE_FLOAT = 20
     TYPE_STRING = 30
     TYPE_TEXT = 40
     TYPE_DATE = 50
@@ -458,27 +480,42 @@ class InputField(models.Model):
     )
 
     name = models.CharField(max_length=200, unique=True)
-    header =  models.IntegerField(choices=HEADER_CHOICES, default=HEADER_REMAINING)
-    position = models.IntegerField(default=0, help_text=_('Hoe hoger hoe eerder in rij'))
-    import_table_field = models.CharField(max_length=100, help_text=_('Name of col. in import csv-file'))
-    destination_table = models.CharField(max_length=100, help_text=_('Name of table in flooding database'))
-    destination_field =  models.CharField(max_length=100, help_text=_('Name of field in flooding database table'))
-    destination_filename =  models.CharField(max_length=100, null=True, blank=True, help_text=_('Name of imported files (match with resulttypes). Use #### for numbers'))
-
+    header = models.IntegerField(
+        choices=HEADER_CHOICES, default=HEADER_REMAINING)
+    position = models.IntegerField(
+        default=0, help_text=_('Hoe hoger hoe eerder in rij'))
+    import_table_field = models.CharField(
+        max_length=100, help_text=_('Name of col. in import csv-file'))
+    destination_table = models.CharField(
+        max_length=100, help_text=_('Name of table in flooding database'))
+    destination_field = models.CharField(
+        max_length=100,
+        help_text=_('Name of field in flooding database table'))
+    destination_filename = models.CharField(
+        max_length=100, null=True, blank=True,
+        help_text=_('Name of imported files (match with resulttypes). '
+                    'Use #### for numbers'))
 
     type = models.IntegerField(choices=TYPE_CHOICES)
     options = models.TextField(blank=True)
 
-    visibility_dependency_field = models.ForeignKey('InputField', null=True, blank=True)
+    visibility_dependency_field = models.ForeignKey(
+        'InputField', null=True, blank=True)
     visibility_dependency_value = models.TextField(blank=True)
 
-    excel_hint = models.CharField(max_length=200, blank=True, help_text=_('help text shown in excel file'))
-    hover_text = models.CharField(max_length=200, blank=True, help_text=_('help text shown when hovering over field'))
-    hint_text = models.CharField(max_length=200, blank=True, help_text=_('help text shown behind field'))
+    excel_hint = models.CharField(
+        max_length=200, blank=True,
+        help_text=_('help text shown in excel file'))
+    hover_text = models.CharField(
+        max_length=200, blank=True,
+        help_text=_('help text shown when hovering over field'))
+    hint_text = models.CharField(
+        max_length=200, blank=True,
+        help_text=_('help text shown behind field'))
     required = models.BooleanField(default=False)
 
     def __unicode__(self):
-        return u'%s - %s'%( self.get_header_display(), self.name )
+        return u'%s - %s' % (self.get_header_display(), self.name)
 
     @property
     def value_class(self):
@@ -493,14 +530,14 @@ class InputField(models.Model):
         item = {
                 "name": self.name,
                 "title": self.name,
-                "required":self.required,
+                "required": self.required,
                 "colSpan": 2,
                 "width": 300,
                 #"height": 50,
                 "startRow": True
         }
         if self.hint_text:
-            item["hint"] =  self.hint_text
+            item["hint"] = self.hint_text
         if self.hover_text:
             item["prompt"] = self.hover_text
         if self.type == self.TYPE_INTEGER:
@@ -513,25 +550,27 @@ class InputField(models.Model):
             item["type"] = "textArea"
         elif self.type == self.TYPE_DATE:
             item["type"] = "date"
-            item["blur"] = "this.setValue(this.getValue().setHours(4));" #fix to get right dates back from Isomorphic
+            # fix to get right dates back from Isomorphic
+            item["blur"] = "this.setValue(this.getValue().setHours(4));"
         elif self.type == self.TYPE_INTERVAL:
             item["type"] = "text"
             item["dateFormatter"] = "intervalFormatter"
             item["blur"] = "this.setValue(intervalFormatter(this.getValue()));"
-            #if self.default_value:
-            #    item["defaultValue"] = "intervalFormatter( " + self.defaultvalue +" )"
         elif self.type == self.TYPE_FILE:
-            item["type"] = "binary"#"link" if not editable and just view it
+            item["type"] = "binary"  # "link" if not editable and just view it
         elif self.type == self.TYPE_SELECT:
             item["type"] = "select"
             item["valueMap"] = eval(self.options)
         elif self.type == self.TYPE_BOOLEAN:
-            item["type"] =  "boolean"
+            item["type"] = "boolean"
         if self.visibility_dependency_field:
-            item["showIf"] = "["+self.visibility_dependency_value+"].contains(form.getValue('"+self.visibility_dependency_field.name+"'))"
+            item["showIf"] = (
+                "[" + self.visibility_dependency_value +
+                "].contains(form.getValue('" +
+                self.visibility_dependency_field.name + "'))")
 
         if self.inputfield_set.count() > 0:
-            item['redrawOnChange'] =  True
+            item['redrawOnChange'] = True
 
         return item
 
@@ -540,23 +579,25 @@ class InputField(models.Model):
 
     def get_static_editor_json(self):
         item = self.get_editor_dict()
-        item["disabled"] =  True
+        item["disabled"] = True
         return simplejson.dumps(item)
 
     def get_approve_remarkeditor_dict(self):
         item = {
                 "name": "edremark." + self.name,
-                "title":"status",
-                "showTitle":False,
+                "title": "status",
+                "showTitle": False,
                 "colSpan": 1,
                 "width": 150,
                 "type": "text"
         }
         if self.visibility_dependency_field:
-            item["showIf"] = "["+self.visibility_dependency_value+"].contains(form.getValue('"+self.visibility_dependency_field.name+"'))"
+            item["showIf"] = (
+                "[" + self.visibility_dependency_value +
+                "].contains(form.getValue('" +
+                self.visibility_dependency_field.name + "'))")
 
         return item
-
 
     def get_approve_remarkeditor_json(self):
         return simplejson.dumps(self.get_approve_remarkeditor_dict())
@@ -568,15 +609,18 @@ class InputField(models.Model):
 
         item = {
             "name": "edstate." + self.name,
-            "title":"status",
+            "title": "status",
             "colSpan": 2,
             "width": 100,
             "type": "select",
-            "valueMap":valuemap
+            "valueMap": valuemap
         }
 
         if self.visibility_dependency_field:
-            item["showIf"] = "["+self.visibility_dependency_value+"].contains(form.getValue('"+self.visibility_dependency_field.name+"'))"
+            item["showIf"] = (
+                "[" + self.visibility_dependency_value +
+                "].contains(form.getValue('" +
+                self.visibility_dependency_field.name + "'))")
 
         return item
 
