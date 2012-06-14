@@ -219,9 +219,7 @@ class ImportScenarioInputField(models.Model):
                         datetime.timedelta(int(value)))
                 value = str(date)
 
-        value_class = self.inputfield.value_class
-        value_object, _ = value_class.objects.get_or_create(
-            importscenario_inputfield=self)
+        value_object = self.inputfield.get_or_create_value_object(self)
         value_object.set(value)
         value_object.save()
 
@@ -524,6 +522,11 @@ class InputField(models.Model):
             return self.TYPE_VALUE_CLASSES[self.type]
         else:
             raise NotImplementedError("self.type has an unknown value")
+
+    def get_or_create_value_object(self, importscenario_inputfield):
+        value_object, _ = self.value_class.objects.get_or_create(
+            importscenario_inputfield=importscenario_inputfield)
+        return value_object
 
     def get_editor_dict(self):
 
