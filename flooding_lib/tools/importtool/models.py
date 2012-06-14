@@ -12,45 +12,38 @@ from django.utils import simplejson
 
 
 def get_dayfloat_from_intervalstring(input):
+    """Return a time interval of a string with days, hours and minutes
+    as a float amount of days.
+
+    Input format is 'x d hh:mm', with spaces and leading zeros optional."""
+
     input = str(input)
-    re_day = re.compile('^(-?\d)d*\s(?!\:)')
-    re_hours = hours = re.compile(r'(\d*)\:')
-    re_minutes = re.compile('\:(\d*)')
+    match = re.compile('(-?\d+)\s*d\s*(\d{1,2}):(\d{1,2})').match(input)
 
-    day = 0
-    hours = 0
-    minutes = 0
-    try:
-        day = re_day.findall(input)[0]
-    except IndexError:
-        pass
+    if match:
+        try:
+            day = float(match.group(1))
+            hours = float(match.group(2))
+            minutes = float(match.group(3))
 
-    try:
-        hours = re_hours.findall(input)[0]
-        minutes = re_minutes.findall(input)[0]
-    except IndexError:
-        raise ValueError(
-            "Interval input format is 'x d hh:mm'. Error on input '%s'" %
-            input)
+            if (0 <= hours < 24) and (0 <= minutes < 60):
+                return day + hours / 24 + minutes / (60 * 24)
+        except ValueError:
+            pass
 
-    return float(day) + float(hours) / 24 + float(minutes) / (60 * 24)
+    raise ValueError(
+        "Interval input format is 'x d hh:mm'. Error on input '%s'" %
+        input)
 
 
 def get_intervalstring_from_dayfloat(input):
-
-    if input < 0:
-        sign = '-'
-    else:
-        sign = ''
-
-    days = math.floor(input)
+    days = int(math.floor(input))
     input = (input - days) * 24
-    hours = math.floor(input)
+    hours = int(math.floor(input))
     input = (input - hours) * 60
-    minutes = math.floor(input)
+    minutes = int(math.floor(input))
 
-    return (sign + ("%i d " % days) + ("%2i:" % hours).replace(' ', '0') +
-            ("%2i" % minutes).replace(' ', '0'))
+    return "%d d %02d:%02d" % (days, hours, minutes)
 
 
 def get_groupimport_table_path(instance, filename):
