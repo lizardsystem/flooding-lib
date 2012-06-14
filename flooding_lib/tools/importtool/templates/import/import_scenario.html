@@ -58,7 +58,7 @@
         ID: "helptext",
         autodraw: true,
         padding: 15,
-        contents: "{% autoescape off %}{{ legend_html }}{% endautoescape %}"
+        contents: {% autoescape off %}{{ legend_html_json }}{% endautoescape %}
     });
 
     isc.DataSource.create({

@@ -361,6 +361,9 @@ def new_import(request):
 
     post_url = reverse('flooding_tools_import_new')
 
+    legend_html_json = simplejson.dumps(
+        Text.get('importnewscenario', request=request))
+
     breadcrumbs = [
         {'name': _('Import tool'),
          'url': reverse('flooding_tools_import_overview')},
@@ -369,8 +372,7 @@ def new_import(request):
                               {'fields': form_fields,
                                'post_url': post_url,
                                'breadcrumbs': breadcrumbs,
-                               'legend_html': Text.get('importnewscenario',
-                                                       request=request),
+                               'legend_html_json': legend_html_json,
                                })
 
 
