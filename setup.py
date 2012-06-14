@@ -23,6 +23,7 @@ install_requires = [
     'GDAL',
     'django-debug-toolbar',
     'factory-boy',
+    'mock',
     ],
 
 tests_require = [
