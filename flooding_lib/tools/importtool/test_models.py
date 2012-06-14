@@ -11,19 +11,16 @@ class UserF(factory.Factory):
 
     username = 'remco'
 
-remco = UserF()
-remco.save()
-
 class ImportScenarioF(factory.Factory):
     FACTORY_FOR = models.ImportScenario
 
     name = 'test'
-    owner = remco
+    owner = UserF.create()
 
 class ImportScenarioInputFieldF(factory.Factory):
     FACTORY_FOR = models.ImportScenarioInputField
 
-    importscenario = factory.LazyAttribute(lambda a: ImportScenarioF())
+    importscenario = factory.LazyAttribute(lambda a: ImportScenarioF.build())
     validation_remarks = ''
 
 
