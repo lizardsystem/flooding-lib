@@ -9,6 +9,10 @@ Changelog of flooding-lib
 
 - Increased flooding-base to 1.24 so we can use its Text model
 
+- Continued refactoring, testing of importtool
+
+- Ticket #3679, adds a legend Text to the new scenario screen.
+  Uses a Text from the database with slug 'importnewscenario'.
 
 1.29 (2012-06-12)
 -----------------
