@@ -54,12 +54,14 @@
     autodraw:false
     });
 
+{% if legend_html_json %}
     isc.Canvas.create({
         ID: "helptext",
         autodraw: true,
         padding: 15,
         contents: {% autoescape off %}{{ legend_html_json }}{% endautoescape %}
     });
+{% endif %}
 
     isc.DataSource.create({
         ID:"dsPostScenario",
@@ -394,7 +396,9 @@
         overflow: "auto",
         members: [
                 breadcrumbs,
+{% if legend_html_json %}
                 helptext,
+{% endif %}
                 formScenarioSettings,
                 scenarioInfobuttons ,
                 {% if import_admin %}  ,isc.Canvas.create({height:"20"}) ,formAdminSettings,scImportAdmin,  {% endif %}

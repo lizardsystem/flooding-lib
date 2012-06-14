@@ -94,6 +94,7 @@ class TestGetIntervalString(TestCase):
             models.get_intervalstring_from_dayfloat(-0.5),
             '-1 d 12:00')
 
+
 class TestImportScenarioInputField(TestCase):
     def get_resulting_isif(self, inputfield_type, inputfield_name, value_in):
         """Create a new scenario and an inputfield of type inputfield_type and

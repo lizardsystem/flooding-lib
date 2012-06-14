@@ -15,10 +15,11 @@ def get_dayfloat_from_intervalstring(input):
     """Return a time interval of a string with days, hours and minutes
     as a float amount of days.
 
-    Input format is 'x d hh:mm', with spaces and leading zeros optional."""
+    Input format is 'x d hh:mm', with the 'd', spaces and leading
+    zeros optional."""
 
     input = str(input)
-    match = re.compile('(-?\d+)\s*d\s*(\d{1,2}):(\d{1,2})').match(input)
+    match = re.compile('(-?\d+)\s*d?\s*(\d{1,2}):(\d{1,2})').match(input)
 
     if match:
         try:
@@ -297,14 +298,10 @@ class ImportScenarioInputField(models.Model):
         return simplejson.dumps(self.get_approve_statuseditor_dict())
 
 
-class Value(models.Model):
-    """Base class for the other *Value classes. Don't use directly"""
+class StringValue(models.Model):
+    """The class responsible for saving Strings"""
     importscenario_inputfield = models.OneToOneField(
         ImportScenarioInputField, primary_key=True)
-
-
-class StringValue(Value):
-    """The class responsible for saving Strings"""
     value = models.CharField(max_length=200, blank=True, null=True)
 
     def set(self, value):
@@ -320,8 +317,10 @@ class DateValue(StringValue):
         proxy = True
 
 
-class IntegerValue(Value):
+class IntegerValue(models.Model):
     """The class responsible for saving Integers"""
+    importscenario_inputfield = models.OneToOneField(
+        ImportScenarioInputField, primary_key=True)
     value = models.IntegerField(blank=True, null=True)
 
     def set(self, value):
@@ -349,8 +348,10 @@ class BooleanValue(IntegerValue):
         proxy = True
 
 
-class FloatValue(Value):
+class FloatValue(models.Model):
     """The class responsible for saving Floats"""
+    importscenario_inputfield = models.OneToOneField(
+        ImportScenarioInputField, primary_key=True)
     value = models.FloatField(blank=True, null=True)
 
     def set(self, value):
@@ -369,6 +370,8 @@ class IntervalValue(FloatValue):
 
 class TextValue(models.Model):
     """The class responsible for saving Texts"""
+    importscenario_inputfield = models.OneToOneField(
+        ImportScenarioInputField, primary_key=True)
     value = models.TextField(blank=True, null=True)
 
     def set(self, value):
@@ -387,8 +390,10 @@ def get_import_upload_files_path(instance, filename):
         'files', filename)
 
 
-class FileValue(Value):
+class FileValue(models.Model):
     """The class responsible for saving Files"""
+    importscenario_inputfield = models.OneToOneField(
+        ImportScenarioInputField, primary_key=True)
     value = models.FileField(
         upload_to=get_import_upload_files_path, blank=True, null=True)
 
@@ -443,8 +448,9 @@ class InputField(models.Model):
         TYPE_INTEGER: IntegerValue,
         TYPE_FLOAT: FloatValue,
         TYPE_STRING: StringValue,
-        TYPE_INTERVAL: IntervalValue,
+        TYPE_TEXT: TextValue,
         TYPE_DATE: DateValue,
+        TYPE_INTERVAL: IntervalValue,
         TYPE_FILE: FileValue,
         TYPE_SELECT: SelectValue,
         TYPE_BOOLEAN: BooleanValue,
@@ -514,7 +520,8 @@ class InputField(models.Model):
         if self.type in self.TYPE_VALUE_CLASSES:
             return self.TYPE_VALUE_CLASSES[self.type]
         else:
-            raise NotImplementedError("self.type has an unknown value")
+            raise NotImplementedError(
+                "self.type has an unknown value (%s)" % (str(self.type),))
 
     def get_or_create_value_object(self, importscenario_inputfield):
         value_object, _ = self.value_class.objects.get_or_create(
