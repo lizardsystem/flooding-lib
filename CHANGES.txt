@@ -2,7 +2,7 @@ Changelog of flooding-lib
 ===================================================
 
 
-1.30 (unreleased)
+1.30 (2012-06-14)
 -----------------
 
 - Show a legend text above the import new scenario screen.
