@@ -255,12 +255,12 @@ def service_get_wms_of_shape(
 
     #################### read data ###################################
     #read source and attach values
-    lyr = mapnik.Layer('points', spherical_mercator)
+    lyr = mapnik.Layer('points', o spherical_mercator)
     lyr.datasource = mapnik.PointDatasource()
     log.debug('ready setting up map ' + str(datetime.datetime.now()))
     log.debug('start reading point cache ' + str(datetime.datetime.now()))
     points = cache.get('model_nodes_' + str(presentationlayer_id) +
-                       '_' + str(timestep) +'_' + str(legend_id))
+                       '_' + str(timestep) + '_' + str(legend_id))
     log.debug('ready reading point cache ' + str(datetime.datetime.now()))
 
     if points is None:
@@ -269,27 +269,31 @@ def service_get_wms_of_shape(
         points = []
 
         drv = ogr.GetDriverByName('ESRI Shapefile')
-        shapefile_name = external_file_location(pl.presentationshape.geo_source.file_location)
+        shapefile_name = external_file_location(
+            pl.presentationshape.geo_source.file_location)
         ds = drv.Open(shapefile_name)
         layer = ds.GetLayer()
 
         has_his_file_field = False
         has_geo_file_field = False
         geo_fields = []
-        log.debug( 'fields are: ' + str(fields))
+        log.debug('fields are: ' + str(fields))
         for nr in fields:
             field = fields[nr]
             if field.source_type == Field.SOURCE_TYPE_VALUE_SOURCE_PARAM:
                 has_his_file_field = True
                 his_field = field
                 #only his files yet supported. read needed data
-                log.debug( 'start reading hiscache' + str(datetime.datetime.now()) )
-                his = cache.get('his_' + str(presentationlayer_id) )
-                log.debug( 'ready reading hiscache' + str(datetime.datetime.now()) )
+                log.debug('start reading hiscache' +
+                          str(datetime.datetime.now()))
+                his = cache.get('his_' + str(presentationlayer_id))
+                log.debug('ready reading hiscache' +
+                          str(datetime.datetime.now()))
 
                 if his == None:
-                    log.debug( 'read hisfile' + str(datetime.datetime.now()) )
-                    zip_name = external_file_location(pl.presentationshape.value_source.file_location)
+                    log.debug('read hisfile' + str(datetime.datetime.now()))
+                    zip_name = external_file_location(
+                        pl.presentationshape.value_source.file_location)
                     input_file = ZipFile(zip_name, "r")
                     if pl.presentationtype.geo_source_filter:
                         filename = pl.presentationtype.geo_source_filter
@@ -298,27 +302,31 @@ def service_get_wms_of_shape(
 
                     his = HISFile(Stream(input_file.read(filename)))
                     input_file.close()
-                    log.debug( 'ready reading hisfile' + str(datetime.datetime.now()))
-                    cache.set('his_' + str(presentationlayer_id) , his , 3000)
+                    log.debug('ready reading hisfile' +
+                              str(datetime.datetime.now()))
+                    cache.set('his_' + str(presentationlayer_id), his, 3000)
 
-                values = his.get_values_timestep_by_index(his.get_parameter_index(his_field.name_in_source), timestep)
+                values = his.get_values_timestep_by_index(
+                    his.get_parameter_index(his_field.name_in_source),
+                    timestep)
 
             elif field.source_type == Field.SOURCE_TYPE_GEO_SOURCE_COL:
                 has_geo_file_field = True
                 geo_fields.append(field)
             else:
-                log.debug(  'field source type ' + field.source_type + ' not yet supported' )
+                log.debug('field source type ' +
+                          field.source_type + ' not yet supported')
 
-        if (layer.GetFeatureCount()>0):
+        if (layer.GetFeatureCount() > 0):
             feature = layer.next()
             id_index = feature.GetFieldIndex('id')
 
             for field in geo_fields:
-                field.index_nr = feature.GetFieldIndex(str(field.name_in_source))
+                field.index_nr = feature.GetFieldIndex(
+                    str(field.name_in_source))
 
             layer.ResetReading()
         ############################# place features in the right 'legend box'
-
 
         for feature in layer:
             point = feature.geometry()
@@ -327,10 +335,12 @@ def service_get_wms_of_shape(
 
             if has_his_file_field:
                 #get id form geosource, needed for reading hisfile
-                id = pl.presentationtype.value_source_id_prefix + str(feature.GetField(id_index).strip())
+                id = (pl.presentationtype.value_source_id_prefix +
+                      str(feature.GetField(id_index).strip()))
                 if pl.presentationtype.absolute:
                     try:
-                        input_dict[his_field.name_in_source] = abs(values.get(id, None))
+                        input_dict[his_field.name_in_source] = abs(
+                            values.get(id, None))
                         if values.get(id, None) > 1:
                             pass
 
@@ -341,13 +351,14 @@ def service_get_wms_of_shape(
 
             if has_geo_file_field:
                 for field in geo_fields:
-                    input_dict[field.name_in_source] = feature.GetField(field.index_nr)
+                    input_dict[field.name_in_source] = feature.GetField(
+                        field.index_nr)
 
             rule_name = mpl.get_rule_name(input_dict)
 
             if pl.presentationtype.geo_type == 3:
-                x = (point.GetX(0) + point.GetX(1))/2
-                y = (point.GetY(0) + point.GetY(1))/2
+                x = (point.GetX(0) + point.GetX(1)) / 2
+                y = (point.GetY(0) + point.GetY(1)) / 2
             else:
                 x = point.GetX()
                 y = point.GetY()
@@ -356,22 +367,28 @@ def service_get_wms_of_shape(
             points.append((x, y, "NAME", rule_name))
        # Clean up
         ds.Destroy()
-        log.debug( 'ready reading points form shape en his file ' + str(datetime.datetime.now()) )
+        log.debug('ready reading points form shape en his file ' +
+                  str(datetime.datetime.now()))
 
-        cache.set('model_nodes_' + str(presentationlayer_id) + '_' + str(timestep) + '_' + str(legend_id), points , 300)
+        cache.set('model_nodes_' + str(presentationlayer_id) +
+                  '_' + str(timestep) + '_' + str(legend_id),
+                  points, 300)
 
-    log.debug(  'start making memory datasource ' + str(datetime.datetime.now()) )
-    for x,y,name,rule_name in points:
-        lyr.datasource.add_point(x,y,name,rule_name)
+    log.debug('start making memory datasource ' + str(datetime.datetime.now()))
+    for x, y, name, rule_name in points:
+        lyr.datasource.add_point(x, y, name, rule_name)
 
-    log.debug(  'finish making memory datasource ' + str(datetime.datetime.now()) )
+    log.debug('finish making memory datasource ' +
+              str(datetime.datetime.now()))
 
     lyr.styles.append('1')
     m.layers.append(lyr)
 
     if presentationlayer_id in [62007, 62008]:
         m = mapnik.Map(width, height)
-        spherical_mercator = mapnik.Projection('+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs +over')
+        spherical_mercator = mapnik.Projection(
+            '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 '
+            '+y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs +over')
 
         m.srs = spherical_mercator
         m.background = mapnik.Color('transparent')
@@ -380,50 +397,58 @@ def service_get_wms_of_shape(
         rule_l = mapnik.Rule()
 
         rule_stk = mapnik.Stroke()
-        rule_stk.color = mapnik.Color(3,158,137)
+        rule_stk.color = mapnik.Color(3, 158, 137)
         rule_stk.line_cap = mapnik.line_cap.ROUND_CAP
         rule_stk.width = 2.0
         rule_l.symbols.append(mapnik.LineSymbolizer(rule_stk))
         sl.rules.append(rule_l)
-        m.append_style('Line Style2',sl)
+        m.append_style('Line Style2', sl)
 
         scenario = pl.scenario_set.get()
-        layers = PresentationLayer.objects.filter(presentationtype = spt, scenario = scenario)
-        log.debug( 'supportive layer found for this presentationlayer' )
+        layers = PresentationLayer.objects.filter(
+            presentationtype=spt, scenario=scenario)
+        log.debug('supportive layer found for this presentationlayer')
 
-        rds = mapnik.Projection("+proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.999908 +x_0=155000 +y_0=463000 +ellps=bessel +towgs84=565.237,50.0087,465.658,-0.406857,0.350733,-1.87035,4.0812 +units=m +no_defs")
+        rds = mapnik.Projection(
+            "+proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 "
+            "+k=0.999908 +x_0=155000 +y_0=463000 +ellps=bessel "
+            "+towgs84=565.237,50.0087,465.658,-0.406857,0.350733,"
+            "-1.87035,4.0812 +units=m +no_defs")
         lyrl = mapnik.Layer('lines', rds)
-        lyrl.datasource = mapnik.Shapefile(file=external_file_location(str(presentation_dir + '\\' + pl.presentationshape.geo_source.file_location)))
+        lyrl.datasource = mapnik.Shapefile(
+            file=external_file_location(
+                str(presentation_dir + '\\' +
+                    pl.presentationshape.geo_source.file_location)))
         lyrl.styles.append('Line Style2')
         m.layers.append(lyrl)
 
     ##################### render map #############################
-    m.zoom_to_box(mapnik.Envelope(*bbox)) #lyrl.envelope
+    m.zoom_to_box(mapnik.Envelope(*bbox))  # lyrl.envelope
 
-    log.debug(  'start render map ' + str(datetime.datetime.now()) )
-    img = mapnik.Image(width,height)
-    mapnik.render(m,img)
-    log.debug(  'ready render map ' + str(datetime.datetime.now()) )
+    log.debug('start render map ' + str(datetime.datetime.now()))
+    img = mapnik.Image(width, height)
+    mapnik.render(m, img)
+    log.debug('ready render map ' + str(datetime.datetime.now()))
 
-    log.debug( 'start PIL ' + str(datetime.datetime.now()) )
+    log.debug('start PIL ' + str(datetime.datetime.now()))
     # you can use this if you want te modify image with PIL
-    imgPIL = PIL.Image.fromstring('RGBA', (width,height), img.tostring())
+    imgPIL = PIL.Image.fromstring('RGBA', (width, height), img.tostring())
     #imgPIL = imgPIL.convert('RGB')
     buffer = StringIO.StringIO()
-    imgPIL.save(buffer, 'png')#,transparency = 10
+    imgPIL.save(buffer, 'png')  # ,transparency = 10
     buffer.seek(0)
 
     response = HttpResponse(buffer.read())
-    log.debug(  'end PIL ' + str(datetime.datetime.now()) )
+    log.debug('end PIL ' + str(datetime.datetime.now()))
     response['Content-type'] = 'image/png'
-    log.debug(  'ready sending map ' + str(datetime.datetime.now()) )
+    log.debug('ready sending map ' + str(datetime.datetime.now()))
     return response
 
 
-
 def service_get_gridframe(request, presentationlayer_id, legend_id, framenr=0):
-    """get png of grid of given timestep, with given legend (of legend is None, use default legend)
-    input
+    """get png of grid of given timestep, with given legend (of legend
+    is None, use default legend) input
+
         presentationlayer
         legend
         timestep
@@ -437,13 +462,14 @@ def service_get_gridframe(request, presentationlayer_id, legend_id, framenr=0):
     pl = get_object_or_404(PresentationLayer, pk=presentationlayer_id)
 
     log.debug('get png name')
-    png_name = external_file_location(pl.presentationgrid.png_default_legend.file_location)
+    png_name = external_file_location(
+        pl.presentationgrid.png_default_legend.file_location)
     if pl.presentationtype.value_type == 3:
         log.debug('get png name with number.')
         numberstring = '%04i' % framenr
-        png_name = png_name.replace('####',numberstring)
+        png_name = png_name.replace('####', numberstring)
 
-    log.debug('load files %s'%png_name)
+    log.debug('load files %s' % png_name)
 
     response = HttpResponse(open(png_name,'rb').read())
     response['Content-type'] = 'image/png'
