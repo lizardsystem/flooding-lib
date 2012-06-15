@@ -563,180 +563,17 @@ def post_upload_import_scenario_files(form, files, importscenario):
     return HttpResponseRedirect(
         reverse('flooding_tools_import_overview'))
 
+
+@checks_permission('importtool.can_upload',
+                   _("No permission to import scenario or login"))
 def group_import(request):
-    """ Renders a html with the form for creating a new groupimport
-
+    """Renders a html with the form for creating a new groupimport
     """
-
-    user = request.user
-    if not (user.is_authenticated() and
-            user.has_perm('importtool.can_upload')):
-        return HttpResponse(_("No permission to import scenarios or login"))
 
     if request.method == 'POST':
         form = GroupImportForm(request.POST, request.FILES)
         if form.is_valid():
-            # create a GroupImport object and fill it
-            groupimport = GroupImport(
-                name=form.cleaned_data['name'],
-                table=None,
-                results=None)
-
-            groupimport.save()
-            # got it only working with creating explicitly the
-            # contentfile and saving it as 'file'
-            table_file_content = ContentFile(request.FILES['table'].read())
-            groupimport.table.save(
-                request.FILES['table'].name, table_file_content)
-            result_file_content = ContentFile(request.FILES['results'].read())
-            groupimport.results.save(
-                request.FILES['results'].name, result_file_content)
-            groupimport.save()
-
-            # Handle the input from the uploaded files
-            remarks = []
-            remarks.append('inladen')
-            method = 2
-
-            try:
-                if method == 1:
-                    pass
-                else:
-
-                    import xlrd
-
-                    wb = xlrd.open_workbook(groupimport.table.path)
-                    sheet = wb.sheet_by_name('import scenarios')
-
-                    nr_rows = sheet.nrows
-
-                    #combine fields with ImportField
-                    field_dict = {}
-                    colnr = 1
-                    for fieldname in sheet.row_slice(1, 1):
-                        try:
-                            # Use name__iexact so case doesn't have to
-                            # be exactly right
-                            inputfield = InputField.objects.get(
-                                name__iexact=fieldname.value)
-                            field_dict[colnr] = inputfield
-
-                        except InputField.DoesNotExist, e:
-                            remarks.append('veld ' + fieldname.value +
-                                           ' komt niet voor in de database')
-
-                        colnr = colnr + 1
-
-                    nr_cols_field = colnr
-
-                    zip_file = ZipFile(groupimport.results.path, "r")
-                    for rownr in range(4, nr_rows):
-                        row = sheet.row_slice(rownr)
-
-                        if row[0].value == 'x':
-                            scenario_name = "geen"
-
-                            # eerst een import scenario maken
-                            approvalobject = ApprovalObject.objects.create(
-                                name=scenario_name)
-                            approvalobject.approvalobjecttype.add(
-                                ApprovalObjectType.objects.get(pk=1))
-                            importscenario = ImportScenario.objects.create(
-                                owner=request.user, name=scenario_name,
-                                approvalobject=approvalobject,
-                                groupimport=groupimport)
-
-                            # vervolgens de velden opslaan
-                            for col_nr in range(
-                                1, min(len(row), nr_cols_field)):
-                                field = row[col_nr]
-                                if (col_nr in field_dict and
-                                    field.ctype != 'empty' and
-                                    field.value != ''):
-                                    importscenario_inputfield, new = (
-                                        ImportScenarioInputField.objects.
-                                        get_or_create(
-                                            importscenario=importscenario,
-                                            inputfield=field_dict[col_nr]))
-                                    try:
-                                        importscenario_inputfield.setValue(
-                                            field.value, field.ctype)
-                                    except ValueError, e:
-                                        remarks.append(
-                                            ("Value error. Rij %i, kolom "
-                                             " '%s' van type %s. Waarde "
-                                             "is: '%s'. error: %s") % (
-                                                rownr,
-                                                field_dict[col_nr].name,
-                                                field_dict[col_nr].
-                                                get_type_display(),
-                                                str(field.value), e))
-                                    except TypeError, e:
-                                        remarks.append(
-                                            ("Type error. Rij %i, kolom"
-                                             "  '%s' van type %s. Waarde "
-                                             "is: \'%s\'. error: %s") % (
-                                                rownr,
-                                                field_dict[col_nr].name,
-                                                field_dict[col_nr].
-                                                get_type_display(),
-                                                str(field.value), e))
-
-                                    if (field_dict[col_nr].type ==
-                                        InputField.TYPE_FILE):
-                                        try:
-                                            filevalue, new = (
-                                                FileValue.objects.
-                                                get_or_create(
-                                                    importscenario_inputfield=importscenario_inputfield))
-                                            #create empty
-                                            #file. replace it later
-                                            #with zipfile
-                                            filevalue.value.save(
-                                                field.value.replace('\\', '/').
-                                                split('/')[-1] + '.zip',
-                                                ContentFile(""))
-                                            filevalue.save()
-                                            filevalue.value.close()
-
-                                            destination = (filevalue.value.
-                                                           file.name)
-                                            save_uploadfile_in_zipfile_groupimport(
-                                                zip_file, field.value,
-                                                destination,
-                                                field_dict[col_nr].
-                                                destination_filename)
-
-                                        except KeyError, e:
-                                            remarks.append(
-                                                ("File '%s' niet gevonden in "
-                                                 "zipfile. Rij %i, kolom '%s'. ") %
-                                                (str(field.value),
-                                                 rownr, field_dict[col_nr].name))
-                                            filevalue.delete()
-
-                            importscenario.update_scenario_name()
-
-                #to do. check of files aanwezig in zipfile
-                remarks.append('klaar met inladen')
-            except BadZipfile, e:
-                remarks.append((
-                        "error bij inlezen. De zip-file kan niet gelezen "
-                        "worden. De gegevens zijn wel opgeslagen, maar kunnen "
-                        "niet verwerkt worden. Neem contact op met de "
-                        "applicatiebeheerder en vermeld het group-import "
-                        "nummer %i") % groupimport.id)
-            except Exception, e:
-                remarks.append(("error bij inlezen: %s. De gegevens zijn wel "
-                                "opgeslagen, maar kunnen niet verwerkt worden."
-                                " Neem contact op met de applicatiebeheerder "
-                                "en vermeld het group-import nummer %i") %
-                               (str(e), groupimport.id))
-
-            remarks.append('<a href="%s">ga terug naar importoverzicht</a>' %
-                           reverse('flooding_tools_import_overview'))
-
-            return HttpResponse('<br>'.join(remarks))
+            return post_group_import(request, form)
     else:
         form = GroupImportForm()
 
@@ -748,6 +585,167 @@ def group_import(request):
                               {'form': form,
                                'breadcrumbs': breadcrumbs})
 
+
+def post_group_import(request, form):
+    # create a GroupImport object and fill it
+    groupimport = GroupImport(
+        name=form.cleaned_data['name'],
+        table=None,
+        results=None)
+
+    groupimport.save()
+    # got it only working with creating explicitly the
+    # contentfile and saving it as 'file'
+    table_file_content = ContentFile(request.FILES['table'].read())
+    groupimport.table.save(
+        request.FILES['table'].name, table_file_content)
+    result_file_content = ContentFile(request.FILES['results'].read())
+    groupimport.results.save(
+        request.FILES['results'].name, result_file_content)
+    groupimport.save()
+
+    # Handle the input from the uploaded files
+    remarks = []
+    remarks.append('inladen')
+    method = 2
+
+    try:
+        if method == 1:
+            pass
+        else:
+            import xlrd
+
+            wb = xlrd.open_workbook(groupimport.table.path)
+            sheet = wb.sheet_by_name('import scenarios')
+
+            nr_rows = sheet.nrows
+
+            #combine fields with ImportField
+            field_dict = {}
+            colnr = 1
+            for fieldname in sheet.row_slice(1, 1):
+                try:
+                    # Use name__iexact so case doesn't have to
+                    # be exactly right
+                    inputfield = InputField.objects.get(
+                        name__iexact=fieldname.value)
+                    field_dict[colnr] = inputfield
+
+                except InputField.DoesNotExist, e:
+                    remarks.append('veld ' + fieldname.value +
+                                   ' komt niet voor in de database')
+
+                colnr = colnr + 1
+
+            nr_cols_field = colnr
+
+            zip_file = ZipFile(groupimport.results.path, "r")
+            for rownr in range(4, nr_rows):
+                row = sheet.row_slice(rownr)
+
+                if row[0].value == 'x':
+                    scenario_name = "geen"
+
+                    # eerst een import scenario maken
+                    approvalobject = ApprovalObject.objects.create(
+                        name=scenario_name)
+                    approvalobject.approvalobjecttype.add(
+                        ApprovalObjectType.objects.get(pk=1))
+                    importscenario = ImportScenario.objects.create(
+                        owner=request.user, name=scenario_name,
+                        approvalobject=approvalobject,
+                        groupimport=groupimport)
+
+                    # vervolgens de velden opslaan
+                    for col_nr in range(1, min(len(row), nr_cols_field)):
+                        field = row[col_nr]
+                        if (col_nr in field_dict and
+                            field.ctype != 'empty' and
+                            field.value != ''):
+                            importscenario_inputfield, new = (
+                                ImportScenarioInputField.objects.
+                                get_or_create(
+                                    importscenario=importscenario,
+                                    inputfield=field_dict[col_nr]))
+                            try:
+                                importscenario_inputfield.setValue(
+                                    field.value, field.ctype)
+                            except ValueError, e:
+                                remarks.append(
+                                    ("Value error. Rij %i, kolom "
+                                     " '%s' van type %s. Waarde "
+                                     "is: '%s'. error: %s") % (
+                                        rownr,
+                                        field_dict[col_nr].name,
+                                        field_dict[col_nr].
+                                        get_type_display(),
+                                        str(field.value), e))
+                            except TypeError, e:
+                                remarks.append(
+                                    ("Type error. Rij %i, kolom"
+                                     "  '%s' van type %s. Waarde "
+                                     "is: \'%s\'. error: %s") % (
+                                        rownr,
+                                        field_dict[col_nr].name,
+                                        field_dict[col_nr].
+                                        get_type_display(),
+                                        str(field.value), e))
+
+                            if (field_dict[col_nr].type ==
+                                InputField.TYPE_FILE):
+                                try:
+                                    filevalue, new = (
+                                        FileValue.objects.
+                                        get_or_create(
+                                            importscenario_inputfield=importscenario_inputfield))
+                                    #create empty
+                                    #file. replace it later
+                                    #with zipfile
+                                    filevalue.value.save(
+                                        field.value.replace('\\', '/').
+                                        split('/')[-1] + '.zip',
+                                        ContentFile(""))
+                                    filevalue.save()
+                                    filevalue.value.close()
+
+                                    destination = (filevalue.value.
+                                                   file.name)
+                                    save_uploadfile_in_zipfile_groupimport(
+                                        zip_file, field.value,
+                                        destination,
+                                        field_dict[col_nr].
+                                        destination_filename)
+
+                                except KeyError, e:
+                                    remarks.append(
+                                        ("File '%s' niet gevonden in "
+                                         "zipfile. Rij %i, kolom '%s'. ") %
+                                        (str(field.value),
+                                         rownr, field_dict[col_nr].name))
+                                    filevalue.delete()
+
+                    importscenario.update_scenario_name()
+
+        #to do. check of files aanwezig in zipfile
+        remarks.append('klaar met inladen')
+    except BadZipfile, e:
+        remarks.append((
+                "error bij inlezen. De zip-file kan niet gelezen "
+                "worden. De gegevens zijn wel opgeslagen, maar kunnen "
+                "niet verwerkt worden. Neem contact op met de "
+                "applicatiebeheerder en vermeld het group-import "
+                "nummer %i") % groupimport.id)
+    except Exception, e:
+        remarks.append(("error bij inlezen: %s. De gegevens zijn wel "
+                        "opgeslagen, maar kunnen niet verwerkt worden."
+                        " Neem contact op met de applicatiebeheerder "
+                        "en vermeld het group-import nummer %i") %
+                       (str(e), groupimport.id))
+
+    remarks.append('<a href="%s">ga terug naar importoverzicht</a>' %
+                   reverse('flooding_tools_import_overview'))
+
+    return HttpResponse('<br>'.join(remarks))
 
 def group_import_example_csv(request):
     """ Returns an example csv file that can be used for creating a
