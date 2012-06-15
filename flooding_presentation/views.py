@@ -471,12 +471,13 @@ def service_get_gridframe(request, presentationlayer_id, legend_id, framenr=0):
 
     log.debug('load files %s' % png_name)
 
-    response = HttpResponse(open(png_name,'rb').read())
+    response = HttpResponse(open(png_name, 'rb').read())
     response['Content-type'] = 'image/png'
     return response
 
+
 def service_get_shapes(
-    request,  x,y, presentationlayer_id ,precision = 100):
+    request, x, y, presentationlayer_id, precision=100):
     """ get shapes near point (mouseclick)
     input:
         x, y (coordinates of point in googlemercator 900913)
@@ -489,32 +490,42 @@ def service_get_shapes(
     """
     pl = get_object_or_404(PresentationLayer, pk=presentationlayer_id)
     #presentation_dir = Setting.objects.get( key = 'presentation_dir' ).value
-    shapefile_name = external_file_location(pl.presentationshape.geo_source.file_location)
+    shapefile_name = external_file_location(
+        pl.presentationshape.geo_source.file_location)
 
     drv = ogr.GetDriverByName('ESRI Shapefile')
     ds = drv.Open(shapefile_name)
     layer = layer = ds.GetLayer()
-    layer.SetSpatialFilterRect(x-precision, y-precision,x+precision,y+precision)
+    layer.SetSpatialFilterRect(
+        x - precision, y - precision, x + precision, y + precision)
 
-    if (layer.GetFeatureCount()>0):
+    if (layer.GetFeatureCount() > 0):
         feature = layer.next()
         id_index = feature.GetFieldIndex('id')
         layer.ResetReading()
 
-    answer=[{"id":feature.GetField(id_index),"name":feature.GetField(id_index)} for feature in layer]
+    answer = [{
+            "id": feature.GetField(id_index),
+            "name": feature.GetField(id_index)}
+            for feature in layer]
 
     return HttpResponse(simplejson.dumps(answer), mimetype='application/json')
 
 
 class TimestepFormatter(Formatter):
     def __call__(self, x, pos=None):
-        log.debug( 'timestep format: ' + str(math.floor(x/24)) )
-        return "Dag %d: %u uur" % (math.floor(x/24), x%24)
+        log.debug('timestep format: ' + str(math.floor(x / 24)))
+        return "Dag %d: %u uur" % (math.floor(x / 24), x % 24)
 
-def service_get_graph_of_shape(request, width, height, sobek_ids, presentationlayer_id):
+
+def service_get_graph_of_shape(
+    request, width, height, sobek_ids, presentationlayer_id):
     """
-        - This service returns a PNG image with the given width and height
-        - The PNG contains a graph of the results belonging to the result_id and sobek_ids
+        - This service returns a PNG image with the given width and
+          height
+        - The PNG contains a graph of the results belonging to the
+          result_id and sobek_ids
+
     input:
         widht and height of returning image
         array of shape_ids which will be shown
@@ -535,24 +546,31 @@ def service_get_graph_of_shape(request, width, height, sobek_ids, presentationla
     graph_dpi = 55
 
     #Create figure and subplot to draw on
-    fig = plt.figure(facecolor='white', edgecolor='white', figsize=(graph_width/graph_dpi, graph_height/graph_dpi), dpi=graph_dpi)
+    fig = plt.figure(
+        facecolor='white',
+        edgecolor='white',
+        figsize=(graph_width / graph_dpi, graph_height / graph_dpi),
+        dpi=graph_dpi)
 
-    #Add axes 'manually' (not via add_subplot(111) to have control over the position
-    #This is necessary as we use long labels
+    #Add axes 'manually' (not via add_subplot(111) to have control
+    #over the position This is necessary as we use long labels
     ax_left = 0.11
-    ax_bottom  = 0.21
-    ax=fig.add_axes([ax_left, ax_bottom, 0.95-ax_left, 0.95-ax_bottom])
+    ax_bottom = 0.21
+    ax = fig.add_axes([ax_left, ax_bottom, 0.95 - ax_left, 0.95 - ax_bottom])
 
     #Read Sobek data and plot it
-    plots=dict() # dictionary necessary for creating the legend at the end of this method
+    plots = dict()  # dictionary necessary for creating the legend at
+                    # the end of this method
     for sobek_id in sobek_ids:
-        #limit id to 20 characters, because hisfiles has max 20 characters . this can refer to the wrong location
+        #limit id to 20 characters, because hisfiles has max 20
+        #characters . this can refer to the wrong location
         time_steps, values = read_his_file(sobek_id[:20], pl)
-        plot =  ax.plot(time_steps, values, '-', linewidth = 3)
-        plots['Sobek_id='+str(sobek_id)]=plot
+        plot = ax.plot(time_steps, values, '-', linewidth=3)
+        plots['Sobek_id=' + str(sobek_id)] = plot
 
     #Create locators
-    [min_locator, maj_locator] = get_time_step_locators(len(time_steps),(time_steps[1] -time_steps[0])  )
+    [min_locator, maj_locator] = get_time_step_locators(
+        len(time_steps), (time_steps[1] - time_steps[0]))
 
     #Set formatting of the x-axis and y-axis
     ax.xaxis.set_major_formatter(TimestepFormatter())
@@ -572,15 +590,19 @@ def service_get_graph_of_shape(request, width, height, sobek_ids, presentationla
     ax.set_title(pl.presentationtype.name)
 
     #Set legend
-    ax.legend((v for k,v in plots.iteritems()), (k for k,v in plots.iteritems()), 'upper left', shadow=True)
+    ax.legend(
+        (v for k, v in plots.iteritems()),
+        (k for k, v in plots.iteritems()),
+        'upper left', shadow=True)
 
     #Return figure as png-file
-    log.debug(  'start making picture' + str(datetime.datetime.now()) )
+    log.debug('start making picture' + str(datetime.datetime.now()))
     canvas = FigureCanvas(fig)
     response = HttpResponse(content_type='image/png')
     canvas.print_png(response)
-    log.debug( 'ready making picture' + str(datetime.datetime.now()) )
+    log.debug('ready making picture' + str(datetime.datetime.now()))
     return response
+
 
 def get_time_step_locators(num_time_steps, dt):
     """
@@ -590,24 +612,29 @@ def get_time_step_locators(num_time_steps, dt):
     """
 
     if 0 <= num_time_steps <= 32:
-        maj_locator= MultipleLocator(4*dt)
-        min_locator= MultipleLocator(4*dt)
-    elif 32 < num_time_steps <=64:
-        maj_locator= MultipleLocator(8*dt)
-        min_locator= MultipleLocator(4*dt)
+        maj_locator = MultipleLocator(4 * dt)
+        min_locator = MultipleLocator(4 * dt)
+    elif 32 < num_time_steps <= 64:
+        maj_locator = MultipleLocator(8 * dt)
+        min_locator = MultipleLocator(4 * dt)
     elif 64 < num_time_steps <= 96:
-        maj_locator= MultipleLocator(12*dt)
-        min_locator= MultipleLocator(4*dt)
+        maj_locator = MultipleLocator(12 * dt)
+        min_locator = MultipleLocator(4 * dt)
     elif 96 < num_time_steps:
-        maj_interval = math.ceil(dt*num_time_steps/8)       #values_timespan.days
-        maj_locator = MultipleLocator(maj_interval +1)
-        min_locator = MultipleLocator(math.ceil(maj_interval/2))
+        maj_interval = math.ceil(dt * num_time_steps / 8)
+        maj_locator = MultipleLocator(maj_interval + 1)
+        min_locator = MultipleLocator(math.ceil(maj_interval / 2))
     return [min_locator, maj_locator]
 
-def service_get_graph_grid(request, width, height, shape_ids, presentationlayer_id):
+
+def service_get_graph_grid(
+    request, width, height, shape_ids, presentationlayer_id):
     """
-        - This service returns a PNG image with the given width and height
-        - The PNG contains a graph of the results belonging to the result_id and sobek_ids
+        - This service returns a PNG image with the given width and
+          height
+        - The PNG contains a graph of the results belonging to the
+          result_id and sobek_ids
+
     input:
         widht and height of returning image
         array of shape_ids which will be shown
@@ -618,8 +645,11 @@ def service_get_graph_grid(request, width, height, shape_ids, presentationlayer_
     """
     pass
 
+
 def service_get_general_values(request, scenario_id, filter_type):
-    """ return table with name and value of  presentationlayers of type 'general'
+    """ return table with name and value of presentationlayers of type
+    'general'
+
     input:
         scenario
         filter_type = custom_filter_type (defined for each presentationtype)
@@ -630,24 +660,26 @@ def service_get_general_values(request, scenario_id, filter_type):
 
 
 def timedelta_to_float(td):
-    """Converts a timedelta object to float representation. If it fails, return None"""
+    """Converts a timedelta object to float representation. If it
+    fails, return None"""
     try:
-        return float(td.days) + float(td.seconds)/float(86400)
+        return float(td.days) + float(td.seconds) / float(86400)
     except:
         return None
 
 
 def read_his_file(sobek_id, presentationlayer):
     """
-    - Return [time_steps, values] read in the his-file and belonging to the sobek_id and result_id
+    - Return [time_steps, values] read in the his-file and belonging
+      to the sobek_id and result_id
     """
 
     pl = presentationlayer
 
-    his = cache.get('his_' + str(presentationlayer.id) )
+    his = cache.get('his_' + str(presentationlayer.id))
     if his == None:
-        #presentation_dir = Setting.objects.get( key = 'presentation_dir' ).value
-        zip_name = external_file_location(pl.presentationshape.value_source.file_location)
+        zip_name = external_file_location(
+            pl.presentationshape.value_source.file_location)
 
         input_file = ZipFile(zip_name, "r")
 
@@ -656,26 +688,30 @@ def read_his_file(sobek_id, presentationlayer):
         else:
             filename = input_file.filelist[0].filename
 
-        his = HISFile(Stream(input_file.read(external_file_location(filename))))
+        his = HISFile(
+            Stream(input_file.read(external_file_location(filename))))
         input_file.close()
-        cache.set('his_' + str(presentationlayer.id) , his , 30)
+        cache.set('his_' + str(presentationlayer.id), his, 30)
 
-    sobek_id = presentationlayer.presentationtype.value_source_id_prefix + sobek_id
+    sobek_id = (
+        presentationlayer.presentationtype.value_source_id_prefix + sobek_id)
     #else:
     #    sobek_id = 'p_' + sobek_id
 
-    field = presentationlayer.presentationtype.field_set.get(source_type = Field.SOURCE_TYPE_VALUE_SOURCE_PARAM)
-    timeserie = his.get_timeseries( sobek_id, field.name_in_source, None, None, list )
+    field = presentationlayer.presentationtype.field_set.get(
+        source_type=Field.SOURCE_TYPE_VALUE_SOURCE_PARAM)
+    timeserie = his.get_timeseries(
+        sobek_id, field.name_in_source, None, None, list)
     t0 = timeserie[0][0]
-    time_steps  = [timedelta_to_float(t-t0)*24 for (t,v) in timeserie]
+    time_steps = [timedelta_to_float(t - t0) * 24 for (t, v) in timeserie]
     if presentationlayer.presentationtype.absolute:
-        values = [abs(v) for (t,v) in timeserie]
+        values = [abs(v) for (t, v) in timeserie]
     else:
-        values = [v for (t,v) in timeserie]
-
+        values = [v for (t, v) in timeserie]
 
     #Return data
     return [time_steps, values]
+
 
 @login_required
 def overview_permissions(request):
@@ -685,23 +721,28 @@ def overview_permissions(request):
     if not(request.user.is_staff):
         raise Http404
 
-
     request_username = request.GET.get('user', None)
     if request_username is None:
         request_user = request.user
     else:
         request_user = User.objects.get(username=request_username)
 
-    request_presentationlayer_id = request.GET.get('presentationlayer_id', None)
+    request_presentationlayer_id = request.GET.get(
+        'presentationlayer_id', None)
     if request_presentationlayer_id is None:
         request_presentationlayer = None
-        text = 'Wat mag user "%s" uberhaupt voor dingen doen?'%request_user
-        source_application_choices = PresentationLayer.SOURCE_APPLICATION_CHOICES
+        text = 'Wat mag user "%s" uberhaupt voor dingen doen?' % request_user
+        source_application_choices = (
+            PresentationLayer.SOURCE_APPLICATION_CHOICES)
     else:
         request_presentationlayer = PresentationLayer.objects.get(
             pk=int(request_presentationlayer_id))
-        text = 'Wat mag user "%s" dingen doen voor presentationlayer "%s".'%(request_user, str(request_presentationlayer))
-        source_application_choices = ((request_presentationlayer.source_application, PresentationLayer.SOURCE_APPLICATION_DICT[request_presentationlayer.source_application]),)
+        text = ('Wat mag user "%s" dingen doen voor presentationlayer "%s".' %
+                (request_user, str(request_presentationlayer)))
+        source_application_choices = (
+            (request_presentationlayer.source_application,
+             PresentationLayer.SOURCE_APPLICATION_DICT[
+                    request_presentationlayer.source_application]),)
 
     header = range(1, 11)
     permission_list = []
@@ -712,11 +753,15 @@ def overview_permissions(request):
         app_block['title'] = app_name
         app_block['header'] = header
         app_block['table'] = []
-        for permission in [PermissionManager.PERMISSION_PRESENTATIONLAYER_VIEW,
-                           PermissionManager.PERMISSION_PRESENTATIONLAYER_EDIT]:
+        for permission in [
+            PermissionManager.PERMISSION_PRESENTATIONLAYER_VIEW,
+            PermissionManager.PERMISSION_PRESENTATIONLAYER_EDIT]:
             row = [PermissionManager.PERMISSION_DICT[permission]]
             for permission_level in header:
-                row.append(pm.check_permission_app(app_code, permission_level, permission, presentationlayer=request_presentationlayer))
+                row.append(
+                    pm.check_permission_app(
+                        app_code, permission_level, permission,
+                        presentationlayer=request_presentationlayer))
             app_block['table'].append(row)
         permission_list.append(app_block)
 
@@ -725,6 +770,8 @@ def overview_permissions(request):
                                'user': request.user,
                                'text': text,
                                })
+
+
 @never_cache
 def uber_service(request):
     """Collection of all available services.
@@ -732,7 +779,7 @@ def uber_service(request):
     This function calls the actual functions
     """
     q = request.GET
-    action = q.get('action',q.get('ACTION') ).lower() #makes it lower case
+    action = q.get('action', q.get('ACTION')).lower()  # makes it lower case
     #action_cap = q.get('ACTION').lower()
 
     if action == 'get_presentationlayer_settings':
@@ -743,45 +790,49 @@ def uber_service(request):
         presentationlayer_id = q.get('result_id', None)
         legend_id = q.get('legend_id', None)
         framenr = q.get('framenr', 0)
-        return service_get_gridframe(request,
-                                        presentationlayer_id=presentationlayer_id,
-                                        legend_id = legend_id,
-                                        framenr = int(framenr))
+        return service_get_gridframe(
+            request,
+            presentationlayer_id=presentationlayer_id,
+            legend_id=legend_id,
+            framenr=int(framenr))
 
     elif action == 'get_shapes':
         presentationlayer_id = q.get('result_id', None)
-        x =  q.get('x', None)
-        y =  q.get('y', None)
-        precision =  q.get('precision', 50)
-        return service_get_shapes(request,
-                                 x=float(x),
-                                 y=float(y),
-                                 presentationlayer_id=presentationlayer_id,
-                                 precision = float(precision))
+        x = q.get('x', None)
+        y = q.get('y', None)
+        precision = q.get('precision', 50)
+        return service_get_shapes(
+            request,
+            x=float(x),
+            y=float(y),
+            presentationlayer_id=presentationlayer_id,
+            precision=float(precision))
 
     elif action == 'get_graph_of_shape':
         presentationlayer_id = q.get('result_id', None)
-        graphwidth =  q.get('graphwidth', None)
-        graphheight =  q.get('graphheight', None)
-        sobek_ids_string =  q.get('sobek_id', None)
+        graphwidth = q.get('graphwidth', None)
+        graphheight = q.get('graphheight', None)
+        sobek_ids_string = q.get('sobek_id', None)
         sobek_ids = sobek_ids_string.split(',')
-        return service_get_graph_of_shape(request,
-                                      width= int(graphwidth),
-                                      height= int(graphheight),
-                                      sobek_ids = sobek_ids,
-                                      presentationlayer_id=presentationlayer_id)
+        return service_get_graph_of_shape(
+            request,
+            width=int(graphwidth),
+            height=int(graphheight),
+            sobek_ids=sobek_ids,
+            presentationlayer_id=presentationlayer_id)
 
     elif action == 'get_wms_of_shape':
         presentationlayer_id = q.get('RESULT_ID', None)
-        bbox =  q.get('BBOX', None)
-        width =  q.get('WIDTH', None)
-        height =  q.get('HEIGHT', None)
-        legend_id =  q.get('LEGEND_ID', -1)
-        timestep =  q.get('TIMESTEP', 6)
-        return service_get_wms_of_shape(request,
-                                      width= int(width),
-                                      height= int(height),
-                                      bbox= tuple([float(value) for value in bbox.split(',')]),
-                                      presentationlayer_id=presentationlayer_id,
-                                      legend_id = int(legend_id),
-                                      timestep = int(timestep))
+        bbox = q.get('BBOX', None)
+        width = q.get('WIDTH', None)
+        height = q.get('HEIGHT', None)
+        legend_id = q.get('LEGEND_ID', -1)
+        timestep = q.get('TIMESTEP', 6)
+        return service_get_wms_of_shape(
+            request,
+            width=int(width),
+            height=int(height),
+            bbox=tuple([float(value) for value in bbox.split(',')]),
+            presentationlayer_id=presentationlayer_id,
+            legend_id=int(legend_id),
+            timestep=int(timestep))
