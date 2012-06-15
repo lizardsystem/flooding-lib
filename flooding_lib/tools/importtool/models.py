@@ -6,7 +6,6 @@ from flooding_lib.tools.approvaltool.models import ApprovalObject
 import os.path
 import re
 import math
-import datetime
 
 from django.utils import simplejson
 
