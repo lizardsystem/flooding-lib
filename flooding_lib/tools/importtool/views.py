@@ -578,7 +578,8 @@ def group_import(request):
         form = GroupImportForm()
 
     breadcrumbs = [
-        {'name': _('Import tool'), 'url': reverse('flooding_tools_import_overview')},
+        {'name': _('Import tool'),
+         'url': reverse('flooding_tools_import_overview')},
         {'name': _('Group import')}]
 
     return render_to_response('import/groupimport_new.html',
@@ -668,9 +669,21 @@ def post_group_import(request, form):
                                     importscenario=importscenario,
                                     inputfield=field_dict[col_nr]))
                             try:
-                                importscenario_inputfield.setValue(
-                                    field.value, field.ctype)
-                            except ValueError, e:
+                                value = field.value
+
+                                # Excel does bugged things with dates,
+                                # always use xl_date_as_tuple to correct them
+                                # Convert it to a string immediately
+                                if field.ctype == 'date':
+                                    datetime_tuple = xlrd.xldate_as_tuple(
+                                        field.value, wb.datemode)
+                                    # Throw away time fields, it's not
+                                    # a datetime it's a date
+                                    date_only = datetime_tuple[:3]
+                                    value = (
+                                        datetime.date(date_only).isoformat())
+                                importscenario_inputfield.setValue(value)
+                            except ValueError as e:
                                 remarks.append(
                                     ("Value error. Rij %i, kolom "
                                      " '%s' van type %s. Waarde "
@@ -680,7 +693,7 @@ def post_group_import(request, form):
                                         field_dict[col_nr].
                                         get_type_display(),
                                         str(field.value), e))
-                            except TypeError, e:
+                            except TypeError as e:
                                 remarks.append(
                                     ("Type error. Rij %i, kolom"
                                      "  '%s' van type %s. Waarde "
@@ -736,16 +749,18 @@ def post_group_import(request, form):
                 "applicatiebeheerder en vermeld het group-import "
                 "nummer %i") % groupimport.id)
     except Exception, e:
-        remarks.append(("error bij inlezen: %s. De gegevens zijn wel "
-                        "opgeslagen, maar kunnen niet verwerkt worden."
-                        " Neem contact op met de applicatiebeheerder "
-                        "en vermeld het group-import nummer %i") %
-                       (str(e), groupimport.id))
+        remarks.append(
+            ("error bij inlezen: %s. De gegevens zijn wel "
+             "opgeslagen, maar kunnen niet verwerkt worden."
+             " Neem contact op met de applicatiebeheerder "
+             "en vermeld het group-import nummer %i") %
+            (str(e), groupimport.id))
 
     remarks.append('<a href="%s">ga terug naar importoverzicht</a>' %
                    reverse('flooding_tools_import_overview'))
 
     return HttpResponse('<br>'.join(remarks))
+
 
 def group_import_example_csv(request):
     """ Returns an example csv file that can be used for creating a

@@ -203,16 +203,7 @@ class ImportScenarioInputField(models.Model):
     def getValueString(self):
         return str(self.getValue())
 
-    def setValue(self, value, type='text'):
-        if self.inputfield.type == InputField.TYPE_DATE:
-            # Hack remaining after refactoring
-            if type == 'text':
-                value = str(value)
-            else:
-                date = (datetime.datetime(1900, 1, 1, 0, 0) +
-                        datetime.timedelta(int(value)))
-                value = str(date)
-
+    def setValue(self, value):
         value_object = self.inputfield.get_or_create_value_object(self)
         value_object.set(value)
         value_object.save()
