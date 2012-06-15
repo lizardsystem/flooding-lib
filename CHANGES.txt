@@ -2,8 +2,8 @@ Changelog of flooding-lib
 ===================================================
 
 
-1.32.3 (unreleased)
--------------------
+1.33 (2012-06-15)
+-----------------
 
 - Add south migrations for all the apps.
 
