@@ -6,6 +6,7 @@ import functools
 import operator
 import os
 import re
+import xlrd
 
 from django.core.files.base import ContentFile
 from django.core.urlresolvers import reverse
@@ -46,6 +47,10 @@ logger = logging.getLogger(__name__)
 
 
 def checks_permission(permission, message):
+    """Decorator that can be used on a view. If it is, the view checks
+    whether the user is logged in and has permission 'permission'. If
+    user doesn't, the message 'message' is returned."""
+
     def permission_checking_decorator(f):
         @functools.wraps(f)
         def wrapper(request, *args, **kwargs):
@@ -614,8 +619,6 @@ def post_group_import(request, form):
         if method == 1:
             pass
         else:
-            import xlrd
-
             wb = xlrd.open_workbook(groupimport.table.path)
             sheet = wb.sheet_by_name('import scenarios')
 
