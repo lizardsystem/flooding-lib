@@ -24,6 +24,7 @@ install_requires = [
     'django-debug-toolbar',
     'factory-boy',
     'mock',
+    'xlrd',
     ],
 
 tests_require = [
