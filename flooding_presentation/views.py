@@ -188,7 +188,9 @@ def service_get_wms_of_shape(
     log.debug('start setting up map ' + str(datetime.datetime.now()))
 
     m = mapnik.Map(width, height)
-    spherical_mercator = '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs +over'
+    spherical_mercator = (
+        '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 '
+        '+y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs +over')
 
     m.srs = spherical_mercator
     m.background = mapnik.Color('transparent')
@@ -200,26 +202,29 @@ def service_get_wms_of_shape(
     mpl = cache.get('legend_' + str(legend_id))
     if mpl == None:
         sdl = get_object_or_404(ShapeDataLegend, pk=legend_id)
-        if pl.presentationtype.geo_type in [PresentationType.GEO_TYPE_POLYGON, PresentationType.GEO_TYPE_LINE, PresentationType.GEO_TYPE_POINT]:
+        if pl.presentationtype.geo_type in [
+            PresentationType.GEO_TYPE_POLYGON, PresentationType.GEO_TYPE_LINE,
+            PresentationType.GEO_TYPE_POINT]:
             sm = SymbolManager('media/flooding_presentation/symbols/')
             mpl = MapnikPointLegend(sdl, sm)
-            cache.set('legend_' + str(legend_id), mpl , 300)
+            cache.set('legend_' + str(legend_id), mpl, 300)
 
-
-    mapnik_style = mpl.get_style() #get mapnik style with a set of rules.
+    mapnik_style = mpl.get_style()  # get mapnik style with a set of rules.
     fields = mpl.get_presentationtype_fields()
     m.append_style('1', mapnik_style)
 
-    log.debug( 'start setting up lijntje ' + str(datetime.datetime.now()) )
+    log.debug('start setting up lijntje ' + str(datetime.datetime.now()))
     #################### supportive layers ###################################
-    if SupportLayers.objects.filter(presentationtype = pl.presentationtype ).count() > 0:
-        supportive_layers = pl.presentationtype.supported_presentationtype.supportive_presentationtype.all()
+    if SupportLayers.objects.filter(
+        presentationtype=pl.presentationtype).count() > 0:
+        supportive_layers = (pl.presentationtype.supported_presentationtype.
+                             supportive_presentationtype.all())
 
         sl = mapnik.Style()
         rule_l = mapnik.Rule()
 
         rule_stk = mapnik.Stroke()
-        rule_stk.color = mapnik.Color(3,158,137)
+        rule_stk.color = mapnik.Color(3, 158, 137)
         rule_stk.line_cap = mapnik.line_cap.ROUND_CAP
         rule_stk.width = 2.0
         rule_l.symbols.append(mapnik.LineSymbolizer(rule_stk))
@@ -227,44 +232,40 @@ def service_get_wms_of_shape(
         m.append_style('Line Style', sl)
 
         for spt in supportive_layers:
-            log.debug( 'supportive layer with id: ' + str(spt.id) )
+            log.debug('supportive layer with id: ' + str(spt.id))
 
-
-            #warning! works only for flooding scenarios
+            # warning! works only for flooding scenarios
             if pl.scenario_set.count() > 0:
                 scenario = pl.scenario_set.get()
-                layers = PresentationLayer.objects.filter(presentationtype = spt, scenario = scenario)
+                layers = PresentationLayer.objects.filter(
+                    presentationtype=spt, scenario=scenario)
 
-                if len(layers)>0:
-                    log.debug( 'supportive layer found for this presentationlayer' )
+                if len(layers) > 0:
+                    log.debug(
+                        'supportive layer found for this presentationlayer')
                     layer = layers[0]
 
                     lyrl = mapnik.Layer('lines', spherical_mercator)
-                    lyrl.datasource = mapnik.Shapefile(file=external_file_location(layer.presentationshape.geo_source.file_location))
+                    lyrl.datasource = mapnik.Shapefile(
+                        file=external_file_location(
+                            layer.presentationshape.geo_source.file_location))
 
                     lyrl.styles.append('Line Style')
                     m.layers.append(lyrl)
 
-
-    #for geo_source in geo_sources:
-    #    lyrl.datasource = mapnik.Shapefile(file=str(presentation_dir + '\\' + geo_source.file_location))
-    #    lyrl.srs = '+proj=tmerc +lat_0=0 +lon_0=84 +k=0.999900 +x_0=500000 +y_0=0 +a=6377276.345 +b=6356075.413140239 +units=m +no_defs'
-    #'+proj=utm +zone=45 +a=6377276.345 +b=6356075.413140239 +units=m +no_defs'
-    #    lyrl.styles.append('Line Style')
-    #    m.layers.append(lyrl)
-
     #################### read data ###################################
     #read source and attach values
-    lyr = mapnik.Layer('points',spherical_mercator)
+    lyr = mapnik.Layer('points', spherical_mercator)
     lyr.datasource = mapnik.PointDatasource()
-    log.debug(  'ready setting up map ' + str(datetime.datetime.now()) )
-    log.debug(  'start reading point cache ' + str(datetime.datetime.now()) )
-    points = cache.get('model_nodes_' + str(presentationlayer_id) + '_' + str(timestep) +'_' + str(legend_id))
-    log.debug( 'ready reading point cache ' + str(datetime.datetime.now()) )
+    log.debug('ready setting up map ' + str(datetime.datetime.now()))
+    log.debug('start reading point cache ' + str(datetime.datetime.now()))
+    points = cache.get('model_nodes_' + str(presentationlayer_id) +
+                       '_' + str(timestep) +'_' + str(legend_id))
+    log.debug('ready reading point cache ' + str(datetime.datetime.now()))
 
-
-    if points == None:
-        log.debug(  'start reading points from shape and his file ' + str(datetime.datetime.now()) )
+    if points is None:
+        log.debug('start reading points from shape and his file ' +
+                  str(datetime.datetime.now()))
         points = []
 
         drv = ogr.GetDriverByName('ESRI Shapefile')
@@ -758,19 +759,3 @@ def uber_service(request):
                                       presentationlayer_id=presentationlayer_id,
                                       legend_id = int(legend_id),
                                       timestep = int(timestep))
-
-    # elif action == 'get_wms_of_shape_nepal':
-    #     from views_dev import service_get_wms_of_shape_nepal
-    #     presentationlayer_id = q.get('RESULT_ID', None)
-    #     bbox =  q.get('BBOX', None)
-    #     width =  q.get('WIDTH', None)
-    #     height =  q.get('HEIGHT', None)
-    #     legend_id =  q.get('LEGEND_ID', 1)
-    #     timestep =  q.get('TIMESTEP', 6)
-    #     return  service_get_wms_of_shape_nepal(request,
-    #                                   width= int(width),
-    #                                   height= int(height),
-    #                                   bbox= tuple([float(value) for value in bbox.split(',')]),
-    #                                   presentationlayer_id=presentationlayer_id,
-    #                                   legend_id = int(legend_id),
-    #                                   timestep = int(timestep))

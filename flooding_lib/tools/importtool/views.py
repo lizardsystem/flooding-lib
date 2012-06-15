@@ -710,7 +710,7 @@ def post_group_import(request, form):
                                     filevalue, new = (
                                         FileValue.objects.
                                         get_or_create(
-                                            importscenario_inputfield=importscenario_inputfield))
+                       importscenario_inputfield=importscenario_inputfield))
                                     #create empty
                                     #file. replace it later
                                     #with zipfile
