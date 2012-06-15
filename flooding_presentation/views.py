@@ -255,7 +255,7 @@ def service_get_wms_of_shape(
 
     #################### read data ###################################
     #read source and attach values
-    lyr = mapnik.Layer('points', o spherical_mercator)
+    lyr = mapnik.Layer('points', spherical_mercator)
     lyr.datasource = mapnik.PointDatasource()
     log.debug('ready setting up map ' + str(datetime.datetime.now()))
     log.debug('start reading point cache ' + str(datetime.datetime.now()))
