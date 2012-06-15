@@ -2,7 +2,7 @@ Changelog of flooding-lib
 ===================================================
 
 
-1.32 (unreleased)
+1.32 (2012-06-15)
 -----------------
 
 - Fix bug with importing Excel dates #3683.
