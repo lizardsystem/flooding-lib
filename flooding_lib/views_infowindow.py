@@ -109,8 +109,10 @@ def infowindow_information(request, scenario_id):
     general_info_list.append((_('Region'), region_names))
     general_info_list.append((_('Project'), scenario.project.friendlyname))
 
-    extrafields = scenario.extrascenarioinfo_set.filter(extrainfofield__header = ExtraInfoField.HEADER_GENERAL,
-                                        extrainfofield__use_in_scenario_overview = True).order_by('-extrainfofield__position')
+    extrafields = scenario.extrascenarioinfo_set.filter(
+        extrainfofield__header=ExtraInfoField.HEADER_GENERAL,
+        extrainfofield__use_in_scenario_overview=True
+        ).order_by('-extrainfofield__position')
     for field in extrafields:
         general_info_list.append((field.extrainfofield.name, field.value))
 
@@ -120,38 +122,50 @@ def infowindow_information(request, scenario_id):
     metadata_info_list.append((_('Scenario id'), scenario.id))
     metadata_info_list.append((_('Scenario remarks'), scenario.remarks))
     #metadata_info_list.append((_('Project remarks'), TO_CREATE_IN_DB))
-    extrafields = scenario.extrascenarioinfo_set.filter(extrainfofield__header = ExtraInfoField.HEADER_METADATA,
-                                        extrainfofield__use_in_scenario_overview = True).order_by('-extrainfofield__position')
+    extrafields = scenario.extrascenarioinfo_set.filter(
+        extrainfofield__header=ExtraInfoField.HEADER_METADATA,
+        extrainfofield__use_in_scenario_overview=True
+        ).order_by('-extrainfofield__position')
     for field in extrafields:
         metadata_info_list.append((field.extrainfofield.name, field.value))
 
     attachment_list = list()
-    inundationmodel_attachments = scenario.sobekmodel_inundation.attachments.order_by('uploaded_date').reverse()
-    scenario_attachments = scenario.attachments.order_by('uploaded_date').reverse()
-    project_attachments = scenario.project.attachments.order_by('uploaded_date').reverse()
+    inundationmodel_attachments = (
+        scenario.sobekmodel_inundation.attachments.
+        order_by('uploaded_date').reverse())
+    scenario_attachments = (scenario.attachments.
+                            order_by('uploaded_date').reverse())
+    project_attachments = (scenario.project.attachments.
+                           order_by('uploaded_date').reverse())
 
     #Needed for generic relation search for multiple breaches
     c = SobekModel
     #ContentType.objects.get(model='sobekmodel')
-    sobekmodel_choices=[]
+    sobekmodel_choices = []
 
     #Get the the sobekmodels
     for breach in scenario.breaches.all():
         for sobekmodel in breach.sobekmodels.all():
-            sobekmodel_choices+=[[sobekmodel.id]]
+            sobekmodel_choices += [[sobekmodel.id]]
     #xxxxxx
-    breachmodel_attachments = Attachment.objects.filter(content_type=c, object_id__in=[sm[0] for sm in sobekmodel_choices]).order_by('uploaded_date')
+    breachmodel_attachments = Attachment.objects.filter(
+        content_type=c,
+        object_id__in=[sm[0] for sm in sobekmodel_choices]
+        ).order_by('uploaded_date')
 
-    scen_atts = [(f.file.name, os.path.split(f.file.name)[1]) for f in scenario_attachments]
-    proj_atts = [(f.file.name, os.path.split(f.file.name)[1]) for f in project_attachments]
-    inun_atts = [(f.file.name, os.path.split(f.file.name)[1]) for f in inundationmodel_attachments]
-    brea_atts = [(f.file.name, os.path.split(f.file.name)[1]) for f in breachmodel_attachments]
+    scen_atts = [(f.file.name, os.path.split(f.file.name)[1])
+                 for f in scenario_attachments]
+    proj_atts = [(f.file.name, os.path.split(f.file.name)[1])
+                 for f in project_attachments]
+    inun_atts = [(f.file.name, os.path.split(f.file.name)[1])
+                 for f in inundationmodel_attachments]
+    brea_atts = [(f.file.name, os.path.split(f.file.name)[1])
+                 for f in breachmodel_attachments]
 
     attachment_list.append((_('Scenario attachments'), scen_atts))
     attachment_list.append((_('Project attachments'), proj_atts))
     attachment_list.append((_('Inundationmodel attachments'), inun_atts))
     attachment_list.append((_('Externalwater model attachments'), brea_atts))
-
 
     #Get breach 'set' information
     breachset_info_list = list()
@@ -167,50 +181,83 @@ def infowindow_information(request, scenario_id):
             pass
             #br_info_list.append((_('Width of breach'), TO_CREATE_IN_DB))
         elif False:
-            br_info_list.append((_('Materiaal kering (ENGELS)'), scenariobreach.ucritical))
+            br_info_list.append((_('Materiaal kering (ENGELS)'),
+                                 scenariobreach.ucritical))
 
-        br_info_list.append((_('Initial breach width'), scenariobreach.widthbrinit))
-        br_info_list.append((_('Duration till breach has maximal depth'), get_intervalstring_from_dayfloat(scenariobreach.tmaxdepth)))
+        br_info_list.append((_('Initial breach width'),
+                             scenariobreach.widthbrinit))
+        br_info_list.append(
+            (_('Duration till breach has maximal depth'),
+             get_intervalstring_from_dayfloat(scenariobreach.tmaxdepth)))
 
-
-        extrafields = scenario.extrascenarioinfo_set.filter(extrainfofield__header = ExtraInfoField.HEADER_BREACH,
-                                        extrainfofield__use_in_scenario_overview = True).order_by('-extrainfofield__position')
+        extrafields = scenario.extrascenarioinfo_set.filter(
+            extrainfofield__header=ExtraInfoField.HEADER_BREACH,
+            extrainfofield__use_in_scenario_overview=True
+            ).order_by('-extrainfofield__position')
         for field in extrafields:
             br_info_list.append((field.extrainfofield.name, field.value))
         #Get external water info
         extw_info_list = list()
 
         extw_info_list.append((_('Externalwater name'), br.externalwater.name))
-        extw_info_list.append((_('Externalwater type'), br.externalwater.get_type_display()))
+        extw_info_list.append(
+            (_('Externalwater type'),
+             br.externalwater.get_type_display()))
         if scenariobreach.manualwaterlevelinput:
-            extw_info_list.append((_('Maximal water level'), _('manual input used')))
-            extw_info_list.append((_('Repeating period duration'), _('manual input used')))
+            extw_info_list.append(
+                (_('Maximal water level'), _('manual input used')))
+            extw_info_list.append(
+                (_('Repeating period duration'), _('manual input used')))
         else:
-            extw_info_list.append((_('Maximal water level'), scenariobreach.extwmaxlevel))
-            extw_info_list.append((_('Repeating period duration'), scenariobreach.extwrepeattime))
+            extw_info_list.append(
+                (_('Maximal water level'), scenariobreach.extwmaxlevel))
+            extw_info_list.append(
+                (_('Repeating period duration'),
+                 scenariobreach.extwrepeattime))
 
-        extw_info_list.append((_('Bottom level breach'), scenariobreach.bottomlevelbreach))
-        extw_info_list.append((_('Pit depth'), scenariobreach.pitdepth))
+        extw_info_list.append(
+            (_('Bottom level breach'), scenariobreach.bottomlevelbreach))
+        extw_info_list.append(
+            (_('Pit depth'), scenariobreach.pitdepth))
 
         if br.externalwater.type == ExternalWater.TYPE_SEA:
             if scenariobreach.manualwaterlevelinput:
-                extw_info_list.append((_('Duration storm'), _('manual input used')))
-                extw_info_list.append((_('Duration peak'), _('manual input used')))
-                extw_info_list.append((_('Tide shift'), _('manual input used')))
+                extw_info_list.append(
+                    (_('Duration storm'), _('manual input used')))
+                extw_info_list.append(
+                    (_('Duration peak'), _('manual input used')))
+                extw_info_list.append(
+                    (_('Tide shift'), _('manual input used')))
             else:
-                extw_info_list.append((_('Duration storm'), get_intervalstring_from_dayfloat(scenariobreach.tstorm)))
-                extw_info_list.append((_('Duration peak'), get_intervalstring_from_dayfloat(scenariobreach.tpeak)))
-                extw_info_list.append((_('Tide shift'), get_intervalstring_from_dayfloat(scenariobreach.tdeltaphase)))
+                extw_info_list.append(
+                    (_('Duration storm'),
+                     get_intervalstring_from_dayfloat(scenariobreach.tstorm)))
+                extw_info_list.append(
+                    (_('Duration peak'),
+                     get_intervalstring_from_dayfloat(scenariobreach.tpeak)))
+                extw_info_list.append(
+                    (_('Tide shift'),
+                     get_intervalstring_from_dayfloat(scenariobreach.tdeltaphase)))
             if scenariobreach.tide != None:
-                extw_info_list.append((_('Tide properties'), scenariobreach.tide.name))
-            if len(scenariobreach.waterlevelset.waterlevel_set.all())>0:
-                image_src = reverse('flooding_service') + \
-                    "?action=get_externalwater_graph_infowindow&width=350&height=400&scenariobreach_id=" + \
-                    str(scenariobreach.id)
-                extw_info_list.append((_('External water graph'), '<img src="' + image_src +' " width=350 height=400/>'))
+                extw_info_list.append(
+                    (_('Tide properties'), scenariobreach.tide.name))
+            if len(scenariobreach.waterlevelset.waterlevel_set.all()) > 0:
+                image_src = (
+                    reverse('flooding_service') +
+                    "?action=get_externalwater_graph_infowindow&width=350&" +
+                    "height=400&scenariobreach_id=" +
+                    str(scenariobreach.id))
+                extw_info_list.append(
+                        (_('External water graph'),
+                         '<img src="' + image_src +
+                         ' " width=350 height=400/>'))
         elif br.externalwater.type == ExternalWater.TYPE_LAKE:
-            extw_info_list.append((_('Duration storm'), get_intervalstring_from_dayfloat(scenariobreach.tstorm)))
-            extw_info_list.append((_('Duration peak'), get_intervalstring_from_dayfloat(scenariobreach.tpeak)))
+            extw_info_list.append(
+                        (_('Duration storm'),
+                         get_intervalstring_from_dayfloat(scenariobreach.tstorm)))
+            extw_info_list.append(
+                        (_('Duration peak'),
+                         get_intervalstring_from_dayfloat(scenariobreach.tpeak)))
 
         elif br.externalwater.type == ExternalWater.TYPE_CANAL:
             pass
@@ -221,23 +268,25 @@ def infowindow_information(request, scenario_id):
         elif br.externalwater.type == ExternalWater.TYPE_RIVER:
             pass
         elif br.externalwater.type == ExternalWater.TYPE_LOWER_RIVER:
-            extw_info_list.append((_('Duration storm'), get_intervalstring_from_dayfloat(scenariobreach.tstorm)))
-            extw_info_list.append((_('Duration peak'), get_intervalstring_from_dayfloat(scenariobreach.tpeak)))
+            extw_info_list.append(
+                        (_('Duration storm'),
+                         get_intervalstring_from_dayfloat(scenariobreach.tstorm)))
+            extw_info_list.append(
+                        (_('Duration peak'),
+                         get_intervalstring_from_dayfloat(scenariobreach.tpeak)))
             if scenariobreach.tide != None:
-                extw_info_list.append((_('Tide properties'), scenariobreach.tide.name))
+                extw_info_list.append(
+                        (_('Tide properties'), scenariobreach.tide.name))
 
-
-
-
-
-        extrafields = scenario.extrascenarioinfo_set.filter(extrainfofield__header = ExtraInfoField.HEADER_EXTERNALWATER,
-                                        extrainfofield__use_in_scenario_overview = True).order_by('-extrainfofield__position')
+        extrafields = scenario.extrascenarioinfo_set.filter(
+            extrainfofield__header=ExtraInfoField.HEADER_EXTERNALWATER,
+            extrainfofield__use_in_scenario_overview=True
+            ).order_by('-extrainfofield__position')
         for field in extrafields:
             extw_info_list.append((field.extrainfofield.name, field.value))
 
-        breachset_info_list.append((br.name, br_info_list, br.externalwater.name, extw_info_list))
-
-
+        breachset_info_list.append(
+            (br.name, br_info_list, br.externalwater.name, extw_info_list))
 
     return render_to_response('flooding/infowindow_information.html',
                               {'general_info_list': general_info_list,
@@ -245,6 +294,7 @@ def infowindow_information(request, scenario_id):
                                'breachset_info_list': breachset_info_list,
                                'attachment_list': attachment_list,
                                'scenario_id': scenario_id})
+
 
 @login_required
 def infowindow_remarks(request, scenario_id, callbackfunction, form_id):
