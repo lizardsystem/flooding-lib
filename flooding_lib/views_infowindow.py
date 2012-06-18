@@ -14,6 +14,7 @@ from django.http import HttpResponse
 from django.shortcuts import render_to_response, get_object_or_404
 from django.utils.translation import ugettext_lazy as _, ungettext
 
+from flooding_lib.dates import get_intervalstring_from_dayfloat
 from flooding_lib.forms import AttachmentForm
 from flooding_lib.forms import EditScenarioPropertiesForm,ScenarioNameRemarksForm, TaskApprovalForm
 from flooding_lib.models import Attachment, ExternalWater, Scenario
@@ -70,26 +71,6 @@ def infowindow(request):
 
     elif action_name == 'showattachments':
         return showattachments(request, scenario_id)
-
-
-def get_intervalstring_from_dayfloat(input):
-
-    if input == None:
-        return ""
-
-    if input <0:
-        sign = '-'
-        input = input * -1
-    else:
-        sign = ''
-
-    days = math.floor(input)
-    input = (input - days)*24
-    hours = math.floor(input)
-    input = (input -  hours)*60
-    minutes = math.floor(input)
-
-    return  sign + ("%i d "%days) + ("%2i:"%hours).replace(' ', '0') + ("%2i"%minutes).replace(' ', '0')
 
 
 def infowindow_information(request, scenario_id):

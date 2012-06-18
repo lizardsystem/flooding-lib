@@ -1,6 +1,8 @@
 from django.contrib.auth.models import User
 from django.contrib.gis.db import models
 from django.utils.translation import ugettext as _
+from flooding_lib.dates import get_intervalstring_from_dayfloat
+from flooding_lib.dates import get_dayfloat_from_intervalstring
 from flooding_lib.models import Breach, Project, Scenario, Region
 from flooding_lib.tools.approvaltool.models import ApprovalObject
 import os.path
@@ -8,42 +10,6 @@ import re
 import math
 
 from django.utils import simplejson
-
-
-def get_dayfloat_from_intervalstring(input):
-    """Return a time interval of a string with days, hours and minutes
-    as a float amount of days.
-
-    Input format is 'x d hh:mm', with the 'd', spaces and leading
-    zeros optional."""
-
-    input = str(input)
-    match = re.compile('(-?\d+)\s*d?\s*(\d{1,2}):(\d{1,2})').match(input)
-
-    if match:
-        try:
-            day = float(match.group(1))
-            hours = float(match.group(2))
-            minutes = float(match.group(3))
-
-            if (0 <= hours < 24) and (0 <= minutes < 60):
-                return day + hours / 24 + minutes / (60 * 24)
-        except ValueError:
-            pass
-
-    raise ValueError(
-        "Interval input format is 'x d hh:mm'. Error on input '%s'" %
-        input)
-
-
-def get_intervalstring_from_dayfloat(input):
-    days = int(math.floor(input))
-    input = (input - days) * 24
-    hours = int(math.floor(input))
-    input = (input - hours) * 60
-    minutes = int(math.floor(input))
-
-    return "%d d %02d:%02d" % (days, hours, minutes)
 
 
 def get_groupimport_table_path(instance, filename):
