@@ -1103,10 +1103,6 @@ class CutoffLocationSobekModelSetting(models.Model):
     - many to many table between cutofflocation and sobekmodel
     - adds settings
 
-    deze tabel dient NIET om sobekmodel en locationcutoff aan elkaar
-    te koppelen, die koppeling wordt ergens anders gelegd.  hier
-    worden extra eigenschappen van de koppeling bepaald.
-
     """
 
     cutofflocation = models.ForeignKey(CutoffLocation)
