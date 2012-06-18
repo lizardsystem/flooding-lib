@@ -15,70 +15,70 @@
 	<tr class='cell'>
 		<td><b>{% trans "General" %}</b></td>
 	</tr>
-	
+
 	{% for info in general_info_list %}
-	    {% ifnotequal info.1 None %}    
+	    {% ifnotequal info.1 None %}
 	    <tr class="{% cycle 'cellDark' 'cell'%}">
 	    	<td>{{info.0}}</td>
 	    	<td>{{info.1}}</td>
 	    </tr>
-	    {% endifnotequal %} 
-    {% endfor %}       
+	    {% endifnotequal %}
+    {% endfor %}
     <tr class='cell'>
-		<td><b>{% trans "Metadata" %}</b></td>		
+		<td><b>{% trans "Metadata" %}</b></td>
 	</tr>
 	{% for info in metadata_info_list %}
-	    {% ifnotequal info.1 None %}    
+	    {% ifnotequal info.1 None %}
 	    <tr class="{% cycle 'cellDark' 'cell'%}">
 	    	<td>{{info.0}}</td>
 	    	<td>{{info.1}}</td>
 	    </tr>
-	    {% endifnotequal %}     
+	    {% endifnotequal %}
     {% endfor %}
     <tr class='cell'>
 		<td><b>{% trans "Breaches" %}</b></td>
 	</tr>
-	{% for info in breachset_info_list %}    
-	    <tr class='cell'> 
-	    	<td><i>{% trans "Breach" %} {{info.0}}</i></td>    	
-	    </tr>	    
+	{% for info in breachset_info_list %}
+	    <tr class='cell'>
+	    	<td><i>{% trans "Breach" %} {{info.0}}</i></td>
+	    </tr>
 	    {% for breach_infodetail in info.1 %}
-	    	{% ifnotequal breach_infodetail.1 None %}    
+	    	{% ifnotequal breach_infodetail.1 None %}
 	    	<tr class="{% cycle 'cellDark' 'cell'%}">
 		    	<td>{{breach_infodetail.0}}</td>
-		    	<td>{{breach_infodetail.1}}</td>    	
+		    	<td>{{breach_infodetail.1}}</td>
 		    </tr>
-		    {% endifnotequal %}    
-	    {% endfor %} 
+		    {% endifnotequal %}
+	    {% endfor %}
 	    {% comment %}
 	    <tr class='cell'>
-	    	<td><i>{% trans "External water" %} </i></td>    	
+	    	<td><i>{% trans "External water" %} </i></td>
 	    </tr>
 	    {% endcomment %}
 	    {% for extw_infodetail in info.3 %}
-	        {% ifnotequal extw_infodetail.1 None %}    
+	        {% ifnotequal extw_infodetail.1 None %}
 	    	<tr class="{% cycle 'cellDark' 'cell'%}">
 		    	<td>{{extw_infodetail.0}}</td>
-		    	<td>{% autoescape off %}{{extw_infodetail.1}}{% endautoescape %}</td>    	
+		    	<td>{% autoescape off %}{{extw_infodetail.1}}{% endautoescape %}</td>
 		    </tr>
-		    {% endifnotequal %}    
-	    {% endfor %}   
+		    {% endifnotequal %}
+	    {% endfor %}
     {% endfor %}
     <tr class='cell'>
 		<td><b>{% trans "Files" %}</b></td>
-	</tr>	
+	</tr>
 	{% for att_category in attachment_list %}
-	    {% ifnotequal att_category.1 None %}    
+	    {% ifnotequal att_category.1 None %}
 	    <tr class="{% cycle 'cellDark' 'cell'%}">
 	    	<td>{{att_category.0}}</td>
 	    	<td>
 	  		 {% for att in att_category.1 %}
 	    	 	<a href="{% url flooding_service %}?action=get_attachment&scenario_id={{scenario_id}}&path={{att.0}}">{{att.1}}</a><BR>
-	    	 {% endfor %}	    
+	    	 {% endfor %}
 	    	</td>
 	    </tr>
-	    {% endifnotequal %} 
-    {% endfor %} 
+	    {% endifnotequal %}
+    {% endfor %}
 	</tbody>
 </table>
 </table>
