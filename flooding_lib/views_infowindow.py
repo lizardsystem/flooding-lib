@@ -99,7 +99,7 @@ def infowindow_information(scenario):
 
     breaches = scenario.breaches.all()
 
-    #Get general information
+    # Get general information
     general_info_list = list()
     breach_names = ', '.join([b.name for b in breaches])
     region_names = ', '.join([b.region.name for b in breaches])
@@ -109,25 +109,16 @@ def infowindow_information(scenario):
     general_info_list.append((_('Region'), region_names))
     general_info_list.append((_('Project'), scenario.project.friendlyname))
 
-    extrafields = scenario.extrascenarioinfo_set.filter(
-        extrainfofield__header=ExtraInfoField.HEADER_GENERAL,
-        extrainfofield__use_in_scenario_overview=True
-        ).order_by('-extrainfofield__position')
-    for field in extrafields:
-        general_info_list.append((field.extrainfofield.name, field.value))
+    general_info_list += scenario.get_scenario_overview_extra_info(
+        ExtraInfoField.HEADER_GENERAL)
 
-    #Get metadata information
+    # Get metadata information
     metadata_info_list = list()
-
     metadata_info_list.append((_('Scenario id'), scenario.id))
     metadata_info_list.append((_('Scenario remarks'), scenario.remarks))
 
-    extrafields = scenario.extrascenarioinfo_set.filter(
-        extrainfofield__header=ExtraInfoField.HEADER_METADATA,
-        extrainfofield__use_in_scenario_overview=True
-        ).order_by('-extrainfofield__position')
-    for field in extrafields:
-        metadata_info_list.append((field.extrainfofield.name, field.value))
+    metadata_info_list += scenario.get_scenario_overview_extra_info(
+        ExtraInfoField.HEADER_METADATA)
 
     attachment_list = list()
 
@@ -170,39 +161,27 @@ def infowindow_information(scenario):
     #Get breach 'set' information
     breachset_info_list = list()
 
-    for br in breaches:
+    for breach in breaches:
         #Get breach information
-        br_info_list = list()
-        scenariobreach = scenario.scenariobreach_set.get(breach=br)
+        scenariobreach = scenario.scenariobreach_set.get(breach=breach)
 
-        br_info_list.append((_('Name'), br.name))
-        # Put here 'if fixed' or 'if automatic' instead of True and False
-        if True:
-            pass
-            #br_info_list.append((_('Width of breach'), TO_CREATE_IN_DB))
-        elif False:
-            br_info_list.append((_('Materiaal kering (ENGELS)'),
-                                 scenariobreach.ucritical))
-
-        br_info_list.append((_('Initial breach width'),
-                             scenariobreach.widthbrinit))
-        br_info_list.append(
+        breach_info_list = list()
+        breach_info_list.append((_('Name'), breach.name))
+        breach_info_list.append((_('Initial breach width'),
+                                 scenariobreach.widthbrinit))
+        breach_info_list.append(
             (_('Duration till breach has maximal depth'),
              get_intervalstring_from_dayfloat(scenariobreach.tmaxdepth)))
+        breach_info_list += scenario.get_scenario_overview_extra_info(
+            ExtraInfoField.HEADER_BREACH)
 
-        extrafields = scenario.extrascenarioinfo_set.filter(
-            extrainfofield__header=ExtraInfoField.HEADER_BREACH,
-            extrainfofield__use_in_scenario_overview=True
-            ).order_by('-extrainfofield__position')
-        for field in extrafields:
-            br_info_list.append((field.extrainfofield.name, field.value))
         #Get external water info
         extw_info_list = list()
-
-        extw_info_list.append((_('Externalwater name'), br.externalwater.name))
+        extw_info_list.append(
+            (_('Externalwater name'), breach.externalwater.name))
         extw_info_list.append(
             (_('Externalwater type'),
-             br.externalwater.get_type_display()))
+             breach.externalwater.get_type_display()))
         if scenariobreach.manualwaterlevelinput:
             extw_info_list.append(
                 (_('Maximal water level'), _('manual input used')))
@@ -220,7 +199,7 @@ def infowindow_information(scenario):
         extw_info_list.append(
             (_('Pit depth'), scenariobreach.pitdepth))
 
-        if br.externalwater.type == ExternalWater.TYPE_SEA:
+        if breach.externalwater.type == ExternalWater.TYPE_SEA:
             if scenariobreach.manualwaterlevelinput:
                 extw_info_list.append(
                     (_('Duration storm'), _('manual input used')))
@@ -252,7 +231,7 @@ def infowindow_information(scenario):
                         (_('External water graph'),
                          '<img src="' + image_src +
                          ' " width=350 height=400/>'))
-        elif br.externalwater.type == ExternalWater.TYPE_LAKE:
+        elif breach.externalwater.type == ExternalWater.TYPE_LAKE:
             extw_info_list.append(
                         (_('Duration storm'),
                          get_intervalstring_from_dayfloat(
@@ -262,15 +241,15 @@ def infowindow_information(scenario):
                          get_intervalstring_from_dayfloat(
                         scenariobreach.tpeak)))
 
-        elif br.externalwater.type == ExternalWater.TYPE_CANAL:
+        elif breach.externalwater.type == ExternalWater.TYPE_CANAL:
             pass
-        elif br.externalwater.type == ExternalWater.TYPE_INTERNAL_LAKE:
+        elif breach.externalwater.type == ExternalWater.TYPE_INTERNAL_LAKE:
             pass
-        elif br.externalwater.type == ExternalWater.TYPE_INTERNAL_CANAL:
+        elif breach.externalwater.type == ExternalWater.TYPE_INTERNAL_CANAL:
             pass
-        elif br.externalwater.type == ExternalWater.TYPE_RIVER:
+        elif breach.externalwater.type == ExternalWater.TYPE_RIVER:
             pass
-        elif br.externalwater.type == ExternalWater.TYPE_LOWER_RIVER:
+        elif breach.externalwater.type == ExternalWater.TYPE_LOWER_RIVER:
             extw_info_list.append(
                 (_('Duration storm'),
                  get_intervalstring_from_dayfloat(
@@ -283,15 +262,12 @@ def infowindow_information(scenario):
                 extw_info_list.append(
                         (_('Tide properties'), scenariobreach.tide.name))
 
-        extrafields = scenario.extrascenarioinfo_set.filter(
-            extrainfofield__header=ExtraInfoField.HEADER_EXTERNALWATER,
-            extrainfofield__use_in_scenario_overview=True
-            ).order_by('-extrainfofield__position')
-        for field in extrafields:
-            extw_info_list.append((field.extrainfofield.name, field.value))
+        extw_info_list += scenario.get_scenario_overview_extra_info(
+            ExtraInfoField.HEADER_EXTERNALWATER)
 
         breachset_info_list.append(
-            (br.name, br_info_list, br.externalwater.name, extw_info_list))
+            (breach.name, breach_info_list,
+             breach.externalwater.name, extw_info_list))
 
     return render_to_response(
         'flooding/infowindow_information.html',

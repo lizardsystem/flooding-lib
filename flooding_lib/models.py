@@ -908,6 +908,18 @@ class Scenario(models.Model):
         return reverse('flooding_scenario_detail',
                        kwargs={'object_id': self.pk})
 
+    def get_scenario_overview_extra_info(self, header):
+        """Return a list of (fieldname, fieldvalue) tuples that should
+        be should under this header in the scenario overview."""
+
+        return [
+            (field.extrainfofield.name, field.value)
+            for field in self.extrascenarioinfo_set.filter(
+                extrainfofield__header=header,
+                extrainfofield__use_in_scenario_overview=True
+                ).order_by('-extrainfofield__position')
+            ]
+
 
 class ScenarioBreach(models.Model):
     """scenario breach properties:
@@ -1199,7 +1211,7 @@ class Task(models.Model):
             scenario=scenario,
             tasktype=TaskType.objects.get(pk=task_type),
             remarks=remarks,
-            creatorlog=creatorelog,
+            creatorlog=creatorlog,
             tstart=datetime.datetime.now(),
             tfinished=datetime.datetime.now(),
             successful=True)
