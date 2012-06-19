@@ -1,15 +1,34 @@
+import datetime
+import logging
+import os
+import os.path
+from shutil import copyfile
+
 from django.contrib.auth.models import User
 from django.contrib.gis.db import models
-from django.utils.translation import ugettext as _
-from flooding_lib.dates import get_intervalstring_from_dayfloat
-from flooding_lib.dates import get_dayfloat_from_intervalstring
-from flooding_lib.models import Breach, Project, Scenario, Region
-from flooding_lib.tools.approvaltool.models import ApprovalObject
-import os.path
-import re
-import math
-
 from django.utils import simplejson
+from django.utils.translation import ugettext as _
+
+from flooding_base.models import Setting
+from flooding_lib.dates import get_dayfloat_from_intervalstring
+from flooding_lib.dates import get_intervalstring_from_dayfloat
+from flooding_lib.models import Breach
+from flooding_lib.models import ExtraInfoField
+from flooding_lib.models import ExtraScenarioInfo
+from flooding_lib.models import Project
+from flooding_lib.models import Region
+from flooding_lib.models import Result
+from flooding_lib.models import ResultType
+from flooding_lib.models import Scenario
+from flooding_lib.models import ScenarioBreach
+from flooding_lib.models import SobekModel
+from flooding_lib.models import Task
+from flooding_lib.models import TaskType
+from flooding_lib.models import WaterlevelSet
+from flooding_lib.tools.approvaltool.models import ApprovalObject
+
+
+logger = logging.getLogger(__name__)
 
 
 def get_groupimport_table_path(instance, filename):
@@ -158,12 +177,8 @@ class ImportScenarioInputField(models.Model):
             self.getValueString())
 
     def getValue(self):
-        value_class = self.inputfield.value_class
-        try:
-            value = value_class.objects.get(importscenario_inputfield=self)
-            return value.value
-        except value_class.DoesNotExist:
-            return None
+        value_object = self.inputfield.get_or_create_value_object(self)
+        return value_object.value
 
     def getValueString(self):
         return str(self.getValue())
@@ -252,6 +267,171 @@ class ImportScenarioInputField(models.Model):
 
     def get_approve_statuseditor_json(self):
         return simplejson.dumps(self.get_approve_statuseditor_dict())
+
+    def get_import_values(self):
+        """Get all import values in dict form.
+        - Keys of the dictionary are destination tables
+        - Values are destination field / value dictionaries"""
+
+        import_values = {
+            'Scenario': {},
+            'ScenarioBreach': {},
+            'ExtraScenarioInfo': {},
+            'Breach': {},
+            }
+
+        for field in self.importscenarioinputfield_set.all():
+            destination_table = field.inputfield.destination_table
+            destination_field = field.inputfield.destination_field
+
+            import_values.setdefault(destination_table, {})[
+                destination_field] = field.getValue()
+
+        return import_values
+
+    def create_scenario(self, scenario_values):
+        """If self.scenario doesn't exist yet, create it with the
+        import values. TODO: should probably update the existing one
+        too."""
+        if self.scenario:
+            scenario = self.scenario
+        else:
+            scenario = Scenario.objects.create(
+                approvalobject=self.approvalobject,
+                name=str(scenario_values.get("name", "-")),
+                owner=self.owner,
+                remarks=str(scenario_values.get("remarks", "")),
+                project=self.project,
+                sobekmodel_inundation=SobekModel.objects.get(
+                    pk=1),  # only link to dummy is possible
+                tsim=float(scenario_values.get("tsim", 0)),
+                # calcpriority
+                code="2impsc_" + str(self.id))
+            self.scenario = scenario
+            self.save()
+
+    def create_scenariobreach(self, breach_values):
+        """Create a ScenarioBreach if it's not there yet. Set values
+        from import input fields."""
+
+        scenariobreach, _ = ScenarioBreach.objects.get_or_create(
+            scenario=self.scenario, breach=self.breach,
+            defaults={
+                "waterlevelset": WaterlevelSet.objects.get(
+                    pk=1),  # only linking to dummy is possible
+                #sobekmodel_externalwater
+                "widthbrinit": breach_values.get("widthbrinit", -999),
+                "methstartbreach": breach_values.get("methstartbreach", 2),
+                "tstartbreach": breach_values.get("tstartbreach", 0),
+                "hstartbreach": breach_values.get("hstartbreach", -999),
+                "brdischcoef": breach_values.get("brdischcoef", -999),
+                "brf1": breach_values.get("brf1", -999),
+                "brf2": breach_values.get("brf2", -999),
+                "bottomlevelbreach": breach_values.get(
+                    "bottomlevelbreach", -999),
+                "ucritical": breach_values.get("ucritical", -999),
+                "pitdepth": breach_values.get("pitdepth", -999),
+                "tmaxdepth": breach_values.get("tmaxdepth", 0),
+                "extwmaxlevel": breach_values.get("extwmaxlevel", -999),
+                "extwbaselevel": breach_values.get("extwbaselevel", None),
+                "extwrepeattime": breach_values.get("extwrepeattime", None),
+                "tstorm": breach_values.get("tstorm", None),
+                "tpeak": breach_values.get("tpeak", None),
+                "tdeltaphase": breach_values.get("tdeltaphase", None),
+                "code": "2impsc_" + str(self.id)})
+
+    def create_extra_scenario_info(self, extra_scenario_info):
+        for extra_field_name in extra_scenario_info:
+            extrainfofield, _ = ExtraInfoField.objects.get_or_create(
+                name=extra_field_name)
+            extrascenarioinfo, _ = ExtraScenarioInfo.objects.get_or_create(
+                extrainfofield=extrainfofield,
+                scenario=self.scenario,
+                defaults={"value": " "})
+            extrascenarioinfo.value = str(
+                extra_scenario_info[extra_field_name])
+            extrascenarioinfo.save()
+
+    def copy_resultfiles(self, result_values):
+        # results
+        for resulttype_id, value in result_values.items():
+            result, _ = Result.objects.get_or_create(
+                scenario=self.scenario,
+                resulttype=ResultType.objects.get(
+                    pk=int(resulttype_id)),
+                defaults={
+                    "resultloc": "-",
+                    "deltat": 1.0 / 24})
+
+            dest_file_rel = os.path.join(
+                self.scenario.get_rel_destdir(),
+                os.path.split(value)[1])
+
+            dest_file = os.path.join(
+                Setting.objects.get(
+                    key='destination_dir').value, dest_file_rel)
+            dest_file = dest_file.replace('\\', '/')
+
+            dest_path = os.path.dirname(dest_file)
+
+            if not os.path.isdir(dest_path):
+                os.makedirs(dest_path)
+
+            result.resultloc = dest_file_rel
+            result.save()
+
+            # Replace \ by / so that it works on both Linux and Windows
+
+            # The directory
+            # /p-flod-fs-00-d1.external-nens.local/flod-share/ was
+            # created on both flooding webservers to make a path like
+            # that work on both sides.
+            value = value.replace('\\', '/')
+            dest_file = dest_file.replace('\\', '/')
+
+            logger.debug("VALUE = " + value)
+            logger.debug("DEST_FILE = " + dest_file)
+            copyfile(value, dest_file)
+
+    def import_into_flooding(self, username):
+        """Import all fields into the correct fields in flooding.
+
+        Returns two values: a success boolean, and a message string."""
+
+        # Check whether attachments are present
+        if not (self.region and self.breach and self.project):
+            return (False,
+                    'instellingen voor region, breach of project missen')
+
+        import_values = self.get_import_values()
+
+        self.create_scenario(import_values['Scenario'])
+        self.create_scenariobreach(import_values['ScenarioBreach'])
+        self.create_extra_scenario_info(import_values['ExtraScenarioInfo'])
+        self.copy_result_files(import_values['Result'])
+
+        # These tasks aren't functional. However, a scenario's
+        # update_status() finds it status by looking at the tasks that
+        # have been successfull for it...
+        Task.create_fake(
+            scenario=self.scenario,
+            tasktype=TaskType.TYPE_SCENARIO_CREATE_AUTO,
+            remarks="import scenario",
+            creatorlog="uploaded by {0}".format(self.owner.get_full_name()))
+
+        Task.create_fake(
+            scenario=self.scenario,
+            tasktype=TaskType.TYPE_SOBEK_CALCULATION,
+            remarks="import scenario",
+            creatorlog="imported by {0}.".format(username))
+
+        self.scenario.update_status()
+
+        self.state = ImportScenario.IMPORT_STATE_IMPORTED
+        self.save()
+
+        return (True, 'migratie compleet. scenario id is: {0}'.
+                format(self.scenario.id))
 
 
 class StringValue(models.Model):

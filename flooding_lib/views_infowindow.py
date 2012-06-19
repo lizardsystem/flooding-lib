@@ -61,7 +61,8 @@ def infowindow(request):
             with_approvalobject = True
 
 
-        return infowindow_approval(request, scenario_id, callbackfunction, form_id,with_approvalobject)
+        return infowindow_approval(
+            request, scenario_id, callbackfunction, form_id,with_approvalobject)
 
     elif action_name == 'edit':
         return infowindow_edit(request, scenario_id)
@@ -78,12 +79,14 @@ def infowindow_information(request, scenario_id):
     - Returns the information for in the infowindow
     - The information is collected from several tables in the database
     """
+
     scenario = get_object_or_404(Scenario, pk=scenario_id)
+    breaches = scenario.breaches.all()
 
     #Get general information
     general_info_list = list()
-    breach_names = ', '.join([b.name for b in scenario.breaches.all()])
-    region_names = ', '.join([b.region.name for b in scenario.breaches.all()])
+    breach_names = ', '.join([b.name for b in breaches])
+    region_names = ', '.join([b.region.name for b in breaches])
 
     general_info_list.append((_('Scenario name'), scenario.name))
     general_info_list.append((_('Breach locations'), breach_names))
@@ -102,7 +105,7 @@ def infowindow_information(request, scenario_id):
 
     metadata_info_list.append((_('Scenario id'), scenario.id))
     metadata_info_list.append((_('Scenario remarks'), scenario.remarks))
-    #metadata_info_list.append((_('Project remarks'), TO_CREATE_IN_DB))
+
     extrafields = scenario.extrascenarioinfo_set.filter(
         extrainfofield__header=ExtraInfoField.HEADER_METADATA,
         extrainfofield__use_in_scenario_overview=True
@@ -111,28 +114,28 @@ def infowindow_information(request, scenario_id):
         metadata_info_list.append((field.extrainfofield.name, field.value))
 
     attachment_list = list()
+
     inundationmodel_attachments = (
         scenario.sobekmodel_inundation.attachments.
-        order_by('uploaded_date').reverse())
-    scenario_attachments = (scenario.attachments.
-                            order_by('uploaded_date').reverse())
-    project_attachments = (scenario.project.attachments.
-                           order_by('uploaded_date').reverse())
+        order_by('-uploaded_date'))
+    scenario_attachments = (
+        scenario.attachments.
+        order_by('-uploaded_date'))
+    project_attachments = (
+        scenario.project.attachments.
+        order_by('-uploaded_date'))
 
-    #Needed for generic relation search for multiple breaches
-    c = SobekModel
-    #ContentType.objects.get(model='sobekmodel')
     sobekmodel_choices = []
 
     #Get the the sobekmodels
-    for breach in scenario.breaches.all():
+    for breach in breaches:
         for sobekmodel in breach.sobekmodels.all():
-            sobekmodel_choices += [[sobekmodel.id]]
-    #xxxxxx
+            sobekmodel_choices += [sobekmodel.id]
+
     breachmodel_attachments = Attachment.objects.filter(
-        content_type=c,
-        object_id__in=[sm[0] for sm in sobekmodel_choices]
-        ).order_by('uploaded_date')
+        content_type=SobekModel,
+        object_id__in=sobekmodel_choices
+        ).order_by('-uploaded_date')
 
     scen_atts = [(f.file.name, os.path.split(f.file.name)[1])
                  for f in scenario_attachments]
@@ -151,7 +154,7 @@ def infowindow_information(request, scenario_id):
     #Get breach 'set' information
     breachset_info_list = list()
 
-    for br in scenario.breaches.all():
+    for br in breaches:
         #Get breach information
         br_info_list = list()
         scenariobreach = scenario.scenariobreach_set.get(breach=br)
@@ -269,12 +272,13 @@ def infowindow_information(request, scenario_id):
         breachset_info_list.append(
             (br.name, br_info_list, br.externalwater.name, extw_info_list))
 
-    return render_to_response('flooding/infowindow_information.html',
-                              {'general_info_list': general_info_list,
-                               'metadata_info_list': metadata_info_list,
-                               'breachset_info_list': breachset_info_list,
-                               'attachment_list': attachment_list,
-                               'scenario_id': scenario_id})
+    return render_to_response(
+        'flooding/infowindow_information.html',
+        {'general_info_list': general_info_list,
+         'metadata_info_list': metadata_info_list,
+         'breachset_info_list': breachset_info_list,
+         'attachment_list': attachment_list,
+         'scenario_id': scenario_id})
 
 
 @login_required

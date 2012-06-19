@@ -1,10 +1,8 @@
 from cStringIO import StringIO
-from shutil import copyfile
 from zipfile import ZipFile, ZIP_DEFLATED, BadZipfile
 import datetime
 import functools
 import operator
-import os
 import re
 import xlrd
 
@@ -16,21 +14,10 @@ from django.shortcuts import get_object_or_404
 from django.utils import simplejson
 from django.utils.translation import ugettext as _
 
-from flooding_base.models import Setting
 from flooding_base.models import Text
 from flooding_lib.models import Breach
-from flooding_lib.models import ExtraInfoField
-from flooding_lib.models import ExtraScenarioInfo
 from flooding_lib.models import Project
 from flooding_lib.models import Region
-from flooding_lib.models import Result
-from flooding_lib.models import ResultType
-from flooding_lib.models import Scenario
-from flooding_lib.models import ScenarioBreach
-from flooding_lib.models import SobekModel
-from flooding_lib.models import Task
-from flooding_lib.models import TaskType
-from flooding_lib.models import WaterlevelSet
 from flooding_lib.tools.approvaltool.models import ApprovalObject
 from flooding_lib.tools.approvaltool.models import ApprovalObjectType
 from flooding_lib.tools.approvaltool.views import approvaltable
@@ -41,9 +28,6 @@ from flooding_lib.tools.importtool.models import GroupImport
 from flooding_lib.tools.importtool.models import ImportScenario
 from flooding_lib.tools.importtool.models import ImportScenarioInputField
 from flooding_lib.tools.importtool.models import InputField
-
-import logging
-logger = logging.getLogger(__name__)
 
 
 def checks_permission(permission, message):
@@ -806,152 +790,9 @@ def import_scenario_into_flooding(request, importscenario):
 
     """
 
-    #attachments
-    if (importscenario.region == None or
-        importscenario.breach == None or
-        importscenario.project == None):
-        answer = {
-            'successful': False,
-            'save_log': 'instellingen voor region, breach of project missen' %
-            importscenario.id
-            }
-        return HttpResponse(simplejson.dumps(answer))
+    username = request.user.get_full_name()
+    success, save_log = importscenario.import_into_flooding(username)
 
-    import_values = {}
-    for field in importscenario.importscenarioinputfield_set.all():
-        if field.inputfield.destination_table not in import_values:
-            import_values[field.inputfield.destination_table] = {}
-        import_values[field.inputfield.destination_table][
-            field.inputfield.destination_field] = field.getValue()
-
-    scenario_values = import_values.get('Scenario', {})
-
-    if importscenario.scenario is not None:
-        scenario = importscenario.scenario
-    else:
-        scenario = Scenario.objects.create(
-            approvalobject=importscenario.approvalobject,
-            name=str(scenario_values.get("name", "-")),
-            owner=importscenario.owner,
-            remarks=str(scenario_values.get("remarks", "")),
-            project=importscenario.project,
-            sobekmodel_inundation=SobekModel.objects.get(
-                pk=1),  # only link to dummy is possible
-            tsim=float(scenario_values.get("tsim", 0)),
-            #calcpriority
-            code="2impsc_" + str(importscenario.id))
-        importscenario.scenario = scenario
-        importscenario.save()
-
-    task_create = Task.objects.create(
-        scenario=scenario, tasktype=TaskType.objects.get(pk=60),
-        remarks="import scenario",
-        creatorlog='uploaded by %s' % importscenario.owner.get_full_name(),
-        tstart=datetime.datetime.now())
-
-    scenario_values = import_values.get('ScenarioBreach', {})
-
-    scenariobreach, new = ScenarioBreach.objects.get_or_create(
-        scenario=scenario, breach=importscenario.breach,
-        defaults={
-            "waterlevelset": WaterlevelSet.objects.get(
-                pk=1),  # only linking to dummy is possible
-            #sobekmodel_externalwater
-            "widthbrinit": scenario_values.get("widthbrinit", -999),
-            "methstartbreach": scenario_values.get("methstartbreach", 2),
-            "tstartbreach": scenario_values.get("tstartbreach", 0),
-            "hstartbreach": scenario_values.get("hstartbreach", -999),
-            "brdischcoef": scenario_values.get("brdischcoef", -999),
-            "brf1": scenario_values.get("brf1", -999),
-            "brf2": scenario_values.get("brf2", -999),
-            "bottomlevelbreach": scenario_values.get(
-                "bottomlevelbreach", -999),
-            "ucritical": scenario_values.get("ucritical", -999),
-            "pitdepth": scenario_values.get("pitdepth", -999),
-            "tmaxdepth": scenario_values.get("tmaxdepth", 0),
-            "extwmaxlevel": scenario_values.get("extwmaxlevel", -999),
-            "extwbaselevel": scenario_values.get("extwbaselevel", None),
-            "extwrepeattime": scenario_values.get("extwrepeattime", None),
-            "tstorm": scenario_values.get("tstorm", None),
-            "tpeak": scenario_values.get("tpeak", None),
-            "tdeltaphase": scenario_values.get("tdeltaphase", None),
-            "code": "2impsc_" + str(importscenario.id)})
-
-    #ExtraScenarioInfo
-    scenario_values = import_values.get('ExtraScenarioInfo', {})
-    for extra_field_name in scenario_values.keys():
-        extrainfofield, new = ExtraInfoField.objects.get_or_create(
-            name=extra_field_name)
-        extrascenarioinfo, new = ExtraScenarioInfo.objects.get_or_create(
-            extrainfofield=extrainfofield,
-            scenario=scenario,
-            defaults={"value": " "})
-        extrascenarioinfo.value = str(
-            scenario_values.get(extra_field_name, " "))
-        extrascenarioinfo.save()
-
-    #results
-    scenario_values = import_values.get('Result', {})
-    for resulttype_id, value in scenario_values.items():
-        result, new = Result.objects.get_or_create(
-            scenario=scenario,
-            resulttype=ResultType.objects.get(
-                pk=int(resulttype_id)),
-            defaults={
-                "resultloc": "-",
-                "deltat": 1 / 24})
-
-        dest_file_rel = os.path.join(
-            scenario.get_rel_destdir(),
-            os.path.split(value)[1])
-
-        dest_file = os.path.join(
-            Setting.objects.get(
-                key='destination_dir').value, dest_file_rel)
-        dest_file = dest_file.replace('\\', '/')
-
-        dest_path = os.path.dirname(dest_file)
-
-        if not os.path.isdir(dest_path):
-            os.makedirs(dest_path)
-
-        result.resultloc = dest_file_rel
-        result.save()
-
-        # Replace \ by / so that it works on both Linux and Windows
-
-        # The directory
-        # /p-flod-fs-00-d1.external-nens.local/flod-share/ was created
-        # on both flooding webservers to make a path like that work on
-        # both sides.
-        value = value.replace('\\', '/')
-        dest_file = dest_file.replace('\\', '/')
-
-        logger.debug("VALUE = " + value)
-        logger.debug("DEST_FILE = " + dest_file)
-        copyfile(value, dest_file)
-
-    task_create.tfinished = datetime.datetime.now()
-    task_create.successful = True
-    task_create.save()
-
-    Task.objects.create(
-        scenario=scenario,
-        tasktype=TaskType.objects.get(pk=130),
-        remarks="import scenario",
-        creatorlog='imported by %s' % request.user.get_full_name(),
-        tstart=datetime.datetime.now(),
-        tfinished=datetime.datetime.now(),
-        successful=True)
-
-    scenario.update_status()
-
-    importscenario.state = ImportScenario.IMPORT_STATE_IMPORTED
-    importscenario.save()
-
-    answer = {
-        'successful': True,
-        'save_log': 'migratie compleet. scenario id is: %i' %
-        scenario.id
-        }
-    return HttpResponse(simplejson.dumps(answer))
+    return HttpResponse(simplejson.dumps({
+                'successful': success,
+                'save_log': save_log}))

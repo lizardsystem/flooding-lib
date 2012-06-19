@@ -1130,6 +1130,7 @@ class TaskType(models.Model):
     """
 
     TYPE_SCENARIO_CREATE = 50
+    TYPE_SCENARIO_CREATE_AUTO = 60
     TYPE_SOBEK_PREPARATION = 120
     TYPE_SOBEK_CALCULATION = 130
     TYPE_SOBEK_PNG_CALCULATION = 150
@@ -1190,6 +1191,18 @@ class Task(models.Model):
     def delete(self):
         super(Task, self).delete()
         self.scenario.update_status()
+
+    @classmethod
+    def create_fake(cls, scenario, task_type, remarks, creatorlog):
+        """Create a 'fake' Task, one that is set to successful immediately."""
+        cls.objects.create(
+            scenario=scenario,
+            tasktype=TaskType.objects.get(pk=task_type),
+            remarks=remarks,
+            creatorlog=creatorelog,
+            tstart=datetime.datetime.now(),
+            tfinished=datetime.datetime.now(),
+            successful=True)
 
 
 # ZELFDE ALS TASKEXECUTOR??? KAN WEG???
