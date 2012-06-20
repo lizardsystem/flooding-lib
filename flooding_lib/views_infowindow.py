@@ -141,6 +141,7 @@ def infowindow_information(scenario):
 
     for header in grouped_input_fields:
         for fieldobject in header['fields']:
+            fieldobject.value = None
             table = fieldobject.destination_table.lower()
             field = fieldobject.destination_field
             if table == 'extrascenarioinfo':
@@ -151,13 +152,18 @@ def infowindow_information(scenario):
                 else:
                     fieldobject.value = info.value
             elif table in data_objects:
-                field.value = getattr(data_objects[table], field, None)
+                fieldobject.value = getattr(data_objects[table], field, None)
+                if table == 'breach' and field == 'geom':
+                    if fieldobject.name.startswith('x'):
+                        fieldobject.value = fieldobject.value.x
+                    if fieldobject.name.startswith('y'):
+                        fieldobject.value = fieldobject.value.y
             elif table == 'result':
                 # We do these differently
                 pass
             else:
                 # Unknown, show it
-                field.value = '{0}/{1}'.format(table, field)
+                fieldobject.value = '{0}/{1}'.format(table, field)
 
         # Only keep fields with a value
         header['fields'] = [f for f in header['fields'] if f.value]
