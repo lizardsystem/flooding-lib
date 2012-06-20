@@ -21,7 +21,8 @@ def search_value_lt(value, value_list):
 
     """
     try:
-        dummy, result_out = itertools.ifilter(lambda(x,v): value <= x, value_list).next()
+        dummy, result_out = itertools.ifilter(
+            lambda(x, v): value <= x, value_list).next()
     except StopIteration:
         dummy, result_out = value_list[-1]
 
@@ -35,12 +36,16 @@ class MapnikPointLegend:
 
     Sample usage:
     input_dict = {'row1': 1, 'row2': 2}
-    shapedatalegend = get_object_or_404(ShapeDataLegend, pk=request.GET['object_id'])
+
+    shapedatalegend = get_object_or_404(ShapeDataLegend,
+    pk=request.GET['object_id'])
+
     if shapedatalegend.type == ShapeDataLegend.TYPE_POINT:
       sm = SymbolManager(SYMBOLS_DIR)
       mpl = MapnikPointLegend(shapedatalegend, sm)
       mapnik_style = mpl.get_style() #get mapnik style with a set of rules.
-      rule_name = mpl.get_rule_name(input_dict) #get rule name by looking at input
+      rule_name = mpl.get_rule_name(input_dict) #get rule name by
+                                                #looking at input
       title, blocks = mpl.get_legend_data() #get info to draw legend
     """
 
@@ -59,7 +64,7 @@ class MapnikPointLegend:
             if o.value_in == '':
                 dict[None] = o.get_value_out()
         tuplelist = dict.items()
-        tuplelist.sort() #sorts on first field
+        tuplelist.sort()  # sorts on first field
         return tuplelist, dict
 
     def get_output_properties(self, valuedict):
@@ -79,8 +84,10 @@ class MapnikPointLegend:
         result['symbol'] = search_value_lt(symbol_value, self.values['symbol'])
         result['color'] = search_value_lt(color_value, self.values['color'])
         result['size'] = search_value_lt(size_value, self.values['size'])
-        result['rotate'] = search_value_lt(rotation_value, self.values['rotation'])
-        result['shadow_height'] = search_value_lt(shadowheight_value, self.values['shadowheight'])
+        result['rotate'] = search_value_lt(
+            rotation_value, self.values['rotation'])
+        result['shadow_height'] = search_value_lt(
+            shadowheight_value, self.values['shadowheight'])
 
         return result
 
@@ -105,49 +112,37 @@ class MapnikPointLegend:
 
         output_values = self.get_output_properties(valuedict)
 
-        symbol_out_str = '%s'%(output_values['symbol'])
-        color_out_str = '%02X%02X%02X%02X'%(tuple([256 * i for i in output_values['color']]))
-        size_out_str = '%dx%d'%(output_values['size'])
-        rotation_out_str = '%d'%(output_values['rotate'])
-        shadowheight_out_str = '%d'%(output_values['shadow_height'])
+        symbol_out_str = '%s' % (output_values['symbol'])
+        color_out_str = '%02X%02X%02X%02X' % (
+            tuple([256 * i for i in output_values['color']]))
+        size_out_str = '%dx%d' % (output_values['size'])
+        rotation_out_str = '%d' % (output_values['rotate'])
+        shadowheight_out_str = '%d' % (output_values['shadow_height'])
 
-        result = '%d_%s_%s_%s_%s_%s'%(
+        result = '%d_%s_%s_%s_%s_%s' % (
             self.sdl.pk, symbol_out_str, color_out_str, size_out_str,
             rotation_out_str, shadowheight_out_str)
         return str(result)
 
-    # TODO: Reinout commented this out: undefined name 'symbol_out', so it can
-    # probably be removed.
-    #
-    # def get_symbol_filename_abs(self, valuedict):
-    #     """
-    #     nergens voor nodig??
-
-    #     calculates outputproperties according to valuedict and let
-    #     symbol_manager create a symbol for it. return absolute
-    #     filename of that symbol
-    #     """
-    #     output_values = self.get_output_properties(valuedict)
-    #     return str(self.sm.get_symbol_transformed(symbol_out+'.png', **output_values))
-
-
     def get_legend_data(self):
         """Returns all info needed to draw the legend in a list. Ugly function.
 
-        title, [{'title': <title>, 'content': [row1, row2, ...]}, {'title': <title>, 'content': [row1, row2, ...]}, ...]
+        title, [{'title': <title>, 'content': [row1, row2, ...]},
+        {'title': <title>, 'content': [row1, row2, ...]}, ...]
 
         titles are strings,
 
 
         the symbol properties can be used with visualization.get_symbol
         """
-        def generate_block_row(value_in, output_dict_template, output_dict_key, label):
-            """
+        def generate_block_row(value_in, output_dict_template,
+                               output_dict_key, label):
 
-            """            
             valuedict = output_dict_template.copy()
             valuedict[output_dict_key] = value_in
-            row = {'symbol_properties': self.get_output_properties(valuedict), 'text': label}
+            row = {
+                'symbol_properties':
+                self.get_output_properties(valuedict), 'text': label}
 
             return row
 
@@ -166,27 +161,39 @@ class MapnikPointLegend:
         dependend_parameter[self.sdl.rotation_field] = []
         dependend_parameter[self.sdl.shadowheight_field] = []
 
-        dependend_parameter[self.sdl.color_field].extend([a for a,b in self.values['color']])
-        dependend_parameter[self.sdl.size_field].extend([a for a,b in self.values['size']])
-        dependend_parameter[self.sdl.symbol_field].extend([a for a,b in self.values['symbol']])
-        dependend_parameter[self.sdl.rotation_field].extend([a for a,b in self.values['rotation']])
-        dependend_parameter[self.sdl.shadowheight_field].extend([a for a,b in self.values['shadowheight']])
+        dependend_parameter[self.sdl.color_field].extend(
+            [a for a, b in self.values['color']])
+        dependend_parameter[self.sdl.size_field].extend(
+            [a for a, b in self.values['size']])
+        dependend_parameter[self.sdl.symbol_field].extend(
+            [a for a, b in self.values['symbol']])
+        dependend_parameter[self.sdl.rotation_field].extend(
+            [a for a, b in self.values['rotation']])
+        dependend_parameter[self.sdl.shadowheight_field].extend(
+            [a for a, b in self.values['shadowheight']])
 
-        for key,parameter in dependend_parameter.items():
-
+        for key, parameter in dependend_parameter.items():
             unique = []
-            last = [None,]
+            last = [None]
             parameter.sort()
             for n in parameter:
                 if not last == n:
                     if n is None:
-                        unique.append(generate_block_row(None,valuedict_empty,key.name_in_source, 'geen waarde' ))
-                    elif last in [[None,], None]:
-                        unique.append(generate_block_row(n,valuedict_empty,key.name_in_source, '<= '+str(n)))
+                        unique.append(generate_block_row(
+                                None, valuedict_empty, key.name_in_source,
+                                'geen waarde'))
+                    elif last in [[None], None]:
+                        unique.append(generate_block_row(
+                                n, valuedict_empty, key.name_in_source,
+                                '<= ' + str(n)))
                     elif n > 1e+99:
-                        unique.append(generate_block_row(n,valuedict_empty,key.name_in_source, '>' + str(last)))
+                        unique.append(generate_block_row(
+                                n, valuedict_empty, key.name_in_source,
+                                '>' + str(last)))
                     else:
-                        unique.append(generate_block_row(n,valuedict_empty,key.name_in_source, str(last)+' tot '+str(n)))
+                        unique.append(generate_block_row(
+                                n, valuedict_empty, key.name_in_source,
+                                str(last) + ' tot ' + str(n)))
                     last = n
 
             block = {'title': key.friendlyname,
@@ -195,7 +202,8 @@ class MapnikPointLegend:
 
         return self.sdl.name, result
 
-    def make_rules_for_input_combinations(self, possible_values, value_dict={}):
+    def make_rules_for_input_combinations(
+        self, possible_values, value_dict={}):
         """
         Recursive function to loop all possible input
         combinations. For each input combination, calculate rule name
@@ -213,15 +221,15 @@ class MapnikPointLegend:
 
             rules = {}
             for fieldvalue in fieldvalues.keys():
-                new_rules = self.make_rules_for_input_combinations(possible_values,
-                                                                   {fieldname: fieldvalue})
+                new_rules = self.make_rules_for_input_combinations(
+                    possible_values, {fieldname: fieldvalue})
                 rules.update(new_rules)
             return rules
         else:
             #possible values are empty, all values are listed in value_dict
             rule_name = self.get_rule_name(value_dict)
             symbol_kwargs = self.get_output_properties(value_dict)
-            symbol_out = symbol_kwargs['symbol'][0]+'.png'
+            symbol_out = symbol_kwargs['symbol'][0] + '.png'
             size_out_x, size_out_y = symbol_kwargs['size']
 
             filename_abs = str(self.sm.get_symbol_transformed(
@@ -231,15 +239,17 @@ class MapnikPointLegend:
                 filename_abs, "png", size_out_x, size_out_y)
             mapnik_rule.symbols.append(ps)
             mapnik_rule.filter = mapnik.Filter(
-                str("[NAME] = '%s'"%(rule_name)))
+                str("[NAME] = '%s'" % (rule_name)))
 
             return {rule_name: mapnik_rule}
 
     def get_style(self, **kwargs):
         """
-        calculates all mapnik rules and put them in a mapnik style. return style.
+        calculates all mapnik rules and put them in a mapnik
+        style. return style.
 
-        as an effect of this function all possible symbols for the legend are generated
+        as an effect of this function all possible symbols for the
+        legend are generated
 
         kwargs: min, max (if % are used)
         """
@@ -253,7 +263,8 @@ class MapnikPointLegend:
                 possible_values[self.fn[key]][value_in] = None
 
         result_style = mapnik.Style()
-        for r in self.make_rules_for_input_combinations(possible_values.copy()).values():
+        for r in self.make_rules_for_input_combinations(
+            possible_values.copy()).values():
             result_style.rules.append(r)
 
         return result_style
@@ -264,11 +275,13 @@ class MapnikPointLegend:
         returns a dictionary with key=field.id and value=field
         """
 
-        fields = [self.sdl.color_field, self.sdl.size_field, self.sdl.symbol_field, self.sdl.rotation_field, self.sdl.shadowheight_field]
+        fields = [self.sdl.color_field, self.sdl.size_field,
+                  self.sdl.symbol_field, self.sdl.rotation_field,
+                  self.sdl.shadowheight_field]
 
         output = {}
         for field in fields:
-           output[field.id] = field
+            output[field.id] = field
 
         return output
 
@@ -297,11 +310,21 @@ class MapnikPointLegend:
         self.values = {}
         self.value_dict = {}
 
-        self.values['color'], self.value_dict['color'] = self.convert_mapping_to_tuple(self.sdl.color.get_visualizer_set().all())
-        self.values['size'], self.value_dict['size'] = self.convert_mapping_to_tuple(self.sdl.size.get_visualizer_set().all())
-        self.values['symbol'], self.value_dict['symbol'] = self.convert_mapping_to_tuple(self.sdl.symbol.get_visualizer_set().all())
-        self.values['rotation'], self.value_dict['rotation'] = self.convert_mapping_to_tuple(self.sdl.rotation.get_visualizer_set().all())
-        self.values['shadowheight'], self.value_dict['shadowheight'] = self.convert_mapping_to_tuple(self.sdl.shadowheight.get_visualizer_set().all())
+        self.values['color'], self.value_dict['color'] = (
+            self.convert_mapping_to_tuple(
+                self.sdl.color.get_visualizer_set().all()))
+        self.values['size'], self.value_dict['size'] = (
+            self.convert_mapping_to_tuple(
+                self.sdl.size.get_visualizer_set().all()))
+        self.values['symbol'], self.value_dict['symbol'] = (
+            self.convert_mapping_to_tuple(
+                self.sdl.symbol.get_visualizer_set().all()))
+        self.values['rotation'], self.value_dict['rotation'] = (
+            self.convert_mapping_to_tuple(
+                self.sdl.rotation.get_visualizer_set().all()))
+        self.values['shadowheight'], self.value_dict['shadowheight'] = (
+            self.convert_mapping_to_tuple(
+                self.sdl.shadowheight.get_visualizer_set().all()))
 
         #fieldnames
         self.fn = {}
@@ -313,4 +336,6 @@ class MapnikPointLegend:
 
         for k, v in self.values.items():
             if not v:
-                raise Exception('legend mapping is not valid: %s has no entries in corresponding model'%k)
+                raise Exception(
+                    ('legend mapping is not valid: %s has no entries '
+                     'in corresponding model') % k)

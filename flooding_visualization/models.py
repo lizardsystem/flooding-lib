@@ -4,10 +4,12 @@ from django.utils.translation import ugettext as _
 
 from flooding_presentation.models import Field, PresentationType
 
+
 class ValueVisualizerMap(models.Model):
     """Maps a value from the source to a visualizable value (i.e. color, size)
 
-    the sorted list of ValueVisualizerMapColor/Size/Value represent the mapping ranges
+    the sorted list of ValueVisualizerMapColor/Size/Value represent
+    the mapping ranges
     """
 
     VALUETYPE_CHOICES = (
@@ -50,7 +52,7 @@ class ValueVisualizerMap(models.Model):
         db_table = 'visualization_valuevisualizermap'
 
     def __unicode__(self):
-        return u'%s'%(self.name)
+        return u'%s' % (self.name)
 
     def get_visualizer_set(self):
         """
@@ -80,7 +82,8 @@ class ValueVisualizerMap(models.Model):
         def get_interpolated_color_value(color1, color2, fraction):
             output_color = []
             for i in range(len(color1)):
-                output_color.append(color1[i] * (1-fraction) + color2[i] * fraction)
+                output_color.append(
+                    color1[i] * (1 - fraction) + color2[i] * fraction)
             return tuple(output_color)
 
         output = None
@@ -88,7 +91,8 @@ class ValueVisualizerMap(models.Model):
             #self.valuevisualizermapfloatcolor_set.all() always has
             #value_in==None as first element
             if input_value is None:
-                return self.valuevisualizermapfloatcolor_set.get(value_in=None).get_value_out()
+                return self.valuevisualizermapfloatcolor_set.get(
+                    value_in=None).get_value_out()
             if self.interpolation == self.INTERPOLATION_NONE:
                 for color in self.valuevisualizermapfloatcolor_set.all():
                     if color.value_in is None:
@@ -97,8 +101,10 @@ class ValueVisualizerMap(models.Model):
                         output = color.get_value_out()
                         break
             elif self.interpolation == self.INTERPOLATION_LINEAR:
-                colors = list(self.valuevisualizermapfloatcolor_set.exclude(value_in=None))
-                #default_color = self.valuevisualizermapfloatcolor_set.get(value_in=None)
+                colors = list(
+                    self.valuevisualizermapfloatcolor_set.exclude(
+                        value_in=None))
+
                 if len(colors) == 1:
                     output = colors[0].get_value_out()
                 else:
@@ -107,8 +113,8 @@ class ValueVisualizerMap(models.Model):
                     elif input_value >= colors[-1].value_in:
                         output = colors[-1].get_value_out()
                     else:
-                        for i in range(len(colors)-1):
-                            color1, color2 = colors[i], colors[i+1]
+                        for i in range(len(colors) - 1):
+                            color1, color2 = colors[i], colors[i + 1]
                             if input_value >= color1.value_in and \
                                     input_value <= color2.value_in:
                                 fraction = (input_value - color1.value_in) / \
@@ -119,6 +125,7 @@ class ValueVisualizerMap(models.Model):
                                     fraction)
                                 break
         return output
+
 
 class ValueVisualizerMapFloatColor(models.Model):
     """float -> color mappings
@@ -142,7 +149,7 @@ class ValueVisualizerMapFloatColor(models.Model):
             value_in = '(default)'
         else:
             value_in = str(self.value_in)
-        return u'%s: %s -> (rgba) = (%1.2f %1.2f %1.2f %1.2f)'%(
+        return u'%s: %s -> (rgba) = (%1.2f %1.2f %1.2f %1.2f)' % (
             self.valuevisualizermap, value_in, self.r, self.g, self.b, self.a)
 
     def get_value_out(self):
@@ -151,7 +158,8 @@ class ValueVisualizerMapFloatColor(models.Model):
 
     def get_htmlcolor_out(self):
         """returns html color string of output value, i.e. '#556677' """
-        return '#%02x%02x%02x'%(self.r*255, self.g*255, self.b*255)
+        return '#%02x%02x%02x' % (self.r * 255, self.g * 255, self.b * 255)
+
 
 class ValueVisualizerMapFloatSize(models.Model):
     """float -> size mappings
@@ -174,12 +182,13 @@ class ValueVisualizerMapFloatSize(models.Model):
             value_in = '(default)'
         else:
             value_in = str(self.value_in)
-        return u'%s: %s -> (x,y) = (%d,%d)'%(self.valuevisualizermap, value_in,
-                                             self.x, self.y)
+        return u'%s: %s -> (x,y) = (%d,%d)' % (
+            self.valuevisualizermap, value_in, self.x, self.y)
 
     def get_value_out(self):
         """returns a tuple representation of the valueout"""
         return (self.x, self.y)
+
 
 class ValueVisualizerMapFloatFloat(models.Model):
     """float -> float mappings (used for i.e. shadow height)
@@ -200,13 +209,14 @@ class ValueVisualizerMapFloatFloat(models.Model):
         if self.value_in is None:
             value_in = '(default)'
         else:
-            value_in = '%1.2f'%(self.value_in)
-        return u'%s: %s -> %1.2f'%(self.valuevisualizermap, value_in,
-                                   self.value_out)
+            value_in = '%1.2f' % (self.value_in)
+        return u'%s: %s -> %1.2f' % (self.valuevisualizermap, value_in,
+                                     self.value_out)
 
     def get_value_out(self):
         """returns a tuple representation of the valueout"""
         return (self.value_out,)
+
 
 class ValueVisualizerMapFloatInteger(models.Model):
     """float -> integer mappings (used for i.e. shadow height)
@@ -227,13 +237,14 @@ class ValueVisualizerMapFloatInteger(models.Model):
         if self.value_in is None:
             value_in = '(default)'
         else:
-            value_in = '%1.2f'%(self.value_in)
-        return u'%s: %s -> %d'%(self.valuevisualizermap, value_in,
-                                self.value_out)
+            value_in = '%1.2f' % (self.value_in)
+        return u'%s: %s -> %d' % (self.valuevisualizermap, value_in,
+                                  self.value_out)
 
     def get_value_out(self):
         """returns a tuple representation of the valueout"""
         return (self.value_out,)
+
 
 class ValueVisualizerMapFloatString(models.Model):
     """float -> string mappings (used for i.e. shadow height)
@@ -252,13 +263,14 @@ class ValueVisualizerMapFloatString(models.Model):
         if self.value_in is None:
             value_in = '(default)'
         else:
-            value_in = '%1.2f'%(self.value_in)
-        return u'%s: %s -> %s'%(self.valuevisualizermap, value_in,
-                                self.value_out)
+            value_in = '%1.2f' % (self.value_in)
+        return u'%s: %s -> %s' % (self.valuevisualizermap, value_in,
+                                  self.value_out)
 
     def get_value_out(self):
         """returns a tuple representation of the valueout"""
         return (self.value_out,)
+
 
 class ValueVisualizerMapStringString(models.Model):
     """string -> string value mappings (used for i.e. object classification)
@@ -278,17 +290,19 @@ class ValueVisualizerMapStringString(models.Model):
             value_in = '(default)'
         else:
             value_in = str(self.value_in)
-        return u'%s: %s -> %s'%(self.valuevisualizermap, value_in,
-                                self.value_out)
+        return u'%s: %s -> %s' % (self.valuevisualizermap, value_in,
+                                  self.value_out)
 
     def get_value_out(self):
         """returns a tuple representation of the valueout"""
         return (self.value_out,)
 
+
 class ShapeDataLegend(models.Model):
     """Legend: maps all possible dimensions to ValueVisualizerMap entries
 
-    can be applied to: point (all params), line (color), polygon (color), grid (color)
+    can be applied to: point (all params), line (color), polygon
+    (color), grid (color)
 
     todo: rename to Legend, because this model represents all possible Legends
     """
@@ -313,19 +327,22 @@ class ShapeDataLegend(models.Model):
 
     rotation = models.ForeignKey(ValueVisualizerMap, blank=True,
                                  null=True, related_name='rotation_set')
-    rotation_field = models.ForeignKey(Field, related_name='rotation_field_set',
-                                       blank=True, null=True)
+    rotation_field = models.ForeignKey(
+        Field, related_name='rotation_field_set',
+        blank=True, null=True)
 
-    shadowheight = models.ForeignKey(ValueVisualizerMap, blank=True,
-                                     null=True, related_name='shadowheight_set')
-    shadowheight_field = models.ForeignKey(Field, related_name='shadowheight_field_set',
-                                           blank=True, null=True)
+    shadowheight = models.ForeignKey(
+        ValueVisualizerMap, blank=True,
+        null=True, related_name='shadowheight_set')
+    shadowheight_field = models.ForeignKey(
+        Field, related_name='shadowheight_field_set',
+        blank=True, null=True)
 
     class Meta:
         db_table = 'visualization_shapedatalegend'
 
     def __unicode__(self):
-        return u'%s'%(self.name)
+        return u'%s' % (self.name)
 
     def get_palette(self, min_value, max_value):
         """Converts color to tuple of 768 items (256 colors, alpha is left out)
@@ -334,8 +351,8 @@ class ShapeDataLegend(models.Model):
         """
         palette = []
         for i in range(256):
-            input_val = min_value + (max_value - min_value)*i/256.0
-            color = self.color.get_interpolated_value(input_val) #4-tuple
+            input_val = min_value + (max_value - min_value) * i / 256.0
+            color = self.color.get_interpolated_value(input_val)  # 4-tuple
             palette.extend(color[:3])
 
         return tuple(palette)
