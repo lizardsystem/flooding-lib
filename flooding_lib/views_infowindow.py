@@ -93,25 +93,6 @@ def infowindow(request):
         return showattachments(request, scenario_id)
 
 
-def scenario_information(scenario):
-    fields = [
-        # Scenario identificatie
-        (_('Scenario name'), scenario.name),
-        # Scenario datum
-        (_('Project name'), scenario.project.friendlyname),
-        # Eigenaar overstromingsinformatie
-        # Beschrijving scenario
-        # Versie resultaat
-        # Motivatie rekenmethode
-        # Doel
-        # Berekeningsmethode
-        # Houdbaarheid scenario
-        ]
-
-    return fields + scenario.get_scenario_overview_extra_info(
-        ExtraInfoField.HEADER_SCENARIO)
-
-
 def infowindow_information(scenario):
     """
     - Get the list of headers and fields that the importtool has
@@ -123,7 +104,14 @@ def infowindow_information(scenario):
 
     We need to add some fields that the importtool doesn't have;
     scenario.id and attachments come to mind. So we're going to
-    manually add some fields to the start and end."""
+    manually add some fields to the start and end.
+
+    Some hacks needed:
+    - Don't show things from Results
+    - Show the old Attachments list instead (more complete)
+    - Split Breach's geom field into x and y based on the field name
+    - Add in the waterlevel picture that the old version could show
+    """
 
     grouped_input_fields = InputField.grouped_input_fields()
 
@@ -162,11 +150,21 @@ def infowindow_information(scenario):
                 # We do these differently
                 pass
             else:
-                # Unknown, show it
+                # Unknown table, show it
                 fieldobject.value = '{0}/{1}'.format(table, field)
 
         # Only keep fields with a value
         header['fields'] = [f for f in header['fields'] if f.value]
+
+    # Add in scenario id under the 'scenario' header
+    for header in grouped_input_fields:
+        if header['title'].lower() == 'scenario':
+            class dummy_field(object): pass
+            scenarioid = dummy_field()
+            scenarioid.name = _('Scenario ID')
+            scenarioid.value = scenario.id
+            header['fields'].insert(0, scenarioid)
+            break
 
     # Only keep headers with fields
     grouped_input_fields = [h for h in grouped_input_fields if h['fields']]
@@ -174,192 +172,7 @@ def infowindow_information(scenario):
     return render_to_response(
         'flooding/infowindow_information.html',
         {'grouped_fields': grouped_input_fields,
-         'scenario_id': scenario.id})
-
-
-def infowindow_information_old(scenario):
-    """
-    - Returns the information for in the infowindow
-    - The information is collected from several tables in the database
-    """
-
-    breaches = scenario.breaches.all()
-
-    # Get general information
-    general_info_list = list()
-    breach_names = ', '.join([b.name for b in breaches])
-    region_names = ', '.join([b.region.name for b in breaches])
-
-    general_info_list.append((_('Breach locations'), breach_names))
-    general_info_list.append((_('Region'), region_names))
-    general_info_list.append((_('Project'), scenario.project.friendlyname))
-
-    general_info_list += scenario.get_scenario_overview_extra_info(
-        ExtraInfoField.HEADER_GENERAL)
-
-    # Get metadata information
-    metadata_info_list = list()
-    metadata_info_list.append((_('Scenario id'), scenario.id))
-    metadata_info_list.append((_('Scenario remarks'), scenario.remarks))
-
-    metadata_info_list += scenario.get_scenario_overview_extra_info(
-        ExtraInfoField.HEADER_METADATA)
-
-    attachment_list = list()
-
-    inundationmodel_attachments = (
-        scenario.sobekmodel_inundation.attachments.
-        order_by('-uploaded_date'))
-    scenario_attachments = (
-        scenario.attachments.
-        order_by('-uploaded_date'))
-    project_attachments = (
-        scenario.project.attachments.
-        order_by('-uploaded_date'))
-
-    sobekmodel_choices = []
-
-    #Get the the sobekmodels
-    for breach in breaches:
-        for sobekmodel in breach.sobekmodels.all():
-            sobekmodel_choices += [sobekmodel.id]
-
-    breachmodel_attachments = Attachment.objects.filter(
-        content_type=SobekModel,
-        object_id__in=sobekmodel_choices
-        ).order_by('-uploaded_date')
-
-    scen_atts = [(f.file.name, os.path.split(f.file.name)[1])
-                 for f in scenario_attachments]
-    proj_atts = [(f.file.name, os.path.split(f.file.name)[1])
-                 for f in project_attachments]
-    inun_atts = [(f.file.name, os.path.split(f.file.name)[1])
-                 for f in inundationmodel_attachments]
-    brea_atts = [(f.file.name, os.path.split(f.file.name)[1])
-                 for f in breachmodel_attachments]
-
-    attachment_list.append((_('Scenario attachments'), scen_atts))
-    attachment_list.append((_('Project attachments'), proj_atts))
-    attachment_list.append((_('Inundationmodel attachments'), inun_atts))
-    attachment_list.append((_('Externalwater model attachments'), brea_atts))
-
-    #Get breach 'set' information
-    breachset_info_list = list()
-
-    for breach in breaches:
-        #Get breach information
-        scenariobreach = scenario.scenariobreach_set.get(breach=breach)
-
-        breach_info_list = list()
-        breach_info_list.append((_('Name'), breach.name))
-        breach_info_list.append((_('Initial breach width'),
-                                 scenariobreach.widthbrinit))
-        breach_info_list.append(
-            (_('Duration till breach has maximal depth'),
-             get_intervalstring_from_dayfloat(scenariobreach.tmaxdepth)))
-        breach_info_list += scenario.get_scenario_overview_extra_info(
-            ExtraInfoField.HEADER_BREACH)
-
-        #Get external water info
-        extw_info_list = list()
-        extw_info_list.append(
-            (_('Externalwater name'), breach.externalwater.name))
-        extw_info_list.append(
-            (_('Externalwater type'),
-             breach.externalwater.get_type_display()))
-        if scenariobreach.manualwaterlevelinput:
-            extw_info_list.append(
-                (_('Maximal water level'), _('manual input used')))
-            extw_info_list.append(
-                (_('Repeating period duration'), _('manual input used')))
-        else:
-            extw_info_list.append(
-                (_('Maximal water level'), scenariobreach.extwmaxlevel))
-            extw_info_list.append(
-                (_('Repeating period duration'),
-                 scenariobreach.extwrepeattime))
-
-        extw_info_list.append(
-            (_('Bottom level breach'), scenariobreach.bottomlevelbreach))
-        extw_info_list.append(
-            (_('Pit depth'), scenariobreach.pitdepth))
-
-        if breach.externalwater.type == ExternalWater.TYPE_SEA:
-            if scenariobreach.manualwaterlevelinput:
-                extw_info_list.append(
-                    (_('Duration storm'), _('manual input used')))
-                extw_info_list.append(
-                    (_('Duration peak'), _('manual input used')))
-                extw_info_list.append(
-                    (_('Tide shift'), _('manual input used')))
-            else:
-                extw_info_list.append(
-                    (_('Duration storm'),
-                     get_intervalstring_from_dayfloat(scenariobreach.tstorm)))
-                extw_info_list.append(
-                    (_('Duration peak'),
-                     get_intervalstring_from_dayfloat(scenariobreach.tpeak)))
-                extw_info_list.append(
-                    (_('Tide shift'),
-                     get_intervalstring_from_dayfloat(
-                            scenariobreach.tdeltaphase)))
-            if scenariobreach.tide != None:
-                extw_info_list.append(
-                    (_('Tide properties'), scenariobreach.tide.name))
-            if len(scenariobreach.waterlevelset.waterlevel_set.all()) > 0:
-                image_src = (
-                    reverse('flooding_service') +
-                    "?action=get_externalwater_graph_infowindow&width=350&" +
-                    "height=400&scenariobreach_id=" +
-                    str(scenariobreach.id))
-                extw_info_list.append(
-                        (_('External water graph'),
-                         '<img src="' + image_src +
-                         ' " width=350 height=400/>'))
-        elif breach.externalwater.type == ExternalWater.TYPE_LAKE:
-            extw_info_list.append(
-                        (_('Duration storm'),
-                         get_intervalstring_from_dayfloat(
-                        scenariobreach.tstorm)))
-            extw_info_list.append(
-                        (_('Duration peak'),
-                         get_intervalstring_from_dayfloat(
-                        scenariobreach.tpeak)))
-
-        elif breach.externalwater.type == ExternalWater.TYPE_CANAL:
-            pass
-        elif breach.externalwater.type == ExternalWater.TYPE_INTERNAL_LAKE:
-            pass
-        elif breach.externalwater.type == ExternalWater.TYPE_INTERNAL_CANAL:
-            pass
-        elif breach.externalwater.type == ExternalWater.TYPE_RIVER:
-            pass
-        elif breach.externalwater.type == ExternalWater.TYPE_LOWER_RIVER:
-            extw_info_list.append(
-                (_('Duration storm'),
-                 get_intervalstring_from_dayfloat(
-                        scenariobreach.tstorm)))
-            extw_info_list.append(
-                (_('Duration peak'),
-                 get_intervalstring_from_dayfloat(
-                        scenariobreach.tpeak)))
-            if scenariobreach.tide != None:
-                extw_info_list.append(
-                        (_('Tide properties'), scenariobreach.tide.name))
-
-        extw_info_list += scenario.get_scenario_overview_extra_info(
-            ExtraInfoField.HEADER_EXTERNALWATER)
-
-        breachset_info_list.append(
-            (breach.name, breach_info_list,
-             breach.externalwater.name, extw_info_list))
-
-    return render_to_response(
-        'flooding/infowindow_information.html',
-        {'general_info_list': general_info_list,
-         'metadata_info_list': metadata_info_list,
-         'breachset_info_list': breachset_info_list,
-         'attachment_list': attachment_list,
+         'attachment_list': scenario.get_attachment_list(),
          'scenario_id': scenario.id})
 
 

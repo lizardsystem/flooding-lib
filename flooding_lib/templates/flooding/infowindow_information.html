@@ -24,6 +24,21 @@
 	    </tr>
         {% endfor %}
 {% endfor %}
+{% if attachment_list %}
+	<tr class='cell'>
+		<td><b>{% trans "Attachments" %}</b></td>
+	</tr>
+	{% for attachment_type in attachment_list %}
+	    <tr class="{% cycle 'cellDark' 'cell'%}">
+	    	<td>{{ attachment_type.description }}</td>
+                {% for attachment in attachment_type.attachments %}
+
+	    	<td><a href="{% url flooding_service %}?action=get_attachment&scenario_id={{scenario_id}}&path={{ attachment.file }}">{{ attachment.filename }}</a><br>
+                {% endfor %}
+		</td>
+	    </tr>
+        {% endfor %}
+{% endif %}
 	</tbody>
 </table>
 </table>

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime
+import logging
 import os
 
 from django.contrib.auth.models import User, Group
@@ -13,6 +14,9 @@ from treebeard.al_tree import AL_Node  # Adjacent list implementation
 from flooding_presentation.models import PresentationLayer, PresentationType
 from flooding_visualization.models import ShapeDataLegend, ValueVisualizerMap
 from flooding_lib.tools.approvaltool.models import ApprovalObject
+
+
+logger = logging.getLogger(__name__)
 
 
 #------------- helper functions ------------------
@@ -57,6 +61,10 @@ class Attachment(models.Model):
 
     def __unicode__(self):
         return self.name
+
+    @property
+    def filename(self):
+        os.path.split(self.file.name)[1]
 
 
 class SobekVersion(models.Model):
@@ -933,6 +941,58 @@ class Scenario(models.Model):
                 extrainfofield__use_in_scenario_overview=True
                 ).order_by('-extrainfofield__position')
             ]
+
+    def get_attachment_list(self):
+        """Return a list with information about this scenario's
+        attachments, used to display them.
+
+        There are four types of attachments: attached to the scenario,
+        attached to the project, attached to the inundation model and
+        attached to the external water model of this scenario.
+
+        The list contains dictionaries, with key:
+
+        - type: either 'scenario', 'project', 'inundationmodel' or
+          'externalwatermodel'
+
+        - description: a localized description of same
+
+        - a list of Attachments
+        """
+
+        inundationmodel_attachments = (
+            self.sobekmodel_inundation.attachments.
+            order_by('-uploaded_date'))
+        scenario_attachments = self.attachments.order_by('-uploaded_date')
+        project_attachments = self.project.attachments.order_by(
+            '-uploaded_date')
+
+        # Get the the sobekmodels
+        sobekmodel_choices = []
+        for breach in self.breaches.all():
+            for sobekmodel in breach.sobekmodels.all():
+                sobekmodel_choices += [sobekmodel.id]
+        breachmodel_attachments = Attachment.objects.filter(
+            content_type=SobekModel,
+            object_id__in=sobekmodel_choices
+            ).order_by('-uploaded_date').all()
+
+        attachment_list = [
+            {'type': 'scenario',
+             'description': _('Scenario attachments'),
+             'attachments': scenario_attachments},
+            {'project': 'project',
+             'description': _('Project attachments'),
+             'attachments': project_attachments},
+            {'type': 'inundationmodel',
+             'description': _('Inundation model attachments'),
+             'attachments': inundationmodel_attachments},
+            {'type': 'externalwatermodel',
+             'description': _('External water model attachments'),
+             'attachments': breachmodel_attachments}
+            ]
+
+        return attachment_list
 
 
 class ScenarioBreach(models.Model):
