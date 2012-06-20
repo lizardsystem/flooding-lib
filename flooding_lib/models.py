@@ -772,6 +772,20 @@ class ExtraScenarioInfo(models.Model):
         return (unicode(self.scenario) + ', ' +
                 unicode(self.extrainfofield) + ': ' + str(self.value))
 
+    @classmethod
+    def get(cls, scenario, fieldname, scenario_overview_only=True):
+        search = {
+            'scenario': scenario,
+            'extrainfofield__name': fieldname
+            }
+        if scenario_overview_only:
+            search['extrainfofield__use_in_scenario_overview'] = True
+
+        try:
+            return cls.objects.get(**search)
+        except cls.DoesNotExist:
+            return None
+
 
 class Scenario(models.Model):
     """scenario properties:

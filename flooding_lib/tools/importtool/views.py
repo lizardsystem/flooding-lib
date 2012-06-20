@@ -328,26 +328,6 @@ def new_import(request):
     if request.method == 'POST':
         return post_new_import(request)
 
-    form_fields = []
-    header_listposition_map = {}  # save the position in the
-                                  # form_fields list for each header
-
-    # create the form_fields list (only headers, no fields added) and
-    # save for each header the position in the list
-
-    for header_id, header_title in InputField.HEADER_CHOICES:
-        header_listposition_map[header_id] = len(form_fields)
-        form_fields.append(
-            {'id': header_id, 'title': header_title, 'fields': []})
-
-    fields = InputField.objects.all().order_by('-position')
-
-    # Loop though all the fields an place them and append
-    # them at the fields of the correct tuple (so, you need the header)
-    for field in fields:
-        (form_fields[header_listposition_map[field.header]]['fields'].
-         append(field))
-
     post_url = reverse('flooding_tools_import_new')
 
     legend_html_json = simplejson.dumps(
@@ -357,12 +337,14 @@ def new_import(request):
         {'name': _('Import tool'),
          'url': reverse('flooding_tools_import_overview')},
         {'name': _('New import')}]
-    return render_to_response('import/import_scenario.html',
-                              {'fields': form_fields,
-                               'post_url': post_url,
-                               'breadcrumbs': breadcrumbs,
-                               'legend_html_json': legend_html_json,
-                               })
+
+    return render_to_response(
+        'import/import_scenario.html',
+        {'fields': InputField.grouped_input_fields(),
+         'post_url': post_url,
+         'breadcrumbs': breadcrumbs,
+         'legend_html_json': legend_html_json,
+         })
 
 
 def post_new_import(request):

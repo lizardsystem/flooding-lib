@@ -139,135 +139,6 @@ class ImportScenario(models.Model):
             self.name = '-'
             self.save()
 
-
-class ImportScenarioInputField(models.Model):
-    """ Relates an input field with a scenario
-
-    This class can be used for 'constructing' a scenario import form.
-    One can pick one or more InputField and link them to a scenario, such
-    that finally a scenario has been connected to one or more input fields.
-
-    These input fields together can be seen as a form. And like in a
-    form one can set and get values for each form field.
-
-    """
-    class Meta:
-        verbose_name = _('Import scenario input field')
-        verbose_name_plural = _('Import scenarios input fields')
-
-    FIELD_STATE_WAITING = 20
-    FIELD_STATE_APPROVED = 30
-    FIELD_STATE_DISAPPROVED = 40
-
-    FIELD_STATE_CHOICES = (
-         (FIELD_STATE_WAITING, _('Waiting')),
-         (FIELD_STATE_APPROVED, _('Approved')),
-         (FIELD_STATE_DISAPPROVED, _('Disapproved'))
-    )
-
-    importscenario = models.ForeignKey(ImportScenario, null=True)
-    inputfield = models.ForeignKey('InputField', null=True)
-    state = models.IntegerField(
-        choices=FIELD_STATE_CHOICES, default=FIELD_STATE_WAITING)
-    validation_remarks = models.TextField(blank=True)
-
-    def __unicode__(self):
-        return u'%s: %s (%s)' % (
-            self.importscenario.name, self.inputfield.name,
-            self.getValueString())
-
-    def getValue(self):
-        value_object = self.inputfield.get_or_create_value_object(self)
-        return value_object.value
-
-    def getValueString(self):
-        return str(self.getValue())
-
-    def setValue(self, value):
-        value_object = self.inputfield.get_or_create_value_object(self)
-        value_object.set(value)
-        value_object.save()
-
-    def get_editor_dict(self):
-        item = self.inputfield.get_editor_dict()
-
-        item["defaultValue"] = self.getValue()
-        if self.inputfield.type == InputField.TYPE_BOOLEAN:
-            if self.getValue() == 0:
-                item["defaultValue"] = False
-            else:
-                item["defaultValue"] = True
-
-        if self.inputfield.type == InputField.TYPE_INTERVAL:
-            item["defaultValue"] = get_intervalstring_from_dayfloat(
-                self.getValue())
-        if self.inputfield.type == InputField.TYPE_DATE:
-            a = self.getValue()
-            try:
-                item["defaultValue"] = (a[8:10] + '/' + a[5:7] +
-                                        '/' + a[0:4] + ' 3:00')
-            except:
-                pass
-        elif self.inputfield.type == InputField.TYPE_FILE:
-            item["type"] = "StaticTextItem"
-            item["required"] = False
-        return item
-
-    def get_editor_json(self):
-        return simplejson.dumps(self.get_editor_dict())
-
-    def get_static_editor_json(self):
-        item = self.get_editor_dict()
-        item["disabled"] = True
-        return simplejson.dumps(item)
-
-    def get_statestring_json(self):
-        item = {
-            "title": "status",
-            "type":  "StaticTextItem",
-            "defaultValue": (self.get_state_display() + ": " +
-                             self.validation_remarks)
-        }
-
-        if self.state == self.FIELD_STATE_APPROVED:
-            item["cellStyle"] = "approved"
-        elif self.state == self.FIELD_STATE_DISAPPROVED:
-            item["cellStyle"] = "disapproved"
-
-        if self.inputfield.visibility_dependency_field:
-            item["showIf"] = (
-                "[" + self.inputfield.visibility_dependency_value +
-                "].contains(form.getValue('" +
-                self.inputfield.visibility_dependency_field.name + "'))")
-
-        return simplejson.dumps(item)
-
-    def get_approve_remarkeditor_dict(self):
-        item = self.inputfield.get_approve_remarkeditor_dict()
-        item["defaultValue"] = self.validation_remarks,
-        if self.inputfield.visibility_dependency_field:
-            item["showIf"] = (
-                "[" + self.inputfield.visibility_dependency_value +
-                "].contains(form.getValue('" +
-                self.inputfield.visibility_dependency_field.name + "'))")
-        return item
-
-    def get_approve_remarkeditor_json(self):
-        return simplejson.dumps(self.get_approve_remarkeditor_dict())
-
-    def get_approve_statuseditor_dict(self):
-        item = self.inputfield.get_approve_statuseditor_dict()
-        item["defaultValue"] = self.state,
-        if self.inputfield.visibility_dependency_field:
-            item["showIf"] = (
-                "[" + self.inputfield.visibility_dependency_value +
-                "].contains(form.getValue('" +
-                self.inputfield.visibility_dependency_field.name + "'))")
-        return item
-
-    def get_approve_statuseditor_json(self):
-        return simplejson.dumps(self.get_approve_statuseditor_dict())
-
     def get_import_values(self):
         """Get all import values in dict form.
         - Keys of the dictionary are destination tables
@@ -432,6 +303,135 @@ class ImportScenarioInputField(models.Model):
 
         return (True, 'migratie compleet. scenario id is: {0}'.
                 format(self.scenario.id))
+
+
+class ImportScenarioInputField(models.Model):
+    """ Relates an input field with a scenario
+
+    This class can be used for 'constructing' a scenario import form.
+    One can pick one or more InputField and link them to a scenario, such
+    that finally a scenario has been connected to one or more input fields.
+
+    These input fields together can be seen as a form. And like in a
+    form one can set and get values for each form field.
+
+    """
+    class Meta:
+        verbose_name = _('Import scenario input field')
+        verbose_name_plural = _('Import scenarios input fields')
+
+    FIELD_STATE_WAITING = 20
+    FIELD_STATE_APPROVED = 30
+    FIELD_STATE_DISAPPROVED = 40
+
+    FIELD_STATE_CHOICES = (
+         (FIELD_STATE_WAITING, _('Waiting')),
+         (FIELD_STATE_APPROVED, _('Approved')),
+         (FIELD_STATE_DISAPPROVED, _('Disapproved'))
+    )
+
+    importscenario = models.ForeignKey(ImportScenario, null=True)
+    inputfield = models.ForeignKey('InputField', null=True)
+    state = models.IntegerField(
+        choices=FIELD_STATE_CHOICES, default=FIELD_STATE_WAITING)
+    validation_remarks = models.TextField(blank=True)
+
+    def __unicode__(self):
+        return u'%s: %s (%s)' % (
+            self.importscenario.name, self.inputfield.name,
+            self.getValueString())
+
+    def getValue(self):
+        value_object = self.inputfield.get_or_create_value_object(self)
+        return value_object.value
+
+    def getValueString(self):
+        return str(self.getValue())
+
+    def setValue(self, value):
+        value_object = self.inputfield.get_or_create_value_object(self)
+        value_object.set(value)
+        value_object.save()
+
+    def get_editor_dict(self):
+        item = self.inputfield.get_editor_dict()
+
+        item["defaultValue"] = self.getValue()
+        if self.inputfield.type == InputField.TYPE_BOOLEAN:
+            if self.getValue() == 0:
+                item["defaultValue"] = False
+            else:
+                item["defaultValue"] = True
+
+        if self.inputfield.type == InputField.TYPE_INTERVAL:
+            item["defaultValue"] = get_intervalstring_from_dayfloat(
+                self.getValue())
+        if self.inputfield.type == InputField.TYPE_DATE:
+            a = self.getValue()
+            try:
+                item["defaultValue"] = (a[8:10] + '/' + a[5:7] +
+                                        '/' + a[0:4] + ' 3:00')
+            except:
+                pass
+        elif self.inputfield.type == InputField.TYPE_FILE:
+            item["type"] = "StaticTextItem"
+            item["required"] = False
+        return item
+
+    def get_editor_json(self):
+        return simplejson.dumps(self.get_editor_dict())
+
+    def get_static_editor_json(self):
+        item = self.get_editor_dict()
+        item["disabled"] = True
+        return simplejson.dumps(item)
+
+    def get_statestring_json(self):
+        item = {
+            "title": "status",
+            "type":  "StaticTextItem",
+            "defaultValue": (self.get_state_display() + ": " +
+                             self.validation_remarks)
+        }
+
+        if self.state == self.FIELD_STATE_APPROVED:
+            item["cellStyle"] = "approved"
+        elif self.state == self.FIELD_STATE_DISAPPROVED:
+            item["cellStyle"] = "disapproved"
+
+        if self.inputfield.visibility_dependency_field:
+            item["showIf"] = (
+                "[" + self.inputfield.visibility_dependency_value +
+                "].contains(form.getValue('" +
+                self.inputfield.visibility_dependency_field.name + "'))")
+
+        return simplejson.dumps(item)
+
+    def get_approve_remarkeditor_dict(self):
+        item = self.inputfield.get_approve_remarkeditor_dict()
+        item["defaultValue"] = self.validation_remarks,
+        if self.inputfield.visibility_dependency_field:
+            item["showIf"] = (
+                "[" + self.inputfield.visibility_dependency_value +
+                "].contains(form.getValue('" +
+                self.inputfield.visibility_dependency_field.name + "'))")
+        return item
+
+    def get_approve_remarkeditor_json(self):
+        return simplejson.dumps(self.get_approve_remarkeditor_dict())
+
+    def get_approve_statuseditor_dict(self):
+        item = self.inputfield.get_approve_statuseditor_dict()
+        item["defaultValue"] = self.state,
+        if self.inputfield.visibility_dependency_field:
+            item["showIf"] = (
+                "[" + self.inputfield.visibility_dependency_value +
+                "].contains(form.getValue('" +
+                self.inputfield.visibility_dependency_field.name + "'))")
+        return item
+
+    def get_approve_statuseditor_json(self):
+        return simplejson.dumps(self.get_approve_statuseditor_dict())
 
 
 class StringValue(models.Model):
@@ -765,3 +765,31 @@ class InputField(models.Model):
 
     def get_approve_statuseditor_json(self):
         return simplejson.dumps(self.get_approve_statuseditor_dict())
+
+    @classmethod
+    def grouped_input_fields(cls):
+        """Returns a list of dictionaries. One dictionary for each header
+        in HEADER_CHOICES, with id the id of the header, title the title
+        of the header, and fields all the InputField objects that belong to
+        that header."""
+
+        form_fields = []
+        header_listposition_map = {}
+
+        # create the form_fields list (only headers, no fields added) and
+        # save for each header the position in the list
+
+        for header_id, header_title in cls.HEADER_CHOICES:
+            header_listposition_map[header_id] = len(form_fields)
+            form_fields.append(
+                {'id': header_id, 'title': header_title, 'fields': []})
+
+        fields = cls.objects.all().order_by('-position')
+
+        # Loop though all the fields an place them and append
+        # them at the fields of the correct tuple (so, you need the header)
+        for field in fields:
+            (form_fields[header_listposition_map[field.header]]['fields'].
+             append(field))
+
+        return form_fields

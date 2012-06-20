@@ -23,6 +23,7 @@ from flooding_lib.forms import TaskApprovalForm
 from flooding_lib.models import Attachment
 from flooding_lib.models import ExternalWater
 from flooding_lib.models import ExtraInfoField
+from flooding_lib.models import ExtraScenarioInfo
 from flooding_lib.models import Scenario
 from flooding_lib.models import ScenarioBreach
 from flooding_lib.models import SobekModel
@@ -31,6 +32,7 @@ from flooding_lib.models import TaskType
 from flooding_lib.models import UserPermission
 from flooding_lib.permission_manager import PermissionManager
 from flooding_lib.tools.approvaltool.views import approvaltable
+from flooding_lib.tools.importtool.models import InputField
 from flooding_presentation.models import Animation
 
 
@@ -91,7 +93,85 @@ def infowindow(request):
         return showattachments(request, scenario_id)
 
 
+def scenario_information(scenario):
+    fields = [
+        # Scenario identificatie
+        (_('Scenario name'), scenario.name),
+        # Scenario datum
+        (_('Project name'), scenario.project.friendlyname),
+        # Eigenaar overstromingsinformatie
+        # Beschrijving scenario
+        # Versie resultaat
+        # Motivatie rekenmethode
+        # Doel
+        # Berekeningsmethode
+        # Houdbaarheid scenario
+        ]
+
+    return fields + scenario.get_scenario_overview_extra_info(
+        ExtraInfoField.HEADER_SCENARIO)
+
+
 def infowindow_information(scenario):
+    """
+    - Get the list of headers and fields that the importtool has
+    - If the importtool field says that the data is stored in a
+      ExtraInfoField, use that to show the data
+    - Otherwise, if it's a known field on a known object, getattr it
+      from that
+    - Only keep fields with a value, only keep headers with fields
+
+    We need to add some fields that the importtool doesn't have;
+    scenario.id and attachments come to mind. So we're going to
+    manually add some fields to the start and end."""
+
+    grouped_input_fields = InputField.grouped_input_fields()
+
+    breach = scenario.breaches.all()[0]
+    scenariobreach = scenario.scenariobreach_set.get(breach=breach)
+
+    data_objects = {
+        'scenario': scenario,
+        'project': scenario.project,
+        'scenariobreach': scenariobreach,
+        'breach': breach,
+        'externalwater': breach.externalwater,
+        'region': breach.region
+        }
+
+    for header in grouped_input_fields:
+        for fieldobject in header['fields']:
+            table = fieldobject.destination_table.lower()
+            field = fieldobject.destination_field
+            if table == 'extrascenarioinfo':
+                info = ExtraScenarioInfo.get(
+                    scenario=scenario, fieldname=field)
+                if info is None:
+                    fieldobject.value = None
+                else:
+                    fieldobject.value = info.value
+            elif table in data_objects:
+                field.value = getattr(data_objects[table], field, None)
+            elif table == 'result':
+                # We do these differently
+                pass
+            else:
+                # Unknown, show it
+                field.value = '{0}/{1}'.format(table, field)
+
+        # Only keep fields with a value
+        header['fields'] = [f for f in header['fields'] if f.value]
+
+    # Only keep headers with fields
+    grouped_input_fields = [h for h in grouped_input_fields if h['fields']]
+
+    return render_to_response(
+        'flooding/infowindow_information.html',
+        {'grouped_fields': grouped_input_fields,
+         'scenario_id': scenario.id})
+
+
+def infowindow_information_old(scenario):
     """
     - Returns the information for in the infowindow
     - The information is collected from several tables in the database
@@ -104,7 +184,6 @@ def infowindow_information(scenario):
     breach_names = ', '.join([b.name for b in breaches])
     region_names = ', '.join([b.region.name for b in breaches])
 
-    general_info_list.append((_('Scenario name'), scenario.name))
     general_info_list.append((_('Breach locations'), breach_names))
     general_info_list.append((_('Region'), region_names))
     general_info_list.append((_('Project'), scenario.project.friendlyname))
