@@ -1235,7 +1235,7 @@ class Migration(SchemaMigration):
             'visualizertype': ('django.db.models.fields.IntegerField', [], {})
         },
         'flooding_worker.workflowtemplate': {
-            'Meta': {'object_name': 'WorkflowTemplate', 'db_table': "'lizard_flooding_worker_workflowtemplate'"},
+            'Meta': {'object_name': 'WorkflowTemplate'},
             'code': ('django.db.models.fields.IntegerField', [], {'max_length': '30'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
         }
