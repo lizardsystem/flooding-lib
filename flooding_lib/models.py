@@ -64,7 +64,7 @@ class Attachment(models.Model):
 
     @property
     def filename(self):
-        os.path.split(self.file.name)[1]
+        return os.path.split(self.file.name)[1]
 
 
 class SobekVersion(models.Model):
