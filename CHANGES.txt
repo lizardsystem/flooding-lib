@@ -5,8 +5,13 @@ Changelog of flooding-lib
 1.34 (unreleased)
 -----------------
 
-- Nothing changed yet.
-
+- Changed the scenario information window. It now:
+  - Shows all the headers and fields from the import new scenario screen
+  - Adds scenario id, attachments
+  To do:
+  - some nice things of the old version should be included, like the graph
+  - some things have unexpected 'missing' values (like 999) and we don't
+    filter for them yet
 
 1.33 (2012-06-15)
 -----------------
