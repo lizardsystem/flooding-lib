@@ -282,8 +282,8 @@ class ImportScenario(models.Model):
         self.copy_result_files(import_values['Result'])
 
         # These tasks aren't functional. However, a scenario's
-        # update_status() finds it status by looking at the tasks that
-        # have been successfull for it...
+        # update_status() finds its status by looking at the tasks that
+        # have been successful for it...
         Task.create_fake(
             scenario=self.scenario,
             tasktype=TaskType.TYPE_SCENARIO_CREATE_AUTO,
