@@ -26,14 +26,12 @@
 #******************************************************************************
 
 
-
 from optparse import make_option
 import csv
 
 from django.core.management.base import BaseCommand
 
-from flooding_lib.models import Breach, Scenario
-
+from flooding_lib.models import Breach
 
 
 class Command(BaseCommand):
@@ -41,13 +39,15 @@ class Command(BaseCommand):
 uitvoerder.py [options]
 
 for example:
-./uitvoerder.py --capabilities 120 --capabilities 130 --scenario-range 50 58 --sequential 1
+./uitvoerder.py --capabilities 120 --capabilities 130 \
+ --scenario-range 50 58 --sequential 1
 """)
     option_list = BaseCommand.option_list
 
     option_list += (
-        make_option('--csv-location',
-                    help='file location of csv-file with scenario information'),)
+        make_option(
+            '--csv-location',
+            help='file location of csv-file with scenario information'),)
 
     def handle(self, *args, **options):
         print(dir(args))

@@ -2,27 +2,22 @@
 from string import Template
 import datetime
 import math
-import os.path
 import string
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.contenttypes.models import ContentType
 from django.core.files.base import ContentFile
-from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render_to_response
 from django.utils.translation import ugettext_lazy as _, ungettext
 
-from flooding_lib.dates import get_intervalstring_from_dayfloat
 from flooding_lib.forms import AttachmentForm
 from flooding_lib.forms import EditScenarioPropertiesForm
 from flooding_lib.forms import ScenarioNameRemarksForm
 from flooding_lib.forms import TaskApprovalForm
 from flooding_lib.models import Attachment
-from flooding_lib.models import ExternalWater
-from flooding_lib.models import ExtraInfoField
 from flooding_lib.models import ExtraScenarioInfo
 from flooding_lib.models import Scenario
 from flooding_lib.models import ScenarioBreach
@@ -159,7 +154,8 @@ def infowindow_information(scenario):
     # Add in scenario id under the 'scenario' header
     for header in grouped_input_fields:
         if header['title'].lower() == 'scenario':
-            class dummy_field(object): pass
+            class dummy_field(object):
+                pass
             scenarioid = dummy_field()
             scenarioid.name = _('Scenario ID')
             scenarioid.value = scenario.id

@@ -9,5 +9,5 @@ def index(request):
     return render_to_response('tools/index.html',
                                {'breadcrumbs': [{'name':_('Flooding')}],
                                'user': request.user,
-                               'LANGUAGES': settings.LANGUAGES,}
+                               'LANGUAGES': settings.LANGUAGES}
                             )

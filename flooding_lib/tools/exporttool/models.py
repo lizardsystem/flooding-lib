@@ -6,6 +6,7 @@ import os.path
 from flooding_lib.models import Region, Scenario
 from flooding_base.models import Setting as BaseSetting
 
+
 class ExportRun(models.Model):
     """
     An export run of one or more scenarios to generate a
@@ -41,14 +42,18 @@ class ExportRun(models.Model):
 
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
-    export_type = models.IntegerField(choices=EXPORT_TYPE_CHOICES, default=EXPORT_TYPE_WATER_DEPTH_MAP)
+    export_type = models.IntegerField(
+        choices=EXPORT_TYPE_CHOICES,
+        default=EXPORT_TYPE_WATER_DEPTH_MAP)
     owner = models.ForeignKey(User)
     creation_date = models.DateTimeField(blank=True, null=True)
     run_date = models.DateTimeField(blank=True, null=True)
     approved_date = models.DateTimeField(blank=True, null=True)
     scenarios = models.ManyToManyField(Scenario)
     gridsize = models.PositiveIntegerField(default=50)
-    state = models.IntegerField(choices=EXPORT_STATE_CHOICES, default=EXPORT_STATE_WAITING)
+    state = models.IntegerField(
+        choices=EXPORT_STATE_CHOICES,
+        default=EXPORT_STATE_WAITING)
 
     def get_main_result(self):
         results = self.result_set.filter(area=Result.RESULT_AREA_COUNTRY)
@@ -60,14 +65,20 @@ class ExportRun(models.Model):
     def __unicode__(self):
         return self.name
 
-    def create_csv_file_for_gis_operation(self, export_result_type, csv_file_location):
+    def create_csv_file_for_gis_operation(
+        self, export_result_type, csv_file_location):
         """
         Returns a csv file containing the:
         * the region ids
-        * the result files (e.g. ASCII) related to the scenario(s) for the region with that region id
+
+        * the result files (e.g. ASCII) related to the scenario(s) for
+          the region with that region id
 
         Inputparameter:
-        * export_result_type (integer): the type of the result of the scenario (e.g. max. water depth (=1))
+
+        * export_result_type (integer): the type of the result of the
+          scenario (e.g. max. water depth (=1))
+
         * csv_file_location: the file_location to store the csv file
 
         The information is gathered by:
@@ -75,13 +86,14 @@ class ExportRun(models.Model):
         2) the regions of that scenario,
         3) the results with the specifief result_type of that scenario
         """
-        dest_dir = BaseSetting.objects.get(key = 'destination_dir').value
+        dest_dir = BaseSetting.objects.get(key='destination_dir').value
 
-        information =[]
+        information = []
         for s in self.scenarios.all():
             for r in Region.objects.filter(breach__scenario__id=s.id).all():
                 for rs in s.result_set.filter(resulttype=export_result_type):
-                    information += [(r.dijkringnr, os.path.join(dest_dir, rs.resultloc))]
+                    information += [
+                        (r.dijkringnr, os.path.join(dest_dir, rs.resultloc))]
 
         import csv
         writer = csv.writer(open(csv_file_location, "wb"))
@@ -91,8 +103,8 @@ class ExportRun(models.Model):
     def create_general_file_for_gis_operation(self, file_location):
         """" Create a file with general information
 
-        The information consists of the gridsize and the name of the export run.
-        The file is saved on the file_location
+        The information consists of the gridsize and the name of the
+        export run.  The file is saved on the file_location
 
         """
 
@@ -102,6 +114,7 @@ class ExportRun(models.Model):
         text_file.write("Gridsize: " + str(self.gridsize))
 
         text_file.close()
+
 
 class Result(models.Model):
     """ A result from an export run.
@@ -131,9 +144,9 @@ class Result(models.Model):
 
 class Setting(models.Model):
     """Stores settings for the export tool"""
-    key = models.CharField(max_length=200, unique = True)
+    key = models.CharField(max_length=200, unique=True)
     value = models.CharField(max_length=200)
     remarks = models.TextField(null=True, blank=True)
 
     def __unicode__(self):
-        return u'%s = %s'%(self.key, self.value)
+        return u'%s = %s' % (self.key, self.value)

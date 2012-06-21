@@ -23,8 +23,6 @@
 #**********************************************************************
 
 
-from django.core.management import setup_environ
-from django.conf import settings
 import os
 import logging
 import glob
@@ -37,9 +35,9 @@ import datetime
 from flooding_lib.tools.exporttool.models import ExportRun, Result
 
 
-
 log = logging.getLogger('lizard.update_export')
 log.setLevel(logging.DEBUG)
+
 
 def main(options, args):
     #define console log handler
@@ -67,16 +65,14 @@ def main(options, args):
         file = open(csvfile, "rb")
         reader = csv.reader(file)
 
-
         # Find exportid; count backwards to avoid underscores in foldernames
         exportid = csvfile.split('_')[-2]
         log.debug('exportid = ' + str(exportid))
         try:
             e_run = ExportRun.objects.get(pk=exportid)
         except:
-            log.error('No Export Run object found with id: ' + str(exportid) )
+            log.error('No Export Run object found with id: ' + str(exportid))
             sys.exit(1)
-
 
         # Skip header
         reader.next()
@@ -85,17 +81,20 @@ def main(options, args):
             log.debug(row)
 
             #Check if object already exists
-            existing_objects = Result.objects.filter(area=row[0], name=row[1], file_location=row[2], export_run=e_run)
+            existing_objects = Result.objects.filter(
+                area=row[0], name=row[1],
+                file_location=row[2], export_run=e_run)
             log.debug('existing_result_objects =' + str(existing_objects))
             if not existing_objects:
                 r = Result(area=row[0],
                            name=row[1],
                            file_location=row[2],
-                           export_run = e_run)
+                           export_run=e_run)
                 r.save()
         file.close()
         e_run.state = ExportRun.EXPORT_STATE_DONE
-        e_run.run_date = datetime.datetime.fromtimestamp(os.path.getctime(csvfile))
+        e_run.run_date = datetime.datetime.fromtimestamp(
+            os.path.getctime(csvfile))
         e_run.save()
         os.remove(csvfile)
 
@@ -104,15 +103,31 @@ if __name__ == '__main__':
     from optparse import OptionParser
     usage = "usage: %prog [options] [csv_file]"
     parser = OptionParser(usage=usage)
-    parser.add_option('--console-level', help='sets the handling level of the console.', default=logging.WARNING, type='int')
+    parser.add_option(
+        '--console-level', help='sets the handling level of the console.',
+        default=logging.WARNING, type='int')
 
-    parser.add_option('--info', help='be sanely informative - the default', action='store_const', dest='loglevel', const=logging.INFO, default=logging.INFO)
-    parser.add_option('--debug', help='be verbose', action='store_const', dest='loglevel', const=logging.DEBUG)
-    parser.add_option('--quiet', help='log warnings and errors', action='store_const', dest='loglevel', const=logging.WARNING)
-    parser.add_option('--extreme-debugging', help='be extremely verbose', action='store_const', dest='loglevel', const=0)
-    parser.add_option('--silent', help='log only errors', action='store_const', dest='loglevel', const=logging.ERROR)
+    parser.add_option(
+        '--info', help='be sanely informative - the default',
+        action='store_const', dest='loglevel',
+        const=logging.INFO, default=logging.INFO)
+    parser.add_option(
+        '--debug', help='be verbose', action='store_const',
+        dest='loglevel', const=logging.DEBUG)
+    parser.add_option(
+        '--quiet', help='log warnings and errors', action='store_const',
+        dest='loglevel', const=logging.WARNING)
+    parser.add_option(
+        '--extreme-debugging', help='be extremely verbose',
+        action='store_const', dest='loglevel', const=0)
+    parser.add_option(
+        '--silent', help='log only errors', action='store_const',
+        dest='loglevel', const=logging.ERROR)
 
-    parser.add_option('--csvpath', help='the folder where the csv-files are located that have to be processed')
+    parser.add_option(
+        '--csvpath',
+        help='the folder where the csv-files are ' +
+        'located that have to be processed')
 
     (options, args) = parser.parse_args()
     if not (options.csvpath):

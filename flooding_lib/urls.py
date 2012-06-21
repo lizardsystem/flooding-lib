@@ -154,7 +154,8 @@ urlpatterns = patterns(
         'flooding_lib.services.service_get_cutofflocations_from_scenario',
         name='flooding_service_get_cutofflocations_from_scenario'),
 
-    url(r'^service/result/(?P<object_id>\d+)/(?P<location_nr>\d+)/(?P<parameter_nr>\d+)/$',
+    url(r'^service/result/(?P<object_id>\d+)/(?P<location_nr>\d+)' +
+        r'/(?P<parameter_nr>\d+)/$',
         'flooding_lib.views_dev.service_result',
         name='flooding_service_result'),
 

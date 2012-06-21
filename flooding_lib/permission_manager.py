@@ -124,10 +124,10 @@ class PermissionManager:
         elif not(user.is_authenticated()):
             #return all regionsets of projects that belong to the demo group
             demogroup = Group.objects.get(name='demo group')
+            PSV = UserPermission.PERMISSION_SCENARIO_VIEW
             filter = Q(
                 project__projectgrouppermission__group=demogroup,
-                project__projectgrouppermission__permission=
-                    UserPermission.PERMISSION_SCENARIO_VIEW,
+                project__projectgrouppermission__permission=PSV,
                 status_cache=Scenario.STATUS_APPROVED,
                 status_cache__in=status_list)
         elif not self.check_permission(permission):
@@ -136,16 +136,15 @@ class PermissionManager:
             if permission == UserPermission.PERMISSION_SCENARIO_VIEW:
                 filter = Q(
                     project__projectgrouppermission__group__user=user,
-                    project__projectgrouppermission__permission=
-                    UserPermission.PERMISSION_SCENARIO_VIEW,
+                    project__projectgrouppermission__permission=PSV,
                     status_cache=Scenario.STATUS_APPROVED,
                     status_cache__in=status_list)
                 if self.check_permission(
                     UserPermission.PERMISSION_SCENARIO_APPROVE):
+                    PSA = UserPermission.PERMISSION_SCENARIO_APPROVE
                     filter = filter | Q(
                         project__projectgrouppermission__group__user=user,
-                        project__projectgrouppermission__permission=
-                        UserPermission.PERMISSION_SCENARIO_APPROVE,
+                        project__projectgrouppermission__permission=PSA,
                         status_cache__in=status_list)
             else:
                 filter = Q(

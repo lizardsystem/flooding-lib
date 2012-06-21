@@ -21,7 +21,9 @@ def get_symbol(request, symbol):
       - colorize (optional): <r,g,b> (float 0..1) e.g. 0.5,0.3,0.7
       - size (optional): <x,y>, cannot be 0 e.g. 32,32
       - rotate (optional): <angle> int in degrees, ccw e.g. 180
-      - shadow_height (optional): <shadow_height> shadow height in pixels e.g. 2
+
+      - shadow_height (optional): <shadow_height> shadow height in
+        pixels e.g. 2
 
     output: binary png, or exception if original does not exist
     """
@@ -66,7 +68,8 @@ def legend_shapedata(request):
     output: png image of the legend
     """
 
-    shapedatalegend = get_object_or_404(ShapeDataLegend, pk=request.GET['object_id'])
+    shapedatalegend = get_object_or_404(
+        ShapeDataLegend, pk=request.GET['object_id'])
     geo_type = shapedatalegend.presentationtype.geo_type
     if geo_type == PresentationType.GEO_TYPE_POINT:
         sm = SymbolManager(settings.SYMBOLS_DIR)
@@ -77,25 +80,25 @@ def legend_shapedata(request):
                                   {'title': title, 'blocks': blocks})
 
     elif geo_type == PresentationType.GEO_TYPE_LINE:
-        if shapedatalegend.id in [20,]:
-            legend_data = [(100,'005bff'),\
-                          (500,'00ebff'),\
-                           (1000,'4dff00'),\
-                           (5000,'fff100'),\
-                           (20000,'ff4100')]
+        if shapedatalegend.id in [20]:
+            legend_data = [(100, '005bff'),
+                          (500, '00ebff'),
+                           (1000, '4dff00'),
+                           (5000, 'fff100'),
+                           (20000, 'ff4100')]
 
-            return render_to_response('visualization/legend_shapedata_grid.html',
-                                  {'title': shapedatalegend.name,
-                                   'content': legend_data})
-
+            return render_to_response(
+                'visualization/legend_shapedata_grid.html',
+                {'title': shapedatalegend.name,
+                 'content': legend_data})
         else:
-
             sm = SymbolManager(settings.SYMBOLS_DIR)
             mpl = MapnikPointLegend(shapedatalegend, sm)
             title, blocks = mpl.get_legend_data()
 
-            return render_to_response('visualization/legend_shapedata_point.html',
-                                  {'title': title, 'blocks': blocks})
+            return render_to_response(
+                'visualization/legend_shapedata_point.html',
+                {'title': title, 'blocks': blocks})
 
     elif geo_type == PresentationType.GEO_TYPE_POLYGON:
         sm = SymbolManager(settings.SYMBOLS_DIR)
@@ -107,24 +110,27 @@ def legend_shapedata(request):
 
     elif geo_type == PresentationType.GEO_TYPE_GRID:
         try:
-            pl = get_object_or_404(PresentationLayer, pk=request.GET['presentationlayer_id'])
-            file_location = pl.presentationgrid.png_default_legend.file_location
+            pl = get_object_or_404(
+                PresentationLayer, pk=request.GET['presentationlayer_id'])
+            file_location = (
+                pl.presentationgrid.png_default_legend.file_location)
             file_folder = file_location[:file_location.rfind('\\')]
             color_mapping = file_folder + '\colormapping.csv'
 
             f = open(external_file_location(color_mapping), 'rb')
             try:
                 reader = list(csv.DictReader(f))
-                legend_data = [(float(r['leftbound']), r['colour']) for r in reader]
+                legend_data = [
+                    (float(r['leftbound']), r['colour']) for r in reader]
             finally:
                 f.close()
         except:
-            legend_data=[]
-
+            legend_data = []
 
         return render_to_response('visualization/legend_shapedata_grid.html',
                                   {'title': shapedatalegend.name,
                                    'content': legend_data})
+
 
 def uber_service(request):
     """Collection of all available services.

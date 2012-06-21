@@ -2,6 +2,7 @@ from django.test import TestCase
 
 from flooding_lib import dates
 
+
 class TestGetDayfloat(TestCase):
     def testCorrectInput(self):
         self.assertEquals(
@@ -56,5 +57,3 @@ class TestGetIntervalString(TestCase):
         self.assertEquals(
             dates.get_intervalstring_from_dayfloat(-0.5),
             '-1 d 12:00')
-
-

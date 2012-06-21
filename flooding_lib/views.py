@@ -797,10 +797,10 @@ def scenario_list(request):
             scenariobreach__extwmaxlevel__lt=search_session['waterlevel_gte'])
     if search_session['repeattime_lte'] is not None:
         objects = objects.exclude(
-            scenariobreach__extwrepeattime__gt=search_session['repeattime_lte'])
+           scenariobreach__extwrepeattime__gt=search_session['repeattime_lte'])
     if search_session['repeattime_gte'] is not None:
         objects = objects.exclude(
-            scenariobreach__extwrepeattime__lt=search_session['repeattime_gte'])
+           scenariobreach__extwrepeattime__lt=search_session['repeattime_gte'])
 
     #order the object list
     order_dict = {
@@ -865,7 +865,7 @@ def scenario_list(request):
             cutofflocations_externalwater = s.cutofflocations.filter(
                 sobekmodels__sobekmodeltype=SobekModel.SOBEKMODELTYPE_CANAL)
             cutofflocations_internal = s.cutofflocations.filter(
-                sobekmodels__sobekmodeltype=SobekModel.SOBEKMODELTYPE_INUNDATION)
+              sobekmodels__sobekmodeltype=SobekModel.SOBEKMODELTYPE_INUNDATION)
             try:
                 casualties = s.presentationlayer.filter(
                     presentationtype__code="casualties")[0].value
@@ -997,7 +997,7 @@ def scenario_list(request):
                     ).count(),
                 _('count internal'),
                 o.cutofflocations.filter(
-                    sobekmodels__sobekmodeltype=SobekModel.SOBEKMODELTYPE_INUNDATION
+              sobekmodels__sobekmodeltype=SobekModel.SOBEKMODELTYPE_INUNDATION
                     ).count(),
                 )
 

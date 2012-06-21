@@ -20,15 +20,20 @@ class ProjectGroupPermissionInline(admin.TabularInline):
     model = ProjectGroupPermission
     extra = 8
 
+
 class RegionAdmin(OSMGeoAdmin):
     list_filter = ('active', 'sobekmodels', )
     search_fields = ['name', 'longname', ]
     filter_vertical = ['maps']
 
+
 class SobekmodelAdmin(admin.ModelAdmin):
     list_filter = ('active', 'sobekmodeltype', 'regions', )
-    list_display = ('active', 'code', 'sobekmodeltype', 'project_fileloc', 'model_case', 'model_version', 'model_varname',)
+    list_display = (
+        'active', 'code', 'sobekmodeltype', 'project_fileloc',
+        'model_case', 'model_version', 'model_varname',)
     search_fields = ['var', 'longname', ]
+
 
 class ProjectGroupPermissionAdmin(admin.ModelAdmin):
     list_filter = ('group', 'project', 'permission',)

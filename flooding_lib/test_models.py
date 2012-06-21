@@ -1,10 +1,12 @@
 import factory
-import mock
+#import mock
 
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 
 from flooding_lib import models
+
+## Helper classes
 
 
 class FakeObject(object):
@@ -12,6 +14,8 @@ class FakeObject(object):
     def __init__(self, **kwargs):
         for attribute, value in kwargs.iteritems():
             setattr(self, attribute, value)
+
+## Model factories
 
 
 class ContentTypeF(factory.Factory):
@@ -24,6 +28,8 @@ class AttachmentF(factory.Factory):
     content_type = ContentTypeF.create()
     object_id = 1
 
+## Test cases
+
 
 class TestHelperFunctions(TestCase):
     def testColorToHex_CorrectInput(self):
@@ -33,8 +39,8 @@ class TestHelperFunctions(TestCase):
 
     def testAttachmentPath_CorrectInput(self):
         instance = FakeObject(
-            content_type = u'test_content_type',
-            object_id = 1234)
+            content_type=u'test_content_type',
+            object_id=1234)
 
         self.assertEquals(
             'attachments/test_content_type/1234/filename.zip',
