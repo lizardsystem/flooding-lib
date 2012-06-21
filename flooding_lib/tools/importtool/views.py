@@ -326,7 +326,7 @@ def new_import(request):
     """
 
     if request.method == 'POST':
-        return post_new_import(request)
+        return post_new_import(request.POST)
 
     post_url = reverse('flooding_tools_import_new')
 
@@ -347,7 +347,7 @@ def new_import(request):
          })
 
 
-def post_new_import(request):
+def post_new_import(posted_values):
     """Handles POSTing of the form. Does no validation, we rely on
     Javascript for that (!)."""
 
@@ -362,14 +362,14 @@ def post_new_import(request):
     # loop through all posted fields, search the corresponding input
     # field object. Get or create the importscenario_inputfield and
     # set the value, given in the POST.
-    for field in request.POST:
+    for field, value in posted_values.iteritems():
         field_ref = InputField.objects.filter(name=field)
         if field_ref.count() == 1:
             field_ref = field_ref[0]
             importscenario_inputfield, new = (
                 ImportScenarioInputField.objects.get_or_create(
                     importscenario=importscenario, inputfield=field_ref))
-            importscenario_inputfield.setValue(request.POST[field])
+            importscenario_inputfield.setValue(value)
 
     importscenario.state = ImportScenario.IMPORT_STATE_WAITING
     importscenario.save()
