@@ -415,10 +415,12 @@ def service_get_wms_of_shape(
             "+towgs84=565.237,50.0087,465.658,-0.406857,0.350733,"
             "-1.87035,4.0812 +units=m +no_defs")
         lyrl = mapnik.Layer('lines', rds)
-        lyrl.datasource = mapnik.Shapefile(
-            file=external_file_location(
-                str(presentation_dir + '\\' +
-                    pl.presentationshape.geo_source.file_location)))
+# Commented out, variable 'presentation_dir' doesn't exist so this
+# cannot work. -- RG20120621
+#        lyrl.datasource = mapnik.Shapefile(
+#            file=external_file_location(
+#                str(presentation_dir + '\\' +
+#                    pl.presentationshape.geo_source.file_location)))
         lyrl.styles.append('Line Style2')
         m.layers.append(lyrl)
 
