@@ -1,6 +1,4 @@
-from django.conf.urls.defaults import *
-from django.core.urlresolvers import reverse
-from django.utils.translation import ugettext as _
+from django.conf.urls.defaults import patterns, url
 
 urlpatterns = patterns(
     '',

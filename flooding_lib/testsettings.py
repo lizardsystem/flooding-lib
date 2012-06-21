@@ -45,10 +45,3 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     # {{ STATIC_URL }}myapp/my.css in your templates.
     'staticfiles.context_processors.static_url',
     )
-
-
-try:
-    # Import local settings that aren't stored in svn.
-    from flooding_lib.local_testsettings import *
-except ImportError:
-    pass
