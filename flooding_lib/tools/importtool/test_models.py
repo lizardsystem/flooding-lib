@@ -32,6 +32,7 @@ class InputFieldF(factory.Factory):
 
     name = 'test'
     header = models.InputField.HEADER_REMAINING
+    type = models.InputField.TYPE_STRING
     position = 0
 
 
@@ -46,14 +47,12 @@ class TestImportScenarioInputField(TestCase):
         Then get the input field back from the database, get the filled in
         ImportScenarioInputField back from the database, and return it."""
 
-        import_scenario = ImportScenarioF()
-        import_scenario.save()
+        import_scenario = ImportScenarioF.create()
 
-        input_field = InputFieldF(
+        input_field = InputFieldF.create(
             type=inputfield_type, name=inputfield_name)
-        input_field.save()
 
-        isif = ImportScenarioInputFieldF(
+        isif = ImportScenarioInputFieldF.create(
             importscenario=import_scenario, inputfield=input_field)
         isif.setValue(value_in)
 
@@ -93,3 +92,50 @@ class TestImportScenarioInputField(TestCase):
                 models.InputField.TYPE_INTERVAL, 'test_interval', '5 d 10:30')
             self.assertEquals(isif.getValue(), 5.5)
             mocked_function.assertCalledWith('5 d 10:30')
+
+
+class TestImportScenario(TestCase):
+    def testReceiveInputFields(self):
+        testfields = {
+            'test1': 'whee',
+            'test2': 3
+            }
+
+        test1 = InputFieldF.create(
+            name='test1',
+            type=models.InputField.TYPE_STRING)
+        test2 = InputFieldF.create(
+            name='test2',
+            type=models.InputField.TYPE_INTEGER)
+
+        importscenario = ImportScenarioF.create()
+
+        importscenario.receive_input_fields(testfields)
+
+        try:
+            isif = models.ImportScenarioInputField.objects.get(
+                importscenario=importscenario, inputfield=test1)
+        except models.ImportScenarioInputField.DoesNotExist:
+            raise AssertionError(
+                "importscenarioimportfield test1 does not exist")
+
+        try:
+            value = models.StringValue.objects.get(
+                importscenario_inputfield=isif)
+            self.assertEquals(value.value, 'whee')
+        except models.StringValue.DoesNotExist:
+            raise AssertionError("stringvalue does not exist")
+
+        try:
+            isif = models.ImportScenarioInputField.objects.get(
+                importscenario=importscenario, inputfield=test2)
+        except models.ImportScenarioInputField.DoesNotExist:
+            raise AssertionError(
+                "importscenarioimportfield test2 does not exist")
+
+        try:
+            value = models.IntegerValue.objects.get(
+                importscenario_inputfield=isif)
+            self.assertEquals(value.value, 3)
+        except models.StringValue.DoesNotExist:
+            raise AssertionError("integervalue does not exist")

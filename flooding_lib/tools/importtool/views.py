@@ -164,6 +164,7 @@ def approve_import(request, import_scenario_id):
                         'edstate.' + field)
                     importscenariovalues.save()
         importscenario.update_scenario_name()
+        importscenario.save()
         answer = {
             'successful': 'true',
             'post_remarks': 'opgeslagen',
@@ -262,6 +263,8 @@ def verify_import(request, import_scenario_id):
                 importscenario_inputfield.setValue(request.POST[field])
 
         importscenario.update_scenario_name()
+        importscenario.save()
+
         answer = {
             'successful': 'true',
             'remarks': 'opgeslagen',
@@ -326,7 +329,7 @@ def new_import(request):
     """
 
     if request.method == 'POST':
-        return post_new_import(request.POST)
+        return post_new_import(request.POST, request.user)
 
     post_url = reverse('flooding_tools_import_new')
 
@@ -347,7 +350,7 @@ def new_import(request):
          })
 
 
-def post_new_import(posted_values):
+def post_new_import(posted_values, owner):
     """Handles POSTing of the form. Does no validation, we rely on
     Javascript for that (!)."""
 
@@ -356,24 +359,13 @@ def post_new_import(posted_values):
     approvalobject.approvalobjecttype.add(
         ApprovalObjectType.objects.get(pk=1))
     importscenario = ImportScenario.objects.create(
-        owner=request.user, name='nog invullen',
+        owner=owner, name='-',
         approvalobject=approvalobject)
 
-    # loop through all posted fields, search the corresponding input
-    # field object. Get or create the importscenario_inputfield and
-    # set the value, given in the POST.
-    for field, value in posted_values.iteritems():
-        field_ref = InputField.objects.filter(name=field)
-        if field_ref.count() == 1:
-            field_ref = field_ref[0]
-            importscenario_inputfield, new = (
-                ImportScenarioInputField.objects.get_or_create(
-                    importscenario=importscenario, inputfield=field_ref))
-            importscenario_inputfield.setValue(value)
-
-    importscenario.state = ImportScenario.IMPORT_STATE_WAITING
-    importscenario.save()
+    importscenario.receive_input_fields(posted_values)
     importscenario.update_scenario_name()
+    importscenario.save()
+
     answer = {
         'successful': 'true',
         'remarks': 'opgeslagen',
@@ -565,7 +557,7 @@ def group_import(request):
 
 
 def post_group_import(request, form):
-    # create a GroupImport object and fill it
+    """create a GroupImport object and fill it"""
     groupimport = GroupImport(
         name=form.cleaned_data['name'],
         table=None,
@@ -713,6 +705,7 @@ def post_group_import(request, form):
                                     filevalue.delete()
 
                     importscenario.update_scenario_name()
+                    importscenario.save()
 
         #to do. check of files aanwezig in zipfile
         remarks.append('klaar met inladen')

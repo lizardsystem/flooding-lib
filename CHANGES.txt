@@ -5,10 +5,15 @@ Changelog of flooding-lib
 1.35 (unreleased)
 -----------------
 
+- Add breadcrumbs to add files screen in import (#3687)
+
+- Make WAITING the default state for new ImportScenarios (#3685)
+
 - Large scale code formatting (pep8/pyflakes), down to 0 errors from
   ~2300
 
-- Add breadcrumbs to add files screen in import (#3687)
+- Refactor and test import code some more (move functionality from
+  views into models)
 
 1.34 (2012-06-20)
 -----------------

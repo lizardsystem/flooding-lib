@@ -116,7 +116,7 @@ class ImportScenario(models.Model):
     owner = models.ForeignKey(User, help_text=_('The owner of the scenario.'))
     creation_date = models.DateTimeField(auto_now_add=True)
     state = models.IntegerField(
-        choices=IMPORT_STATE_CHOICES, default=IMPORT_STATE_NONE)
+        choices=IMPORT_STATE_CHOICES, default=IMPORT_STATE_WAITING)
     action_taker = models.CharField(max_length=200, blank=True, null=True)
 
     validation_remarks = models.TextField(blank=True, null=True, default='-')
@@ -125,6 +125,9 @@ class ImportScenario(models.Model):
         return u'%s (%s)' % (self.name, self.get_state_display())
 
     def update_scenario_name(self):
+        """The Scenario name isn't actually imported yet, but we can
+        use it for the ImportScenario just as well."""
+
         try:
             field = self.importscenarioinputfield_set.get(
                 inputfield__destination_table="Scenario",
@@ -133,10 +136,22 @@ class ImportScenario(models.Model):
             if name == '':
                 name = '-'
             self.name = name
-            self.save()
         except ImportScenarioInputField.DoesNotExist:
             self.name = '-'
-            self.save()
+
+    def receive_input_fields(self, fields):
+        """Loop through all posted fields, search the corresponding
+        input field object. Get or create the
+        importscenario_inputfield and set the value, given in the
+        fields dictionary."""
+        for field, value in fields.iteritems():
+            input_fields = InputField.objects.filter(name=field)
+            if input_fields.count() == 1:
+                input_field = input_fields[0]
+                importscenario_inputfield, _ = (
+                    ImportScenarioInputField.objects.get_or_create(
+                        importscenario=self, inputfield=input_field))
+                importscenario_inputfield.setValue(value)
 
     def get_import_values(self):
         """Get all import values in dict form.
