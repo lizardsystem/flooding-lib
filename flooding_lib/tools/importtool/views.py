@@ -478,6 +478,11 @@ def upload_import_scenario_files(request, import_scenario_id):
             return post_upload_import_scenario_files(
                 form, request.FILES, importscenario)
 
+    breadcrumbs = [
+        {'name': _('Import tool'),
+         'url': reverse('flooding_tools_import_overview')},
+        {'name': _('Add files')}]
+
     file_inputfields = InputField.objects.filter(type=InputField.TYPE_FILE)
     file_inputfields = file_inputfields.order_by('name').reverse()
     file_urls = []
@@ -502,6 +507,7 @@ def upload_import_scenario_files(request, import_scenario_id):
 
     return render_to_response('import/import_file_upload.html',
                               {'form': form,
+                               'breadcrumbs': breadcrumbs,
                                'import_scenario_id': import_scenario_id,
                                'file_urls': file_urls})
 

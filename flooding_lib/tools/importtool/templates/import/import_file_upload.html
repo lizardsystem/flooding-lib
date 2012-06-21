@@ -5,7 +5,7 @@
 	{% trans 'Files' %}
 {% endblock %}
 
-{% block stylesheets %}	
+{% block stylesheets %}
 		<link rel="shortcut icon" href="{{ url_favicon }}">
 		<link href="{% url root_url %}static_media/style/style.css" media="screen" type="text/css" rel="stylesheet">
 		<link href="{% url root_url %}static_media/style/forms.css" media="screen" type="text/css" rel="stylesheet">
@@ -19,14 +19,14 @@
 <form action="{% url flooding_tools_upload_files import_scenario_id %}" enctype="multipart/form-data" method="post">
 <h1>{% trans 'Add files' %}</h1>
    	{%if file_urls %}
-   	    <h2>{% trans 'Already uploaded files' %}</h2>   	    
-   	    
-		{% for fileurl in file_urls %}	
+   	    <h2>{% trans 'Already uploaded files' %}</h2>
+
+		{% for fileurl in file_urls %}
 		<a href="{% url flooding_service %}?action=get_import_scenario_uploaded_file&path={{fileurl.0}}">{{fileurl.1}}</a><BR>
-		{% endfor %} 	
+		{% endfor %}
 		<BR><BR>
 	{% endif %}
-	
+
     <table>
         {{ form.as_table }}
        	<tr><td><FORM><INPUT TYPE="button" value="Terug naar gegevens" onClick="history.go(-1);"></FORM>         <input type="submit" value="{% trans 'Submit' %}" /></td></tr>
