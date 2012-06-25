@@ -71,7 +71,7 @@ def external_file_location(filename):
 @never_cache
 def service_get_region_tree(
     request, permission=UserPermission.PERMISSION_SCENARIO_VIEW,
-    filter_through_scenario=False, filter_has_model=False):
+    filter_has_model=False):
     """Get a tree of regionsets and regions
 
     optional: Filter on permissions
@@ -92,11 +92,7 @@ def service_get_region_tree(
         if permission_from_get is not None:
             permission = int(permission_from_get)
     pm = PermissionManager(request.user)
-    if filter_through_scenario:
-        regionset_list = pm.get_regionsets(permission, True)
-    else:
-        regionset_list = pm.get_regionsets(permission)
-
+    regionset_list = pm.get_regionsets(permission)
     region_list_total = pm.get_regions(permission)
 
     object_list = []

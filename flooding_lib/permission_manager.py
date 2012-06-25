@@ -12,7 +12,6 @@ log = logging.getLogger('permission_manager')
 
 def get_permission_manager(user):
     """Factory function for the three types of permission managers."""
-
     if not user.is_authenticated():
         return AnonymousPermissionManager()
     elif user.is_superuser:
@@ -34,13 +33,11 @@ class SuperuserPermissionManager(object):
         return Project.objects.all()
 
     def get_regionsets(self,
-                       permission=UserPermission.PERMISSION_SCENARIO_VIEW,
-                       through_scenario=False):
+                       permission=UserPermission.PERMISSION_SCENARIO_VIEW):
         """Superuser can see all RegionSets."""
         return RegionSet.objects.all()
 
-    def get_regions(self, permission=UserPermission.PERMISSION_SCENARIO_VIEW,
-                    through_scenario=False):
+    def get_regions(self, permission=UserPermission.PERMISSION_SCENARIO_VIEW):
         """Superuser can see all Regions."""
         return Region.objects.all()
 
@@ -89,24 +86,18 @@ class AnonymousPermissionManager(object):
             projectgrouppermission__permission=permission)
 
     def get_regionsets(self,
-                       permission=UserPermission.PERMISSION_SCENARIO_VIEW,
-                       through_scenario=False):
+                       permission=UserPermission.PERMISSION_SCENARIO_VIEW):
         """Find regionsets with given permission for a user and return them."""
 
         project_list = Project.objects.filter(
             projectgrouppermission__group__name='demo group',
             projectgrouppermission__permission=permission)
 
-        if through_scenario:
-            return RegionSet.objects.filter(
-                region__breach__scenario__project_in=project_list).distinct()
-        else:
-            return RegionSet.objects.filter(
-                Q(project__in=project_list) |
-                Q(regions__project__in=project_list)).distinct()
+        return RegionSet.objects.filter(
+            Q(project__in=project_list) |
+            Q(regions__project__in=project_list)).distinct()
 
-    def get_regions(self, permission=UserPermission.PERMISSION_SCENARIO_VIEW,
-                    through_scenario=False):
+    def get_regions(self, permission=UserPermission.PERMISSION_SCENARIO_VIEW):
         """Find regions with given permission for a user and return them."""
 
         #return all regionsets of projects that belong to the demo group
@@ -115,12 +106,7 @@ class AnonymousPermissionManager(object):
             Q(projectgrouppermission__group=demogroup,
               projectgrouppermission__permission=permission))
 
-        if through_scenario:
-            return Region.objects.filter(
-                Q(region__breach__scenario__project__in=project_list) |
-                Q(breach__scenario__project__in=project_list)).distinct()
-        else:
-            return Region.objects.filter(
+        return Region.objects.filter(
                 Q(project__in=project_list) |
                 Q(regionset__project__in=project_list)).distinct()
 
@@ -228,24 +214,18 @@ class UserPermissionManager(object):
             projectgrouppermission__permission=permission)
 
     def get_regionsets(self,
-                       permission=UserPermission.PERMISSION_SCENARIO_VIEW,
-                       through_scenario=False):
+                       permission=UserPermission.PERMISSION_SCENARIO_VIEW):
         """Find regionsets with given permission for a user and return them."""
         if not self.check_permission(permission):
             return RegionSet.objects.filter(pk=-1)
 
         project_list = self.get_projects(permission)
 
-        if through_scenario:
-            return RegionSet.objects.filter(
-                region__breach__scenario__project_in=project_list).distinct()
-        else:
-            return RegionSet.objects.filter(
-                Q(project__in=project_list) |
-                Q(regions__project__in=project_list)).distinct()
+        return RegionSet.objects.filter(
+            Q(project__in=project_list) |
+            Q(regions__project__in=project_list)).distinct()
 
-    def get_regions(self, permission=UserPermission.PERMISSION_SCENARIO_VIEW,
-                    through_scenario=False):
+    def get_regions(self, permission=UserPermission.PERMISSION_SCENARIO_VIEW):
         """Find regions with given permission for a user and return them."""
 
         if not self.check_permission(permission):
@@ -255,14 +235,9 @@ class UserPermissionManager(object):
             Q(projectgrouppermission__group__user=self.user,
               projectgrouppermission__permission=permission))
 
-        if through_scenario:
-            return Region.objects.filter(
-                Q(region__breach__scenario__project__in=project_list) |
-                Q(breach__scenario__project__in=project_list)).distinct()
-        else:
-            return Region.objects.filter(
-                Q(project__in=project_list) |
-                Q(regionset__project__in=project_list)).distinct()
+        return Region.objects.filter(
+            Q(project__in=project_list) |
+            Q(regionset__project__in=project_list)).distinct()
 
     def get_scenarios(
         self, breach=None, permission=UserPermission.PERMISSION_SCENARIO_VIEW,
