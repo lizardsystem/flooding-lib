@@ -10,15 +10,20 @@ from flooding_lib.models import ProjectGroupPermission, Scenario
 log = logging.getLogger('permission_manager')
 
 
-def PermissionManager(user):
+def get_permission_manager(user):
     """Factory function for the three types of permission managers."""
 
-    if user.is_superuser:
-        return SuperuserPermissionManager()
-    elif not user.is_authenticated():
+    if not user.is_authenticated():
         return AnonymousPermissionManager()
+    elif user.is_superuser:
+        return SuperuserPermissionManager()
     else:
         return UserPermissionManager(user)
+
+
+def PermissionManager(user):
+    """Placeholder, because there used to be a class of this name."""
+    return get_permission_manager(user)
 
 
 class SuperuserPermissionManager(object):
@@ -79,9 +84,8 @@ class AnonymousPermissionManager(object):
         """Find projects with given permission and return them."""
 
         #anonymous users: show all demo projects
-        demogroup = Group.objects.get(name='demo group')
         return Project.objects.filter(
-            projectgrouppermission__group=demogroup,
+            projectgrouppermission__group__name='demo group',
             projectgrouppermission__permission=permission)
 
     def get_regionsets(self,
@@ -89,9 +93,8 @@ class AnonymousPermissionManager(object):
                        through_scenario=False):
         """Find regionsets with given permission for a user and return them."""
 
-        demogroup = Group.objects.get(name='demo group')
         project_list = Project.objects.filter(
-            projectgrouppermission__group=demogroup,
+            projectgrouppermission__group__name='demo group',
             projectgrouppermission__permission=permission)
 
         if through_scenario:
@@ -168,11 +171,10 @@ class AnonymousPermissionManager(object):
 
         #last chance: user is not authenticated, then the project must
         #fall in the 'demo group'
-        demogroup = Group.objects.filter(name='demo group')[0]
         return ProjectGroupPermission.objects.filter(
-            group=demogroup,
+            group__name='demo group',
             project=project,
-            permission=permission).exist()
+            permission=permission).exists()
 
     def check_regionset_permission(self, regionset, permission):
         """Check regionset access permission."""
@@ -186,13 +188,11 @@ class AnonymousPermissionManager(object):
     def check_region_permission(self, region, permission):
         """Check region access permission."""
 
-        demogroup = Group.objects.get(name='demo group')
-        perms = ProjectGroupPermission.objects.filter(
-            permission=permission, group=demogroup).filter(
+        return ProjectGroupPermission.objects.filter(
+            permission=permission,
+            group__name='demo group').filter(
             Q(project__regions=region) |
-            Q(project__regionsets__regions=region)).count()
-
-        return bool(perms > 0)
+            Q(project__regionsets__regions=region)).exists()
 
 
 class UserPermissionManager(object):
@@ -247,13 +247,12 @@ class UserPermissionManager(object):
     def get_regions(self, permission=UserPermission.PERMISSION_SCENARIO_VIEW,
                     through_scenario=False):
         """Find regions with given permission for a user and return them."""
-        user = self.user
 
         if not self.check_permission(permission):
             return Region.objects.filter(pk=-1)
 
         project_list = Project.objects.filter(
-            Q(projectgrouppermission__group__user=user,
+            Q(projectgrouppermission__group__user=self.user,
               projectgrouppermission__permission=permission))
 
         if through_scenario:
@@ -275,11 +274,11 @@ class UserPermissionManager(object):
 
 
         get list of scenarios"""
-        if status_list == None:
-            status_list = [a for a, b in Scenario.STATUS_CHOICES]
-
         if not self.check_permission(permission):
             return Scenario.objects.filter(pk=-1)
+
+        if status_list == None:
+            status_list = [a for a, b in Scenario.STATUS_CHOICES]
 
         if permission == UserPermission.PERMISSION_SCENARIO_VIEW:
             PSV = UserPermission.PERMISSION_SCENARIO_VIEW
@@ -329,13 +328,15 @@ class UserPermissionManager(object):
         """
         #one of users groups must have permission for this project
         return ProjectGroupPermission.objects.filter(
-            group__in=self.user.groups.all(),
+            group__user=self.user,
             project=project,
-            permission=permission).exist()
+            permission=permission).exists()
 
     def check_regionset_permission(self, regionset, permission):
         """Check regionset access permission."""
 
+        # User has this permission on a regionset if he has this
+        # permission on any of the projects related to this regionset
         return any(self.check_project_permission(p, permission)
                    for p in regionset.project_set.all())
 
