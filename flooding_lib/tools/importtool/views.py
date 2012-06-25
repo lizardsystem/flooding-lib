@@ -33,30 +33,39 @@ from flooding_lib.tools.importtool.models import InputField
 def checks_permission(permission, message):
     """Decorator that can be used on a view. If it is, the view checks
     whether the user is logged in and has permission 'permission'. If
-    user doesn't, the message 'message' is returned."""
+    user doesn't, the message 'message' is returned.
+
+    If permission is a tuple, check if user has one of the permissions
+    in it."""
 
     def permission_checking_decorator(f):
         @functools.wraps(f)
         def wrapper(request, *args, **kwargs):
+            if isinstance(permission, tuple):
+                permissions = permission
+            else:
+                permissions = (permission,)
+
             if not (request.user.is_authenticated() and
-                    request.user.has_perm(permission)):
+                    any(request.user.has_perm(perm)
+                        for perm in permissions)):
                 return HttpResponse(message)
             return f(request, *args, **kwargs)
         return wrapper
     return permission_checking_decorator
 
 
+@checks_permission(
+    ('importtool.can_upload', 'importtool.can_approve'),
+    _("No permission to upload data or login"))
 def overview(request):
     """
     Renders Lizard-flooding import page, contains among others
     an overview of the imported scenarios.
     """
     has_approve_rights = False
-    if not (request.user.is_authenticated() and
-            (request.user.has_perm('importtool.can_upload') or
-             request.user.has_perm('importtool.can_approve'))):
-        return HttpResponse(_("No permission to upload data or login"))
-    elif request.user.has_perm('importtool.can_approve'):
+
+    if request.user.has_perm('importtool.can_approve'):
         #show all uploaded scenarios
         importscenarios = ImportScenario.objects.filter()
         has_approve_rights = True
@@ -92,16 +101,13 @@ def overview(request):
                                })
 
 
+@checks_permission(
+    'importtool.can_approve', _("No permission to approve scenario or login"))
 def approve_import(request, import_scenario_id):
     """
     Renders Lizard-flooding page for verifying the data of a proposed
     scenario import. The administrator has to verify the results.
     """
-    user = request.user
-    if not (user.is_authenticated() and
-            user.has_perm('importtool.can_approve')):
-        return HttpResponse(_("No permission to approve scenario or login"))
-
     importscenario = get_object_or_404(ImportScenario, pk=import_scenario_id)
 
     if request.method == 'POST':
