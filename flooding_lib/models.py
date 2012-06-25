@@ -805,6 +805,8 @@ class Scenario(models.Model):
     remarks = models.TextField(
         _('remarks'), blank=True, null=True, default=None)
     project = models.ForeignKey(Project)
+    x_projects = models.ManyToManyField(
+        Project, through='ScenarioProject', related_name='x_scenarios')
     attachments = generic.GenericRelation(Attachment)
     approvalobject = models.ForeignKey(
         ApprovalObject, blank=True, null=True, default=None)
@@ -960,6 +962,18 @@ class Scenario(models.Model):
             ]
 
         return attachment_list
+
+
+class ScenarioProject(models.Model):
+    """Table implementing the ManyToMany relation between Scenario and Project.
+
+    Model is needed because each scenario has one 'main' project and zero or more
+    extra projects."""
+
+    scenario = models.ForeignKey(Scenario)
+    project = models.ForeignKey(Project)
+
+    is_main_project = models.BooleanField(default=False)
 
 
 class ScenarioBreach(models.Model):
