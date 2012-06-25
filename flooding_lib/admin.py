@@ -4,8 +4,6 @@ from django.contrib.gis.admin import OSMGeoAdmin
 from flooding_lib.models import (Attachment, Breach, BreachSobekModel,
                     CutoffLocation, CutoffLocationSet,
                     CutoffLocationSobekModelSetting, Dike,
-                    PermissionProjectGridDataLegend,
-                    PermissionProjectShapeDataLegend,
                     Project, ProjectGroupPermission, Region, RegionSet, Map,
                     Result, ResultType,
                     ResultType_PresentationType, Scenario, ScenarioBreach,
@@ -93,8 +91,6 @@ admin.site.register(ExternalWater)
 admin.site.register(ExtraInfoField)
 admin.site.register(ExtraScenarioInfo)
 admin.site.register(Map)
-admin.site.register(PermissionProjectGridDataLegend)
-admin.site.register(PermissionProjectShapeDataLegend)
 admin.site.register(Project, ProjectAdmin)
 admin.site.register(ProjectGroupPermission, ProjectGroupPermissionAdmin)
 admin.site.register(Region, RegionAdmin)
