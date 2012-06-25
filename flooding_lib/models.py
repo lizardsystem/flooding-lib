@@ -690,38 +690,6 @@ class ProjectGroupPermission(models.Model):
                  self.get_permission_display()))
 
 
-class PermissionProjectShapeDataLegend(models.Model):
-    """View permissions for visualization.models.ShapeDataLegend
-    """
-    project = models.ForeignKey(Project)
-    shapedatalegend = models.ForeignKey(ShapeDataLegend)
-
-    class meta:
-        verbose_name = _('Permission project shapedatalegend')
-        verbose_name_plural = _('Permissions project shapedatalegend')
-        db_table = 'flooding_permissionprojectshapedatalegend'
-
-    def __unicode__(self):
-        return (u'view %s - %s' %
-                (unicode(self.project), unicode(self.shapedatalegend)))
-
-
-class PermissionProjectGridDataLegend(models.Model):
-    """View permissions for visualization.models.ValueVisualizerMap
-    """
-    project = models.ForeignKey(Project)
-    griddatalegend = models.ForeignKey(ValueVisualizerMap)
-
-    class meta:
-        verbose_name = _('Permission project griddatalegend')
-        verbose_name_plural = _('Permissions project griddatalegend')
-        db_table = 'flooding_permissinoprojectgriddatalegend'
-
-    def __unicode__(self):
-        return (u'view %s - %s' %
-                (unicode(self.project), unicode(self.griddatalegend)))
-
-
 class ExtraInfoField(models.Model):
     """extra informatie velden voor scenarios
     """
