@@ -40,11 +40,6 @@ def get_permission_manager(user=None):
         return UserPermissionManager(user)
 
 
-def PermissionManager(user):
-    """Placeholder, because there used to be a class of this name."""
-    return get_permission_manager(user)
-
-
 class SuperuserPermissionManager(object):
     """Superusers can do everything they want, permissions are all True."""
 
@@ -213,7 +208,7 @@ class UserPermissionManager(object):
     ...     UserPermission(
     ...         user=u,
     ...         permission=UserPermission.PERMISSION_SCENARIO_VIEW).save()
-    >>> pm = PermissionManager(u)
+    >>> pm = get_permission_manager(u)
     >>> pm.check_permission(UserPermission.PERMISSION_SCENARIO_VIEW)
     True
 
