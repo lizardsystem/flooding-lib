@@ -20,7 +20,7 @@ from matplotlib.ticker import MultipleLocator
 from matplotlib.ticker import FormatStrFormatter
 from matplotlib.ticker import LinearLocator
 from osgeo import ogr
-import PIL.Image
+import Image
 import mapnik
 import matplotlib.pyplot as plt
 
@@ -434,7 +434,7 @@ def service_get_wms_of_shape(
 
     log.debug('start PIL ' + str(datetime.datetime.now()))
     # you can use this if you want te modify image with PIL
-    imgPIL = PIL.Image.fromstring('RGBA', (width, height), img.tostring())
+    imgPIL = Image.fromstring('RGBA', (width, height), img.tostring())
     #imgPIL = imgPIL.convert('RGB')
     buffer = StringIO.StringIO()
     imgPIL.save(buffer, 'png')  # ,transparency = 10

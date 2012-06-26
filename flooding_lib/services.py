@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import Image
-import PIL
 import StringIO
 import mapnik
 import os
@@ -911,7 +910,7 @@ def service_get_existing_embankments_shape(
     mapnik.render(m, img)
 
     # you can use this if you want te modify image with PIL
-    imgPIL = PIL.Image.fromstring(
+    imgPIL = Image.fromstring(
         'RGBA', (width, height), img.tostring())
     #imgPIL = imgPIL.convert('RGB')
     buffer = StringIO.StringIO()
@@ -1001,7 +1000,7 @@ def service_get_extra_shapes(request, width, height, bbox, region_id):
     mapnik.render(m, img)
 
     # you can use this if you want te modify image with PIL
-    imgPIL = PIL.Image.fromstring('RGBA', (width, height), img.tostring())
+    imgPIL = Image.fromstring('RGBA', (width, height), img.tostring())
     #imgPIL = imgPIL.convert('RGB')
     buffer = StringIO.StringIO()
     imgPIL.save(buffer, 'png')
@@ -1052,7 +1051,7 @@ def service_get_extra_grid_shapes(request, width, height, bbox, region_id):
     mapnik.render(m, img)
 
     # you can use this if you want te modify image with PIL
-    imgPIL = PIL.Image.fromstring('RGBA', (width, height), img.tostring())
+    imgPIL = Image.fromstring('RGBA', (width, height), img.tostring())
     #imgPIL = imgPIL.convert('RGB')
     buffer = StringIO.StringIO()
     imgPIL.save(buffer, 'png')
