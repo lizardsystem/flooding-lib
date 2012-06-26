@@ -589,7 +589,7 @@ class Project(models.Model):
 
     def count_scenarios(self):
         """returns number of scenarios attached to this project."""
-        return self.x_scenarios.count()
+        return self.scenarios.count()
 
     def __unicode__(self):
         return self.friendlyname
@@ -624,7 +624,7 @@ class Project(models.Model):
 
     def all_scenarios(self):
         """Return a queryset of all scenarios attached to this project."""
-        return self.x_scenarios.all()
+        return self.scenarios.all()
 
 
 class UserPermission(models.Model):
@@ -832,9 +832,9 @@ class Scenario(models.Model):
     owner = models.ForeignKey(User)
     remarks = models.TextField(
         _('remarks'), blank=True, null=True, default=None)
-    project = models.ForeignKey(Project, null=True, blank=True)
-    x_projects = models.ManyToManyField(
-        Project, through='ScenarioProject', related_name='x_scenarios')
+
+    projects = models.ManyToManyField(
+        Project, through='ScenarioProject', related_name='scenarios')
     attachments = generic.GenericRelation(Attachment)
     approvalobject = models.ForeignKey(
         ApprovalObject, blank=True, null=True, default=None)
@@ -890,21 +890,11 @@ class Scenario(models.Model):
             is_main_project=True)
         sp.save()
 
-        # These lines are here to make sure nothing breaks while
-        # refactoring. We'll remove them later.
-        self.project = project
-        self.save()
-
     @property
     def main_project(self):
         try:
             sp = ScenarioProject.objects.get(
                 scenario=self, is_main_project=True)
-            if not sp.project_id == self.project_id:
-                logger.critical(
-                    ("SHOULD NOT HAPPEN: {0} ({1}).main_project found a "
-                    "different project than self.project.")
-                    .format(unicode(self), self.pk))
             return sp.project
         except ScenarioProject.DoesNotExist:
             return None
@@ -1034,7 +1024,7 @@ class Scenario(models.Model):
         return attachment_list
 
     def all_projects(self):
-        return self.x_projects.all()
+        return self.projects.all()
 
     @classmethod
     def in_project_list(cls, project_list):
