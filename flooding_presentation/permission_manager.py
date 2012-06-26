@@ -29,11 +29,7 @@ class PermissionManager:
 
     def __init__(self, user):
         self.user = user
-        #we gaan er even van uit dat Flooding aanwezig is
-        if True:
-            self.pm_flooding = get_permission_manager(self.user)
-        #except ImportError:
-        #    self.pm_flooding = None
+        self.pm_flooding = get_permission_manager(user)
 
     def check_permission_flooding(
         self, permission_level, permission, presentationlayer=None):
