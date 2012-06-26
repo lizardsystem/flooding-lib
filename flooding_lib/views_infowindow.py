@@ -4,7 +4,6 @@ import datetime
 import math
 import string
 
-from django.contrib.auth.decorators import login_required
 from django.contrib.contenttypes.models import ContentType
 from django.core.files.base import ContentFile
 from django.db.models import Q
@@ -25,7 +24,9 @@ from flooding_lib.models import SobekModel
 from flooding_lib.models import Task
 from flooding_lib.models import TaskType
 from flooding_lib.models import UserPermission
-from flooding_lib.permission_manager import PermissionManager
+from flooding_lib.permission_manager import receives_permission_manager
+from flooding_lib.permission_manager import \
+    receives_loggedin_permission_manager
 from flooding_lib.tools.approvaltool.views import approvaltable
 from flooding_lib.tools.importtool.models import InputField
 from flooding_presentation.models import Animation
@@ -172,12 +173,13 @@ def infowindow_information(scenario):
          'scenario_id': scenario.id})
 
 
-@login_required
-def infowindow_remarks(request, scenario_id, callbackfunction, form_id):
+@receives_loggedin_permission_manager
+def infowindow_remarks(
+    request, permission_manager, scenario_id, callbackfunction, form_id):
     """Edits scenario name and remarks"""
     scenario = get_object_or_404(Scenario, pk=scenario_id)
-    pm = PermissionManager(request.user)
-    if not(pm.check_project_permission(
+
+    if not(permission_manager.check_project_permission(
             scenario.main_project,
             UserPermission.PERMISSION_SCENARIO_EDIT_SIMPLE)):
         return HttpResponse(_("No permission to import scenario or login"))
@@ -193,16 +195,17 @@ def infowindow_remarks(request, scenario_id, callbackfunction, form_id):
                                'form_id': form_id})
 
 
-def infowindow_approval(request, scenario_id, callbackfunction,
-                        form_id, with_approvalobject):
+@receives_permission_manager
+def infowindow_approval(
+    request, permission_manager, scenario_id, callbackfunction,
+    form_id, with_approvalobject):
     """Calls the page to give approval to scenarios"""
 
     used_scenario = get_object_or_404(Scenario, pk=scenario_id)
 
-    pm = PermissionManager(request.user)
-    if not(pm.check_project_permission(
-            used_scenario.main_project,
-            UserPermission.PERMISSION_SCENARIO_APPROVE)):
+    if not permission_manager.check_project_permission(
+        used_scenario.main_project,
+        UserPermission.PERMISSION_SCENARIO_APPROVE):
         return HttpResponse(_("No permission to import scenario or login"))
 
     if request.method == 'POST':
@@ -266,10 +269,11 @@ def infowindow_approval(request, scenario_id, callbackfunction,
              'form_id': form_id})
 
 
-def infowindow_edit(request, scenario_id):
+@receives_permission_manager
+def infowindow_edit(request, permission_manager, scenario_id):
     used_scenario = get_object_or_404(Scenario, pk=scenario_id)
-    pm = PermissionManager(request.user)
-    if not(pm.check_project_permission(
+
+    if not(permission_manager.check_project_permission(
             used_scenario.main_project,
             UserPermission.PERMISSION_SCENARIO_EDIT)):
         return HttpResponse(_("No permission to import scenario or login"))
@@ -366,15 +370,16 @@ def showattachments(request, scenario_id):
             'action_url': action_url})
 
 
-def editproperties(request, scenario_id):
+@receives_permission_manager
+def editproperties(request, permission_manager, scenario_id):
     """ Renders the page for editing properties of the scenario
 
     For this method the right permissions are required
 
     """
     used_scenario = get_object_or_404(Scenario, pk=scenario_id)
-    pm = PermissionManager(request.user)
-    if not(pm.check_project_permission(
+
+    if not(permission_manager.check_project_permission(
             used_scenario.main_project,
             UserPermission.PERMISSION_SCENARIO_EDIT)):
         return HttpResponse(_("No permission to import scenario or login"))

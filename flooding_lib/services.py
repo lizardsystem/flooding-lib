@@ -26,7 +26,7 @@ from flooding_lib.models import Scenario
 from flooding_lib.models import SobekModel
 from flooding_lib.models import Strategy
 from flooding_lib.models import UserPermission
-from flooding_lib.permission_manager import PermissionManager
+from flooding_lib.permission_manager import receives_permission_manager
 from flooding_lib.views_dev import get_externalwater_csv
 from flooding_lib.views_dev import get_externalwater_graph
 from flooding_lib.views_dev import get_externalwater_graph_infowindow
@@ -69,8 +69,10 @@ def external_file_location(filename):
 
 
 @never_cache
+@receives_permission_manager
 def service_get_region_tree(
-    request, permission=UserPermission.PERMISSION_SCENARIO_VIEW,
+    request, permission_manager,
+    permission=UserPermission.PERMISSION_SCENARIO_VIEW,
     filter_has_model=False):
     """Get a tree of regionsets and regions
 
@@ -91,9 +93,9 @@ def service_get_region_tree(
         permission_from_get = request.GET.get('permission')
         if permission_from_get is not None:
             permission = int(permission_from_get)
-    pm = PermissionManager(request.user)
-    regionset_list = pm.get_regionsets(permission)
-    region_list_total = pm.get_regions(permission)
+
+    regionset_list = permission_manager.get_regionsets(permission)
+    region_list_total = permission_manager.get_regions(permission)
 
     object_list = []
     for regionset in regionset_list:
@@ -177,8 +179,10 @@ def service_get_region_maps(request,
 
 
 @never_cache
+@receives_permission_manager
 def service_get_breach_tree(
-    request, permission=UserPermission.PERMISSION_SCENARIO_VIEW,
+    request, permission_manager,
+    permission=UserPermission.PERMISSION_SCENARIO_VIEW,
     region_id=None, filter_onlyscenariobreaches=False,
     filter_scenario=None, filter_active=None):
     """Get breaches and external waters in a tree.
@@ -196,13 +200,13 @@ def service_get_breach_tree(
 
     """
 
-    pm = PermissionManager(request.user)
-
-    scenarios = pm.get_scenarios(None, permission, filter_scenario)
+    scenarios = permission_manager.get_scenarios(
+        None, permission, filter_scenario)
 
     if region_id:
         region = get_object_or_404(Region, pk=region_id)
-        if not(pm.check_region_permission(region, permission)):
+        if not(permission_manager.check_region_permission(
+                region, permission)):
             raise Http404
         if filter_onlyscenariobreaches:
             breach_list = region.breach_set.filter(
@@ -210,7 +214,7 @@ def service_get_breach_tree(
         else:
             breach_list = region.breach_set.filter(active=True)
     else:
-        if not(pm.check_permission(permission)):
+        if not(permission_manager.check_permission(permission)):
             raise Http404
         if filter_onlyscenariobreaches:
             breach_list = Breach.objects.filter(
@@ -250,8 +254,9 @@ def service_get_breach_tree(
 
 
 @never_cache
+@receives_permission_manager
 def service_get_scenario_tree(
-    request, breach_id,
+    request, permission_manager, breach_id,
     permission=UserPermission.PERMISSION_SCENARIO_VIEW,
     filter_scenarioproject=None,
     filter_onlyprojectswithscenario=False,
@@ -266,16 +271,14 @@ def service_get_scenario_tree(
         filter_scenariostatus = []
 
     #select all projects that you can see
-    pm = PermissionManager(request.user)
-
-    scenario_list = pm.get_scenarios(
+    scenario_list = permission_manager.get_scenarios(
         breach_id, permission, filter_scenariostatus)
 
     #only projects with scenario
     if filter_onlyprojectswithscenario:
         project_list = Project.in_scenario_list(scenario_list).distinct()
     else:
-        project_list = pm.get_projects(permission)
+        project_list = permission_manager.get_projects(permission)
 
     object_list = []
     for project in project_list:
@@ -299,8 +302,9 @@ def service_get_scenario_tree(
 
 
 @never_cache
+@receives_permission_manager
 def service_get_cutofflocations_from_scenario(
-    request, scenario_id,
+    request, permission_manager, scenario_id,
     permission=UserPermission.PERMISSION_SCENARIO_VIEW):
     """Get cutofflocations of given scenario.
 
@@ -309,9 +313,8 @@ def service_get_cutofflocations_from_scenario(
     - given permission level
     """
     scenario = get_object_or_404(Scenario, pk=scenario_id)
-    pm = PermissionManager(request.user)
 
-    if not(pm.check_project_permission(
+    if not(permission_manager.check_project_permission(
             scenario.main_project, permission)):
         raise Http404
     scenariocutofflocation_list = scenario.scenariocutofflocation_set.all()
@@ -323,13 +326,15 @@ def service_get_cutofflocations_from_scenario(
 
 
 @never_cache
+@receives_permission_manager
 def service_get_regions(
-    request, regionset_id,
+    request, permission_manager, regionset_id,
     permission=UserPermission.PERMISSION_SCENARIO_VIEW):
     """Get all regions for a given regionset_id and given permission."""
     regionset = get_object_or_404(RegionSet, pk=regionset_id)
-    pm = PermissionManager(request.user)
-    if not(pm.check_regionset_permission(regionset, permission)):
+
+    if not(permission_manager.check_regionset_permission(
+            regionset, permission)):
         raise Http404
     if request.user.is_staff:
         filter_active = None
@@ -342,23 +347,27 @@ def service_get_regions(
 
 
 @never_cache
+@receives_permission_manager
 def service_get_regionsets(
-    request, permission=UserPermission.PERMISSION_SCENARIO_VIEW):
+    request, permission_manager,
+    permission=UserPermission.PERMISSION_SCENARIO_VIEW):
     """Get all regionsets where you have the given permission."""
     if request.method == "GET":
         #see if there's a parameter called "permission"
         permission_from_get = request.GET.get('permission')
         if permission_from_get is not None:
             permission = int(permission_from_get)
-    pm = PermissionManager(request.user)
-    regionsets = pm.get_regionsets(permission).order_by('name')
+
+    regionsets = permission_manager.get_regionsets(permission).order_by('name')
     result_list = [{'id': r.id, 'name': str(r.name)} for r in regionsets]
     return HttpResponse(
         simplejson.dumps(result_list), mimetype="application/json")
 
 
 @never_cache
-def service_get_breaches(request, region_id, scenariofilter=-1):
+@receives_permission_manager
+def service_get_breaches(
+    request, permission_manager, region_id, scenariofilter=-1):
     """Get breaches from a given region_id.
 
     * breaches from given region_id (permissions: scenario_view), if
@@ -372,8 +381,7 @@ def service_get_breaches(request, region_id, scenariofilter=-1):
     except Region.DoesNotExist:
         return HttpResponse(simplejson.dumps([]), mimetype="application/json")
 
-    pm = PermissionManager(request.user)
-    if not(pm.check_region_permission(
+    if not(permission_manager.check_region_permission(
             region,
             UserPermission.PERMISSION_SCENARIO_VIEW)):
         raise Http404
@@ -392,27 +400,31 @@ def service_get_breaches(request, region_id, scenariofilter=-1):
 
 
 @never_cache
+@receives_permission_manager
 def service_get_projects(
-    request, permission=UserPermission.PERMISSION_SCENARIO_VIEW):
+    request, permission_manager,
+    permission=UserPermission.PERMISSION_SCENARIO_VIEW):
     """Get the list of projects with given permission and return in
     JSON format."""
-    pm = PermissionManager(request.user)
-    project_list = pm.get_projects(permission)
-    return render_to_response('flooding/project.json',
-                              {'project_list': project_list})
+
+    project_list = permission_manager.get_projects(permission)
+    return render_to_response(
+        'flooding/project.json',
+        {'project_list': project_list})
 
 
 @never_cache
+@receives_permission_manager
 def service_get_scenarios_export_list(
-    request, project_id,
+    request, permission_manager, project_id,
     permission=UserPermission.PERMISSION_SCENARIO_VIEW):
     """
     Gets the scenario list with all scenarios, with all the info neede
     for displaying in the drag and drop window for the export tool.
     """
     project = get_object_or_404(Project, pk=project_id)
-    pm = PermissionManager(request.user)
-    if not(pm.check_project_permission(project, permission)):
+
+    if not(permission_manager.check_project_permission(project, permission)):
         raise Http404
     scenarios_export_list = [
         {
@@ -432,12 +444,14 @@ def service_get_scenarios_export_list(
 
 
 @never_cache
+@receives_permission_manager
 def service_get_all_regions(
-    request, permission=UserPermission.PERMISSION_SCENARIO_VIEW):
+    request, permission_manager,
+    permission=UserPermission.PERMISSION_SCENARIO_VIEW):
     """Get the list of regions with given permission and return in
     JSON format."""
-    pm = PermissionManager(request.user)
-    regions = pm.get_regions(permission).order_by('name')
+
+    regions = permission_manager.get_regions(permission).order_by('name')
     result_list = [{'id': r.id, 'name': str(r.name)} for r in regions]
     return HttpResponse(
         simplejson.dumps(result_list), mimetype="application/json")
@@ -546,16 +560,16 @@ def service_get_cutofflocationsets(
 
 
 @never_cache
+@receives_permission_manager
 def service_get_cutofflocations_from_cutofflocationset(
-    request, cutofflocationset_id, permission):
+    request, permission_manager, cutofflocationset_id, permission):
     """Get cutofflocations, given cutofflocationset_id
     """
     cls = get_object_or_404(CutoffLocationSet, pk=cutofflocationset_id)
-    if request.user.is_staff:
+    if request.user.is_authenticated() and request.user.is_staff:
         object_list = cls.cutofflocations.all()
     else:
-        pm = PermissionManager(request.user)
-        projects = pm.get_projects(permission)
+        projects = permission_manager.get_projects(permission)
         object_list = cls.cutofflocations.filter(
             region__regionset__project__in=projects).distinct()
     return render_to_response('flooding/cutofflocation.json',
@@ -684,16 +698,15 @@ def service_get_raw_result(
 
 
 @never_cache
-def service_get_attachment(request, scenario_id, path):
+@receives_permission_manager
+def service_get_attachment(request, permission_manager, scenario_id, path):
     """ Returns a non-public attachment if one has the permission
 
     """
 
     scenario = get_object_or_404(Scenario, pk=scenario_id)
-    user = request.user
-    pm = PermissionManager(user)
 
-    if not pm.check_project_permission(
+    if not permission_manager.check_project_permission(
         scenario.main_project, UserPermission.PERMISSION_SCENARIO_VIEW):
         raise Http404
 
@@ -711,14 +724,14 @@ def service_get_attachment(request, scenario_id, path):
 
 
 @never_cache
-def service_get_import_scenario_uploaded_file(request, path):
+@receives_permission_manager
+def service_get_import_scenario_uploaded_file(
+    request, permission_manager, path):
     """ Returns a non-public uploaded file if one has the permission
 
     """
-
-    user = request.user
-    pm = PermissionManager(user)
-    if not(pm.check_permission(UserPermission.PERMISSION_SCENARIO_ADD)):
+    if not(permission_manager.check_permission(
+            UserPermission.PERMISSION_SCENARIO_ADD)):
         raise Http404
 
     file_path = os.path.join(settings.MEDIA_ROOT, path)
@@ -1242,7 +1255,6 @@ def service(request):
     """Calls other service functions
 
     parameters depend on action.
-
     """
 
     if request.method == 'GET':
@@ -1659,8 +1671,9 @@ def service(request):
             raise Http404
 
 
-# not in use:
-def service_get_scenarios_from_breach(request, breach_id, scenariofilter=-1):
+@receives_permission_manager
+def service_get_scenarios_from_breach(
+    request, permission_manager, breach_id, scenariofilter=-1):
     """Get scenario's.
 
     Conditions:
@@ -1674,9 +1687,9 @@ def service_get_scenarios_from_breach(request, breach_id, scenariofilter=-1):
     """
     scenario_dict = {}
     breach = get_object_or_404(Breach, pk=breach_id)
-    pm = PermissionManager(request.user)
+
     for s in breach.scenario_set.all():
-        if pm.check_project_permission(
+        if permission_manager.check_project_permission(
             s.project,
             UserPermission.PERMISSION_SCENARIO_VIEW):
             if scenariofilter == -1 or s.status == scenariofilter:
@@ -1685,8 +1698,9 @@ def service_get_scenarios_from_breach(request, breach_id, scenariofilter=-1):
                               {'scenario_list': scenario_dict.values()})
 
 
+@receives_permission_manager
 def service_get_tasks_from_scenario(
-    request, scenario_id,
+    request, permission_manager, scenario_id,
     permission=UserPermission.PERMISSION_SCENARIO_VIEW):
     """Get tasks from a given scenario.
 
@@ -1696,9 +1710,9 @@ def service_get_tasks_from_scenario(
     - todo: filter tasks(?)
     """
     scenario = get_object_or_404(Scenario, pk=scenario_id)
-    pm = PermissionManager(request.user)
 
-    if not(pm.check_project_permission(scenario.main_project, permission)):
+    if not(permission_manager.check_project_permission(
+            scenario.main_project, permission)):
         raise Http404
     #todo: filter
     object_list = scenario.task_set.all()
@@ -1706,8 +1720,9 @@ def service_get_tasks_from_scenario(
                               {'object_list': object_list})
 
 
+@receives_permission_manager
 def service_get_scenarios_from_project(
-    request, project_id,
+    request, permission_manager, project_id,
     permission=UserPermission.PERMISSION_SCENARIO_VIEW):
     """Get the list of scenarios from a project with given permission.
 
@@ -1715,8 +1730,8 @@ def service_get_scenarios_from_project(
 
     """
     project = get_object_or_404(Project, pk=project_id)
-    pm = PermissionManager(request.user)
-    if not(pm.check_project_permission(project, permission)):
+
+    if not(permission_manager.check_project_permission(project, permission)):
         raise Http404
 
     return render_to_response(
@@ -1724,21 +1739,25 @@ def service_get_scenarios_from_project(
         {'scenario_list': project.all_scenarios()})
 
 
+@receives_permission_manager
 def service_get_scenarios(
-    request, permission=UserPermission.PERMISSION_SCENARIO_VIEW):
+    request, permission_manager,
+    permission=UserPermission.PERMISSION_SCENARIO_VIEW):
     """Get the list of scenarios with given permission and return in
     JSON format."""
     scenario_list = []
-    pm = PermissionManager(request.user)
-    project_list = pm.get_projects(permission)
+
+    project_list = permission_manager.get_projects(permission)
     for p in project_list:
         scenario_list += p.scenario_set.all()
     return render_to_response('flooding/scenario.json',
                               {'scenario_list': scenario_list})
 
 
+@receives_permission_manager
 def service_get_results_from_scenario(
-    request, scenario_id, permission=UserPermission.PERMISSION_SCENARIO_VIEW):
+    request, permission_manager, scenario_id,
+    permission=UserPermission.PERMISSION_SCENARIO_VIEW):
     """Get results from a given scenario.
 
     Conditions:
@@ -1747,9 +1766,9 @@ def service_get_results_from_scenario(
     - todo: predefined types only
     """
     scenario = get_object_or_404(Scenario, pk=scenario_id)
-    pm = PermissionManager(request.user)
 
-    if not(pm.check_project_permission(scenario.main_project, permission)):
+    if not permission_manager.check_project_permission(
+        scenario.main_project, permission):
         raise Http404
 
     result = scenario.result_set.all().select_related(

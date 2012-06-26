@@ -11,7 +11,7 @@ from flooding_lib.models import Task
 class ScenarioForm(forms.ModelForm):
     class Meta:
         model = Scenario
-        exclude = ('owner', 'breaches', 'cutofflocations',)
+        exclude = ('owner', 'breaches', 'cutofflocations', 'x_projects')
 
 
 class ScenarioNameRemarksForm(forms.ModelForm):

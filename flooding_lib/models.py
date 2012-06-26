@@ -618,12 +618,13 @@ class Project(models.Model):
 
     @classmethod
     def in_scenario_list(cls, scenario_list):
-        """Return a queryset of Projects that are related to scenarios in scenario_list."""
+        """Return a queryset of Projects that are related to scenarios
+        in scenario_list."""
         return cls.objects.filter(scenarioproject__scenario__in=scenario_list)
 
     def all_scenarios(self):
         """Return a queryset of all scenarios attached to this project."""
-        return self.x_scenarios
+        return self.x_scenarios.all()
 
 
 class UserPermission(models.Model):
@@ -1033,14 +1034,12 @@ class Scenario(models.Model):
         return attachment_list
 
     def all_projects(self):
-        return list(
-            sp.project for sp in
-            self.scenarioproject_set.all())
+        return self.x_projects.all()
 
     @classmethod
     def in_project_list(cls, project_list):
-        """Return a Queryset of Scenarios that are related to the projects in the
-        queryset project_list"""
+        """Return a Queryset of Scenarios that are related to the
+        projects in the queryset project_list"""
 
         return cls.objects.filter(scenarioproject__project__in=project_list)
 

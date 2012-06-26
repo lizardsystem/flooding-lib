@@ -36,6 +36,7 @@ class ScenarioF(factory.Factory):
     owner = User.objects.get_or_create(username='remco')[0]
     tsim = 0.0
 
+
 class ProjectF(factory.Factory):
     FACTORY_FOR = models.Project
 
@@ -70,6 +71,7 @@ class TestAttachment(TestCase):
 
         self.assertEquals(
             attachment.filename, filename)
+
 
 class TestScenario(TestCase):
     def testMainProject(self):
@@ -188,4 +190,10 @@ class TestProject(TestCase):
         scenario1.set_project(project)
         scenario2.set_project(project)
 
-        self.assertEquals(project.all_scenarios().count(), 2)
+        scenarios = project.all_scenarios()
+        self.assertEquals(scenarios.count(), 2)
+
+        # We don't test anything about order, that's not specified
+        scenarioset = set(scenario.id for scenario in scenarios)
+        self.assertTrue(scenario1.id in scenarioset)
+        self.assertTrue(scenario2.id in scenarioset)

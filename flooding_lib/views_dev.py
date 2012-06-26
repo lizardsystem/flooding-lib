@@ -12,7 +12,7 @@ from flooding_lib.models import ExternalWater, UserPermission, Project
 from flooding_lib.models import Scenario, SobekModel, Strategy
 from flooding_lib.models import ScenarioCutoffLocation, CutoffLocation
 from flooding_lib.models import TaskType, Task, Waterlevel, ScenarioBreach
-from flooding_lib.permission_manager import PermissionManager
+from flooding_lib.permission_manager import receives_permission_manager
 from nens.sobek import SobekHIS
 from django.views.decorators.cache import never_cache
 
@@ -307,7 +307,8 @@ def service_select_strategy(request, region_id):
          })
 
 
-def service_compose_scenario(request, breach_id):
+@receives_permission_manager
+def service_compose_scenario(request, permission_manager, breach_id):
     """  """
     breach = Breach.objects.get(pk=breach_id)
     #data[0].tdeltaphase = intervalFormatter(intervalReader("0 00:00"));
@@ -326,12 +327,11 @@ def service_compose_scenario(request, breach_id):
 
         pitdepth['max'] = breach.groundlevel
 
-    pm = PermissionManager(request.user)
-    projects = pm.get_projects(
-        UserPermission.PERMISSION_SCENARIO_ADD).filter(
+    projects_queryset = permission_manager.get_projects(
+        UserPermission.PERMISSION_SCENARIO_ADD)
+    projects = projects_queryset.filter(
         regions__breach=breach).distinct().values_list('id', flat=True)
-    projects2 = pm.get_projects(
-        UserPermission.PERMISSION_SCENARIO_ADD).filter(
+    projects2 = projects_queryset.filter(
         regionsets__regions__breach=breach
         ).distinct().values_list('id', flat=True)
 

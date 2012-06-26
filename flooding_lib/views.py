@@ -7,7 +7,6 @@ import os
 import string
 
 from django.conf import settings
-from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.core.urlresolvers import reverse
 from django.db.models import Q
@@ -24,7 +23,9 @@ from flooding_lib.models import (Project, UserPermission, Scenario,
 from flooding_lib.forms import ScenarioBreachForm, ProjectForm
 from flooding_lib.forms import ScenarioForm, ScenarioCutoffLocationForm
 from flooding_lib.forms import ScenarioNameRemarksForm
-from flooding_lib.permission_manager import PermissionManager
+from flooding_lib.permission_manager import receives_permission_manager
+from flooding_lib.permission_manager import \
+    receives_loggedin_permission_manager
 
 logger = logging.getLogger(__name__)
 
@@ -86,12 +87,12 @@ scenario_list_search_table_columns = (
 #-----------------------------editing views-----------------------------------
 
 
-@login_required
-def project_delete(request, object_id):
+@receives_loggedin_permission_manager
+def project_delete(request, permission_manager, object_id):
     project = get_object_or_404(Project, pk=object_id)
-    pm = PermissionManager(request.user)
+
     if ((project.owner == request.user or request.user.is_staff) and
-        pm.check_project_permission(
+        permission_manager.check_project_permission(
             project, UserPermission.PERMISSION_PROJECT_DELETE)):
         project.delete()
 
@@ -99,29 +100,30 @@ def project_delete(request, object_id):
     return HttpResponseRedirect(next)
 
 
-@login_required
-def scenario_addedit(request, object_id=None):
+@receives_loggedin_permission_manager
+def scenario_addedit(request, permission_manager, object_id=None):
     """Adds a scenario if object_id is None, else edit scenario"""
 
     user = request.user
-    pm = PermissionManager(user)
     if object_id is not None:
         scenario = get_object_or_404(Scenario, pk=object_id)
         scenario_name = scenario.name
         #check scenario_edit permission FOR PROJECT
 
-        if not (pm.check_project_permission(
-                scenario.main_project, UserPermission.PERMISSION_SCENARIO_EDIT)):
+        if not (permission_manager.check_project_permission(
+                scenario.main_project,
+                UserPermission.PERMISSION_SCENARIO_EDIT)):
             raise Http404
     else:
         #check scenario_add permission FOR USER
         scenario = []
         scenario_name = _('New scenario')
-        if not(pm.check_permission(UserPermission.PERMISSION_SCENARIO_ADD)):
+        if not(permission_manager.check_permission(
+                UserPermission.PERMISSION_SCENARIO_ADD)):
             raise Http404
 
     if request.method == 'POST':
-        #check if we're editing an existing scenario
+        # check if we're editing an existing scenario
         if object_id is None:
             form = ScenarioForm(request.POST)
         else:
@@ -151,12 +153,12 @@ def scenario_addedit(request, object_id=None):
             'breadcrumbs': breadcrumbs})
 
 
-@login_required
-def scenario_editnameremarks(request, object_id):
+@receives_loggedin_permission_manager
+def scenario_editnameremarks(request, permission_manager, object_id):
     """Edits scenario name and remarks"""
     scenario = get_object_or_404(Scenario, pk=object_id)
-    pm = PermissionManager(request.user)
-    if not(pm.check_permission(UserPermission.PERMISSION_SCENARIO_EDIT)):
+    if not(permission_manager.check_permission(
+            UserPermission.PERMISSION_SCENARIO_EDIT)):
         raise Http404
     if request.method == 'POST':
         form = ScenarioNameRemarksForm(request.POST, instance=scenario)
@@ -170,15 +172,14 @@ def scenario_editnameremarks(request, object_id):
                               {'form': form})
 
 
-@login_required
-def scenario_delete(request, object_id):
+@receives_loggedin_permission_manager
+def scenario_delete(request, permission_manager, object_id):
     """Create delete scenario task"""
     scenario = get_object_or_404(Scenario, pk=object_id)
 
     project = scenario.main_project
-    pm = PermissionManager(request.user)
     if ((scenario.owner == request.user or request.user.is_staff) and
-        pm.check_project_permission(
+        permission_manager.check_project_permission(
             project, UserPermission.PERMISSION_SCENARIO_DELETE)):
         #scenario.delete()
         tasktype = TaskType.objects.get(pk=TaskType.TYPE_SCENARIO_DELETE)
@@ -193,17 +194,18 @@ def scenario_delete(request, object_id):
     return HttpResponseRedirect(next)
 
 
-@login_required
-def scenario_cutofflocation_add(request, scenario_id):
+@receives_loggedin_permission_manager
+def scenario_cutofflocation_add(request, permission_manager, scenario_id):
     """Add /edit page for ScenarioCutoffLocation"""
     user = request.user
-    pm = PermissionManager(user)
-    if not(pm.check_permission(UserPermission.PERMISSION_SCENARIO_EDIT)):
+
+    if not(permission_manager.check_permission(
+            UserPermission.PERMISSION_SCENARIO_EDIT)):
         raise Http404
 
     scenario = get_object_or_404(Scenario, pk=scenario_id)
 
-    if not(pm.check_project_permission(
+    if not(permission_manager.check_project_permission(
             scenario.main_project,
             UserPermission.PERMISSION_SCENARIO_EDIT)):
         raise Http404
@@ -225,17 +227,17 @@ def scenario_cutofflocation_add(request, scenario_id):
             'form': form, 'user': user, 'scenario': scenario})
 
 
-@login_required
-def scenario_breach_add(request, scenario_id):
+@receives_loggedin_permission_manager
+def scenario_breach_add(request, permission_manager, scenario_id):
     """Add /edit page for ScenarioBreach"""
-    user = request.user
-    pm = PermissionManager(user)
-    if not(pm.check_permission(UserPermission.PERMISSION_SCENARIO_EDIT)):
+
+    if not(permission_manager.check_permission(
+            UserPermission.PERMISSION_SCENARIO_EDIT)):
         raise Http404
 
     scenario = get_object_or_404(Scenario, pk=scenario_id)
 
-    if not(pm.check_project_permission(
+    if not(permission_manager.check_project_permission(
             scenario.main_project,
             UserPermission.PERMISSION_SCENARIO_EDIT)):
         raise Http404
@@ -253,20 +255,21 @@ def scenario_breach_add(request, scenario_id):
         form = ScenarioBreachForm()
 
     return render_to_response(
-        'flooding/scenario_breach_form.html',
-        {'form': form, 'user': user, 'scenario': scenario})
+        'flooding/scenario_breach_form.html', {
+            'form': form,
+            'user': request.user,
+            'scenario': scenario})
 
 
-@login_required
-def scenario_cutofflocation_delete(request, object_id):
+@receives_loggedin_permission_manager
+def scenario_cutofflocation_delete(request, permission_manager, object_id):
     scenario_cutofflocation = get_object_or_404(
         ScenarioCutoffLocation, pk=object_id)
     scenario = scenario_cutofflocation.scenario
-
     project = scenario.main_project
-    pm = PermissionManager(request.user)
+
     if ((scenario.owner == request.user or request.user.is_staff) and
-        pm.check_project_permission(
+        permission_manager.check_project_permission(
             project, UserPermission.PERMISSION_SCENARIO_EDIT)):
         scenario_cutofflocation.delete()
 
@@ -274,15 +277,15 @@ def scenario_cutofflocation_delete(request, object_id):
     return HttpResponseRedirect(next)
 
 
-@login_required
-def scenario_breach_delete(request, object_id):
+@receives_loggedin_permission_manager
+def scenario_breach_delete(request, permission_manager, object_id):
     scenario_breach = get_object_or_404(ScenarioBreach, pk=object_id)
     scenario = scenario_breach.scenario
 
     project = scenario.main_project
-    pm = PermissionManager(request.user)
+
     if ((scenario.owner == request.user or request.user.is_staff) and
-        pm.check_project_permission(
+        permission_manager.check_project_permission(
             project, UserPermission.PERMISSION_SCENARIO_EDIT)):
         scenario_breach.delete()
 
@@ -290,22 +293,25 @@ def scenario_breach_delete(request, object_id):
     return HttpResponseRedirect(next)
 
 
-def project_addedit(request, object_id=None):
+@receives_permission_manager
+def project_addedit(request, permission_manager, object_id=None):
     """Add/edit project"""
+
     user = request.user
-    pm = PermissionManager(user)
+
     if object_id is not None:
         project = get_object_or_404(Project, pk=object_id)
         project_name = project.name
         #check project_edit permission FOR PROJECT
-        if not pm.check_project_permission(
+        if not permission_manager.check_project_permission(
                 project, UserPermission.PERMISSION_PROJECT_EDIT):
             raise Http404
     else:
         #check project_add permission FOR USER
         project = []
         project_name = _('New project')
-        if not(pm.check_permission(UserPermission.PERMISSION_PROJECT_ADD)):
+        if not(permission_manager.check_permission(
+                UserPermission.PERMISSION_PROJECT_ADD)):
             raise Http404
 
     if request.method == 'POST':
@@ -331,23 +337,27 @@ def project_addedit(request, object_id=None):
         {'name': _('My projects'), 'url': reverse('flooding_projects_url')},
         {'name': project_name}]
 
-    return render_to_response('flooding/project_form.html',
-                              {'form': form, 'user': user, 'project': project,
-                               'breadcrumbs': breadcrumbs})
+    return render_to_response(
+        'flooding/project_form.html', {
+            'form': form, 'user': user, 'project': project,
+            'breadcrumbs': breadcrumbs})
 
 
 #--------------------------- look only views ----------------------------------
 
 def index(request):
     """Renders Lizard-flooding main page."""
-    return render_to_response('flooding/index.html',
-                              {'breadcrumbs': [{'name':_('Flooding')}],
-                               'user': request.user,
-                               'LANGUAGES': settings.LANGUAGES}
-                              )
+    return render_to_response(
+        'flooding/index.html',
+        {
+            'breadcrumbs': [{'name':_('Flooding')}],
+            'user': request.user,
+            'LANGUAGES': settings.LANGUAGES}
+        )
 
 
-def project_list(request):
+@receives_permission_manager
+def project_list(request, permission_manager):
     """Renders index of projects: viewable projects."""
 
     #stuff from request
@@ -358,8 +368,8 @@ def project_list(request):
     filter_owner = int(request.GET.get('filter_owner', '-1'))
 
     #from database: all possible projects
-    pm = PermissionManager(request.user)
-    projects = pm.get_projects(UserPermission.PERMISSION_SCENARIO_VIEW)
+    projects = permission_manager.get_projects(
+        UserPermission.PERMISSION_SCENARIO_VIEW)
 
     #make list of owners
     owners = {}
@@ -432,7 +442,7 @@ def project_list(request):
         scenarios = ', '.join(
             [str(s) for s in o.scenario_set.all().order_by('name')])
 
-        if pm.check_project_permission(
+        if permission_manager.check_project_permission(
             o, UserPermission.PERMISSION_PROJECT_EDIT):
             edit_field = {'icon': 'edit',
                           'icontitle': _('edit this item'),
@@ -443,7 +453,7 @@ def project_list(request):
             edit_field = {
                 'icon': 'edit_disabled',
                 'icontitle': _('you need permission to edit this item')}
-        if pm.check_project_permission(
+        if permission_manager.check_project_permission(
             o, UserPermission.PERMISSION_PROJECT_DELETE):
             delete_field = {'icon': 'delete',
                             'icontitle': _('delete this item'),
@@ -489,10 +499,10 @@ def project_list(request):
             })
 
 
-def task_list(request):
+@receives_permission_manager
+def task_list(request, permission_manager):
     """Task list.
     """
-    user = request.user
 
     page_nr = int(request.GET.get('page_nr', '1'))
     items_per_page = int(request.GET.get('items_per_page', 20))
@@ -502,8 +512,7 @@ def task_list(request):
     filter_tasktype = int(request.GET.get('filter_tasktype', -1))
     filter_successful = int(request.GET.get('filter_successful', -1))
 
-    pm = PermissionManager(user)
-    projects = pm.get_projects()
+    projects = permission_manager.get_projects()
     scenarios = Scenario.in_project_list(projects)
     tasks = Task.objects.filter(scenario__in=scenarios)
     if filter_scenario != -1:
@@ -613,14 +622,15 @@ def task_list(request):
                      ]
     table_data = []
     for o in page.object_list:
-        if pm.check_project_permission(o, UserPermission.PERMISSION_TASK_EDIT):
+        if permission_manager.check_project_permission(
+            o, UserPermission.PERMISSION_TASK_EDIT):
             edit_field = {'icon': 'edit',
                           'icontitle': _('not implemented yet')}
         else:
             edit_field = {
                 'icon': 'edit_disabled',
                 'icontitle': _('you need permission to edit this item')}
-        if pm.check_project_permission(
+        if permission_manager.check_project_permission(
             o, UserPermission.PERMISSION_TASK_DELETE):
             delete_field = {'icon': 'delete',
                             'icontitle': _('not implemented yet')}
@@ -648,7 +658,7 @@ def task_list(request):
                    ]
 
     return render_to_response('flooding/task_list.html', {
-            'user': user,
+            'user': request.user,
 
             'fields': fields,
             'paginator': paginator,
@@ -732,7 +742,8 @@ def scenario_list_get_search_parameters(request, search_defaults):
     return search_session
 
 
-def scenario_list(request):
+@receives_loggedin_permission_manager
+def scenario_list(request, permission_manager):
     """Renders index of scenario's: divided in own and viewable scenario's.
 
     options:
@@ -749,8 +760,7 @@ def scenario_list(request):
     search options are stored in the session 'scenario_list' as a dictionary
 
     """
-    if not request.user.is_authenticated():
-        return HttpResponse('Log eerst in')
+
     is_embedded = request.GET.get('is_embedded', 0)
     search_defaults = scenario_list_search_defaults.copy()
 
@@ -765,8 +775,7 @@ def scenario_list(request):
         request.session['scenario_list'] = search_parameters
 
     #get the objects (scenario's) that you can see and filter
-    pm = PermissionManager(request.user)
-    projects = pm.get_projects(
+    projects = permission_manager.get_projects(
         permission=UserPermission.PERMISSION_SCENARIO_VIEW)
 
     scenarios = Scenario.in_project_list(projects)
@@ -789,11 +798,12 @@ def scenario_list(request):
         #je gehacked, dus 404 is wel okee
         filter_region_object = get_object_or_404(
             Region, pk=search_session['region'])
-        if not(pm.check_region_permission(
+        if not(permission_manager.check_region_permission(
                 filter_region_object,
                 UserPermission.PERMISSION_SCENARIO_VIEW)):
             raise Http404
-        scenarios = scenarios.filter(breaches__region__in=[filter_region_object])
+        scenarios = scenarios.filter(
+            breaches__region__in=[filter_region_object])
     else:
         filter_region_object = None
     if search_session['breach'] > 0:
@@ -976,7 +986,7 @@ def scenario_list(request):
         #build table data for template
         table_data = []
         for o in page.object_list:
-            if pm.check_project_permission(
+            if permission_manager.check_project_permission(
                 o, UserPermission.PERMISSION_SCENARIO_DELETE):
                 delete_field = {
                     'icon': '/static_media/images/icons/delete.png',
@@ -1031,11 +1041,10 @@ def scenario_list(request):
             table_data.append(row)
 
         #build search fields
-        pm = PermissionManager(request.user)
-        regionsets = pm.get_regionsets(
+        regionsets = permission_manager.get_regionsets(
             UserPermission.PERMISSION_SCENARIO_VIEW
             ).order_by('name')
-        regions = pm.get_regions().order_by('name')
+        regions = permission_manager.get_regions().order_by('name')
         search_fields = [
             {'name': _('Search (scenario name or project name)'),
              'type': 'text',
@@ -1140,12 +1149,12 @@ def scenario_list(request):
                 })
 
 
-def scenario(request, object_id):
+@receives_permission_manager
+def scenario(request, permission_manager, object_id):
     """Renders page for a single scenario."""
     scenario = get_object_or_404(Scenario, pk=object_id)
-    pm = PermissionManager(request.user)
 
-    if not(pm.check_project_permission(
+    if not(permission_manager.check_project_permission(
             scenario.main_project,
             UserPermission.PERMISSION_SCENARIO_VIEW)):
         raise Http404  # user cannot see difference between no access
@@ -1163,12 +1172,13 @@ def scenario(request, object_id):
             })
 
 
-def project(request, object_id):
+@receives_permission_manager
+def project(request, permission_manager, object_id):
     """Renders page for single project."""
     project = get_object_or_404(Project, pk=object_id)
-    pm = PermissionManager(request.user)
-    if not(pm.check_project_permission(project,
-                                    UserPermission.PERMISSION_SCENARIO_VIEW)):
+
+    if not(permission_manager.check_project_permission(
+            project, UserPermission.PERMISSION_SCENARIO_VIEW)):
         raise Http404  # user cannot see difference between no access
                        # and not existing
 
@@ -1184,14 +1194,14 @@ def project(request, object_id):
             })
 
 
-def task(request, object_id):
+@receives_permission_manager
+def task(request, permission_manager, object_id):
     """Renders task detail.
 
     """
     task = get_object_or_404(Task, pk=object_id)
-    pm = PermissionManager(request.user)
 
-    if not(pm.check_project_permission(
+    if not(permission_manager.check_project_permission(
             task.scenario.main_project,
             UserPermission.PERMISSION_SCENARIO_VIEW)):
         raise Http404
@@ -1202,7 +1212,8 @@ def task(request, object_id):
 
 
 #@login_required
-def result_list(request):
+@receives_permission_manager
+def result_list(request, permission_manager):
     """Renders result list.
 
     #todo: filter result list, so you can see only a sublist
@@ -1230,13 +1241,13 @@ def result_list(request):
         )
 
     #from database
-    pm = PermissionManager(request.user)
+    projects = permission_manager.get_projects()
     if filter_resulttype == -1:
         lookup_query = {
-            'scenario__scenarioproject__project__in': pm.get_projects()}
+            'scenario__scenarioproject__project__in': projects}
     else:
         lookup_query = {
-            'scenario__scenarioproject__project__in': pm.get_projects(),
+            'scenario__scenarioproject__project__in': projects,
             'resulttype': get_object_or_404(
                 ResultType, pk=filter_resulttype)}
     if query:
@@ -1299,8 +1310,9 @@ def result_list(request):
                                kwargs={'object_id': o.scenario_id}),
                 'value': o.scenario},
 
-               {'url': reverse('flooding_project_detail',
-                               kwargs={'object_id': o.scenario.main_project.id}),
+               {'url': reverse(
+                    'flooding_project_detail',
+                    kwargs={'object_id': o.scenario.main_project.id}),
                 'value': o.scenario.main_project},
                {'value': cutofflocations},
                {'value': scenariobreaches},

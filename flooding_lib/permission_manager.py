@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
+import functools
 import logging
 
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group
 from django.db.models import Q
 
@@ -10,7 +12,25 @@ from flooding_lib.models import ProjectGroupPermission, Scenario
 log = logging.getLogger('permission_manager')
 
 
-def get_permission_manager(user):
+def receives_permission_manager(view):
+    """Decorator that wraps a function that receives a request as its first
+    argument, creates a permission manager using request.user, and passes it
+    as second argument to the function."""
+    @functools.wraps(view)
+    def wrapper(request, *args, **kwargs):
+        permission_manager = get_permission_manager(request.user)
+        return view(request, permission_manager, *args, **kwargs)
+
+    return wrapper
+
+
+def receives_loggedin_permission_manager(view):
+    """Decorator that combines login_required and
+    receives_permission_manager."""
+    return login_required(receives_permission_manager(view))
+
+
+def get_permission_manager(user=None):
     """Factory function for the three types of permission managers."""
     if user is None or not user.is_authenticated():
         return AnonymousPermissionManager()
