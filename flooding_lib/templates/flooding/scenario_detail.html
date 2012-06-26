@@ -13,7 +13,7 @@ Lizard-flooding: Scenario {{ object.name }}
 {% endblock %}
 
 {% block content %}
-<p><strong>Project:</strong> <a href="{% url flooding_project_detail object_id=object.project.id %}">{{ object.project.name }}</a></p> {% comment %}PROJECT KOALA{% endcomment %}
+<p><strong>Project:</strong> <a href="{% url flooding_project_detail object_id=object.project.id %}">{{ object.main_project.name }}</a></p>
 <p><strong>Name:</strong> {{ object.name }}</p>
 <p><strong>Owner:</strong> {{ object.owner }}</p>
 <p><strong>Remarks:</strong> {{ object.remarks }}</p>
