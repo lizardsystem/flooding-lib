@@ -57,7 +57,7 @@ class PermissionManager:
             """
             for scenario in presentationlayer.scenario_set.all():
                 if self.pm_flooding.check_project_permission(
-                    scenario.project, flooding_permission):
+                    scenario.main_project, flooding_permission):
                     return True
             return False
 

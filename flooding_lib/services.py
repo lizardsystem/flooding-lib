@@ -273,8 +273,7 @@ def service_get_scenario_tree(
 
     #only projects with scenario
     if filter_onlyprojectswithscenario:
-        project_list = Project.objects.filter(
-            scenario__in=scenario_list).distinct()
+        project_list = Project.in_scenario_list(scenario_list).distinct()
     else:
         project_list = pm.get_projects(permission)
 
@@ -289,7 +288,7 @@ def service_get_scenario_tree(
     for scenario in scenario_list:
             object_list.append({'sid': scenario.id,
                                 'name': scenario.__unicode__(),
-                                'parentid': scenario.project.id,
+                                'parentid': scenario.main_project.id,
                                 'isscenario': True,
                                 'status': scenario.get_status(),
                                 'strategy_id': scenario.strategy_id,
@@ -311,7 +310,9 @@ def service_get_cutofflocations_from_scenario(
     """
     scenario = get_object_or_404(Scenario, pk=scenario_id)
     pm = PermissionManager(request.user)
-    if not(pm.check_project_permission(scenario.project, permission)):
+
+    if not(pm.check_project_permission(
+            scenario.main_project, permission)):
         raise Http404
     scenariocutofflocation_list = scenario.scenariocutofflocation_set.all()
 
@@ -425,7 +426,7 @@ def service_get_scenarios_export_list(
             'project_name': project.name,
             'owner_id': s.owner.id,
             'owner_name': s.owner.username}
-        for s in project.scenario_set.all()]
+        for s in project.all_scenarios()]
     return HttpResponse(
         simplejson.dumps(scenarios_export_list), mimetype="application/json")
 
@@ -691,8 +692,9 @@ def service_get_attachment(request, scenario_id, path):
     scenario = get_object_or_404(Scenario, pk=scenario_id)
     user = request.user
     pm = PermissionManager(user)
+
     if not pm.check_project_permission(
-        scenario.project, UserPermission.PERMISSION_SCENARIO_VIEW):
+        scenario.main_project, UserPermission.PERMISSION_SCENARIO_VIEW):
         raise Http404
 
     file_path = os.path.join(settings.MEDIA_ROOT, path)
@@ -1695,7 +1697,8 @@ def service_get_tasks_from_scenario(
     """
     scenario = get_object_or_404(Scenario, pk=scenario_id)
     pm = PermissionManager(request.user)
-    if not(pm.check_project_permission(scenario.project, permission)):
+
+    if not(pm.check_project_permission(scenario.main_project, permission)):
         raise Http404
     #todo: filter
     object_list = scenario.task_set.all()
@@ -1715,8 +1718,10 @@ def service_get_scenarios_from_project(
     pm = PermissionManager(request.user)
     if not(pm.check_project_permission(project, permission)):
         raise Http404
-    return render_to_response('flooding/scenario.json',
-                              {'scenario_list': project.scenario_set.all()})
+
+    return render_to_response(
+        'flooding/scenario.json',
+        {'scenario_list': project.all_scenarios()})
 
 
 def service_get_scenarios(
@@ -1743,7 +1748,8 @@ def service_get_results_from_scenario(
     """
     scenario = get_object_or_404(Scenario, pk=scenario_id)
     pm = PermissionManager(request.user)
-    if not(pm.check_project_permission(scenario.project, permission)):
+
+    if not(pm.check_project_permission(scenario.main_project, permission)):
         raise Http404
 
     result = scenario.result_set.all().select_related(

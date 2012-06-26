@@ -12,7 +12,7 @@ log = logging.getLogger('permission_manager')
 
 def get_permission_manager(user):
     """Factory function for the three types of permission managers."""
-    if not user.is_authenticated():
+    if user is None or not user.is_authenticated():
         return AnonymousPermissionManager()
     elif user.is_superuser:
         return SuperuserPermissionManager()
@@ -249,6 +249,7 @@ class UserPermissionManager(object):
 
 
         get list of scenarios"""
+        # PROJECT KOALA
         if not self.check_permission(permission):
             return Scenario.objects.filter(pk=-1)
 

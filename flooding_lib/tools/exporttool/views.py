@@ -86,7 +86,8 @@ def export_detail(request, export_run_id):
         results_list += [[result.get_area_display(), result.name, path]]
 
     num_scenarios = len(export_run.scenarios.all())
-    num_projects = len(set([s.project for s in export_run.scenarios.all()]))
+    num_projects = len(
+        set([s.main_project for s in export_run.scenarios.all()]))
 
     breadcrumbs = [
         {'name': _('Export tool'),

@@ -589,7 +589,7 @@ class Project(models.Model):
 
     def count_scenarios(self):
         """returns number of scenarios attached to this project."""
-        return len(self.scenario_set.all())
+        return self.x_scenarios.count()
 
     def __unicode__(self):
         return self.friendlyname
@@ -597,6 +597,33 @@ class Project(models.Model):
     def get_absolute_url(self):
         return reverse(
             "flooding_project_detail", kwargs={"object_id": self.id})
+
+    def add_scenario(self, scenario):
+        """Adds the scenario to this project. This is not the scenario's
+        main project, the main project for the scenario must already be
+        set and be different."""
+
+        main_project = scenario.main_project
+        if not main_project:
+            raise ValueError(
+                ("Tried to add scenario (pk={0}) to an extra project while it "
+                 "doesn't have a main one yet.").format(scenario.pk))
+        if main_project.pk == self.pk:
+            raise ValueError(
+                "Tried to add scenario (pk={0}) to its own main project."
+                .format(scenario.pk))
+
+        ScenarioProject.objects.get_or_create(
+            project=self, scenario=scenario, is_main_project=False)
+
+    @classmethod
+    def in_scenario_list(cls, scenario_list):
+        """Return a queryset of Projects that are related to scenarios in scenario_list."""
+        return cls.objects.filter(scenarioproject__scenario__in=scenario_list)
+
+    def all_scenarios(self):
+        """Return a queryset of all scenarios attached to this project."""
+        return self.x_scenarios
 
 
 class UserPermission(models.Model):
@@ -804,7 +831,7 @@ class Scenario(models.Model):
     owner = models.ForeignKey(User)
     remarks = models.TextField(
         _('remarks'), blank=True, null=True, default=None)
-    project = models.ForeignKey(Project)
+    project = models.ForeignKey(Project, null=True, blank=True)
     x_projects = models.ManyToManyField(
         Project, through='ScenarioProject', related_name='x_scenarios')
     attachments = generic.GenericRelation(Attachment)
@@ -818,7 +845,7 @@ class Scenario(models.Model):
     strategy = models.ForeignKey(
         'Strategy', blank=True, null=True, default=None)
 
-    sobekmodel_inundation = models.ForeignKey(SobekModel)
+    sobekmodel_inundation = models.ForeignKey(SobekModel, null=True)
 
     tsim = models.FloatField()  # datetime object, time in days
     calcpriority = models.IntegerField(choices=CALCPRIORITY_CHOICES,
@@ -835,16 +862,57 @@ class Scenario(models.Model):
 
     workflow_template = models.ForeignKey(
         'flooding_worker.WorkflowTemplate',
-        db_column='workflow_template')
+        db_column='workflow_template',
+        null=True)
 
     class Meta:
-        ordering = ('name', 'project', 'owner', )
+        ordering = ('name', 'owner', )
         verbose_name = _('Scenario')
         verbose_name_plural = _('Scenarios')
         db_table = 'flooding_scenario'
 
     def __unicode__(self):
         return self.name
+
+    def set_project(self, project):
+        """Set the MAIN project. Raises ValueError if it was already set."""
+        if ScenarioProject.objects.filter(
+            scenario=self, is_main_project=True).exists():
+            raise ValueError(
+                ("Tried to set_project on a scenario (pk={0}) "
+                 "that already had one.")
+                .format(self.pk))
+
+        sp = ScenarioProject(
+            project=project,
+            scenario=self,
+            is_main_project=True)
+        sp.save()
+
+        # These lines are here to make sure nothing breaks while
+        # refactoring. We'll remove them later.
+        self.project = project
+        self.save()
+
+    @property
+    def main_project(self):
+        try:
+            sp = ScenarioProject.objects.get(
+                scenario=self, is_main_project=True)
+            if not sp.project_id == self.project_id:
+                logger.critical(
+                    ("SHOULD NOT HAPPEN: {0} ({1}).main_project found a "
+                    "different project than self.project.")
+                    .format(unicode(self), self.pk))
+            return sp.project
+        except ScenarioProject.DoesNotExist:
+            return None
+        except ScenarioProject.MultipleObjectsReturned:
+            logger.critical(
+                ((u"SHOULD NOT HAPPEN: {0} ({1}).main_project "
+                  "found multiple objects.")
+                 .format(unicode(self)), self.pk))
+            raise ValueError
 
     def get_tsim(self):
         return datetime.datetime(self.tsim)
@@ -933,7 +1001,8 @@ class Scenario(models.Model):
             self.sobekmodel_inundation.attachments.
             order_by('-uploaded_date'))
         scenario_attachments = self.attachments.order_by('-uploaded_date')
-        project_attachments = self.project.attachments.order_by(
+
+        project_attachments = self.main_project.attachments.order_by(
             '-uploaded_date')
 
         # Get the the sobekmodels
@@ -963,12 +1032,24 @@ class Scenario(models.Model):
 
         return attachment_list
 
+    def all_projects(self):
+        return list(
+            sp.project for sp in
+            self.scenarioproject_set.all())
+
+    @classmethod
+    def in_project_list(cls, project_list):
+        """Return a Queryset of Scenarios that are related to the projects in the
+        queryset project_list"""
+
+        return cls.objects.filter(scenarioproject__project__in=project_list)
+
 
 class ScenarioProject(models.Model):
     """Table implementing the ManyToMany relation between Scenario and Project.
 
-    Model is needed because each scenario has one 'main' project and zero or more
-    extra projects."""
+    Model is needed because each scenario has one 'main' project and
+    zero or more extra projects."""
 
     scenario = models.ForeignKey(Scenario)
     project = models.ForeignKey(Project)

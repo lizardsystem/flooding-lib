@@ -5,7 +5,13 @@ Changelog of flooding-lib
 1.36 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Changed scenario fields to null=True to make testing easier
+
+- Added ScenarioProject model
+
+- Changed most of them to new, tested functions
+
+- Changed scenario fields to null=True to make testing easier
 
 
 1.35 (2012-06-26)

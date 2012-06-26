@@ -128,15 +128,16 @@ def service_save_new_scenario(request):
     tsim = to_intervalfloat(query.get('tsim_ms'))
     breach = Breach.objects.get(pk=query.get('breach_id'))
     #Scenario
+
     scenario = Scenario.objects.create(
         name=query.get('name'),
         owner=request.user,
         remarks=query.get('remarks'),
-        project=Project.objects.get(pk=query.get('project_fk')),
         sobekmodel_inundation=SobekModel.objects.get(
             pk=query.get('inundationmodel')),
         tsim=to_intervalfloat(query.get('tsim_ms')),
         calcpriority=query.get('calcpriority'))
+    scenario.set_project(Project.objects.get(pk=query.get('project_fk')))
 
     scenario.code = '2s_c_%i' % scenario.id
     scenario.save()

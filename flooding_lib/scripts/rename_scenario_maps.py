@@ -98,6 +98,7 @@ if __name__ == '__main__':
             os.makedirs(os.path.join(dest_dir, new_scenario_dir))
 
         for result in scenario.result_set.all():
+            # PROJECT KOALA
         #print "result: " + str(result.resulttype.id)
             try:
                 if result.resulttype.id == 16:

@@ -115,7 +115,7 @@ def infowindow_information(scenario):
 
     data_objects = {
         'scenario': scenario,
-        'project': scenario.project,
+        'project': scenario.main_project,
         'scenariobreach': scenariobreach,
         'breach': breach,
         'externalwater': breach.externalwater,
@@ -178,7 +178,8 @@ def infowindow_remarks(request, scenario_id, callbackfunction, form_id):
     scenario = get_object_or_404(Scenario, pk=scenario_id)
     pm = PermissionManager(request.user)
     if not(pm.check_project_permission(
-            scenario.project, UserPermission.PERMISSION_SCENARIO_EDIT_SIMPLE)):
+            scenario.main_project,
+            UserPermission.PERMISSION_SCENARIO_EDIT_SIMPLE)):
         return HttpResponse(_("No permission to import scenario or login"))
     if request.method == 'POST':
         form = ScenarioNameRemarksForm(request.POST, instance=scenario)
@@ -200,7 +201,7 @@ def infowindow_approval(request, scenario_id, callbackfunction,
 
     pm = PermissionManager(request.user)
     if not(pm.check_project_permission(
-            used_scenario.project,
+            used_scenario.main_project,
             UserPermission.PERMISSION_SCENARIO_APPROVE)):
         return HttpResponse(_("No permission to import scenario or login"))
 
@@ -269,7 +270,8 @@ def infowindow_edit(request, scenario_id):
     used_scenario = get_object_or_404(Scenario, pk=scenario_id)
     pm = PermissionManager(request.user)
     if not(pm.check_project_permission(
-            used_scenario.project, UserPermission.PERMISSION_SCENARIO_EDIT)):
+            used_scenario.main_project,
+            UserPermission.PERMISSION_SCENARIO_EDIT)):
         return HttpResponse(_("No permission to import scenario or login"))
 
     return render_to_response(
@@ -318,9 +320,9 @@ def showattachments(request, scenario_id):
             'uploaded_date').reverse()
         related_to_object = used_scenario
     elif request_related_to == 'project':
-        attachments = used_scenario.project.attachments.order_by(
+        attachments = used_scenario.main_project.attachments.order_by(
             'uploaded_date').reverse()
-        related_to_object = used_scenario.project
+        related_to_object = used_scenario.main_project
 
     if request.method == 'POST':
 
@@ -373,7 +375,8 @@ def editproperties(request, scenario_id):
     used_scenario = get_object_or_404(Scenario, pk=scenario_id)
     pm = PermissionManager(request.user)
     if not(pm.check_project_permission(
-            used_scenario.project, UserPermission.PERMISSION_SCENARIO_EDIT)):
+            used_scenario.main_project,
+            UserPermission.PERMISSION_SCENARIO_EDIT)):
         return HttpResponse(_("No permission to import scenario or login"))
 
     succeeded = False

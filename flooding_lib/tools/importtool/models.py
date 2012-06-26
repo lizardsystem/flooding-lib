@@ -186,12 +186,12 @@ class ImportScenario(models.Model):
                 name=str(scenario_values.get("name", "-")),
                 owner=self.owner,
                 remarks=str(scenario_values.get("remarks", "")),
-                project=self.project,
                 sobekmodel_inundation=SobekModel.objects.get(
                     pk=1),  # only link to dummy is possible
                 tsim=float(scenario_values.get("tsim", 0)),
                 # calcpriority
                 code="2impsc_" + str(self.id))
+            scenario.set_project(self.project)
             self.scenario = scenario
             self.save()
 

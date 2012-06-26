@@ -109,8 +109,9 @@ def scenario_addedit(request, object_id=None):
         scenario = get_object_or_404(Scenario, pk=object_id)
         scenario_name = scenario.name
         #check scenario_edit permission FOR PROJECT
+
         if not (pm.check_project_permission(
-                scenario.project, UserPermission.PERMISSION_SCENARIO_EDIT)):
+                scenario.main_project, UserPermission.PERMISSION_SCENARIO_EDIT)):
             raise Http404
     else:
         #check scenario_add permission FOR USER
@@ -173,7 +174,8 @@ def scenario_editnameremarks(request, object_id):
 def scenario_delete(request, object_id):
     """Create delete scenario task"""
     scenario = get_object_or_404(Scenario, pk=object_id)
-    project = scenario.project
+
+    project = scenario.main_project
     pm = PermissionManager(request.user)
     if ((scenario.owner == request.user or request.user.is_staff) and
         pm.check_project_permission(
@@ -200,8 +202,10 @@ def scenario_cutofflocation_add(request, scenario_id):
         raise Http404
 
     scenario = get_object_or_404(Scenario, pk=scenario_id)
+
     if not(pm.check_project_permission(
-            scenario.project, UserPermission.PERMISSION_SCENARIO_EDIT)):
+            scenario.main_project,
+            UserPermission.PERMISSION_SCENARIO_EDIT)):
         raise Http404
 
     if request.method == 'POST':
@@ -230,8 +234,10 @@ def scenario_breach_add(request, scenario_id):
         raise Http404
 
     scenario = get_object_or_404(Scenario, pk=scenario_id)
+
     if not(pm.check_project_permission(
-            scenario.project, UserPermission.PERMISSION_SCENARIO_EDIT)):
+            scenario.main_project,
+            UserPermission.PERMISSION_SCENARIO_EDIT)):
         raise Http404
 
     if request.method == 'POST':
@@ -256,7 +262,8 @@ def scenario_cutofflocation_delete(request, object_id):
     scenario_cutofflocation = get_object_or_404(
         ScenarioCutoffLocation, pk=object_id)
     scenario = scenario_cutofflocation.scenario
-    project = scenario.project
+
+    project = scenario.main_project
     pm = PermissionManager(request.user)
     if ((scenario.owner == request.user or request.user.is_staff) and
         pm.check_project_permission(
@@ -271,7 +278,8 @@ def scenario_cutofflocation_delete(request, object_id):
 def scenario_breach_delete(request, object_id):
     scenario_breach = get_object_or_404(ScenarioBreach, pk=object_id)
     scenario = scenario_breach.scenario
-    project = scenario.project
+
+    project = scenario.main_project
     pm = PermissionManager(request.user)
     if ((scenario.owner == request.user or request.user.is_staff) and
         pm.check_project_permission(
@@ -496,7 +504,8 @@ def task_list(request):
 
     pm = PermissionManager(user)
     projects = pm.get_projects()
-    tasks = Task.objects.filter(scenario__project__in=projects)
+    scenarios = Scenario.in_project_list(projects)
+    tasks = Task.objects.filter(scenario__in=scenarios)
     if filter_scenario != -1:
         tasks = tasks.filter(scenario__id=filter_scenario)
     if filter_tasktype != -1:
@@ -541,7 +550,7 @@ def task_list(request):
         'filter_tasktype': filter_tasktype,
         'filter_successful': filter_successful,
         }
-    scenarios = Scenario.objects.filter(project__in=projects)
+
     scenario_choices = tuple(
         [(-1, _('(choose scenario)'))] + [(s.id, str(s)) for s in scenarios]
         )
@@ -759,20 +768,21 @@ def scenario_list(request):
     pm = PermissionManager(request.user)
     projects = pm.get_projects(
         permission=UserPermission.PERMISSION_SCENARIO_VIEW)
-    objects = Scenario.objects.filter(project__in=projects)
+
+    scenarios = Scenario.in_project_list(projects)
     if search_session['q']:
         q = search_session['q']
-        objects = objects.filter(
+        scenarios = scenarios.filter(
             Q(name__icontains=q) |
             Q(remarks__icontains=q) |
-            Q(project__name__icontains=q) |
-            Q(project__friendlyname__icontains=q))
+            Q(scenarioproject__project__name__icontains=q) |
+            Q(scenarioproject__project__friendlyname__icontains=q))
     if search_session['status']:
-        objects = objects.filter(status_cache__in=search_session['status'])
+        scenarios = scenarios.filter(status_cache__in=search_session['status'])
     if search_session['regionset'] > 0:
         filter_regionset_object = get_object_or_404(
             RegionSet, pk=search_session['regionset'])
-        objects = objects.filter(
+        scenarios = scenarios.filter(
             breaches__region__regionset__in=[filter_regionset_object])
     if search_session['region'] > 0:
         #in het menu staan altijd opties die je mag doen, anders heb
@@ -783,23 +793,23 @@ def scenario_list(request):
                 filter_region_object,
                 UserPermission.PERMISSION_SCENARIO_VIEW)):
             raise Http404
-        objects = objects.filter(breaches__region__in=[filter_region_object])
+        scenarios = scenarios.filter(breaches__region__in=[filter_region_object])
     else:
         filter_region_object = None
     if search_session['breach'] > 0:
         search_breach = get_object_or_404(Breach, pk=search_session['breach'])
-        objects = objects.filter(breaches__in=[search_breach])
+        scenarios = scenarios.filter(breaches__in=[search_breach])
     if search_session['waterlevel_lte'] is not None:
-        objects = objects.exclude(
+        scenarios = scenarios.exclude(
             scenariobreach__extwmaxlevel__gt=search_session['waterlevel_lte'])
     if search_session['waterlevel_gte'] is not None:
-        objects = objects.exclude(
+        scenarios = scenarios.exclude(
             scenariobreach__extwmaxlevel__lt=search_session['waterlevel_gte'])
     if search_session['repeattime_lte'] is not None:
-        objects = objects.exclude(
+        scenarios = scenarios.exclude(
            scenariobreach__extwrepeattime__gt=search_session['repeattime_lte'])
     if search_session['repeattime_gte'] is not None:
-        objects = objects.exclude(
+        scenarios = scenarios.exclude(
            scenariobreach__extwrepeattime__lt=search_session['repeattime_gte'])
 
     #order the object list
@@ -817,7 +827,7 @@ def scenario_list(request):
         'status': 'status_cache', 'status_rev': '-status_cache',
         }
     if search_session['sort']:
-        objects = objects.order_by(order_dict[search_session['sort']])
+        scenarios = scenarios.order_by(order_dict[search_session['sort']])
 
     format = request.GET.get('format', 'html')
     if format == 'csv':
@@ -856,7 +866,7 @@ def scenario_list(request):
                       'Damage to the embankments'
                       )]
 
-        for s in objects:
+        for s in scenarios:
             # retrieve data to use for filling the row
             regions = Region.objects.filter(
                 breach__scenario__in=[s]).distinct()
@@ -887,7 +897,7 @@ def scenario_list(request):
                     s.id,
                     s.name,
                     s.status_cache,
-                    s.project.name,
+                    s.main_project.name,
                     string.join([r.name for r in regions], '|'),
                     scenario_inundation_model.model_varname,
                     scenario_inundation_model.sobekversion.name,
@@ -949,11 +959,11 @@ def scenario_list(request):
         response['Content-Disposition'] = 'attachment; filename=query.csv'
         csv_file.close()
 
-        return  response
+        return response
 
     if format == 'html':
         #paginate
-        paginator = Paginator(objects, search_session['items_per_page'])
+        paginator = Paginator(scenarios, search_session['items_per_page'])
         try:
             page = paginator.page(search_session['page_nr'])
         except:
@@ -1134,9 +1144,10 @@ def scenario(request, object_id):
     """Renders page for a single scenario."""
     scenario = get_object_or_404(Scenario, pk=object_id)
     pm = PermissionManager(request.user)
+
     if not(pm.check_project_permission(
-                                    scenario.project,
-                                    UserPermission.PERMISSION_SCENARIO_VIEW)):
+            scenario.main_project,
+            UserPermission.PERMISSION_SCENARIO_VIEW)):
         raise Http404  # user cannot see difference between no access
                        # and not existing
 
@@ -1179,8 +1190,10 @@ def task(request, object_id):
     """
     task = get_object_or_404(Task, pk=object_id)
     pm = PermissionManager(request.user)
-    if not(pm.check_project_permission(task.scenario.project,
-                                    UserPermission.PERMISSION_SCENARIO_VIEW)):
+
+    if not(pm.check_project_permission(
+            task.scenario.main_project,
+            UserPermission.PERMISSION_SCENARIO_VIEW)):
         raise Http404
     return render_to_response('flooding/task_detail.html', {
             'user': request.user,
@@ -1219,16 +1232,17 @@ def result_list(request):
     #from database
     pm = PermissionManager(request.user)
     if filter_resulttype == -1:
-        lookup_query = {'scenario__project__in': pm.get_projects()}
+        lookup_query = {
+            'scenario__scenarioproject__project__in': pm.get_projects()}
     else:
         lookup_query = {
-            'scenario__project__in': pm.get_projects(),
+            'scenario__scenarioproject__project__in': pm.get_projects(),
             'resulttype': get_object_or_404(
                 ResultType, pk=filter_resulttype)}
     if query:
         objects = Result.objects.filter(
             Q(scenario__name__icontains=query) |
-            Q(scenario__project__name__icontains=query),
+            Q(scenario__scenarioproject__project__name__icontains=query),
             **lookup_query)
     else:
         objects = Result.objects.filter(**lookup_query)
@@ -1237,7 +1251,8 @@ def result_list(request):
     order_dict = {
         'id': 'id', 'id_rev': '-id',
         'scenario': 'scenario', 'scenario_rev': '-scenario',
-        'project': 'scenario__project', 'project_rev': '-scenario__project',
+        'project': 'scenario__scenarioproject__project',
+        'project_rev': '-scenario__scenarioproject__project',
         'resulttype': 'resulttype', 'resulttype_rev': '-resulttype',
         }
     objects = objects.order_by(order_dict[sort])
@@ -1283,9 +1298,10 @@ def result_list(request):
                {'url': reverse('flooding_scenario_detail',
                                kwargs={'object_id': o.scenario_id}),
                 'value': o.scenario},
+
                {'url': reverse('flooding_project_detail',
-                               kwargs={'object_id': o.scenario.project_id}),
-                'value': o.scenario.project},
+                               kwargs={'object_id': o.scenario.main_project.id}),
+                'value': o.scenario.main_project},
                {'value': cutofflocations},
                {'value': scenariobreaches},
                {'value': o.resulttype}]
