@@ -29,6 +29,12 @@ Changelog of flooding-lib
 
 - Fixed import of Image.
 
+- Added tests for get_scenarios() in UserPermissionManager, test
+  multiple projects per scenario
+
+- Got tests to work -- multiple projects per scenario is functional
+  now
+
 1.34 (2012-06-20)
 -----------------
 

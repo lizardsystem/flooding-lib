@@ -71,7 +71,7 @@ class SuperuserPermissionManager(object):
         if breach:
             criteria["breaches"] = breach
 
-        return Scenario.objects.filter(criteria).distinct()
+        return Scenario.objects.filter(**criteria).distinct()
 
     #------------------------- permission functions --------------
     def check_permission(self, permission):
@@ -142,8 +142,8 @@ class AnonymousPermissionManager(object):
         demogroup = Group.objects.get(name='demo group')
         PSV = UserPermission.PERMISSION_SCENARIO_VIEW
         filter = Q(
-            project__projectgrouppermission__group=demogroup,
-            project__projectgrouppermission__permission=PSV,
+            scenarioproject__project__projectgrouppermission__group=demogroup,
+            scenariproject__project__projectgrouppermission__permission=PSV,
             status_cache=Scenario.STATUS_APPROVED,
             status_cache__in=status_list)
 
@@ -264,7 +264,7 @@ class UserPermissionManager(object):
 
 
         get list of scenarios"""
-        # PROJECT KOALA
+
         if not self.check_permission(permission):
             return Scenario.objects.filter(pk=-1)
 
@@ -274,21 +274,21 @@ class UserPermissionManager(object):
         if permission == UserPermission.PERMISSION_SCENARIO_VIEW:
             PSV = UserPermission.PERMISSION_SCENARIO_VIEW
             filter = Q(
-                project__projectgrouppermission__group__user=self.user,
-                project__projectgrouppermission__permission=PSV,
+  scenarioproject__project__projectgrouppermission__group__user=self.user,
+  scenarioproject__project__projectgrouppermission__permission=PSV,
                 status_cache=Scenario.STATUS_APPROVED,
                 status_cache__in=status_list)
             if self.check_permission(
                 UserPermission.PERMISSION_SCENARIO_APPROVE):
                 PSA = UserPermission.PERMISSION_SCENARIO_APPROVE
                 filter = filter | Q(
-                    project__projectgrouppermission__group__user=self.user,
-                    project__projectgrouppermission__permission=PSA,
+  scenarioproject__project__projectgrouppermission__group__user=self.user,
+  scenarioproject__project__projectgrouppermission__permission=PSA,
                     status_cache__in=status_list)
         else:
             filter = Q(
-                project__projectgrouppermission__group__user=self.user,
-                project__projectgrouppermission__permission=permission,
+  scenarioproject__project__projectgrouppermission__group__user=self.user,
+  scenarioproject__project__projectgrouppermission__permission=permission,
                 status_cache__in=status_list)
 
         if breach is None:
