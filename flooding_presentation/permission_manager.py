@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 from flooding_presentation.models import PresentationLayer
 from flooding_visualization.models import ShapeDataLegend
-from flooding_lib.permission_manager import PermissionManager as \
-    PermissionManagerFlooding
+from flooding_lib.permission_manager import get_permission_manager
 from flooding_lib.models import UserPermission as UserPermissionFlooding
 
 
@@ -32,7 +31,7 @@ class PermissionManager:
         self.user = user
         #we gaan er even van uit dat Flooding aanwezig is
         if True:
-            self.pm_flooding = PermissionManagerFlooding(self.user)
+            self.pm_flooding = get_permission_manager(self.user)
         #except ImportError:
         #    self.pm_flooding = None
 
