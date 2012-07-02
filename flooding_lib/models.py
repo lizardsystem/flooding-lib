@@ -566,6 +566,9 @@ class Project(models.Model):
     regionsets = models.ManyToManyField(RegionSet, blank=True)
     regions = models.ManyToManyField(Region, blank=True)
 
+    color_mapping_name = models.CharField(
+        max_length=256, blank=True, null=True)
+
     code = models.CharField(max_length=20, null=True)
 
     class Meta:
