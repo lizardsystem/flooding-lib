@@ -13,6 +13,9 @@ Changelog of flooding-lib
 
 - Changed scenario fields to null=True to make testing easier
 
+- Added 'color_mapping_name' field to 'Project' model (the field
+  exists yet, fake it on migration).
+
 
 1.35 (2012-06-26)
 -----------------
