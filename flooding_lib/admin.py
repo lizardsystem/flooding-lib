@@ -50,7 +50,7 @@ class ScenarioBreachAdmin(admin.ModelAdmin):
 class ScenarioAdmin(admin.ModelAdmin):
     #'breaches','breaches_region',
     list_display = ['__unicode__', 'get_status_str', ]
-    list_filter = ('calcpriority', 'owner', 'project', )
+    list_filter = ('calcpriority', 'owner', 'projects', )
     #inlines = [PresentationLayerInline]
 
 
