@@ -2,7 +2,7 @@ Changelog of flooding-lib
 ===================================================
 
 
-1.36 (unreleased)
+1.36 (2012-07-02)
 -----------------
 
 - Changed scenario fields to null=True to make testing easier
