@@ -3,6 +3,7 @@ import os
 import os.path
 from shutil import copyfile
 
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.gis.db import models
 from django.utils import simplejson
@@ -237,9 +238,12 @@ class ImportScenario(models.Model):
                 extra_scenario_info[extra_field_name])
             extrascenarioinfo.save()
 
-    def copy_resultfiles(self, result_values):
+    def copy_result_files(self, result_values):
         # results
         for resulttype_id, value in result_values.items():
+            filepath = os.path.join(
+                settings.MEDIA_ROOT, value.name)
+
             result, _ = Result.objects.get_or_create(
                 scenario=self.scenario,
                 resulttype=ResultType.objects.get(
@@ -250,7 +254,7 @@ class ImportScenario(models.Model):
 
             dest_file_rel = os.path.join(
                 self.scenario.get_rel_destdir(),
-                os.path.split(value)[1])
+                os.path.basename(filepath))
 
             dest_file = os.path.join(
                 Setting.objects.get(
@@ -271,12 +275,12 @@ class ImportScenario(models.Model):
             # /p-flod-fs-00-d1.external-nens.local/flod-share/ was
             # created on both flooding webservers to make a path like
             # that work on both sides.
-            value = value.replace('\\', '/')
+            filepath = filepath.replace('\\', '/')
             dest_file = dest_file.replace('\\', '/')
 
-            logger.debug("VALUE = " + value)
+            logger.debug("VALUE = " + filepath)
             logger.debug("DEST_FILE = " + dest_file)
-            copyfile(value, dest_file)
+            copyfile(filepath, dest_file)
 
     def import_into_flooding(self, username):
         """Import all fields into the correct fields in flooding.
@@ -300,13 +304,13 @@ class ImportScenario(models.Model):
         # have been successful for it...
         Task.create_fake(
             scenario=self.scenario,
-            tasktype=TaskType.TYPE_SCENARIO_CREATE_AUTO,
+            task_type=TaskType.TYPE_SCENARIO_CREATE_AUTO,
             remarks="import scenario",
             creatorlog="uploaded by {0}".format(self.owner.get_full_name()))
 
         Task.create_fake(
             scenario=self.scenario,
-            tasktype=TaskType.TYPE_SOBEK_CALCULATION,
+            task_type=TaskType.TYPE_SOBEK_CALCULATION,
             remarks="import scenario",
             creatorlog="imported by {0}.".format(username))
 

@@ -5,7 +5,9 @@ Changelog of flooding-lib
 1.37 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Fix issues relating to #3705; obviously import wasn't tested yet and
+  there were several typos and things that couldn't work. Works on my
+  development machine now.
 
 
 1.36 (2012-07-02)
