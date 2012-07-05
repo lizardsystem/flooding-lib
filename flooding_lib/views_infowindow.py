@@ -12,6 +12,8 @@ from django.shortcuts import get_object_or_404
 from django.shortcuts import render_to_response
 from django.utils.translation import ugettext_lazy as _, ungettext
 
+from flooding_lib import coordinates
+from flooding_lib.dates import get_intervalstring_from_dayfloat
 from flooding_lib.forms import AttachmentForm
 from flooding_lib.forms import EditScenarioPropertiesForm
 from flooding_lib.forms import ScenarioNameRemarksForm
@@ -89,6 +91,94 @@ def infowindow(request):
         return showattachments(request, scenario_id)
 
 
+def find_imported_value(fieldobject, data_objects):
+    """Given an InputField object, find its values within the data_objects.
+
+    InputFields know in what sort of objects they should be saved --
+    in a Scenario, in a Breach, etc. We know in which objects all the
+    information _was_ saved, the ones given in data_objects.
+
+    Also some special hacks:
+
+    - There are two InputFields that both store their info in Breach's
+      geom field: x location and y location. So we handle that
+      hardcoded here.
+
+    - To make that worse, we also need to translate the stored WGS84
+      coordinates to the RD we use for display.
+
+    - Fields that store in 'Result' are ignored because we do them
+      elsewhere.
+
+    - A value of '-999' is interpreted as 'not present', and changed
+      to None.
+
+    The result is returned.
+    """
+
+    value = None
+    table = fieldobject.destination_table.lower()
+    field = fieldobject.destination_field
+    if table == 'extrascenarioinfo':
+        info = ExtraScenarioInfo.get(
+            scenario=data_objects['scenario'], fieldname=field)
+        if info is not None:
+            value = info.value
+
+        if value is not None:
+            value_type = fieldobject.type
+            if value_type in (InputField.TYPE_INTEGER,):
+                value = int(value)
+            elif value_type in (InputField.TYPE_FLOAT, InputField.TYPE_INTERVAL):
+                value = float(value)
+            elif value_type in (
+                InputField.TYPE_STRING, InputField.TYPE_TEXT, InputField.TYPE_DATE,
+                InputField.TYPE_SELECT):
+                pass  # Already a string -- yes, Select as well!
+            elif value_type in (InputField.TYPE_BOOLEAN,):
+                value = bool(value)
+            elif value_type in (InputField.TYPE_FILE,):
+                # Don't know what to do
+                value = None
+
+    elif table in data_objects:
+        value = getattr(data_objects[table], field, None)
+        if table == 'breach' and field == 'geom':
+            # Show in RD
+            x, y = coordinates.wgs84_to_rd(
+                value.x, value.y)
+
+            if fieldobject.name.lower().startswith('x'):
+                value = x
+            if fieldobject.name.lower().startswith('y'):
+                value = y
+    elif table == 'result':
+        # We do these differently
+        pass
+    else:
+        # Unknown table, show it
+        value = '{0}/{1}'.format(table, field)
+
+    if value in (u'-999', -999, -999.0):
+        value = None
+
+    return value
+
+
+def display_string(inputfield, value):
+    """Take a value and format it for output use. The wait to display it
+    depends on the type of the inputfield (e.g. a float and an date interval
+    are both floats, but displayed very differently)."""
+
+    if value is None:
+        return ''
+
+    if inputfield.type == InputField.TYPE_INTERVAL:
+        return get_intervalstring_from_dayfloat(value)
+
+    return str(value)
+
+
 def infowindow_information(scenario):
     """
     - Get the list of headers and fields that the importtool has
@@ -124,33 +214,16 @@ def infowindow_information(scenario):
         }
 
     for header in grouped_input_fields:
-        for fieldobject in header['fields']:
-            fieldobject.value = None
-            table = fieldobject.destination_table.lower()
-            field = fieldobject.destination_field
-            if table == 'extrascenarioinfo':
-                info = ExtraScenarioInfo.get(
-                    scenario=scenario, fieldname=field)
-                if info is None:
-                    fieldobject.value = None
-                else:
-                    fieldobject.value = info.value
-            elif table in data_objects:
-                fieldobject.value = getattr(data_objects[table], field, None)
-                if table == 'breach' and field == 'geom':
-                    if fieldobject.name.startswith('x'):
-                        fieldobject.value = fieldobject.value.x
-                    if fieldobject.name.startswith('y'):
-                        fieldobject.value = fieldobject.value.y
-            elif table == 'result':
-                # We do these differently
-                pass
-            else:
-                # Unknown table, show it
-                fieldobject.value = '{0}/{1}'.format(table, field)
+        for inputfield in header['fields']:
+            value = find_imported_value(inputfield, data_objects)
+            value_str = display_string(inputfield, value)
+
+            # Set the value_str on the inputfield object for easy
+            # use in the template.
+            inputfield.value_str = value_str
 
         # Only keep fields with a value
-        header['fields'] = [f for f in header['fields'] if f.value]
+        header['fields'] = [f for f in header['fields'] if f.value_str]
 
     # Add in scenario id under the 'scenario' header
     for header in grouped_input_fields:

@@ -25,6 +25,7 @@ install_requires = [
     'factory-boy',
     'mock',
     'xlrd',
+#    'pyproj', # We do need it, but requiring it doesn't work well
     ],
 
 tests_require = [

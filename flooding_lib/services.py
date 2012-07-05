@@ -1531,7 +1531,7 @@ def service(request):
                 use_manual_input,
                 timeserie)
 
-        elif  action_name == 'get_raw_result':
+        elif action_name == 'get_raw_result':
             presentationlayer = int(query.get('presentationlayer', None))
             return service_get_raw_result(request,
                                           presentationlayer)
@@ -1539,15 +1539,15 @@ def service(request):
             scenarioid = int(query.get('scenarioid', None))
             return get_raw_result_scenario(request, scenarioid)
 
-        elif  action_name == 'get_import_scenario_uploaded_file':
+        elif action_name == 'get_import_scenario_uploaded_file':
             path = query.get('path', '')
             return service_get_import_scenario_uploaded_file(request, path)
 
-        elif  action_name == 'get_attachment':
+        elif action_name == 'get_attachment':
             scenario_id = query.get('scenario_id', None)
             path = query.get('path', '')
             return service_get_attachment(request, scenario_id, path)
-        elif  action_name == 'get_existing_embankments_shape':
+        elif action_name == 'get_existing_embankments_shape':
             bbox = query.get('BBOX', None)
             width = query.get('WIDTH', None)
             height = query.get('HEIGHT', None)

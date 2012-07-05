@@ -5,7 +5,10 @@ Changelog of flooding-lib
 1.38 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Solves issues from Trac #3682. In the scenario info window:
+  - Coordinates are shown in RD, not WGS84
+  - Intervals are shown as '2 d 12:00', not as 2.5
+  - Values like '-999' are treated as null values
 
 
 1.37 (2012-07-02)

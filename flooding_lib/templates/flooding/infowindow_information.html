@@ -20,7 +20,7 @@
 	{% for field in header.fields %}
 	    <tr class="{% cycle 'cellDark' 'cell'%}">
 	    	<td>{{field.name}}</td>
-	    	<td>{{field.value}}</td>
+	    	<td>{{field.value_str}}</td>
 	    </tr>
         {% endfor %}
 {% endfor %}
