@@ -129,10 +129,12 @@ def find_imported_value(fieldobject, data_objects):
             value_type = fieldobject.type
             if value_type in (InputField.TYPE_INTEGER,):
                 value = int(value)
-            elif value_type in (InputField.TYPE_FLOAT, InputField.TYPE_INTERVAL):
+            elif value_type in (
+                InputField.TYPE_FLOAT, InputField.TYPE_INTERVAL):
                 value = float(value)
             elif value_type in (
-                InputField.TYPE_STRING, InputField.TYPE_TEXT, InputField.TYPE_DATE,
+                InputField.TYPE_STRING, InputField.TYPE_TEXT,
+                InputField.TYPE_DATE,
                 InputField.TYPE_SELECT):
                 pass  # Already a string -- yes, Select as well!
             elif value_type in (InputField.TYPE_BOOLEAN,):

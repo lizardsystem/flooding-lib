@@ -3,11 +3,7 @@
 import factory
 import mock
 
-from django.contrib.auth.models import User
-from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
-
-import flooding_lib.coordinates
 
 from flooding_lib.tools.importtool import models as importmodels
 from flooding_lib.test_models import ScenarioF
@@ -75,7 +71,7 @@ class TestFindImportedValue(TestCase):
         value = 3
 
         extrainfofield = ExtraInfoFieldF.create(name=fieldname)
-        extrascenarioinfo = ExtraScenarioInfoF.create(
+        ExtraScenarioInfoF.create(
             scenario=scenario,
             extrainfofield=extrainfofield,
             value=value)
@@ -93,7 +89,7 @@ class TestFindImportedValue(TestCase):
         value = '-999'
 
         extrainfofield = ExtraInfoFieldF.create(name=fieldname)
-        extrascenarioinfo = ExtraScenarioInfoF.create(
+        ExtraScenarioInfoF.create(
             scenario=scenario,
             extrainfofield=extrainfofield,
             value=value)
@@ -127,7 +123,7 @@ class TestFindImportedValue(TestCase):
 
         with mock.patch(
             'flooding_lib.coordinates.wgs84_to_rd',
-            return_value=(RD_X,RD_Y)):
+            return_value=(RD_X, RD_Y)):
             retvaluex = find_imported_value(inputfieldx, {'breach': breach})
             retvaluey = find_imported_value(inputfieldy, {'breach': breach})
             self.assertEquals(retvaluex, RD_X)
@@ -143,5 +139,3 @@ class TestDisplayValueStr(TestCase):
             type=importmodels.InputField.TYPE_INTERVAL)
         value_str = display_string(inputfield, 2.5)
         self.assertEquals(value_str, '2 d 12:00')
-
-
