@@ -5,7 +5,22 @@ Changelog of flooding-lib
 1.39 (unreleased)
 -----------------
 
-- Nothing changed yet.
+We are testing and fixed the following issues:
+
+- Restored a scenario.project_id field for the benefit of the old uitvoerder.py scripts
+
+- Forgot to set field.value_str instead of field.value for the
+  scenario ID that we hack into the info window by hand
+
+- 999 was also sometimes used as a sentinel, just like -999. Ignore it too.
+
+- Changed another .project to .main_project
+
+- We should really use Unicode everywhere, people use non-ASCII
+  characters and there's no reason why we should crash on them
+
+- Added an 'ignore' directory to .gitignore, helpful to put silly
+  temporary files in
 
 
 1.38.1 (2012-07-06)
