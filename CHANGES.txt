@@ -5,8 +5,11 @@ Changelog of flooding-lib
 1.40 (unreleased)
 -----------------
 
-- Nothing changed yet.
-
+- Solved issue Trac #3684
+  After an individual scenario upload, the user can optionally upload
+  files.  After uploading, the site used to redirect immediately to
+  the import overview screen, but now it redirects to a tiny screen
+  with a success message and a link to the overview screen.
 
 1.39 (2012-07-06)
 -----------------
@@ -39,11 +42,10 @@ We are testing and fixed the following issues:
 1.38 (2012-07-06)
 -----------------
 
-- Solves issues from Trac #3682. In the scenario info window:
+- Solved issues from Trac #3682. In the scenario info window:
   - Coordinates are shown in RD, not WGS84
   - Intervals are shown as '2 d 12:00', not as 2.5
   - Values like '-999' are treated as null values
-
 
 1.37 (2012-07-02)
 -----------------

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-06-12 07:21-0500\n"
+"POT-Creation-Date: 2012-07-06 01:50-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,214 +18,281 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 
-#: models.py:83
+#: models.py:64
 msgid "Name"
 msgstr "Naam"
 
-#: models.py:84
+#: models.py:66
 msgid "Excel table (.xls)"
 msgstr "Excel tabel (.xls)"
 
-#: models.py:85
+#: models.py:69
 msgid "Results (zipfile)"
 msgstr "Resultaten (zipfile)"
 
-#: models.py:103
+#: models.py:88
 msgid "Import scenario"
 msgstr "Import scenario"
 
-#: models.py:104
+#: models.py:89
 msgid "Import scenarios"
 msgstr "Import scenario's"
 
-#: models.py:114
+#: models.py:99
 msgid "None"
 msgstr "Geen"
 
-#: models.py:115
+#: models.py:100
 msgid "Waiting for validation"
 msgstr ""
 
-#: models.py:116
+#: models.py:101
 msgid "Action required"
 msgstr ""
 
-#: models.py:117
+#: models.py:102
 msgid "Approved for import"
 msgstr ""
 
-#: models.py:118
+#: models.py:103
 msgid "Disapproved for import"
 msgstr ""
 
-#: models.py:119
+#: models.py:104
 msgid "Imported"
 msgstr ""
 
-#: models.py:131
+#: models.py:117
 msgid "The owner of the scenario."
 msgstr "De eigenaar van het scenario."
 
-#: models.py:167
+#: models.py:338
 msgid "Import scenario input field"
 msgstr ""
 
-#: models.py:168
+#: models.py:339
 msgid "Import scenarios input fields"
 msgstr ""
 
-#: models.py:176
+#: models.py:346
 msgid "Waiting"
 msgstr ""
 
-#: models.py:177
+#: models.py:347
 msgid "Approved"
 msgstr ""
 
-#: models.py:178
+#: models.py:348
 msgid "Disapproved"
 msgstr ""
 
-#: models.py:405
+#: models.py:575
 msgid "Import scenario fields"
 msgstr ""
 
-#: models.py:406
+#: models.py:576
 msgid "Import scenarios fields"
 msgstr ""
 
-#: models.py:420
+#: models.py:590
 msgid "Integer"
 msgstr ""
 
-#: models.py:421
+#: models.py:591
 msgid "Float"
 msgstr ""
 
-#: models.py:422
+#: models.py:592
 msgid "String"
 msgstr ""
 
-#: models.py:423
+#: models.py:593
 msgid "Text"
 msgstr ""
 
-#: models.py:424
+#: models.py:594
 msgid "Interval (D d HH:MM)"
 msgstr ""
 
-#: models.py:425
+#: models.py:595
 msgid "Date"
 msgstr ""
 
-#: models.py:426
+#: models.py:596
 msgid "File"
 msgstr ""
 
-#: models.py:427
+#: models.py:597
 msgid "Select"
 msgstr ""
 
-#: models.py:428
+#: models.py:598
 msgid "Boolean (True or False)"
 msgstr ""
 
-#: models.py:442
+#: models.py:623
 msgid "Scenario"
 msgstr "Scenario"
 
-#: models.py:443
+#: models.py:624
 msgid "Meta"
 msgstr "Meta"
 
-#: models.py:444
+#: models.py:625
 msgid "Location"
 msgstr "Locatie"
 
-#: models.py:445
+#: models.py:626
 msgid "Breach"
 msgstr "Bres"
 
-#: models.py:446
+#: models.py:627
 msgid "External Water"
 msgstr "Extern Water"
 
-#: models.py:447
+#: models.py:628
 msgid "Model"
 msgstr "Model"
 
-#: models.py:448
+#: models.py:629
 msgid "Remaining"
 msgstr "Overig"
 
-#: models.py:449
+#: models.py:630 templates/import/import_file_upload.html:5
 msgid "Files"
 msgstr "Files"
 
-#: models.py:454
+#: models.py:637
 msgid "Hoe hoger hoe eerder in rij"
 msgstr "Hoe hoger hoe eerder in de rij"
 
-#: models.py:455
+#: models.py:639
 msgid "Name of col. in import csv-file"
 msgstr ""
 
-#: models.py:456
+#: models.py:641
 msgid "Name of table in flooding database"
 msgstr ""
 
-#: models.py:457
+#: models.py:644
 msgid "Name of field in flooding database table"
 msgstr ""
 
-#: models.py:458
+#: models.py:647
 msgid "Name of imported files (match with resulttypes). Use #### for numbers"
 msgstr ""
 
-#: models.py:467
+#: models.py:659
 msgid "help text shown in excel file"
 msgstr ""
 
-#: models.py:468
+#: models.py:662
 msgid "help text shown when hovering over field"
 msgstr ""
 
-#: models.py:469
+#: models.py:665
 msgid "help text shown behind field"
 msgstr ""
 
-#: views.py:68
+#: views.py:60
 msgid "No permission to upload data or login"
 msgstr ""
 
-#: views.py:95 views.py:225 views.py:311 views.py:364 views.py:736
+#: views.py:94 views.py:222 views.py:310 views.py:346 views.py:480
+#: views.py:559
 msgid "Import tool"
 msgstr ""
 
-#: views.py:113 views.py:261
+#: views.py:105 views.py:258
 msgid "No permission to approve scenario or login"
 msgstr ""
 
-#: views.py:227
+#: views.py:224
 msgid "Approve import"
 msgstr ""
 
-#: views.py:313
+#: views.py:312
 msgid "Verify import"
 msgstr ""
 
-#: views.py:330
+#: views.py:329 views.py:463 views.py:546
 msgid "No permission to import scenario or login"
 msgstr ""
 
-#: views.py:366
+#: views.py:348
 msgid "New import"
 msgstr ""
 
-#: views.py:495 views.py:566
-msgid "No permission to import scenarios or login"
+#: views.py:482 templates/import/import_file_upload.html:20
+msgid "Add files"
 msgstr ""
 
-#: views.py:737
+#: views.py:561 templates/import/imports_overview.html:23
 msgid "Group import"
 msgstr ""
+
+#: templates/import/groupimport_new.html:24
+#: templates/import/import_file_upload.html:32
+msgid "Submit"
+msgstr ""
+
+#: templates/import/import_file_upload.html:16
+msgid ""
+"Het opslaan is gelukt. U kunt een nieuw bestand toevoegen of dit venster "
+"sluiten."
+msgstr ""
+
+#: templates/import/import_file_upload.html:22
+msgid "Already uploaded files"
+msgstr ""
+
+#: templates/import/import_file_upload_success.html:5
+msgid "Success"
+msgstr "Geslaagd"
+
+#: templates/import/import_file_upload_success.html:16
+msgid "The files have been added. The import scenario id is: "
+msgstr "De bestanden zijn toegevoegd. Het import scenario id is: "
+
+#: templates/import/import_file_upload_success.html:21
+msgid "Go back to the import overview page."
+msgstr "Ga terug naar het import overzichtsscherm."
+
+#: templates/import/imports_overview.html:14
+msgid "Overview"
+msgstr ""
+
+#: templates/import/imports_overview.html:20
+msgid "Creation date"
+msgstr ""
+
+#: templates/import/imports_overview.html:21
+#, fuzzy
+msgid "Scenario name"
+msgstr "Scenario"
+
+#: templates/import/imports_overview.html:22
+msgid "Owner name"
+msgstr ""
+
+#: templates/import/imports_overview.html:24
+msgid "Opmerkingen keuring"
+msgstr ""
+
+#: templates/import/imports_overview.html:25
+msgid "State"
+msgstr ""
+
+#: templates/import/imports_overview.html:27
+msgid "Approve"
+msgstr ""
+
+#: templates/import/imports_overview.html:52
+#, fuzzy
+msgid "Import new scenario"
+msgstr "Import scenario"
+
+#: templates/import/imports_overview.html:54
+#, fuzzy
+msgid "Import groep scenario's"
+msgstr "Import scenario's"

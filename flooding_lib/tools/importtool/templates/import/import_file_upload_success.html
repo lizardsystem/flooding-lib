@@ -1,0 +1,24 @@
+{% extends "lizard/base.html" %}
+{% load i18n %}
+
+{% block title %}
+	{% trans 'Success' %}
+{% endblock %}
+
+{% block stylesheets %}
+<link rel="shortcut icon" href="{{ url_favicon }}">
+<link href="{% url root_url %}static_media/style/style.css" media="screen" type="text/css" rel="stylesheet">
+<link href="{% url root_url %}static_media/style/forms.css" media="screen" type="text/css" rel="stylesheet">
+{% endblock stylesheets %}
+
+{% block content %}
+<p>
+  {% trans 'The files have been added. The import scenario id is: ' %}
+  {{ import_scenario_id }}.
+</p>
+<p>
+  <a href="{{ url }}">
+    {% trans 'Go back to the import overview page.' %}
+  </a>
+</p>
+{% endblock content %}

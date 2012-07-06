@@ -8,7 +8,7 @@ import xlrd
 
 from django.core.files.base import ContentFile
 from django.core.urlresolvers import reverse
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.shortcuts import get_object_or_404
 from django.utils import simplejson
@@ -535,8 +535,11 @@ def post_upload_import_scenario_files(form, files, importscenario):
             file_content, upload_filename,
             destination, field_ref.destination_filename)
 
-    return HttpResponseRedirect(
-        reverse('flooding_tools_import_overview'))
+    return render_to_response(
+        'import/import_file_upload_success.html', {
+            'import_scenario_id': importscenario.id,
+            'url': reverse('flooding_tools_import_overview'),
+            })
 
 
 @checks_permission('importtool.can_upload',
