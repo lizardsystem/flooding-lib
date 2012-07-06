@@ -2,7 +2,7 @@ Changelog of flooding-lib
 ===================================================
 
 
-1.38 (unreleased)
+1.38 (2012-07-06)
 -----------------
 
 - Solves issues from Trac #3682. In the scenario info window:
