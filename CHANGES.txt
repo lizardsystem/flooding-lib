@@ -5,7 +5,8 @@ Changelog of flooding-lib
 1.39 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Fixed two occurences of 'scenario.project' that should be
+  'scenario.main_project' now.
 
 
 1.38 (2012-07-06)
