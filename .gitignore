@@ -9,3 +9,4 @@ nosetests.xml
 .mr.developer.cfg
 test.db
 .#*
+ignore

@@ -869,6 +869,11 @@ class Scenario(models.Model):
         db_column='workflow_template',
         null=True)
 
+    # This field is ONLY here to support the old 'uitvoerder.py' scripts that won't
+    # be updated to the new data model. It is set by set_project and never changed.
+    # Don't use this field elsewhere.
+    project_id = models.IntegerField(null=True)
+
     class Meta:
         ordering = ('name', 'owner', )
         verbose_name = _('Scenario')
@@ -892,6 +897,9 @@ class Scenario(models.Model):
             scenario=self,
             is_main_project=True)
         sp.save()
+
+        self.project_id = project.id
+        self.save()
 
     @property
     def main_project(self):
@@ -1119,20 +1127,20 @@ class ScenarioBreach(models.Model):
         return datetime.timedelta(self.tmaxdepth)
 
     def get_summary_str(self):
-        """Returns str summary of object, with markdown layout
+        """Returns _UNICODE_ summary of object, with markdown layout
         """
-        sb_summary = ''
-        sb_summary += ('* %s: %s\n' %
+        sb_summary = u''
+        sb_summary += (u'* %s: %s\n' %
                        (('location'), self.breach))
-        sb_summary += ('* %s: %s\n' %
+        sb_summary += (u'* %s: %s\n' %
                        (_('external water'), self.breach.externalwater))
-        sb_summary += ('* %s: %s\n' %
+        sb_summary += (u'* %s: %s\n' %
                        (_('external water period'), self.extwrepeattime))
-        sb_summary += ('* %s: %s\n' %
+        sb_summary += (u'* %s: %s\n' %
                        (_('external water max waterlevel'), self.extwmaxlevel))
-        sb_summary += ('* %s: %s\n' %
+        sb_summary += (u'* %s: %s\n' %
                        (_('storm duration'), self.tstorm))
-        sb_summary += ('* %s: %s' %
+        sb_summary += (u'* %s: %s' %
                        (_('pitdepth'), self.pitdepth))
         return sb_summary
 

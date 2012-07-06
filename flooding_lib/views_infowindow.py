@@ -111,7 +111,7 @@ def find_imported_value(fieldobject, data_objects):
       elsewhere.
 
     - A value of '-999' is interpreted as 'not present', and changed
-      to None.
+      to None. So is '999'.
 
     The result is returned.
     """
@@ -161,7 +161,7 @@ def find_imported_value(fieldobject, data_objects):
         # Unknown table, show it
         value = '{0}/{1}'.format(table, field)
 
-    if value in (u'-999', -999, -999.0):
+    if value in (u'-999', -999, -999.0, 999.0, 999, u'999'):
         value = None
 
     return value
@@ -234,7 +234,7 @@ def infowindow_information(scenario):
                 pass
             scenarioid = dummy_field()
             scenarioid.name = _('Scenario ID')
-            scenarioid.value = scenario.id
+            scenarioid.value_str = str(scenario.id)
             header['fields'].insert(0, scenarioid)
             break
 
