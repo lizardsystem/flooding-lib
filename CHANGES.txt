@@ -5,11 +5,27 @@ Changelog of flooding-lib
 1.40 (unreleased)
 -----------------
 
-- Solved issue Trac #3684
+Solved issue Trac #3684
+
   After an individual scenario upload, the user can optionally upload
   files.  After uploading, the site used to redirect immediately to
   the import overview screen, but now it redirects to a tiny screen
   with a success message and a link to the overview screen.
+
+Solved issue Trac #3711
+
+  In the export CSV view (flooding_lib.views.scenario_list), ASCII
+  strings were used in combination with user-defined data. This led to
+  Unicode decoding errors. Working with Unicode only solves the
+  problem.
+
+  Instead of writing a CSV file to disk and then reading it back in to
+  send it to the browser, we just send it there directly.
+
+  Added a util/csvutil.py to work with Unicode CSV files.
+
+  CSV file generation may well hit timeout limits, depends on the
+  query parameters.
 
 1.39 (2012-07-06)
 -----------------

@@ -869,9 +869,10 @@ class Scenario(models.Model):
         db_column='workflow_template',
         null=True)
 
-    # This field is ONLY here to support the old 'uitvoerder.py' scripts that won't
-    # be updated to the new data model. It is set by set_project and never changed.
-    # Don't use this field elsewhere.
+    # This field is ONLY here to support the old 'uitvoerder.py'
+    # scripts that won't be updated to the new data model. It is set
+    # by set_project and never changed.  Don't use this field
+    # elsewhere.
     project_id = models.IntegerField(null=True)
 
     class Meta:

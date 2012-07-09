@@ -1,10 +1,9 @@
 # Create your views here.
 from math import cos, sin
-import csv
+import flooding_lib.util.csvutil
 import datetime
 import logging
 import os
-import string
 
 from django.conf import settings
 from django.core.paginator import Paginator
@@ -841,40 +840,46 @@ def scenario_list(request, permission_manager):
 
     format = request.GET.get('format', 'html')
     if format == 'csv':
+        def join(sequence):
+            """Join a bunch of things into a |-separated unicode string"""
+            return u'|'.join(unicode(item) for item in sequence)
 
-        # create csv file
-        csv_file = open('query.csv', 'wb')
-        writer = csv.writer(csv_file)
-        csv_data = []
+        # create a CSV response
+        # write Unicode CSV to it directly
+        response = HttpResponse(mimetype='text/csv')
+        response['Content-Disposition'] = 'attachment; filename=query.csv'
 
-        csv_data += [('Id',
-                      'Name',
-                      'Status',
-                      'Regions',
-                      'Project name',
-                      'Inundation model name',
-                      'Inundation model version',
-                      'Names of breaches',
-                      'X-coordinates of breaches',
-                      'Y-coordinates of breaches',
-                      'Name of external water of breaches',
-                      'Type of external water of breaches',
-                      'Initial width of breaches',
-                      'Bottom level of breaches',
-                      'Pit depth of breaches',
-                      'Max level of external water of breaches',
-                      'Base level of external water of breaches',
-                      'Time till max depth of breaches',
-                      'Duration of storm of breaches',
-                      'Duration of the peak of the storm of breaches',
-                      'Number of cutofflocations of the external water',
-                      'Ids of cutofflocations of the external water',
-                      'Number of cutofflocations of the internal water',
-                      'Ids of cutofflocations of the internal water',
-                      'Number of casualties',
-                      'Damage to the flooding area',
-                      'Damage to the embankments'
-                      )]
+        writer = flooding_lib.util.csvutil.UnicodeWriter(response)
+
+        writer.writerow((
+                'Id',
+                'Name',
+                'Status',
+                'Regions',
+                'Project name',
+                'Inundation model name',
+                'Inundation model version',
+                'Names of breaches',
+                'X-coordinates of breaches',
+                'Y-coordinates of breaches',
+                'Name of external water of breaches',
+                'Type of external water of breaches',
+                'Initial width of breaches',
+                'Bottom level of breaches',
+                'Pit depth of breaches',
+                'Max level of external water of breaches',
+                'Base level of external water of breaches',
+                'Time till max depth of breaches',
+                'Duration of storm of breaches',
+                'Duration of the peak of the storm of breaches',
+                'Number of cutofflocations of the external water',
+                'Ids of cutofflocations of the external water',
+                'Number of cutofflocations of the internal water',
+                'Ids of cutofflocations of the internal water',
+                'Number of casualties',
+                'Damage to the flooding area',
+                'Damage to the embankments'
+                ))
 
         for s in scenarios:
             # retrieve data to use for filling the row
@@ -903,71 +908,36 @@ def scenario_list(request, permission_manager):
                 damage_floodingarea = None
 
             # fill the row
-            csv_data += [(
+            writer.writerow((
                     s.id,
                     s.name,
                     s.status_cache,
                     s.main_project.name,
-                    string.join([r.name for r in regions], '|'),
+                    join(r.name for r in regions),
                     scenario_inundation_model.model_varname,
                     scenario_inundation_model.sobekversion.name,
-                    string.join(
-                        [sb.breach.name for sb in scenario_breaches], '|'),
-                    string.join(
-                        [str(sb.breach.geom.x)
-                         for sb in scenario_breaches], '|'),
-                    string.join(
-                        [str(sb.breach.geom.y)
-                         for sb in scenario_breaches], '|'),
-                    string.join(
-                        [sb.breach.externalwater.name
-                         for sb in scenario_breaches], '|'),
-                    string.join(
-                        [sb.breach.externalwater.get_type_display()
-                         for sb in scenario_breaches], '|'),
-                    string.join(
-                        [str(sb.widthbrinit)
-                         for sb in scenario_breaches], '|'),
-                    string.join(
-                        [str(sb.bottomlevelbreach)
-                         for sb in scenario_breaches], '|'),
-                    string.join(
-                        [str(sb.pitdepth)
-                         for sb in scenario_breaches], '|'),
-                    string.join(
-                        [str(sb.extwmaxlevel)
-                         for sb in scenario_breaches], '|'),
-                    string.join(
-                        [str(sb.extwbaselevel)
-                         for sb in scenario_breaches], '|'),
-                    string.join(
-                        [str(sb.tmaxdepth)
-                         for sb in scenario_breaches], '|'),
-                    string.join(
-                        [str(sb.tstorm)
-                         for sb in scenario_breaches], '|'),
-                    string.join(
-                        [str(sb.tpeak)
-                         for sb in scenario_breaches], '|'),
+                    join(sb.breach.name for sb in scenario_breaches),
+                    join(sb.breach.geom.x for sb in scenario_breaches),
+                    join(sb.breach.geom.y for sb in scenario_breaches),
+                    join(sb.breach.externalwater.name
+                         for sb in scenario_breaches),
+                    join(sb.breach.externalwater.get_type_display()
+                         for sb in scenario_breaches),
+                    join(sb.widthbrinit for sb in scenario_breaches),
+                    join(sb.bottomlevelbreach for sb in scenario_breaches),
+                    join(sb.pitdepth for sb in scenario_breaches),
+                    join(sb.extwmaxlevel for sb in scenario_breaches),
+                    join(sb.extwbaselevel for sb in scenario_breaches),
+                    join(sb.tmaxdepth for sb in scenario_breaches),
+                    join(sb.tstorm for sb in scenario_breaches),
+                    join(sb.tpeak for sb in scenario_breaches),
                     cutofflocations_externalwater.count(),
-                    string.join(
-                        [str(c.id)
-                         for c in cutofflocations_externalwater], '|'),
+                    join(c.id for c in cutofflocations_externalwater),
                     cutofflocations_internal.count(),
-                    string.join(
-                        [str(c.id) for c in cutofflocations_internal], '|'),
+                    join(c.id for c in cutofflocations_internal),
                     casualties,
                     damage_floodingarea,
-                    damage_embankments)]
-
-        writer.writerows(csv_data)
-        csv_file.close()
-
-        # read created csv file for sending it over html
-        csv_file = open('query.csv', 'rb')
-        response = HttpResponse(csv_file.read(), mimetype='text/csv')
-        response['Content-Disposition'] = 'attachment; filename=query.csv'
-        csv_file.close()
+                    damage_embankments))
 
         return response
 
