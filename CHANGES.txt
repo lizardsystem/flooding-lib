@@ -5,6 +5,10 @@ Changelog of flooding-lib
 1.40 (unreleased)
 -----------------
 
+"Het kan wel eens 2.0 worden"
+  -- Martijn Siemerink, 2012
+
+
 Solved issue Trac #3684
 
   After an individual scenario upload, the user can optionally upload
