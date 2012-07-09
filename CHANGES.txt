@@ -2,8 +2,8 @@ Changelog of flooding-lib
 ===================================================
 
 
-1.40 (unreleased)
------------------
+2.0 (2012-07-09)
+----------------
 
 "Het kan wel eens 2.0 worden"
   -- Martijn Siemerink, 2012
