@@ -21,3 +21,8 @@ For the approval objects:
   a method with a project argument too
 - Move the field to ScenarioProject, let the methods use the correct
   approval object
+
+
+For related cleanup:
+- Move Task creation in importtool to Scenario (all Task business
+  should be in Scenario)
