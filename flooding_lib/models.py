@@ -645,19 +645,6 @@ class UserPermission(models.Model):
     PERMISSION_SCENARIO_APPROVE = 4
     PERMISSION_SCENARIO_DELETE = 5
     PERMISSION_SCENARIO_EDIT_SIMPLE = 6
-#    permissions below not in use.
-#    PERMISSION_PROJECT_ADD = 11
-#    PERMISSION_PROJECT_EDIT = 12
-#    PERMISSION_PROJECT_DELETE = 13
-#    PERMISSION_TASK_VIEW = 21
-#    PERMISSION_TASK_ADD = 22
-#    PERMISSION_TASK_EDIT = 23
-#    PERMISSION_TASK_DELETE = 24
-#    PERMISSION_IMPORT_ADD = 30
-#    PERMISSION_IMPORT_APPROVE = 31
-#    PERMISSION_IMPORT_TO_MAINDATABASE = 32
-#    PERMISSION_EXPORT_ADD = 40
-#    PERMISSION_EXPORT_VIEW = 41
 
     PERMISSION_CHOICES = (
         (PERMISSION_SCENARIO_VIEW, _('view_scenario')),
@@ -667,19 +654,6 @@ class UserPermission(models.Model):
         (PERMISSION_SCENARIO_APPROVE, _('approve_scenario')),
         (PERMISSION_SCENARIO_DELETE, _('delete_scenario')),
         (PERMISSION_SCENARIO_EDIT_SIMPLE, _('edit_scenario_simple')),
-#        (PERMISSION_PROJECT_ADD, _('add_project')),
-#        (PERMISSION_PROJECT_EDIT, _('edit_project')),
-#        (PERMISSION_PROJECT_DELETE, _('delete_project')),
-#        (PERMISSION_TASK_VIEW, _('view_task')),
-#        (PERMISSION_TASK_ADD, _('add_task')),
-#        (PERMISSION_TASK_EDIT, _('edit_task')),
-#        (PERMISSION_TASK_DELETE, _('delete_task')),
-#        (PERMISSION_IMPORT_ADD, _('add import scenarios')),
-#        (PERMISSION_IMPORT_APPROVE, _('approve Import scenarios')),
-#        (PERMISSION_IMPORT_TO_MAINDATABASE,
-#             _('Import scenario to maindatabase')),
-#        (PERMISSION_EXPORT_ADD, _('add export')),
-#        (PERMISSION_EXPORT_VIEW, _('view exports')),
         )
 
     user = models.ForeignKey(User)
