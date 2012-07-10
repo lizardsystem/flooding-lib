@@ -278,9 +278,21 @@ def infowindow_approval(
 
     used_scenario = get_object_or_404(Scenario, pk=scenario_id)
 
-    if not permission_manager.check_project_permission(
-        used_scenario.main_project,
-        UserPermission.PERMISSION_SCENARIO_APPROVE):
+    # The scenario may be part of several projects. We are looking for
+    # a project in which this user has approve rights, and then let
+    # him approve for that project.
+
+    # Right now, a user isn't supposed to be the approver for more
+    # than one project, if that's necessary they should make multiple
+    # users.
+
+    for project in used_scenario.all_projects():
+        if permission_manager.check_project_permission(
+            project, UserPermission.PERMISSION_SCENARIO_APPROVE):
+            break
+    else:
+        # No project found in which the user has Approve rights for
+        # this scenario.
         return HttpResponse(_("No permission to import scenario or login"))
 
     if request.method == 'POST':
@@ -308,7 +320,7 @@ def infowindow_approval(
         Q(scenario=used_scenario), Q(tasktype=TaskType.TYPE_SCENARIO_APPROVE))
     ordered_approved_tasks = approved_tasks.order_by('tfinished')
 
-    if used_scenario.approvalobject and with_approvalobject:
+    if used_scenario.approval_object(project) and with_approvalobject:
         items = {}
         for label, value in request.REQUEST.items():
             items[label] = value
@@ -324,7 +336,7 @@ def infowindow_approval(
         return render_to_response(
             'flooding/infowindow_approval_total.html',
             {"approval_object": approvaltable(
-                    request, used_scenario.approvalobject.id, True),
+                    request, used_scenario.approval_object(project).id, True),
              'with_approval_object': True,
              'form': form,
              'ordered_approved_tasks': ordered_approved_tasks,

@@ -181,7 +181,6 @@ class ImportScenario(models.Model):
             scenario = self.scenario
         else:
             scenario = Scenario.objects.create(
-                approvalobject=self.approvalobject,
                 name=str(scenario_values.get("name", "-")),
                 owner=self.owner,
                 remarks=str(scenario_values.get("remarks", "")),
@@ -191,6 +190,7 @@ class ImportScenario(models.Model):
                 # calcpriority
                 code="2impsc_" + str(self.id))
             scenario.set_project(self.project)
+            scenario.set_approval_object(self.project, self.approvalobject)
             self.scenario = scenario
             self.save()
 

@@ -891,6 +891,19 @@ class Scenario(models.Model):
                  .format(unicode(self)), self.pk))
             raise ValueError
 
+    def approval_object(self, project):
+        """Get the approval object relating to this scenario and that project,
+        if any.
+
+        Currently just returns self.approvalobject, but will be changed."""
+
+        return self.approvalobject
+
+    def set_approval_object(self, project, approval_object):
+        """Set the approval object for this scenario in that project."""
+
+        self.approvalobject = approval_object
+
     def get_tsim(self):
         return datetime.datetime(self.tsim)
 
@@ -931,7 +944,8 @@ class Scenario(models.Model):
                   task.tfinished is None and
                   task.successful is None):
                 return self.STATUS_ERROR
-            elif task.is_type(TaskType.TYPE_SCENARIO_CREATE) and task.successful:
+            elif (task.is_type(TaskType.TYPE_SCENARIO_CREATE)
+                  and task.successful):
                 return self.STATUS_WAITING
         return self.STATUS_NONE
 
