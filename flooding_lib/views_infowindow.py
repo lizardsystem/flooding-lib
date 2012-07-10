@@ -286,13 +286,14 @@ def infowindow_approval(
     if request.method == 'POST':
         form = TaskApprovalForm(request.POST)
         if form.is_valid():
-            newTask = Task(scenario=used_scenario,
-                           remarks=form.cleaned_data['remarks'],
-                           tasktype=TaskType.objects.get(id=190),
-                           tstart=datetime.datetime.now(),
-                           tfinished=datetime.datetime.now(),
-                           creatorlog=request.user.username
-                           )
+            newTask = Task(
+                scenario=used_scenario,
+                remarks=form.cleaned_data['remarks'],
+                tasktype_id=TaskType.TYPE_SCENARIO_APPROVE,
+                tstart=datetime.datetime.now(),
+                tfinished=datetime.datetime.now(),
+                creatorlog=request.user.username)
+
             # Convert string values to boolean (the None option, will
             # be handled correctly)
             if form.cleaned_data['successful'] == 'True':

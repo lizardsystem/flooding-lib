@@ -912,20 +912,26 @@ class Scenario(models.Model):
             return self.STATUS_NONE
 
         for task in tasks:
-            if task.tasktype.id == 200 and task.successful:
+            if task.is_type(TaskType.TYPE_SCENARIO_DELETE) and task.successful:
                 return self.STATUS_DELETED
-            elif task.tasktype.id == 190 and task.successful:
+            elif (task.is_type(TaskType.TYPE_SCENARIO_APPROVE)
+                  and task.successful):
                 return self.STATUS_APPROVED
-            elif task.tasktype.id == 190 and task.successful == False:
+            elif (task.is_type(TaskType.TYPE_SCENARIO_APPROVE)
+                  and task.successful == False):
                 return self.STATUS_DISAPPROVED
-            elif (task.tasktype.id in [150, 155, 170, 180, 185] and
-                  task.successful):
+            elif ((task.is_type(TaskType.TYPE_SOBEK_PNG_CALCULATION) or
+                   task.is_type(TaskType.TYPE_HIS_SSM_CALCULATION) or
+                   task.tasktype.id in [155, 170, 185])  # XXX
+                  and task.successful):
                 return self.STATUS_CALCULATED
-            elif ((task.tasktype.id in [120, 130, 150]) and
+            elif ((task.is_type(TaskType.TYPE_SOBEK_PREPARATION) or
+                   task.is_type(TaskType.TYPE_SOBEK_CALCULATION) or
+                   task.is_type(TaskType.TYPE_SOBEK_PNG_CALCULATION)) and
                   task.tfinished is None and
                   task.successful is None):
                 return self.STATUS_ERROR
-            elif task.tasktype.id == 50 and task.successful:
+            elif task.is_type(TaskType.TYPE_SCENARIO_CREATE) and task.successful:
                 return self.STATUS_WAITING
         return self.STATUS_NONE
 
@@ -1337,6 +1343,11 @@ class Task(models.Model):
     def delete(self):
         super(Task, self).delete()
         self.scenario.update_status()
+
+    def is_type(self, tasktype_id):
+        """Check whether this Task's task type is equal to the given
+        type ID."""
+        return self.tasktype.id == tasktype_id
 
     @classmethod
     def create_fake(cls, scenario, task_type, remarks, creatorlog):
