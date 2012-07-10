@@ -1,4 +1,6 @@
 For the approval _status_:
+- Eradicate the use of magic numbers (190) and replace them by task types
+  (TASK_APPROVAL)
 - Add boolean field 'approved_by_owner' to Scenario
 - Let set_status() update it
 - Look for code that checks for a scenario being approved, change it
