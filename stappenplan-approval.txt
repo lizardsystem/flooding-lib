@@ -1,0 +1,23 @@
+For the approval _status_:
+- Add boolean field 'approved_by_owner' to Scenario
+- Let set_status() update it
+- Look for code that checks for a scenario being approved, change it
+  to look at the new field
+- Find all code that uses the tasks to change approval, let it change
+  the field directly
+- Remove the dependency on tasks, remove the approval tasks
+BUT: What will happen to the other statuses? Needs more
+thinking. Maybe we should just keep it like this. But move the code
+that does it into Scenario.
+
+
+For the approval objects:
+- Make a new method 'approval_object_for(project)' for Scenario
+- Let it return the Scenario's approval object
+- Find all places that use the approval object, let them use the new
+  method (hopefully with some concept of which project -- or all
+  projects)
+- Look at the code that creates approval objects, let them go through
+  a method with a project argument too
+- Move the field to ScenarioProject, let the methods use the correct
+  approval object
