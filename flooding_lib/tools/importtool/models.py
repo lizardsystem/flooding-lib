@@ -22,8 +22,6 @@ from flooding_lib.models import ResultType
 from flooding_lib.models import Scenario
 from flooding_lib.models import ScenarioBreach
 from flooding_lib.models import SobekModel
-from flooding_lib.models import Task
-from flooding_lib.models import TaskType
 from flooding_lib.models import WaterlevelSet
 from flooding_lib.tools.approvaltool.models import ApprovalObject
 
@@ -298,23 +296,7 @@ class ImportScenario(models.Model):
         self.create_scenariobreach(import_values['ScenarioBreach'])
         self.create_extra_scenario_info(import_values['ExtraScenarioInfo'])
         self.copy_result_files(import_values['Result'])
-
-        # These tasks aren't functional. However, a scenario's
-        # update_status() finds its status by looking at the tasks that
-        # have been successful for it...
-        Task.create_fake(
-            scenario=self.scenario,
-            task_type=TaskType.TYPE_SCENARIO_CREATE_AUTO,
-            remarks="import scenario",
-            creatorlog="uploaded by {0}".format(self.owner.get_full_name()))
-
-        Task.create_fake(
-            scenario=self.scenario,
-            task_type=TaskType.TYPE_SOBEK_CALCULATION,
-            remarks="import scenario",
-            creatorlog="imported by {0}.".format(username))
-
-        self.scenario.update_status()
+        self.scenario.create_calculated_status(username)
 
         self.state = ImportScenario.IMPORT_STATE_IMPORTED
         self.save()

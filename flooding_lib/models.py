@@ -1038,6 +1038,29 @@ class Scenario(models.Model):
     def all_projects(self):
         return self.projects.all()
 
+    def create_calculated_status(self, username):
+        """
+        Used by importtool. Set up Tasks so that this scenario's state
+        can be STATUS_CALCULATED.
+
+        These tasks aren't functional. However, update_status() finds
+        its status by looking at the tasks that have been successful
+        for it.
+        """
+        Task.create_fake(
+            scenario=self,
+            task_type=TaskType.TYPE_SCENARIO_CREATE_AUTO,
+            remarks="import scenario",
+            creatorlog="uploaded by {0}".format(self.owner.get_full_name()))
+
+        Task.create_fake(
+            scenario=self,
+            task_type=TaskType.TYPE_SOBEK_CALCULATION,
+            remarks="import scenario",
+            creatorlog="imported by {0}.".format(username))
+
+        self.update_status()
+
     @classmethod
     def in_project_list(cls, project_list):
         """Return a Queryset of Scenarios that are related to the
