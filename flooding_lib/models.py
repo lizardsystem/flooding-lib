@@ -1354,22 +1354,6 @@ class Task(models.Model):
             successful=True)
 
 
-# ZELFDE ALS TASKEXECUTOR??? KAN WEG???
-#class TaskProcessor(models.Model):
-#    """taskprocessor"""
-#    class Meta:
-#        verbose_name = _('Task processor')
-#        verbose_name_plural = _('Task processors')
-#    name = models.CharField(max_length=200)
-#    ipaddress = models.IPAddressField()
-#    port = models.PositiveIntegerField()
-#
-#    tasktypes = models.ManyToManyField(TaskType)
-#
-#    def __unicode__(self):
-#        return self.name
-
-
 class TaskExecutor(models.Model):
     """Defines all machines that can execute tasks"""
     name = models.CharField(max_length=200)
