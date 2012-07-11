@@ -1497,16 +1497,10 @@ class EmbankmentUnit(models.Model):
 class ScenarioShareOffer(models.Model):
     """Used when a scenario owner offers to share a scenario with
     another project."""
-    original_project = models.ForeignKey(Project, related_name='original_share')
-    new_project = models.ForeignKey(Project, related_name='new_share')
+    scenario = models.ForeignKey(Scenario)
+    new_project = models.ForeignKey(Project)
 
     class Meta:
         unique_together = ('original_project', 'new_project')
 
-    @classmethod
-    def projects_for_sharing(cls):
-        """Return a tuple of projects that are available to share
-        scenarios with. Hardcoded."""
-        projects = (
-            Project.objects.get(id=99),  # ROR
-            Project.objects.get(id=100))  # Voor landelijk gebruik
+
