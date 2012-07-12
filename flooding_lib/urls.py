@@ -51,6 +51,10 @@ urlpatterns = patterns(
         'flooding_lib.scenario_sharing.list_view',
         name='flooding_scenario_share_list'),
 
+    url(r'^scenario/share/action/$',
+        'flooding_lib.scenario_sharing.action_view',
+        name='flooding_scenario_share_action'),
+
     url(r'^scenario/(?P<object_id>\d+)/$',
         'flooding_lib.views.scenario',
         name='flooding_scenario_detail'),

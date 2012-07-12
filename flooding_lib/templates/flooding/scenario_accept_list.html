@@ -3,45 +3,38 @@
 {% load i18n %}
 
 {% block title %}
-Flooding: {% trans 'Share scenarios' %}
+Flooding: {% trans 'Accept scenarios' %}
 {% endblock %}
 
 {% block content %}
 <script type="text/javascript" src="{% url root_url %}static_media/weblib/jquery/jquery-1.3.2.min.js"></script>
 <script type="text/javascript" src="{% url root_url %}static_media/flooding_lib/share_scenarios.js"></script>
 
-<h1>{% trans 'Share scenarios' %}</h1>
-
+<h1>{% trans 'Accept scenarios for ' %}{{ toproject.name }}</h1>
+{% for fromproject, scenarios in projects %}
 	<div  style="overflow:auto">
-	{% for project, scenarios in projects %}
-          <h2>{{ project.name }}</h2>
+          <h2>{% trans 'From project ' %}{{ fromproject.name }}</h2>
           <table>
 	    <thead>
 	      <th>Scenario ID</th>
               <th>Scenarionaam</th>
               <th>Status</th>
-	      {% for projectid, projectname in otherprojects %}
-	      <th>{{ projectname }}</th>
-              {% endfor %}
+	      <th>Offered by</th>
+	      <th>Accept</th>
             </thead>
 	    {% for scenario in scenarios %}
             <tr>
 	      <td>{{ scenario.scenario.id }}</td>
 	      <td>{{ scenario.scenario.name }}</td>
 	      <td>{{ scenario.scenario.status_cache }}</td>
-	      {% for extrafield in scenario.extra_fields %}
-	      <td>
-		<a class="shareaction"
-		     data-scenario-id="{{ extrafield.scenario_id }}"
-		     data-project-id="{{ extrafield.project_id }}"
-		     data-action="{{ extrafield.action }}"
-		   href="#">{{ extrafield.message }}</a>
-	      </td>
-	      {% endfor %}
+              <td>{{ scenario.shared_by.username }}</td>
+	      <td><a href="#" class="shareaction"
+		     data-action="accept"
+		     data-scenario-id="{{ scenario.scenario.id }}"
+		     data-project-id="{{ toproject.id }}">Accept</a></td>
             </tr>
 	    {% endfor %}
 	  </table>
-        {% endfor %}
 	</div>
-
+{% endfor%}
 {% endblock %}

@@ -1500,7 +1500,7 @@ class ScenarioShareOffer(models.Model):
     scenario = models.ForeignKey(Scenario)
     new_project = models.ForeignKey(Project)
 
+    shared_by = models.ForeignKey(User, null=True)
+
     class Meta:
-        unique_together = ('original_project', 'new_project')
-
-
+        unique_together = ('scenario', 'new_project')

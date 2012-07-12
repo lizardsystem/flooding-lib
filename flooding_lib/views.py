@@ -1101,6 +1101,12 @@ def scenario_list(request, permission_manager):
              },
             ]
 
+        # Do we have any projects in which we can approve scenarios?
+        # Pass that info to the template, which shows a link to the
+        # share/accept page in that case.
+        can_approve = permission_manager.get_projects(
+            permission=UserPermission.PERMISSION_SCENARIO_APPROVE).exists()
+
         return render_to_response('flooding/scenario_list.html', {
                 'is_embedded': is_embedded,
                 'user': request.user,
@@ -1116,6 +1122,7 @@ def scenario_list(request, permission_manager):
                 'paginator': paginator,
                 'page': page,
                 'search_fields': search_fields,
+                'can_approve': can_approve
                 })
 
 
