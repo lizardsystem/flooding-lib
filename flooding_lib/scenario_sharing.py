@@ -92,13 +92,15 @@ def project_field(scenario, project_id):
 @receives_loggedin_permission_manager
 def list_view(request, permission_manager):
 
-    # Users can EITHER approve scenarios in normal projects, or in the special, not
-    # in both. So we can look at the first of the projects they have approval access
-    # to and see what kind of user we have here.
+    # Users can EITHER approve scenarios in normal projects, or in the
+    # special, not in both. So we can look at the first of the
+    # projects they have approval access to and see what kind of user
+    # we have here.
     projects = permission_manager.get_projects(
         permission=models.UserPermission.PERMISSION_SCENARIO_APPROVE)
     if len(projects) == 0:
-        return HttpResponse(_("You do not have approval permission in any project."))
+        return HttpResponse(
+            _("You do not have approval permission in any project."))
 
     if projects[0].id in PROJECT_IDS:
         # Handle these in a separate function
@@ -116,19 +118,19 @@ def list_view(request, permission_manager):
 
         project_dict[project].append({
                 'scenario': scenario,
-                'extra_fields' : tuple(
+                'extra_fields': tuple(
                     project_field(scenario, project_id)
                     for project_id in PROJECT_IDS)
                 })
 
     for project in project_dict:
         project_dict[project].sort(
-            cmp=lambda a,b:
+            cmp=lambda a, b:
                 cmp(a['scenario'].name, b['scenario'].name))
 
     projects = [(project, project_dict[project])
                 for project in sorted(project_dict,
-                                      cmp=lambda a,b: cmp(a.name, b.name))]
+                                      cmp=lambda a, b: cmp(a.name, b.name))]
 
     otherprojects = (
         (str(project_id), models.Project.objects.get(pk=project_id).name)
@@ -136,8 +138,10 @@ def list_view(request, permission_manager):
 
     return render_to_response('flooding/scenario_share_list.html', {
             'breadcrumbs': [
-                {'name': _('Flooding'), 'url': reverse('flooding')},
-                {'name': _('Scenarios'), 'url': reverse('flooding_scenarios_url')},
+                {'name': _('Flooding'),
+                 'url': reverse('flooding')},
+                {'name': _('Scenarios'),
+                 'url': reverse('flooding_scenarios_url')},
                 {'name': _('Share scenarios')}
                 ],
             'projects': projects,
@@ -158,7 +162,8 @@ def list_view_accepting_project(request, permission_manager):
     else:
         # In neither. But then how did we get in this function?
         return HttpResponse(
-            "You do not have approval permission in any of the accepting projects.")
+            "You do not have approval permission in "
+            "any of the accepting projects.")
 
     scenarios = tuple(
         {
@@ -166,7 +171,8 @@ def list_view_accepting_project(request, permission_manager):
             'shared_by': shared.shared_by,
             'project': shared.scenario.main_project  # Slow
             }
-        for shared in models.ScenarioShareOffer.objects.filter(new_project=toproject))
+        for shared in models.ScenarioShareOffer.objects.filter(
+            new_project=toproject))
     logger.debug(scenarios)
 
     project_dict = dict()
@@ -177,16 +183,18 @@ def list_view_accepting_project(request, permission_manager):
         project_dict[project].append(scenario)
 
     for project in project_dict:
-        project_dict[project].sort(cmp=lambda a, b:
-                                       cmp(a['scenario'].name, b['scenario'].name))
+        project_dict[project].sort(
+            cmp=lambda a, b: cmp(a['scenario'].name, b['scenario'].name))
 
     projects = [(project, project_dict[project]) for project in
                 sorted(project_dict, cmp=lambda a, b: cmp(a.name, b.name))]
 
     return render_to_response('flooding/scenario_accept_list.html', {
             'breadcrumbs': [
-                {'name': _('Flooding'), 'url': reverse('flooding')},
-                {'name': _('Scenarios'), 'url': reverse('flooding_scenarios_url')},
+                {'name': _('Flooding'),
+                 'url': reverse('flooding')},
+                {'name': _('Scenarios'),
+                 'url': reverse('flooding_scenarios_url')},
                 {'name': _('Accept scenarios')}
                 ],
             'toproject': toproject,

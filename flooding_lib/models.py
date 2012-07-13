@@ -813,8 +813,6 @@ class Scenario(models.Model):
     projects = models.ManyToManyField(
         Project, through='ScenarioProject', related_name='scenarios')
     attachments = generic.GenericRelation(Attachment)
-    approvalobject = models.ForeignKey(
-        ApprovalObject, blank=True, null=True, default=None)
 
     breaches = models.ManyToManyField(Breach, through='ScenarioBreach')
     cutofflocations = models.ManyToManyField(
@@ -893,16 +891,24 @@ class Scenario(models.Model):
 
     def approval_object(self, project):
         """Get the approval object relating to this scenario and that project,
-        if any.
+        if any. Returns ScenarioProject.DoesNotExist if this scenario isn't in
+        that project.
 
         Currently just returns self.approvalobject, but will be changed."""
 
-        return self.approvalobject
+        scenarioproject = ScenarioProject.objects.get(
+            scenario=self, project=project)
+        return scenarioproject.approvalobject
 
     def set_approval_object(self, project, approval_object):
-        """Set the approval object for this scenario in that project."""
+        """Set the approval object for this scenario in that project.
+        Raises ScenarioProject.DoesNotExist if this scenario isn't in
+        that project."""
 
-        self.approvalobject = approval_object
+        scenarioproject = ScenarioProject.objects.get(
+            scenario=self, project=project)
+        scenarioproject.approvalobject = approval_object
+        scenarioproject.save()
 
     def get_tsim(self):
         return datetime.datetime(self.tsim)
@@ -1073,6 +1079,9 @@ class ScenarioProject(models.Model):
     project = models.ForeignKey(Project)
 
     is_main_project = models.BooleanField(default=False)
+
+    approvalobject = models.ForeignKey(
+        ApprovalObject, blank=True, null=True, default=None)
 
 
 class ScenarioBreach(models.Model):

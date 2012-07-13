@@ -71,11 +71,8 @@ def infowindow(request):
         callbackfunction = request.REQUEST.get('callback')
         callbackfunction.replace("%22", '"')
         form_id = request.REQUEST.get('formId')
-        with_approvalobject = request.REQUEST.get('with_approvalobject', 1)
-        if int(with_approvalobject) == 0:
-            with_approvalobject = False
-        else:
-            with_approvalobject = True
+        with_approvalobject = bool(
+            request.REQUEST.get('with_approvalobject', True))
 
         return infowindow_approval(
             request, scenario_id, callbackfunction,

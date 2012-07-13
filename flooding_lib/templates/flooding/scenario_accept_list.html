@@ -26,7 +26,7 @@ Flooding: {% trans 'Accept scenarios' %}
             <tr>
 	      <td>{{ scenario.scenario.id }}</td>
 	      <td>{{ scenario.scenario.name }}</td>
-	      <td>{{ scenario.scenario.status_cache }}</td>
+	      <td>{{ scenario.scenario.get_status_cache_display }}</td>
               <td>{{ scenario.shared_by.username }}</td>
 	      <td><a href="#" class="shareaction"
 		     data-action="accept"
