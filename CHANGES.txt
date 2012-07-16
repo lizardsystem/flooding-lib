@@ -5,7 +5,16 @@ Changelog of flooding-lib
 2.1 (unreleased)
 ----------------
 
-- Nothing changed yet.
+Overhaul of the approval system. From now on, there will be no
+Task-based approval, no any project-wide 'approved' checkbox. The only
+thing we will use is the approval objects from approvaltool, and their
+contents will be changed.
+
+Steps taken:
+- A large migration removes all the existing approval objects, creates
+  a new approval type with one rule ('is this project approved?') and
+  for each scenario, connects this approval type to it. The successful
+  property of the rule is set based on the old Task-based status.
 
 
 2.0 (2012-07-09)
