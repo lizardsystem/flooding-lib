@@ -13,6 +13,7 @@ from treebeard.al_tree import AL_Node  # Adjacent list implementation
 
 from flooding_presentation.models import PresentationLayer, PresentationType
 from flooding_lib.tools.approvaltool.models import ApprovalObject
+from flooding_lib.tools.approvaltool.models import ApprovalObjectType
 
 
 logger = logging.getLogger(__name__)
@@ -571,6 +572,11 @@ class Project(models.Model):
 
     code = models.CharField(max_length=20, null=True)
 
+    approval_object_type = models.ForeignKey(
+        ApprovalObjectType,
+        default=ApprovalObjectType.default_approval_type,
+        null=True)  # Should never actually be null
+
     class Meta:
         verbose_name = _('Project')
         verbose_name_plural = _('Projects')
@@ -814,6 +820,7 @@ class Scenario(models.Model):
         Project, through='ScenarioProject', related_name='scenarios')
     attachments = generic.GenericRelation(Attachment)
 
+
     breaches = models.ManyToManyField(Breach, through='ScenarioBreach')
     cutofflocations = models.ManyToManyField(
         CutoffLocation, through='ScenarioCutoffLocation',
@@ -894,10 +901,16 @@ class Scenario(models.Model):
         if any. Returns ScenarioProject.DoesNotExist if this scenario isn't in
         that project.
 
+        If the relevant approvalobject doesn't exist yet, it will be created
+        using the project's default approval object.
+
         Currently just returns self.approvalobject, but will be changed."""
 
         scenarioproject = ScenarioProject.objects.get(
             scenario=self, project=project)
+
+        scenarioproject.ensure_has_approvalobject()
+
         return scenarioproject.approvalobject
 
     def set_approval_object(self, project, approval_object):
@@ -1082,6 +1095,15 @@ class ScenarioProject(models.Model):
 
     approvalobject = models.ForeignKey(
         ApprovalObject, blank=True, null=True, default=None)
+
+    def ensure_has_approvalobject(self):
+        """Create an approvalobject for this scenario/project
+        connection if there isn't one yet."""
+        if not self.approvalobject:
+            self.approvalobject = ApprovalObject.objects.create(
+                name="Project's default approval object",
+                approvalobjectype=self.project.approval_object_type)
+            self.save()
 
 
 class ScenarioBreach(models.Model):

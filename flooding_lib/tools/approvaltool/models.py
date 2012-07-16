@@ -6,20 +6,27 @@ from django.utils.translation import ugettext as _
 class ApprovalObjectType(models.Model):
     """
     """
-    TYPE_PROJECT = 10
-    TYPE_IMPORTSCENARIO = 20
+    TYPE_PROJECT = 1
+    TYPE_ROR = 2
+    TYPE_LANDELIJK = 3
 
     TYPE_CHOICES = (
          (TYPE_PROJECT, _('Project')),
-         (TYPE_IMPORTSCENARIO, _('Import scenario')),
+         (TYPE_ROR, _('ROR')),
+         (TYPE_LANDELIJK, _('Landelijk gebruik')),
     )
 
     name = models.CharField(max_length=200, unique=True)
-    type = models.IntegerField(choices=TYPE_CHOICES)
+    type = models.IntegerField(choices=TYPE_CHOICES, unique=True)
     approvalrule = models.ManyToManyField('ApprovalRule')
 
     def __unicode__(self):
         return self.name
+
+    @classmethod
+    def default_approval_type(cls):
+        """Default approval object type for projects."""
+        return cls.objects.get(type=cls.TYPE_PROJECT)
 
 
 class ApprovalObject(models.Model):
