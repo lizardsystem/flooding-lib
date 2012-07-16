@@ -1,75 +1,21 @@
 # encoding: utf-8
 import datetime
 from south.db import db
-from south.v2 import DataMigration
+from south.v2 import SchemaMigration
 from django.db import models
 
-class Migration(DataMigration):
+class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        "Write your forwards methods here."
-
-        ## Three steps:
-
-        # 1. Remove all the old approvalobjects definitions, filled in
-        # fields, etc
-        for scenarioproject in orm.ScenarioProject.objects.all():
-            scenarioproject.approvalobject = None
-            scenarioproject.save()
-
-        orm['approvaltool.ApprovalObjectState'].objects.all().delete()
-
-        for objecttype in orm['approvaltool.ApprovalObjectType'].objects.all():
-            objecttype.approvalrule.all().delete()
-
-        for approvalobject in orm['approvaltool.ApprovalObject'].objects.all():
-            approvalobject.approvalobjecttype.all().delete()
-
-        orm['approvaltool.ApprovalObject'].objects.all().delete()
-        orm['approvaltool.ApprovalObjectType'].objects.all().delete()
-        orm['approvaltool.ApprovalRule'].objects.all().delete()
-
-        # 2. Make a new definition with a single rule
-        rule = orm['approvaltool.ApprovalRule'](
-            name="Algemene controle",
-            description="Is dit scenario goedgekeurd?")
-        rule.save()
-        objecttype = orm['approvaltool.ApprovalObjectType'](
-            name="Standaard project",
-            type=1)  # ApprovalObjectType.TYPE_PROJECT
-        objecttype.save()
-        objecttype.approvalrule.add(rule)
-
-        # 3. For all existing scenario/project combinations, filled in
-        # the rule based on their approved / not approved status.
-        for scenarioproject in orm.ScenarioProject.objects.filter(
-            is_main_project=True).select_related(depth=1).all():
-            approvalobject = orm['approvaltool.ApprovalObject'].objects.create(
-                name="Generic approval object")
-            approvalobject.approvalobjecttype.add(objecttype)
-            approvalobject.save()
-
-            scenarioproject.approvalobject = approvalobject
-            scenarioproject.save()
-
-            ruledata = {
-                'approvalobject': approvalobject,
-                'approvalrule': rule,
-                'remarks': '',
-                'creatorlog': 'Set automatically',
-                }
-
-            if scenarioproject.scenario.status_cache == 20:  # STATUS_APPROVED
-                ruledata['successful'] = True
-            if scenarioproject.scenario.status_cache == 30:  # STATUS_DISAPPROVED
-                ruledata['successful'] = False
-            # Keep it null ('not yet judged') otherwise
-
-            orm['approvaltool.ApprovalObjectState'].objects.create(**ruledata)
+        
+        # Adding field 'Project.approval_object_type'
+        db.add_column('flooding_project', 'approval_object_type', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['approvaltool.ApprovalObjectType'], null=True), keep_default=False)
 
 
     def backwards(self, orm):
-        "Write your backwards methods here."
+        
+        # Deleting field 'Project.approval_object_type'
+        db.delete_column('flooding_project', 'approval_object_type_id')
 
 
     models = {
@@ -95,7 +41,7 @@ class Migration(DataMigration):
             'approvalrule': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['approvaltool.ApprovalRule']", 'symmetrical': 'False'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '200'}),
-            'type': ('django.db.models.fields.IntegerField', [], {})
+            'type': ('django.db.models.fields.IntegerField', [], {'unique': 'True'})
         },
         'approvaltool.approvalrule': {
             'Meta': {'object_name': 'ApprovalRule'},
@@ -280,6 +226,7 @@ class Migration(DataMigration):
         },
         'flooding_lib.project': {
             'Meta': {'ordering': "('friendlyname', 'name', 'owner')", 'object_name': 'Project', 'db_table': "'flooding_project'"},
+            'approval_object_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['approvaltool.ApprovalObjectType']", 'null': 'True'}),
             'code': ('django.db.models.fields.CharField', [], {'max_length': '20', 'null': 'True'}),
             'color_mapping_name': ('django.db.models.fields.CharField', [], {'max_length': '256', 'null': 'True', 'blank': 'True'}),
             'friendlyname': ('django.db.models.fields.CharField', [], {'max_length': '200'}),

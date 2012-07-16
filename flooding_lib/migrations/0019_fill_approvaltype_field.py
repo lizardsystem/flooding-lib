@@ -9,64 +9,11 @@ class Migration(DataMigration):
     def forwards(self, orm):
         "Write your forwards methods here."
 
-        ## Three steps:
-
-        # 1. Remove all the old approvalobjects definitions, filled in
-        # fields, etc
-        for scenarioproject in orm.ScenarioProject.objects.all():
-            scenarioproject.approvalobject = None
-            scenarioproject.save()
-
-        orm['approvaltool.ApprovalObjectState'].objects.all().delete()
-
-        for objecttype in orm['approvaltool.ApprovalObjectType'].objects.all():
-            objecttype.approvalrule.all().delete()
-
-        for approvalobject in orm['approvaltool.ApprovalObject'].objects.all():
-            approvalobject.approvalobjecttype.all().delete()
-
-        orm['approvaltool.ApprovalObject'].objects.all().delete()
-        orm['approvaltool.ApprovalObjectType'].objects.all().delete()
-        orm['approvaltool.ApprovalRule'].objects.all().delete()
-
-        # 2. Make a new definition with a single rule
-        rule = orm['approvaltool.ApprovalRule'](
-            name="Algemene controle",
-            description="Is dit scenario goedgekeurd?")
-        rule.save()
-        objecttype = orm['approvaltool.ApprovalObjectType'](
-            name="Standaard project",
-            type=1)  # ApprovalObjectType.TYPE_PROJECT
-        objecttype.save()
-        objecttype.approvalrule.add(rule)
-
-        # 3. For all existing scenario/project combinations, filled in
-        # the rule based on their approved / not approved status.
-        for scenarioproject in orm.ScenarioProject.objects.filter(
-            is_main_project=True).select_related(depth=1).all():
-            approvalobject = orm['approvaltool.ApprovalObject'].objects.create(
-                name="Generic approval object")
-            approvalobject.approvalobjecttype.add(objecttype)
-            approvalobject.save()
-
-            scenarioproject.approvalobject = approvalobject
-            scenarioproject.save()
-
-            ruledata = {
-                'approvalobject': approvalobject,
-                'approvalrule': rule,
-                'remarks': '',
-                'creatorlog': 'Set automatically',
-                }
-
-            if scenarioproject.scenario.status_cache == 20:  # STATUS_APPROVED
-                ruledata['successful'] = True
-            if scenarioproject.scenario.status_cache == 30:  # STATUS_DISAPPROVED
-                ruledata['successful'] = False
-            # Keep it null ('not yet judged') otherwise
-
-            orm['approvaltool.ApprovalObjectState'].objects.create(**ruledata)
-
+        approvaltype = orm['approvaltool.ApprovalObjectType'].objects.get(
+            type=1)  # TYPE_PROJECT
+        for project in orm.Project.objects.filter(approval_object_type=None).all():
+            project.approval_object_type = approvaltype
+            project.save()
 
     def backwards(self, orm):
         "Write your backwards methods here."
@@ -95,7 +42,7 @@ class Migration(DataMigration):
             'approvalrule': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['approvaltool.ApprovalRule']", 'symmetrical': 'False'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '200'}),
-            'type': ('django.db.models.fields.IntegerField', [], {})
+            'type': ('django.db.models.fields.IntegerField', [], {'unique': 'True'})
         },
         'approvaltool.approvalrule': {
             'Meta': {'object_name': 'ApprovalRule'},
@@ -280,6 +227,7 @@ class Migration(DataMigration):
         },
         'flooding_lib.project': {
             'Meta': {'ordering': "('friendlyname', 'name', 'owner')", 'object_name': 'Project', 'db_table': "'flooding_project'"},
+            'approval_object_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['approvaltool.ApprovalObjectType']", 'null': 'True'}),
             'code': ('django.db.models.fields.CharField', [], {'max_length': '20', 'null': 'True'}),
             'color_mapping_name': ('django.db.models.fields.CharField', [], {'max_length': '256', 'null': 'True', 'blank': 'True'}),
             'friendlyname': ('django.db.models.fields.CharField', [], {'max_length': '200'}),

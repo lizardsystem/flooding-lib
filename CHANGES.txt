@@ -16,6 +16,17 @@ Steps taken:
   for each scenario, connects this approval type to it. The successful
   property of the rule is set based on the old Task-based status.
 
+- Made 'type' in approvaltool.ApprovalObjectType unique. This is the
+  identifier we shall be using that relates projects' default approval
+  types to database rows in this table.
+
+- Each project now has a field 'approval_object_type' that defines which
+  approval object type scenarios in it will use. All existing projects use
+  the default one (hand edit ROR and Landelijk gebied when this change
+  goes live).
+
+- Scenario.approval_object() method creates the approval object if it
+  doesn't exist yet, using the project's default.
 
 2.0 (2012-07-09)
 ----------------
