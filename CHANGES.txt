@@ -31,6 +31,11 @@ Steps taken:
 - Scenario.main_approval_object() method that does the same but only for
   the main project.
 
+- Add helper functions to ApprovalObject: setup() to create a new
+  approvalobject that also enters ApprovalObjectState lines into the
+  database, and approved() and disapproved() properties that check
+  whether all or some of the states have been filled in.
+
 2.0 (2012-07-09)
 ----------------
 
