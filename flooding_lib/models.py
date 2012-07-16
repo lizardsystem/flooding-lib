@@ -820,7 +820,6 @@ class Scenario(models.Model):
         Project, through='ScenarioProject', related_name='scenarios')
     attachments = generic.GenericRelation(Attachment)
 
-
     breaches = models.ManyToManyField(Breach, through='ScenarioBreach')
     cutofflocations = models.ManyToManyField(
         CutoffLocation, through='ScenarioCutoffLocation',
@@ -905,13 +904,22 @@ class Scenario(models.Model):
         using the project's default approval object.
 
         Currently just returns self.approvalobject, but will be changed."""
-
         scenarioproject = ScenarioProject.objects.get(
             scenario=self, project=project)
 
         scenarioproject.ensure_has_approvalobject()
 
         return scenarioproject.approvalobject
+
+    def main_approval_object(self):
+        """Return the approval object belonging to the main project."""
+        try:
+            return ApprovalObject.objects.get(
+                scenarioproject__scenario=self,
+                scenarioproject__is_main_project=True)
+        except ApprovalObject.DoesNotExist:
+            # Let approval_object() handle it
+            return self.approval_object(self.main_project)
 
     def set_approval_object(self, project, approval_object):
         """Set the approval object for this scenario in that project.
