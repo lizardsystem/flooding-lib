@@ -14,6 +14,8 @@ from flooding_lib.models import Scenario
 from flooding_lib.test_models import ScenarioF
 from flooding_lib.test_models import ProjectF
 
+from flooding_lib.tools.approvaltool.models import ApprovalObjectType
+
 
 class UserF(factory.Factory):
     FACTORY_FOR = User
@@ -70,6 +72,10 @@ class TestDecorators(TestCase):
 
 
 class TestUserPermissionManager(TestCase):
+    def setUp(self):
+        ApprovalObjectType.objects.create(
+            type=ApprovalObjectType.TYPE_PROJECT)
+
     def testGetScenariosUserDoesntHavePermission(self):
         # If the user doesn't have the required permission, an empty
         # queryset is returned.

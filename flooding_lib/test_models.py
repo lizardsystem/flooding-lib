@@ -6,6 +6,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 
 from flooding_lib import models
+from flooding_lib.tools.approvaltool.models import ApprovalObjectType
 
 ## Helper classes
 
@@ -74,6 +75,10 @@ class TestAttachment(TestCase):
 
 
 class TestScenario(TestCase):
+    def setUp(self):
+        ApprovalObjectType.objects.create(
+            type=ApprovalObjectType.TYPE_PROJECT)
+
     def testMainProject(self):
         """Use set_project to set a scenario's main project, then use the
         main_project property to see that it is returned correctly."""
@@ -136,6 +141,10 @@ class TestScenario(TestCase):
 
 
 class TestProject(TestCase):
+    def setUp(self):
+        ApprovalObjectType.objects.create(
+            type=ApprovalObjectType.TYPE_PROJECT)
+
     def testAddScenarioValueErrorIfScenarioHasNoMainProject(self):
         """You can't add a scenario to another project if it doesn't have a
         main project yet."""
