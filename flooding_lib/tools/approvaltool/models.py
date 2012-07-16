@@ -29,18 +29,6 @@ class ApprovalObjectType(models.Model):
         return cls.objects.get(type=cls.TYPE_PROJECT)
 
 
-class ApprovalObject(models.Model):
-    """
-    """
-    name = models.CharField(max_length=100)
-    approvalobjecttype = models.ManyToManyField(ApprovalObjectType)
-    approvalrule = models.ManyToManyField(
-        'ApprovalRule', through='ApprovalObjectState')
-
-    def __unicode__(self):
-        return self.name
-
-
 class ApprovalObjectState(models.Model):
     """
     """
@@ -58,6 +46,54 @@ class ApprovalObjectState(models.Model):
     def __unicode__(self):
         return u'%s - %s - %s' % (
             self.approvalobject.name, self.approvalrule.name, self.successful)
+
+
+class ApprovalObject(models.Model):
+    """
+    """
+    name = models.CharField(max_length=100)
+    approvalobjecttype = models.ManyToManyField(ApprovalObjectType)
+    approvalrule = models.ManyToManyField(
+        'ApprovalRule', through='ApprovalObjectState')
+
+    def __unicode__(self):
+        return self.name
+
+    @classmethod
+    def setup(cls, name, approvalobjecttype):
+        """Create new ApprovalObject and also created the rules for it."""
+        self = cls.objects.create(name=name)
+        self.approvalobjecttype.add(approvalobjecttype)
+
+        # Create non-filled in rules
+        for rule in approvalobjecttype.approvalrule.all():
+            ApprovalObjectState.objects.create(
+                approvalobject=self,
+                approvalrule=rule,
+                creatorlog="",
+                remarks="")
+
+        return self
+
+    @property
+    def approved(self):
+        """Return True if all rules for this approval type are
+        successful."""
+
+        return all(
+            rule.successful
+            for rule in ApprovalObjectState.objects.filter(
+                approvalobject=self))
+
+    @property
+    def disapproved(self):
+        """Scenario is disapproved if at least some of its rules have
+        been filled in, but not all successfully."""
+        successes = tuple(
+            rule.successful
+            for rule in ApprovalObjectState.objects.filter(
+                approvalobject=self))
+        return any(rule is not None for rule in successes) and not all(successes)
 
 
 class ApprovalRule(models.Model):

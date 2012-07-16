@@ -1108,10 +1108,9 @@ class ScenarioProject(models.Model):
         """Create an approvalobject for this scenario/project
         connection if there isn't one yet."""
         if not self.approvalobject:
-            self.approvalobject = ApprovalObject.objects.create(
+            self.approvalobject = ApprovalObject.setup(
                 name="Project's default approval object",
-                approvalobjectype=self.project.approval_object_type)
-            self.save()
+                approvalobjecttype=self.project.approval_object_type)
 
 
 class ScenarioBreach(models.Model):
