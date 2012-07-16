@@ -28,6 +28,9 @@ Steps taken:
 - Scenario.approval_object() method creates the approval object if it
   doesn't exist yet, using the project's default.
 
+- Scenario.main_approval_object() method that does the same but only for
+  the main project.
+
 2.0 (2012-07-09)
 ----------------
 
