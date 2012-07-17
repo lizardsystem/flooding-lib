@@ -1,5 +1,5 @@
-
 from django.contrib.gis.db import models
+
 from django.utils.translation import ugettext as _
 
 
@@ -93,7 +93,8 @@ class ApprovalObject(models.Model):
             rule.successful
             for rule in ApprovalObjectState.objects.filter(
                 approvalobject=self))
-        return any(rule is not None for rule in successes) and not all(successes)
+        return (any(rule is not None for rule in successes) and
+                not all(successes))
 
 
 class ApprovalRule(models.Model):

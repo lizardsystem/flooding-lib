@@ -1,11 +1,10 @@
-import factory
-import mock
+#import factory
+#import mock
 
-from django.contrib.auth.models import User
-from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 
 from flooding_lib.tools.approvaltool import models
+
 
 class TestApprovalObjectType(TestCase):
     def setUp(self):

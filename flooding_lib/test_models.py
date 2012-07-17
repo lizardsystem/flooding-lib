@@ -7,6 +7,8 @@ from django.test import TestCase
 
 from flooding_lib import models
 from flooding_lib.tools.approvaltool.models import ApprovalObjectType
+from flooding_lib.tools.approvaltool.models import ApprovalRule
+from flooding_lib.tools.approvaltool.models import ApprovalObjectState
 
 ## Helper classes
 
@@ -76,8 +78,13 @@ class TestAttachment(TestCase):
 
 class TestScenario(TestCase):
     def setUp(self):
-        ApprovalObjectType.objects.create(
+        self.aot = ApprovalObjectType.objects.create(
             type=ApprovalObjectType.TYPE_PROJECT)
+        self.rule = ApprovalRule.objects.create(
+            name="test_rule",
+            description="test",
+            position=0)
+        self.aot.approvalrule.add(self.rule)
 
     def testMainProject(self):
         """Use set_project to set a scenario's main project, then use the
@@ -138,6 +145,126 @@ class TestScenario(TestCase):
             models.Project.objects.all())
         self.assertEquals(scenarios.count(), 1)
         self.assertEquals(scenario.id, scenarios[0].id)
+
+    def test_update_status_new_scenario(self):
+        scenario = ScenarioF.create()
+        project = ProjectF.create()
+        scenario.set_project(project)
+
+        scenario.update_status()
+        self.assertEquals(scenario.status_cache, models.Scenario.STATUS_NONE)
+
+    def test_main_approval_object_always_same(self):
+        scenario = ScenarioF.create()
+        project = ProjectF.create()
+        scenario.set_project(project)
+
+        # There was a bug because they weren't saved
+        ao1 = scenario.main_approval_object()
+        ao2 = scenario.main_approval_object()
+
+        self.assertEquals(ao1, ao2)
+
+    def test_update_status_scenario_one_task(self):
+        scenario = ScenarioF.create()
+        project = ProjectF.create()
+        scenario.set_project(project)
+
+        tasktype = models.TaskType.objects.create(
+            name='calculate sobek',
+            id=models.TaskType.TYPE_SCENARIO_CREATE)
+
+        models.Task.create_fake(
+            scenario=scenario,
+            task_type=tasktype.id,
+            remarks="test",
+            creatorlog="test")
+
+        scenario.update_status()
+        self.assertEquals(
+            scenario.status_cache, models.Scenario.STATUS_WAITING)
+
+    def test_update_scenario_disapprove(self):
+        scenario = ScenarioF.create()
+        project = ProjectF.create()
+        scenario.set_project(project)
+
+        tasktype = models.TaskType.objects.create(
+            name='calculate sobek',
+            id=models.TaskType.TYPE_SCENARIO_CREATE)
+
+        models.Task.create_fake(
+            scenario=scenario,
+            task_type=tasktype.id,
+            remarks="test",
+            creatorlog="test")
+
+        approvalobject = scenario.main_approval_object()
+        aos = ApprovalObjectState.objects.get(
+            approvalobject=approvalobject,
+            approvalrule=self.rule)
+        aos.successful = False
+        aos.save()
+
+        scenario.update_status()
+
+        self.assertEquals(
+            scenario.status_cache, models.Scenario.STATUS_DISAPPROVED)
+
+    def test_update_scenario_approve(self):
+        scenario = ScenarioF.create()
+        project = ProjectF.create()
+        scenario.set_project(project)
+
+        tasktype = models.TaskType.objects.create(
+            name='calculate sobek',
+            id=models.TaskType.TYPE_SCENARIO_CREATE)
+
+        models.Task.create_fake(
+            scenario=scenario,
+            task_type=tasktype.id,
+            remarks="test",
+            creatorlog="test")
+
+        approvalobject = scenario.main_approval_object()
+        aos = ApprovalObjectState.objects.get(
+            approvalobject=approvalobject,
+            approvalrule=self.rule)
+        aos.successful = True
+        aos.save()
+
+        scenario.update_status()
+
+        self.assertEquals(
+            scenario.status_cache, models.Scenario.STATUS_APPROVED)
+
+    def test_update_scenario_deleted(self):
+        scenario = ScenarioF.create()
+        project = ProjectF.create()
+        scenario.set_project(project)
+
+        tasktype = models.TaskType.objects.create(
+            name='calculate sobek',
+            id=models.TaskType.TYPE_SCENARIO_DELETE)
+
+        models.Task.create_fake(
+            scenario=scenario,
+            task_type=tasktype.id,
+            remarks="test",
+            creatorlog="test")
+
+        # Approve or disapprove shouldn't matter, we test approved
+        approvalobject = scenario.main_approval_object()
+        aos = ApprovalObjectState.objects.get(
+            approvalobject=approvalobject,
+            approvalrule=self.rule)
+        aos.successful = True
+        aos.save()
+
+        scenario.update_status()
+
+        self.assertEquals(
+            scenario.status_cache, models.Scenario.STATUS_DELETED)
 
 
 class TestProject(TestCase):

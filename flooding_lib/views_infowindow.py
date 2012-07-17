@@ -2,11 +2,9 @@
 from string import Template
 import datetime
 import math
-import string
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.files.base import ContentFile
-from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render_to_response
@@ -17,19 +15,15 @@ from flooding_lib.dates import get_intervalstring_from_dayfloat
 from flooding_lib.forms import AttachmentForm
 from flooding_lib.forms import EditScenarioPropertiesForm
 from flooding_lib.forms import ScenarioNameRemarksForm
-from flooding_lib.forms import TaskApprovalForm
 from flooding_lib.models import Attachment
 from flooding_lib.models import ExtraScenarioInfo
 from flooding_lib.models import Scenario
 from flooding_lib.models import ScenarioBreach
 from flooding_lib.models import SobekModel
-from flooding_lib.models import Task
-from flooding_lib.models import TaskType
 from flooding_lib.models import UserPermission
 from flooding_lib.permission_manager import receives_permission_manager
 from flooding_lib.permission_manager import \
     receives_loggedin_permission_manager
-from flooding_lib.tools.approvaltool.views import approvaltable
 from flooding_lib.tools.importtool.models import InputField
 from flooding_presentation.models import Animation
 
@@ -271,87 +265,99 @@ def infowindow_remarks(
 def infowindow_approval(
     request, permission_manager, scenario_id, callbackfunction,
     form_id, with_approvalobject):
-    """Calls the page to give approval to scenarios"""
+    return render_to_response(
+        'flooding/infowindow_approval_new.html',
+        {
+            })
 
-    used_scenario = get_object_or_404(Scenario, pk=scenario_id)
+# @receives_permission_manager
+# def infowindow_approval(
+#     request, permission_manager, scenario_id, callbackfunction,
+#     form_id, with_approvalobject):
+#     """Calls the page to give approval to scenarios"""
 
-    # The scenario may be part of several projects. We are looking for
-    # a project in which this user has approve rights, and then let
-    # him approve for that project.
+#     used_scenario = get_object_or_404(Scenario, pk=scenario_id)
 
-    # Right now, a user isn't supposed to be the approver for more
-    # than one project, if that's necessary they should make multiple
-    # users.
+#     # The scenario may be part of several projects. We are looking for
+#     # a project in which this user has approve rights, and then let
+#     # him approve for that project.
 
-    for project in used_scenario.all_projects():
-        if permission_manager.check_project_permission(
-            project, UserPermission.PERMISSION_SCENARIO_APPROVE):
-            break
-    else:
-        # No project found in which the user has Approve rights for
-        # this scenario.
-        return HttpResponse(_("No permission to import scenario or login"))
+#     # Right now, a user isn't supposed to be the approver for more
+#     # than one project, if that's necessary they should make multiple
+#     # users.
 
-    if request.method == 'POST':
-        form = TaskApprovalForm(request.POST)
-        if form.is_valid():
-            newTask = Task(
-                scenario=used_scenario,
-                remarks=form.cleaned_data['remarks'],
-                tasktype_id=TaskType.TYPE_SCENARIO_APPROVE,
-                tstart=datetime.datetime.now(),
-                tfinished=datetime.datetime.now(),
-                creatorlog=request.user.username)
+#     for project in used_scenario.all_projects():
+#         if permission_manager.check_project_permission(
+#             project, UserPermission.PERMISSION_SCENARIO_APPROVE):
+#             break
+#     else:
+#         # No project found in which the user has Approve rights for
+#         # this scenario.
+#         return HttpResponse(_("No permission to import scenario or login"))
 
-            # Convert string values to boolean (the None option, will
-            # be handled correctly)
-            if form.cleaned_data['successful'] == 'True':
-                newTask.successful = True
-            elif form.cleaned_data['successful'] == 'False':
-                newTask.successful = False
-            newTask.save()
-    else:
-        form = TaskApprovalForm()
+#     if request.method == 'POST':
+#         form = TaskApprovalForm(request.POST)
+#         if form.is_valid():
+#             newTask = Task(
+#                 scenario=used_scenario,
+#                 remarks=form.cleaned_data['remarks'],
+#                 tasktype_id=TaskType.TYPE_SCENARIO_APPROVE,
+#                 tstart=datetime.datetime.now(),
+#                 tfinished=datetime.datetime.now(),
+#                 creatorlog=request.user.username)
 
-    approved_tasks = Task.objects.filter(
-        Q(scenario=used_scenario), Q(tasktype=TaskType.TYPE_SCENARIO_APPROVE))
-    ordered_approved_tasks = approved_tasks.order_by('tfinished')
+#             # Convert string values to boolean (the None option, will
+#             # be handled correctly)
+#             if form.cleaned_data['successful'] == 'True':
+#                 newTask.successful = True
+#             elif form.cleaned_data['successful'] == 'False':
+#                 newTask.successful = False
+#             newTask.save()
+#     else:
+#         form = TaskApprovalForm()
 
-    if used_scenario.approval_object(project) and with_approvalobject:
-        items = {}
-        for label, value in request.REQUEST.items():
-            items[label] = value
+#     approved_tasks = Task.objects.filter(
+#         Q(scenario=used_scenario), Q(
+#             tasktype=TaskType.TYPE_SCENARIO_APPROVE))
+#     ordered_approved_tasks = approved_tasks.order_by('tfinished')
 
-        items['callback'] = (
-            'callbackFunctions["ApprovalObjectCallbackFormFunction"]()')
-        items['formId'] = 'totalApprovalForm'
-        url_args = '?' + string.join(["%s=%s" % x for x in items.items()], "&")
+#     if used_scenario.approval_object(project) and with_approvalobject:
+#         items = {}
+#         for label, value in request.REQUEST.items():
+#             items[label] = value
 
-        destroy_function = request.REQUEST.get('destroy_function', None)
-        create_function = request.REQUEST.get('create_function', None)
-        pane_id = request.REQUEST.get('pane_id', None)
-        return render_to_response(
-            'flooding/infowindow_approval_total.html',
-            {"approval_object": approvaltable(
-                    request, used_scenario.approval_object(project).id, True),
-             'with_approval_object': True,
-             'form': form,
-             'ordered_approved_tasks': ordered_approved_tasks,
-             'callbackfunction': callbackfunction,
-             'form_id': form_id,
-             'url_args': url_args,
-             'destroy_function': destroy_function,
-             'create_function': create_function,
-             'pane_id': pane_id
-             })
+#         items['callback'] = (
+#             'callbackFunctions["ApprovalObjectCallbackFormFunction"]()')
+#         items['formId'] = 'totalApprovalForm'
+#         url_args = '?' + string.join(
+#             ["%s=%s" % x for x in items.items()], "&")
 
-    else:
-        return render_to_response(
-            'flooding/infowindow_approval.html',
-            {'form': form,
-             'ordered_approved_tasks': ordered_approved_tasks,
-             'callbackfunction': callbackfunction,
-             'form_id': form_id})
+#         destroy_function = request.REQUEST.get('destroy_function', None)
+#         create_function = request.REQUEST.get('create_function', None)
+#         pane_id = request.REQUEST.get('pane_id', None)
+#         return render_to_response(
+#             'flooding/infowindow_approval_total.html',
+#             {"approval_object": approvaltable(
+#                     request,
+#                     used_scenario.approval_object(project).id, True),
+#              'with_approval_object': True,
+#              'form': form,
+#              'ordered_approved_tasks': ordered_approved_tasks,
+#              'callbackfunction': callbackfunction,
+#              'form_id': form_id,
+#              'url_args': url_args,
+#              'destroy_function': destroy_function,
+#              'create_function': create_function,
+#              'pane_id': pane_id
+#              })
+
+#     else:
+#         return render_to_response(
+#             'flooding/infowindow_approval.html',
+#             {'form': form,
+#              'ordered_approved_tasks': ordered_approved_tasks,
+#              'callbackfunction': callbackfunction,
+#              'form_id': form_id})
 
 
 @receives_permission_manager

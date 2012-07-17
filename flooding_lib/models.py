@@ -954,11 +954,9 @@ class Scenario(models.Model):
         for task in tasks:
             if task.is_type(TaskType.TYPE_SCENARIO_DELETE) and task.successful:
                 return self.STATUS_DELETED
-            elif (task.is_type(TaskType.TYPE_SCENARIO_APPROVE)
-                  and task.successful):
+            elif self.main_approval_object().approved:
                 return self.STATUS_APPROVED
-            elif (task.is_type(TaskType.TYPE_SCENARIO_APPROVE)
-                  and task.successful == False):
+            elif self.main_approval_object().disapproved:
                 return self.STATUS_DISAPPROVED
             elif ((task.is_type(TaskType.TYPE_SOBEK_PNG_CALCULATION) or
                    task.is_type(TaskType.TYPE_HIS_SSM_CALCULATION) or
@@ -1111,6 +1109,7 @@ class ScenarioProject(models.Model):
             self.approvalobject = ApprovalObject.setup(
                 name="Project's default approval object",
                 approvalobjecttype=self.project.approval_object_type)
+            self.save()
 
 
 class ScenarioBreach(models.Model):
