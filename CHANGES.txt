@@ -40,6 +40,12 @@ Steps taken:
   of the main project for approved and disapproved status. Tasks for
   approval and disapproval are now obsolete.
 
+- Removed the old UI for task-based approval
+
+- Added a ApprovalObjectLog model that logs the history of a certain
+  approvalobject/rule combination, ApprovalObjectState doesn't do that
+  anymore
+
 2.0 (2012-07-09)
 ----------------
 

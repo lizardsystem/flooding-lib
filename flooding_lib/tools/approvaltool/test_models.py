@@ -47,6 +47,71 @@ class TestApprovalObject(TestCase):
         self.assertEquals(len(rules), 1)
         self.assertEquals(rules[0].name, 'test_rule')
 
+    def test_states(self):
+        # Create a approval object type with two rules
+        aot = models.ApprovalObjectType.objects.create(
+            name='test_aot',
+            type=models.ApprovalObjectType.TYPE_ROR)
+        rule1 = models.ApprovalRule.objects.create(
+            name="test_rule1",
+            description="test",
+            position=2)
+        rule2 = models.ApprovalRule.objects.create(
+            name="test_rule2",
+            description="test",
+            position=1)
+
+        aot.approvalrule.add(rule1)
+        aot.approvalrule.add(rule2)
+
+        ao = models.ApprovalObject.setup(
+            name='test',
+            approvalobjecttype=aot)
+
+        states = list(ao.states())
+
+        # Order should be reversed because of the positions
+        self.assertEquals(len(states), 2)
+        self.assertEquals(states[0].approvalrule, rule2)
+        self.assertEquals(states[1].approvalrule, rule1)
+
+        # No success entered yet
+        self.assertEquals(states[0].successful, None)
+        self.assertEquals(states[1].successful, None)
+
+    def test_approve(self):
+        # Create a approval object type with one rule
+        aot = models.ApprovalObjectType.objects.create(
+            name='test_aot',
+            type=models.ApprovalObjectType.TYPE_ROR)
+        rule = models.ApprovalRule.objects.create(
+            name="test_rule",
+            description="test",
+            position=0)
+        aot.approvalrule.add(rule)
+
+        # Call the setup method
+        ao = models.ApprovalObject.setup(
+            name='test',
+            approvalobjecttype=aot)
+
+        # Approve!
+        ao.approve(rule, True, 'test', 'testremarks')
+
+        state = ao.states()[0]
+
+        self.assertEquals(state.successful, True)
+        self.assertEquals(state.creatorlog, 'test')
+        self.assertEquals(state.remarks, 'testremarks')
+
+        # Also present in the log?
+        latest = models.ApprovalObjectLog.objects.filter(
+            approvalobject=ao, approvalrule=rule).latest()
+
+        self.assertEquals(latest.successful, True)
+        self.assertEquals(latest.creatorlog, 'test')
+        self.assertEquals(latest.remarks, 'testremarks')
+
     def test_approved_disapproved(self):
         # Create a approval object type with two rules
         aot = models.ApprovalObjectType.objects.create(

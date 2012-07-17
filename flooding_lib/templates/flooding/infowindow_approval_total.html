@@ -1,19 +1,10 @@
+{% load i18n %}
 
     <script>
-    function {{ create_function }}() {
+    var {{ create_function }} = function () {
 
     <!-- Javascript for the screen Framework -->
     {{ approval_object }}
-
-            isc.HTMLPane.create({
-                            ID: 'approvalHTMLPane',
-                            width:'300',
-                            overflow:'visible',
-                            border: '0px',
-                            contentsURL: '{% url infowindow %}{{ url_args|safe}}&with_approvalobject=0',
-                            autodraw:false
-                            });
-            scApprovalTotal.addMember(approvalHTMLPane);
 
         /***
         Callback function for form.
@@ -25,7 +16,7 @@
       }
 
       {% if destroy_function %}
-      function {{ destroy_function }}() {
+      var {{ destroy_function }} = function () {
         scApprovalTotal.hide();
       }{% endif %}
 
@@ -39,7 +30,7 @@
             }
 
             RPCManager.sendRequest({
-               actionURL: '{% url infowindow %}{{ url_args|safe}}&with_approvalobject=0',
+               actionURL: '{% url infowindow %}{{ url_args|safe}}',
                useSimpleHttp: true,
                httpMethod: "POST",
                params: postParams,

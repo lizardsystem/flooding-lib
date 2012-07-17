@@ -17,19 +17,19 @@
 	        {name:"creatorlog",title: "Door", width:70, canEdit:false,showHover: true,hoverHTML:"return record.date"},
 	        {name:"remarks", title: "Keurings opmerkingen", editorProperties:{height:60}}
 	    ],
-	    data: 
+	    data:
 
   			{{ lines|safe }}{% ifequal forloop.last 0 %},{% endifequal %}
 
     	,
-	    
+
 	    canEdit: true,
 	    editEvent: "click",
 	    modalEditing:true,
 	    bodyOverflow: "visible",
     	overflow: "visible",
     	leaveScrollbarGap: false,
-    	hoverWidth:300, 
+    	hoverWidth:300,
     	autodraw:false
 	})
 
@@ -48,27 +48,20 @@
                 for (var i = 0 ; i < newdata.length ; i++) {
                 	send[newdata[i].id] = '{"name": "'+newdata[i].name+'", "successful": "'+newdata[i].successful+'", "remarks": "'+newdata[i].remarks+'","creatorlog":"'+newdata[i].creatorlog+'"}'
                 }
-                
+
                 dsPostApproval.fetchData(send, function(dsResponse, data, dsRequest) {
                 	if (dsResponse.httpResponseCode == 200) {
 						if (data[0]["lines"]) {
 							approvalList.setData(data[0]["lines"]);
 						}
-						
-                		if (data[0]["ok"] == true) {
-                			alert(data[0]["opm"])
-                		} else {
-                			alert('error saving: ' + data[0]["opm"])
-                		}
-                	} else {
-                		alert('server error, scenario niet opgeslagen')
+
                 	}
                 });
         },
         autoDraw: false
     });
-    
-  
+
+
 	isc.HLayout.create({
         ID: 'approvalButtons',
         height: 28,
@@ -83,7 +76,7 @@
         ],
         autoDraw: false
     });
-	
+
 
 
     isc.VLayout.create({

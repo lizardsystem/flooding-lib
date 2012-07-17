@@ -29,11 +29,35 @@ class ApprovalObjectType(models.Model):
         return cls.objects.get(type=cls.TYPE_PROJECT)
 
 
-class ApprovalObjectState(models.Model):
-    """
-    """
+class ApprovalObjectLog(models.Model):
+    """We would like to keep a history of approval object states.
+
+    However, keeping the history in the ObjectState table makes that slow,
+    and as of today we haven't decided yet where we want to store the history.
+    So we'll use this log table for logging the history of approval states.
+    Every time an approvalobjectstate is changed because of an action by a
+    user (usually approving or disapproving of something), we should also add
+    a row to this table."""
+
+    approvalobject = models.ForeignKey('ApprovalObject')
+    approvalrule = models.ForeignKey('ApprovalRule')
+
+    date = models.DateTimeField(auto_now_add=True)
+    creatorlog = models.CharField(max_length=40)
+    successful = models.NullBooleanField(null=True)
+    remarks = models.TextField(blank=True)
+
     class Meta:
         get_latest_by = 'date'
+
+class ApprovalObjectState(models.Model):
+    """Keeps the latest ApprovalObjectState corresponding to some rule and
+    some approvalobject. Because we don't log history using this model,
+    the combination (approvalobject, approvalrule) has been made unique."""
+
+    class Meta:
+        get_latest_by = 'date'
+        unique_together = ('approvalobject', 'approvalrule')
 
     approvalobject = models.ForeignKey('ApprovalObject')
     approvalrule = models.ForeignKey('ApprovalRule')
@@ -58,6 +82,34 @@ class ApprovalObject(models.Model):
 
     def __unicode__(self):
         return self.name
+
+    def states(self):
+        return ApprovalObjectState.objects.filter(
+            approvalobject=self).order_by('approvalrule__position')
+
+    def state(self, rule):
+        state, created = ApprovalObjectState.objects.get_or_create(
+            approvalobject=self,
+            approvalrule=rule)
+        return state
+
+    def approve(self, rule, success, creator, remarks):
+        """Set the relevant approvalobjectstate, and also add the
+        result to the log."""
+        state, created = ApprovalObjectState.objects.get_or_create(
+            approvalobject=self,
+            approvalrule=rule)
+        state.successful = success
+        state.creatorlog = creator
+        state.remarks = remarks
+        state.save()
+
+        ApprovalObjectLog.objects.create(
+            approvalobject=self,
+            approvalrule=rule,
+            successful=success,
+            creatorlog=creator,
+            remarks=remarks)
 
     @classmethod
     def setup(cls, name, approvalobjecttype):

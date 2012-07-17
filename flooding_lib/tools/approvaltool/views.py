@@ -10,76 +10,52 @@ import datetime
 
 
 def approvaltable(request, approvalobject_id, ignore_post=False):
-    """
-    Renders Lizard-flooding page with an overview of all exports
-    """
+
+    approvalobject = ApprovalObject.objects.get(pk=approvalobject_id)
+
     bool_transform = {True: 'true', False: 'false', None: '-'}
     bool_transform_back = {'true': True, 'false': False, '-': None}
 
-    def get_lines(approvalobject, approvalrule):
+    def get_lines(approvalobject, approvalrules):
         lines = []
         for approvalrule in approvalrules:
-            try:
-                stat = approvalrule.approvalobjectstate_set.filter(
-                    approvalobject=approvalobject).latest()
-                state = {
-                    "successful": bool_transform[stat.successful],
-                    "creatorlog": stat.creatorlog,
-                    "remarks": stat.remarks,
-                    "date": stat.date}
-            except ApprovalObjectState.DoesNotExist:
-                state = {
-                    "successful": bool_transform[None],
-                    "creatorlog": "",
-                    "remarks": "",
-                    "date": datetime.datetime.now()}
-
+            state = approvalobject.state(approvalrule)
             lines.append({
                     'id': approvalrule.id,
-                    'date': state["date"].isoformat(),
-                    'successful': state["successful"],
+                    'date': state.date.isoformat(),
+                    'successful': bool_transform[state.successful],
                     'name': approvalrule.name,
                     'description': approvalrule.description,
-                    'creatorlog': state["creatorlog"],
-                    'remarks': state["remarks"]})
+                    'creatorlog': state.creatorlog,
+                    'remarks': state.remarks})
         return lines
 
     if request.method == 'POST' and not ignore_post:
         update = False
-        for rule_id in request.POST:
-            data = simplejson.loads(request.POST.get(rule_id))
+        for rule_id, datajson in request.POST.items():
+            rule = ApprovalRule.objects.get(pk=rule_id)
+            data = simplejson.loads(datajson)
+
             if not (data['creatorlog'] == "" and
                     bool_transform_back[data['successful']] == None and
                     data['remarks'] == ""):  # object is not new or has changed
-                try:
-                    stat = ApprovalObjectState.objects.filter(
-                        approvalobject=int(approvalobject_id),
-                        approvalrule=int(rule_id)).latest()
-                    if (stat.successful !=
-                        bool_transform_back[data['successful']] or
-                        stat.remarks != data['remarks']):
-                        changed = True
-                    else:
-                        changed = False
 
-                except ApprovalObjectState.DoesNotExist:
-                    changed = True
+                stat = approvalobject.state(rule)
+                changed = (stat.successful !=
+                           bool_transform_back[data['successful']] or
+                           stat.remarks != data['remarks'])
 
                 if changed:
-                    ApprovalObjectState.objects.create(
-                        approvalobject=ApprovalObject.objects.get(
-                            pk=int(approvalobject_id)),
-                        approvalrule=ApprovalRule.objects.get(pk=int(rule_id)),
-                        remarks=data['remarks'],
-                        successful=bool_transform_back[data['successful']],
-                        creatorlog=request.user.get_full_name())
+                    approvalobject.approve(
+                        rule=rule,
+                        success=bool_transform_back[data['successful']],
+                        creator=request.user.get_full_name(),
+                        remarks=data['remarks'])
                     update = True
 
                 answer = {'ok': True, 'opm': 'opgeslagen'}
 
         if update:
-            approvalobject = ApprovalObject.objects.get(pk=approvalobject_id)
-
             #krijg alle rules die van toepassing zijn op dit object
             approvalrules = ApprovalRule.objects.filter(
                 approvalobjecttype__in=approvalobject.approvalobjecttype.all()
@@ -90,8 +66,6 @@ def approvaltable(request, approvalobject_id, ignore_post=False):
         return simplejson.dumps(answer)
 
     else:
-        approvalobject = ApprovalObject.objects.get(pk=approvalobject_id)
-
         #krijg alle rules die van toepassing zijn op dit object
         approvalrules = ApprovalRule.objects.filter(
             approvalobjecttype__in=approvalobject.approvalobjecttype.all()
@@ -103,9 +77,9 @@ def approvaltable(request, approvalobject_id, ignore_post=False):
         'flooding_tools_approval_table',
         kwargs={'approvalobject_id': approvalobject_id})
     return render_to_string('approval/approvaltable.js',
-                              {'lines': simplejson.dumps(lines),
-                               'post_url': post_url
-                               })
+                            {'lines': simplejson.dumps(lines),
+                             'post_url': post_url
+                             })
 
 
 def approvaltable_page(request, approvalobject_id):
