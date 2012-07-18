@@ -50,6 +50,7 @@ class ApprovalObjectLog(models.Model):
     class Meta:
         get_latest_by = 'date'
 
+
 class ApprovalObjectState(models.Model):
     """Keeps the latest ApprovalObjectState corresponding to some rule and
     some approvalobject. Because we don't log history using this model,

@@ -1,12 +1,10 @@
 from flooding_lib.tools.approvaltool.models import ApprovalObject
-from flooding_lib.tools.approvaltool.models import ApprovalObjectState
 from flooding_lib.tools.approvaltool.models import ApprovalRule
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.template.loader import render_to_string
 from django.utils import simplejson
-import datetime
 
 
 def approvaltable(request, approvalobject_id, ignore_post=False):

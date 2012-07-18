@@ -3,7 +3,6 @@ from string import Template
 import datetime
 import math
 
-from django.db.models import Q
 from django.contrib.contenttypes.models import ContentType
 from django.core.files.base import ContentFile
 from django.http import HttpResponse
@@ -27,9 +26,6 @@ from flooding_lib.permission_manager import \
     receives_loggedin_permission_manager
 from flooding_lib.tools.importtool.models import InputField
 from flooding_presentation.models import Animation
-from flooding_lib.forms import TaskApprovalForm
-from flooding_lib.models import Task
-from flooding_lib.models import TaskType
 from flooding_lib.tools.approvaltool.views import approvaltable
 
 

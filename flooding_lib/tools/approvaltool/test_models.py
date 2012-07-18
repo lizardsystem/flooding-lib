@@ -1,6 +1,3 @@
-#import factory
-#import mock
-
 from django.test import TestCase
 
 from flooding_lib.tools.approvaltool import models
@@ -10,14 +7,17 @@ class TestApprovalObjectType(TestCase):
     def setUp(self):
         """Code assumes there is always a type with this type in the
         database. Probably ought to make it a fixture."""
-        models.ApprovalObjectType.objects.create(
-            name="test",
+        self.aot = models.ApprovalObjectType.objects.create(
+            name=u"test",
             type=models.ApprovalObjectType.TYPE_PROJECT)
 
     def test_default_approval_type(self):
         """Check that the method returns something with the right type"""
         t = models.ApprovalObjectType.default_approval_type()
         self.assertEquals(t.type, models.ApprovalObjectType.TYPE_PROJECT)
+
+    def test_unicode(self):
+        self.assertEquals(unicode(self.aot), u"test")
 
 
 class TestApprovalObjectState(TestCase):
@@ -46,6 +46,31 @@ class TestApprovalObject(TestCase):
                 approvalobject=ao))
         self.assertEquals(len(rules), 1)
         self.assertEquals(rules[0].name, 'test_rule')
+
+    def test_state(self):
+        aot = models.ApprovalObjectType.objects.create(
+            name='test_aot',
+            type=models.ApprovalObjectType.TYPE_ROR)
+        rule = models.ApprovalRule.objects.create(
+            name="test_rule",
+            description="test",
+            position=0)
+        aot.approvalrule.add(rule)
+        ao = models.ApprovalObject.setup(
+            name='test',
+            approvalobjecttype=aot)
+
+        # ao.state returns a state object
+        state = ao.state(rule)
+        state.successful = True
+        state.save()
+
+        # but if we delete all the state objects, it returns a new one
+        models.ApprovalObjectState.objects.filter(
+            approvalobject=ao,
+            approvalrule=rule).delete()
+        state = ao.state(rule)
+        self.assertNotEquals(state.successful, True)
 
     def test_states(self):
         # Create a approval object type with two rules
