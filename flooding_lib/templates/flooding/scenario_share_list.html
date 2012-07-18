@@ -30,12 +30,28 @@ Flooding: {% trans 'Share scenarios' %}
 	      <td>{{ scenario.scenario.name }}</td>
 	      <td>{{ scenario.scenario.get_status_cache_display }}</td>
 	      {% for extrafield in scenario.extra_fields %}
-	      <td>
-		<a class="shareaction"
-		     data-scenario-id="{{ extrafield.scenario_id }}"
-		     data-project-id="{{ extrafield.project_id }}"
-		     data-action="{{ extrafield.action }}"
-		   href="#">{{ extrafield.message }}</a>
+	      <td class="shareaction"
+		  data-scenario-id="{{ extrafield.scenario_id }}"
+		  data-project-id="{{ extrafield.project_id }}"
+		  data-action="{{ extrafield.action }}"
+		  >
+                {% if extrafield.is_url %}
+		<a href="#">{{ extrafield.message }}</a>
+                {% else %}
+                {{ extrafield.message }}
+                {% endif %}
+                {% if extrafield.approvalobject %}
+                  <ul style="background: lightblue; margin: 0; padding: 0">
+		  {% for state in extrafield.approvalobject.states %}
+                  <li style="font-size: 80%; list-style-type: none; margin-left: 1em">
+		    {{ state.approvalrule.name }}: {{ state.successful_string }}
+                  {% if state.remarks %}
+                    ({{state.remarks}})
+                  {% endif %}
+		  </li>
+                  {% endfor %}
+                  </ul>
+                {% endif %}
 	      </td>
 	      {% endfor %}
             </tr>

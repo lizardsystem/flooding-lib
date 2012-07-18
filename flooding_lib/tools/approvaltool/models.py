@@ -72,6 +72,13 @@ class ApprovalObjectState(models.Model):
         return u'%s - %s - %s' % (
             self.approvalobject.name, self.approvalrule.name, self.successful)
 
+    def successful_string(self):
+        if self.successful:
+            return _('yes')
+        if self.successful == False:
+            return _('no')
+        if self.successful is None:
+            return '-'
 
 class ApprovalObject(models.Model):
     """
@@ -140,14 +147,13 @@ class ApprovalObject(models.Model):
 
     @property
     def disapproved(self):
-        """Scenario is disapproved if at least some of its rules have
-        been filled in, but not all successfully."""
-        successes = tuple(
-            rule.successful
+        """Scenario is disapproved if at least one of them has been filled
+        in unsuccessfully."""
+
+        return any(
+            rule.successful == False
             for rule in ApprovalObjectState.objects.filter(
                 approvalobject=self))
-        return (any(rule is not None for rule in successes) and
-                not all(successes))
 
 
 class ApprovalRule(models.Model):

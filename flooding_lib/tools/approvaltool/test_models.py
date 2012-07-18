@@ -174,11 +174,11 @@ class TestApprovalObject(TestCase):
         self.assertFalse(ao.approved)
         self.assertTrue(ao.disapproved)
 
-        # That rule to True -- disapproved still True, approved still False
+        # That rule to True -- disapproved False, approved still False
         state1.successful = True
         state1.save()
         self.assertFalse(ao.approved)
-        self.assertTrue(ao.disapproved)
+        self.assertFalse(ao.disapproved)
 
         # Both to True -- disapproved False, approved True
         state1.successful = True

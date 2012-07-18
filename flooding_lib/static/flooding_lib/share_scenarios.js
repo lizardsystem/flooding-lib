@@ -1,14 +1,7 @@
 $(document).ready(function () {
     var URL = '/flooding/scenario/share/action/';
 
-    var update_element = function(element, action, message) {
-	element.attr('data-action', action);
-	element.html(message);
-    }
-
     var click_handler = function (event) {
-	event.preventDefault();
-
 	var that = $(this);
 
 	var handle_response = function(data) {
@@ -19,7 +12,13 @@ $(document).ready(function () {
 		parsed = eval(data); // IE7
 	    }
 
-	    update_element(that, parsed.action, parsed.message);
+	    that.attr('data-action', parsed.action);
+
+	    if (parsed.is_url) {
+		that.html('<a href="#">'+parsed.message+'</a>');
+	    } else {
+		that.html(parsed.message);
+	    }
 	}
 
 	var action = that.attr("data-action");
@@ -35,6 +34,13 @@ $(document).ready(function () {
 	}
     }
 
-    // Add the click handler to all <a>s with class "shareaction"
-    $("a.shareaction").click(click_handler);
+    var prevent_action_handler = function (event) {
+	event.preventDefault();
+    }
+
+    // Add the click handler to all elements with class "shareaction"
+    $(".shareaction").click(click_handler);
+    // Add the prevent action handler to any a's inside it
+    $(".shareaction a").click(prevent_action_handler);
+
 });

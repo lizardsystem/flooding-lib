@@ -28,10 +28,10 @@ Flooding: {% trans 'Accept scenarios' %}
 	      <td>{{ scenario.scenario.name }}</td>
 	      <td>{{ scenario.scenario.get_status_cache_display }}</td>
               <td>{{ scenario.shared_by.username }}</td>
-	      <td><a href="#" class="shareaction"
-		     data-action="accept"
-		     data-scenario-id="{{ scenario.scenario.id }}"
-		     data-project-id="{{ toproject.id }}">Accept</a></td>
+	      <td class="shareaction"
+		  data-action="accept"
+		  data-scenario-id="{{ scenario.scenario.id }}"
+		  data-project-id="{{ toproject.id }}"><a href="#">Accept</a></td>
             </tr>
 	    {% endfor %}
 	  </table>

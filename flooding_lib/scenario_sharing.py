@@ -73,17 +73,37 @@ def project_field(scenario, project_id):
             'message': _("Offered"),
             'action': 'rescind',
             })
-    elif models.ScenarioProject.objects.filter(
-        scenario=scenario, project__id=project_id).exists():
-        fielddict.update({
-            'message': _("Added to project"),
-            'action': '',
-            })
     else:
-        fielddict.update({
-                'message': _("Offer to project"),
-                'action': 'add',
-                })
+        try:
+            scenarioproject = (
+                models.ScenarioProject.objects.select_related(depth=1).
+                get(scenario=scenario, project__id=project_id))
+        except models.ScenarioProject.DoesNotExist:
+            # Scenario not in project
+            fielddict.update({
+                    'message': _("Offer to project"),
+                    'action': 'add',
+                    })
+        else:
+            # Scenario in project
+            scenarioproject.ensure_has_approvalobject()
+            approvalobject = scenarioproject.approvalobject
+            if approvalobject.approved:
+                status = _('approved')
+                fielddict['approvalobject'] = approvalobject
+            elif approvalobject.disapproved:
+                status = _('disapproved')
+                fielddict['approvalobject'] = approvalobject
+            else:
+                status = _('not yet approved')
+
+            fielddict.update({
+                    'message': "{message} ({status})". format(
+                        message=_("Added to project"), status=status),
+                    'action': '',
+                    })
+
+    fielddict['is_url'] = bool(fielddict['action'])
 
     return fielddict
 

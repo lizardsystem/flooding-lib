@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-06-12 14:40+0200\n"
+"POT-Creation-Date: 2012-07-18 06:56-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,528 +18,561 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 
-#: forms.py:13 forms.py:44 views_infowindow.py:164
-#: templates/flooding/showattachments.html:21
+#: forms.py:20 forms.py:64 templates/flooding/showattachments.html:21
 #: tools/exporttool/templates/export/exports_overview.html:20
 #: tools/exporttool/templates/export/exports_run_detail.html:22
-#: tools/importtool/models.py:83
+#: tools/importtool/models.py:62
 msgid "Name"
-msgstr ""
+msgstr "Naam"
 
-#: forms.py:14 forms.py:31 forms.py:45
+#: forms.py:23 forms.py:45 forms.py:66
 #: templates/flooding/infowindow_approval.html:18
 #: templates/flooding/showattachments.html:23
 #: templates/flooding/task_detail.html:22
 msgid "Remarks"
-msgstr ""
+msgstr "Opmerkingen"
 
-#: forms.py:32 templates/flooding/task_detail.html:19
+#: forms.py:48 templates/flooding/task_detail.html:19
 msgid "Successful"
 msgstr ""
 
-#: forms.py:46 templates/flooding/showattachments.html:22
-#: tools/importtool/models.py:426
+#: forms.py:68 templates/flooding/showattachments.html:22
+#: tools/importtool/models.py:578
 msgid "File"
-msgstr ""
+msgstr "File"
 
-#: forms.py:51 models.py:124
+#: forms.py:75 models.py:132
 msgid "Sobek model"
-msgstr ""
+msgstr "Sobekmodel"
 
-#: forms.py:54
+#: forms.py:81
 msgid "Start animation"
-msgstr ""
+msgstr "Start animatie"
 
-#: models.py:54
+#: models.py:58
 msgid "Attachment"
-msgstr ""
+msgstr "Attachment"
 
-#: models.py:55 templates/flooding/showattachments.html:5
+#: models.py:59 templates/flooding/infowindow_information.html:29
+#: templates/flooding/showattachments.html:5
 msgid "Attachments"
-msgstr ""
+msgstr "Attachments"
 
-#: models.py:65
+#: models.py:73
 msgid "Sobek version"
-msgstr ""
+msgstr "Sobekversie"
 
-#: models.py:66
+#: models.py:74
 msgid "Sobek versions"
-msgstr ""
+msgstr "Sobekversie"
 
-#: models.py:94 models.py:100 models.py:221
+#: models.py:102 models.py:108 models.py:229
 msgid "canal"
-msgstr ""
+msgstr "kanaal"
 
-#: models.py:95 models.py:101
+#: models.py:103 models.py:109
 msgid "inundation"
 msgstr ""
 
-#: models.py:125 views_infowindow.py:345
+#: models.py:133 views_infowindow.py:332
 msgid "Sobek models"
-msgstr ""
+msgstr "Sobekmodellen"
 
-#: models.py:139
+#: models.py:147
 msgid "type"
-msgstr ""
+msgstr "type"
 
-#: models.py:141
+#: models.py:149
 msgid "case"
 msgstr ""
 
-#: models.py:143
+#: models.py:151
 msgid "version"
 msgstr ""
 
-#: models.py:157
+#: models.py:165
 msgid "lock"
 msgstr ""
 
-#: models.py:158
+#: models.py:166
 msgid "culvert"
 msgstr ""
 
-#: models.py:159
+#: models.py:167
 msgid "weir"
 msgstr ""
 
-#: models.py:160
+#: models.py:168
 msgid "bridge"
 msgstr ""
 
-#: models.py:161 models.py:287
+#: models.py:169 models.py:295
 msgid "undefined"
 msgstr ""
 
-#: models.py:162
+#: models.py:170
 msgid "generic_internal"
 msgstr ""
 
-#: models.py:185
+#: models.py:193
 msgid "Cutoff location"
 msgstr ""
 
-#: models.py:186
+#: models.py:194
 msgid "Cutoff locations"
 msgstr ""
 
-#: models.py:219
+#: models.py:227
 msgid "sea"
-msgstr ""
+msgstr "zee"
 
-#: models.py:220
+#: models.py:228
 msgid "lake"
-msgstr ""
+msgstr "meer"
 
-#: models.py:222
+#: models.py:230
 msgid "internal_lake"
-msgstr ""
+msgstr "intern_meer"
 
-#: models.py:223
+#: models.py:231
 msgid "internal_canal"
-msgstr ""
+msgstr "intern_kanaal"
 
-#: models.py:224
+#: models.py:232
 msgid "river"
-msgstr ""
+msgstr "rivier"
 
-#: models.py:225
+#: models.py:233
 msgid "unknown"
-msgstr ""
+msgstr "onbekend"
 
-#: models.py:226
+#: models.py:234
 msgid "lower_river"
 msgstr ""
 
-#: models.py:255
+#: models.py:263
 msgid "External water"
-msgstr ""
+msgstr "Extern water"
 
-#: models.py:256
+#: models.py:264
 msgid "External waters"
-msgstr ""
+msgstr "Externe wateren"
 
-#: models.py:272
+#: models.py:280
 msgid "Dike"
-msgstr ""
+msgstr "Dijk"
 
-#: models.py:273
+#: models.py:281
 msgid "Dikes"
-msgstr ""
+msgstr "Dijken"
 
-#: models.py:288
+#: models.py:296
 msgid "tide"
-msgstr ""
+msgstr "tij"
 
-#: models.py:289
+#: models.py:297
 msgid "breach"
-msgstr ""
+msgstr "bres"
 
-#: models.py:301
+#: models.py:309
 msgid "Waterlevel set"
-msgstr ""
+msgstr "Waterniveau set"
 
-#: models.py:302
+#: models.py:310
 msgid "Waterlevel sets"
-msgstr ""
+msgstr "Waterniveau sets"
 
-#: models.py:323 views.py:958
+#: models.py:331 views.py:1080
 msgid "Waterlevel"
-msgstr ""
+msgstr "Waterniveau"
 
-#: models.py:324
+#: models.py:332
 msgid "Waterlevels"
-msgstr ""
+msgstr "Waterniveaus"
 
-#: models.py:380 views.py:943 views_infowindow.py:109
+#: models.py:388 views.py:1055
 msgid "Region"
-msgstr ""
+msgstr "Regio"
 
-#: models.py:381
+#: models.py:389
 msgid "Regions"
-msgstr ""
+msgstr "Regio's"
 
-#: models.py:409
+#: models.py:417
 msgid "Region set"
-msgstr ""
+msgstr "Regio set"
 
-#: models.py:410
+#: models.py:418
 msgid "Region sets"
-msgstr ""
+msgstr "Regio sets"
 
-#: models.py:479 views.py:951
-#: templates/flooding/infowindow_information.html:43
-#: tools/importtool/models.py:445
+#: models.py:487 views.py:1067 tools/importtool/models.py:608
 msgid "Breach"
-msgstr ""
+msgstr "Bres"
 
-#: models.py:480 templates/flooding/infowindow_information.html:39
+#: models.py:488
 msgid "Breaches"
-msgstr ""
+msgstr "Bressen"
 
-#: models.py:538
+#: models.py:546
 msgid "Cutoff location set"
 msgstr ""
 
-#: models.py:539
+#: models.py:547
 msgid "Cutoff location sets"
 msgstr ""
 
-#: models.py:565 views_infowindow.py:110 views_infowindow.py:347
-#: tools/approvaltool/models.py:15
+#: models.py:581 views_infowindow.py:334 tools/approvaltool/models.py:14
 #: tools/exporttool/templates/export/exports_run_detail_scenarios_and_projects.html:21
 msgid "Project"
-msgstr ""
+msgstr "Project"
 
-#: models.py:566 views.py:431 views.py:436 views.py:1028
+#: models.py:582 views.py:487 views.py:492 views.py:1167
 #: templates/flooding/index.html:20
 msgid "Projects"
-msgstr ""
+msgstr "Projecten"
 
-#: models.py:625
+#: models.py:656
 msgid "view_scenario"
 msgstr ""
 
-#: models.py:626
+#: models.py:657
 msgid "add_scenario_new_simulation"
 msgstr ""
 
-#: models.py:627
+#: models.py:658
 msgid "add_scenario_import"
 msgstr ""
 
-#: models.py:628
+#: models.py:659
 msgid "edit_scenario"
 msgstr ""
 
-#: models.py:629
+#: models.py:660
 msgid "approve_scenario"
 msgstr ""
 
-#: models.py:630
+#: models.py:661
 msgid "delete_scenario"
 msgstr ""
 
-#: models.py:631
+#: models.py:662
 msgid "edit_scenario_simple"
 msgstr ""
 
-#: models.py:652
+#: models.py:670
 msgid "User permission"
-msgstr ""
+msgstr "Gebruikersrecht"
 
-#: models.py:653
+#: models.py:671
 msgid "User permissions"
-msgstr ""
-
-#: models.py:674
-msgid "Project group permission"
-msgstr ""
-
-#: models.py:675
-msgid "Project group permissions"
-msgstr ""
+msgstr "Gebruikersrechten"
 
 #: models.py:692
-msgid "Permission project shapedatalegend"
-msgstr ""
+msgid "Project group permission"
+msgstr "Projectgroeprecht"
 
 #: models.py:693
-msgid "Permissions project shapedatalegend"
-msgstr ""
+msgid "Project group permissions"
+msgstr "Projectgroeprechten"
 
-#: models.py:708
-msgid "Permission project griddatalegend"
-msgstr ""
-
-#: models.py:709
-msgid "Permissions project griddatalegend"
-msgstr ""
-
-#: models.py:735 views.py:529
+#: models.py:721 views.py:589
 msgid "scenario"
-msgstr ""
+msgstr "scenario"
 
-#: models.py:736
+#: models.py:722
 msgid "location"
-msgstr ""
+msgstr "locatie"
 
-#: models.py:737
+#: models.py:723
 msgid "model"
 msgstr ""
 
-#: models.py:738
+#: models.py:724
 msgid "other"
 msgstr ""
 
-#: models.py:739
+#: models.py:725
 msgid "files"
 msgstr ""
 
-#: models.py:740
+#: models.py:726
 msgid "general"
 msgstr ""
 
-#: models.py:741
+#: models.py:727
 msgid "metadata"
 msgstr ""
 
-#: models.py:742
+#: models.py:728
 msgid "breaches"
 msgstr ""
 
-#: models.py:743
+#: models.py:729
 msgid "externalwater"
 msgstr ""
 
-#: models.py:744 models.py:811 views.py:511 views.py:933
+#: models.py:730 models.py:811 views.py:571 views.py:1040
 msgid "none"
-msgstr ""
+msgstr "geen"
 
 #: models.py:788
 msgid "low"
-msgstr ""
+msgstr "laag"
 
 #: models.py:789
 msgid "medium"
-msgstr ""
+msgstr "middel"
 
 #: models.py:790
 msgid "high"
+msgstr "hoog"
+
+#: models.py:805 views.py:1034
+msgid "verwijderd"
 msgstr ""
 
-#: models.py:805 views.py:930
-msgid "deleted"
-msgstr ""
-
-#: models.py:806 views.py:927
+#: models.py:806 scenario_sharing.py:92 views.py:1028
 msgid "approved"
-msgstr ""
+msgstr "goedgekeurd"
 
-#: models.py:807 views.py:928
+#: models.py:807 scenario_sharing.py:95 views.py:1030
 msgid "disapproved"
-msgstr ""
+msgstr "afgekeurd"
 
-#: models.py:808 views.py:929
+#: models.py:808 views.py:1032
 msgid "calculated"
-msgstr ""
+msgstr "berekend"
 
-#: models.py:809 views.py:931
+#: models.py:809 views.py:1036
 msgid "error"
-msgstr ""
+msgstr "fout"
 
-#: models.py:810 views.py:932
+#: models.py:810 views.py:1038
 msgid "waiting"
-msgstr ""
+msgstr "wacht"
 
-#: models.py:814 views.py:60 views.py:367
+#: models.py:814 views.py:60 views.py:416
 msgid "name"
-msgstr ""
+msgstr "naam"
 
 #: models.py:817
 msgid "remarks"
-msgstr ""
+msgstr "opmerkingen"
 
-#: models.py:851 views.py:137 views_infowindow.py:346
+#: models.py:858 views.py:145 views_infowindow.py:333
 #: templates/flooding/edit_scenario_properties.html:8
 #: templates/flooding/task_detail.html:15
 #: tools/exporttool/templates/export/exports_run_detail_scenarios_and_projects.html:20
-#: tools/importtool/models.py:442
+#: tools/importtool/models.py:605
 msgid "Scenario"
-msgstr ""
+msgstr "Scenario"
 
-#: models.py:852 views.py:985 views.py:987 views.py:1011
-#: templates/flooding/index.html:21 templates/flooding/scenario_list.html:14
+#: models.py:859 scenario_sharing.py:163 scenario_sharing.py:216 views.py:1113
+#: views.py:1116 views.py:1145 templates/flooding/index.html:21
+#: templates/flooding/scenario_list.html:14
 msgid "Scenarios"
-msgstr ""
+msgstr "Scenario's"
 
-#: models.py:920
+#: models.py:1042
+msgid "Scenario attachments"
+msgstr "Scenario attachments"
+
+#: models.py:1045
+msgid "Project attachments"
+msgstr "Project attachments"
+
+#: models.py:1048
+msgid "Inundation model attachments"
+msgstr "Inundatiemodel attachments"
+
+#: models.py:1051
+msgid "External water model attachments"
+msgstr "Extern watermodel attachments"
+
+#: models.py:1123
 msgid "at top"
-msgstr ""
+msgstr "op de top"
 
-#: models.py:921
+#: models.py:1124
 msgid "at moment x"
-msgstr ""
+msgstr "op moment x"
 
-#: models.py:922
+#: models.py:1125
 msgid "at crossing level x"
 msgstr ""
 
-#: models.py:923
+#: models.py:1126
 msgid "unknown/error at import"
 msgstr ""
 
-#: models.py:960
+#: models.py:1163
 msgid "Scenario breach"
 msgstr ""
 
-#: models.py:961
+#: models.py:1164
 msgid "Scenario breaches"
 msgstr ""
 
-#: models.py:988
+#: models.py:1191
 msgid "external water"
 msgstr ""
 
-#: models.py:990
+#: models.py:1193
 msgid "external water period"
 msgstr ""
 
-#: models.py:992
+#: models.py:1195
 msgid "external water max waterlevel"
 msgstr ""
 
-#: models.py:994
+#: models.py:1197
 msgid "storm duration"
 msgstr ""
 
-#: models.py:996
+#: models.py:1199
 msgid "pitdepth"
 msgstr ""
 
-#: models.py:1016
+#: models.py:1219
 msgid "Scenario cutoff location"
 msgstr ""
 
-#: models.py:1017
+#: models.py:1220
 msgid "Scenario cutoff locations"
 msgstr ""
 
-#: models.py:1040
+#: models.py:1243
 msgid "Program"
 msgstr ""
 
-#: models.py:1041
+#: models.py:1244
 msgid "Programs"
 msgstr ""
 
-#: models.py:1062
+#: models.py:1265
 msgid "Result type"
 msgstr ""
 
-#: models.py:1063
+#: models.py:1266
 msgid "Result types"
 msgstr ""
 
-#: models.py:1095 tools/exporttool/models.py:113
+#: models.py:1298 tools/exporttool/models.py:126
 msgid "Result"
 msgstr ""
 
-#: models.py:1096 views.py:1144 templates/flooding/index.html:19
-#: tools/exporttool/models.py:114
+#: models.py:1299 views.py:1303 templates/flooding/index.html:19
+#: tools/exporttool/models.py:127
 msgid "Results"
 msgstr ""
 
-#: models.py:1120
+#: models.py:1319
 msgid "Cutoff location sobek model setting"
 msgstr ""
 
-#: models.py:1121
+#: models.py:1320
 msgid "Cutoff location sobek model settings"
 msgstr ""
 
-#: models.py:1148 templates/flooding/task_detail.html:16
+#: models.py:1348 templates/flooding/task_detail.html:16
 msgid "Task type"
-msgstr ""
+msgstr "Taaktype"
 
-#: models.py:1149
+#: models.py:1349
 msgid "Task types"
-msgstr ""
+msgstr "Taaktypen"
 
-#: models.py:1177
+#: models.py:1377
 msgid "Task"
-msgstr ""
+msgstr "Taak"
 
-#: models.py:1178 views.py:592 views.py:604 templates/flooding/index.html:23
+#: models.py:1378 views.py:656 views.py:668 templates/flooding/index.html:23
 msgid "Tasks"
-msgstr ""
+msgstr "Taken"
 
-#: models.py:1227
+#: models.py:1428
 msgid "Task executor"
-msgstr ""
+msgstr "Taakuitvoerder"
 
-#: models.py:1228
+#: models.py:1429
 msgid "Task executors"
-msgstr ""
+msgstr "Taakuitvoerders"
 
-#: models.py:1286
+#: models.py:1487
 msgid "unkown"
-msgstr ""
+msgstr "onbekend"
 
-#: models.py:1287
+#: models.py:1488
 msgid "existing level"
-msgstr ""
+msgstr "bestaand niveau"
 
-#: models.py:1288
+#: models.py:1489
 msgid "new level"
-msgstr ""
+msgstr "nieuw niveau"
 
-#: models.py:1313
+#: models.py:1514
 msgid "existing"
-msgstr ""
+msgstr "bestaand"
 
-#: models.py:1314
+#: models.py:1515
 msgid "new"
-msgstr ""
+msgstr "nieuw"
 
-#: views.py:56 views.py:363 views.py:525
+#: scenario_sharing.py:73
+msgid "Offered"
+msgstr "Aangeboden"
+
+#: scenario_sharing.py:84
+msgid "Offer to project"
+msgstr "Bied aan aan project"
+
+#: scenario_sharing.py:98
+msgid "not yet approved"
+msgstr "nog niet gekeurd"
+
+#: scenario_sharing.py:102
+msgid "Added to project"
+msgstr "Toegevoegd aan project"
+
+#: scenario_sharing.py:123
+msgid "You do not have approval permission in any project."
+msgstr "U heeft geen goedkeuringsrechten in een project."
+
+#: scenario_sharing.py:161 scenario_sharing.py:214 views.py:144 views.py:335
+#: views.py:352 views.py:486 views.py:655 views.py:1115 views.py:1166
+#: views.py:1302 tools/views.py:10
+msgid "Flooding"
+msgstr "Flooding"
+
+#: scenario_sharing.py:165 templates/flooding/scenario_share_list.html:6
+#: templates/flooding/scenario_share_list.html:13
+msgid "Share scenarios"
+msgstr "Deel scenario's"
+
+#: scenario_sharing.py:218 templates/flooding/scenario_accept_list.html:6
+msgid "Accept scenarios"
+msgstr "Accepteer scenario's"
+
+#: views.py:56 views.py:412 views.py:585
 msgid "id"
-msgstr ""
+msgstr "id"
 
 #: views.py:64
 msgid "status"
-msgstr ""
+msgstr "status"
 
 #: views.py:68
 msgid "project"
-msgstr ""
+msgstr "project"
 
 #: views.py:72
 msgid "region"
-msgstr ""
+msgstr "regio"
 
 #: views.py:74
 msgid "sobekmodel inundation"
-msgstr ""
+msgstr "sobekmodel inundatie"
 
 #: views.py:78
 msgid "breseigenschappen"
@@ -549,295 +582,198 @@ msgstr ""
 msgid "cutofflocations"
 msgstr ""
 
-#: views.py:82 views.py:385 views.py:559
+#: views.py:82 views.py:434 views.py:619
 msgid "delete"
 msgstr ""
 
-#: views.py:112
+#: views.py:119
 msgid "New scenario"
-msgstr ""
+msgstr "Nieuw scenario"
 
-#: views.py:136 views.py:294 views.py:308 views.py:430 views.py:591
-#: views.py:986 views.py:1027 views.py:1143 tools/views.py:10
-msgid "Flooding"
-msgstr ""
-
-#: views.py:271
+#: views.py:311
 msgid "New project"
-msgstr ""
+msgstr "Nieuw project"
 
-#: views.py:295
+#: views.py:336
 msgid "My projects"
-msgstr ""
+msgstr "Mijn projecten"
 
-#: views.py:332
+#: views.py:378
 msgid "(choose owner)"
-msgstr ""
+msgstr "(kies eigenaar)"
 
-#: views.py:371
+#: views.py:420
 msgid "friendlyname"
 msgstr ""
 
-#: views.py:375
+#: views.py:424
 msgid "owner"
 msgstr ""
 
-#: views.py:379
+#: views.py:428
 msgid "regionsets"
 msgstr ""
 
-#: views.py:381
+#: views.py:430
 msgid "scenarios"
-msgstr ""
+msgstr "scenario's"
 
-#: views.py:383 views.py:557
+#: views.py:432 views.py:617
 msgid "edit"
-msgstr ""
+msgstr "bewerk"
 
-#: views.py:395
+#: views.py:447
 msgid "edit this item"
-msgstr ""
+msgstr "bewerk dit item"
 
-#: views.py:401 views.py:569
+#: views.py:454 views.py:631
 msgid "you need permission to edit this item"
-msgstr ""
+msgstr "u heeft rechten nodig om dit item te bewerken"
 
-#: views.py:404 views.py:872
+#: views.py:458 views.py:963
 msgid "delete this item"
-msgstr ""
+msgstr "verwijder dit item"
 
-#: views.py:407 views.py:874
+#: views.py:461 views.py:967
 msgid "are you sure?"
-msgstr ""
+msgstr "weet u het zeker?"
 
-#: views.py:411 views.py:575 views.py:879
+#: views.py:466 views.py:639 views.py:972
 msgid "you need permission to delete this item"
-msgstr ""
+msgstr "u heeft rechten nodig om dit item te verwijderen"
 
-#: views.py:505
+#: views.py:563
 msgid "(choose scenario)"
-msgstr ""
+msgstr "(kies scenario)"
 
-#: views.py:508
+#: views.py:566
 msgid "(choose tasktype)"
-msgstr ""
+msgstr "(kies taaktype)"
 
-#: views.py:511
+#: views.py:570
 msgid "(choose successful)"
-msgstr ""
+msgstr "(kies succes)"
 
-#: views.py:511
+#: views.py:571
 msgid "true"
 msgstr ""
 
-#: views.py:511
+#: views.py:571
 msgid "false"
 msgstr ""
 
-#: views.py:533
+#: views.py:593
 msgid "tasktype"
-msgstr ""
+msgstr "taaktype"
 
-#: views.py:537
+#: views.py:597
 msgid "tstart"
 msgstr ""
 
-#: views.py:541
+#: views.py:601
 msgid "tfinished"
 msgstr ""
 
-#: views.py:545
+#: views.py:605
 msgid "successful"
 msgstr ""
 
-#: views.py:549
+#: views.py:609
 msgid "creator log"
 msgstr ""
 
-#: views.py:553
+#: views.py:613
 msgid "error log"
 msgstr ""
 
-#: views.py:566 views.py:572
+#: views.py:627 views.py:635
 msgid "not implemented yet"
-msgstr ""
+msgstr "nog niet geimplementeerd"
 
-#: views.py:889
+#: views.py:984
 msgid "count external"
 msgstr ""
 
-#: views.py:892
+#: views.py:988
 msgid "count internal"
 msgstr ""
 
-#: views.py:919
+#: views.py:1019
 msgid "Search (scenario name or project name)"
-msgstr ""
+msgstr "Zoek (scenarionaam of projectnaam)"
 
-#: views.py:936
+#: views.py:1044
 msgid "RegionSet"
 msgstr ""
 
-#: views.py:939
+#: views.py:1048
 msgid "All regionsets"
 msgstr ""
 
-#: views.py:947
+#: views.py:1060
 msgid "All regions"
 msgstr ""
 
-#: views.py:955 templates/flooding/scenario_list.html:34
+#: views.py:1072 templates/flooding/scenario_list.html:37
 msgid "All breaches"
 msgstr ""
 
-#: views.py:961 views.py:972
+#: views.py:1083 views.py:1094
 msgid "less than"
 msgstr ""
 
-#: views.py:964 views.py:975
+#: views.py:1086 views.py:1097
 msgid "greater than"
 msgstr ""
 
-#: views.py:969
+#: views.py:1091
 msgid "Repeattime"
 msgstr ""
 
-#: views.py:1010
+#: views.py:1144
 msgid "Flooding-home"
 msgstr ""
 
-#: views.py:1071
+#: views.py:1215
 msgid "all resulttypes"
 msgstr ""
 
-#: views_infowindow.py:34
+#: views_infowindow.py:38
 #, python-format
 msgid "%(nrdays)d day"
 msgid_plural "%(nrdays)d days"
 msgstr[0] ""
 msgstr[1] ""
 
-#: views_infowindow.py:35
+#: views_infowindow.py:40
 #, python-format
 msgid "%(nrhours)d hour"
 msgid_plural "%(nrhours)d hours"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%(nrhours)d uur"
+msgstr[1] "%(nrhours)d uren"
 
-#: views_infowindow.py:107
-#: tools/importtool/templates/import/imports_overview.html:21
-msgid "Scenario name"
-msgstr ""
+#: views_infowindow.py:228
+msgid "Scenario ID"
+msgstr "Scenario ID"
 
-#: views_infowindow.py:108
-msgid "Breach locations"
-msgstr ""
-
-#: views_infowindow.py:120
-msgid "Scenario id"
-msgstr ""
-
-#: views_infowindow.py:121 templates/flooding/infowindow_remarks.html:5
-#: templates/flooding/infowindow_remarks.html:8
-msgid "Scenario remarks"
-msgstr ""
-
-#: views_infowindow.py:150
-msgid "Scenario attachments"
-msgstr ""
-
-#: views_infowindow.py:151
-msgid "Project attachments"
-msgstr ""
-
-#: views_infowindow.py:152
-msgid "Inundationmodel attachments"
-msgstr ""
-
-#: views_infowindow.py:153
-msgid "Externalwater model attachments"
-msgstr ""
-
-#: views_infowindow.py:170
-msgid "Materiaal kering (ENGELS)"
-msgstr ""
-
-#: views_infowindow.py:172
-msgid "Initial breach width"
-msgstr ""
-
-#: views_infowindow.py:173
-msgid "Duration till breach has maximal depth"
-msgstr ""
-
-#: views_infowindow.py:183
-msgid "Externalwater name"
-msgstr ""
-
-#: views_infowindow.py:184
-msgid "Externalwater type"
-msgstr ""
-
-#: views_infowindow.py:186 views_infowindow.py:189
-msgid "Maximal water level"
-msgstr ""
-
-#: views_infowindow.py:186 views_infowindow.py:187 views_infowindow.py:197
-#: views_infowindow.py:198 views_infowindow.py:199
-msgid "manual input used"
-msgstr ""
-
-#: views_infowindow.py:187 views_infowindow.py:190
-msgid "Repeating period duration"
-msgstr ""
-
-#: views_infowindow.py:192
-msgid "Bottom level breach"
-msgstr ""
-
-#: views_infowindow.py:193
-msgid "Pit depth"
-msgstr ""
-
-#: views_infowindow.py:197 views_infowindow.py:201 views_infowindow.py:212
-#: views_infowindow.py:224
-msgid "Duration storm"
-msgstr ""
-
-#: views_infowindow.py:198 views_infowindow.py:202 views_infowindow.py:213
-#: views_infowindow.py:225
-msgid "Duration peak"
-msgstr ""
-
-#: views_infowindow.py:199 views_infowindow.py:203
-msgid "Tide shift"
-msgstr ""
-
-#: views_infowindow.py:205 views_infowindow.py:227
-msgid "Tide properties"
-msgstr ""
-
-#: views_infowindow.py:210
-msgid "External water graph"
-msgstr ""
-
-#: views_infowindow.py:255 views_infowindow.py:275 views_infowindow.py:336
-#: views_infowindow.py:417 tools/importtool/views.py:330
+#: views_infowindow.py:252 views_infowindow.py:286 views_infowindow.py:318
+#: views_infowindow.py:424 tools/importtool/views.py:329
+#: tools/importtool/views.py:463 tools/importtool/views.py:546
 msgid "No permission to import scenario or login"
-msgstr ""
+msgstr "Geen recht om scenario te importeren, of u moet nog inloggen."
 
-#: views_infowindow.py:344
+#: views_infowindow.py:330
 msgid "Inundation model"
-msgstr ""
+msgstr "Inundatiemodel"
 
 #: templates/flooding/edit_scenario_properties.html:5
 #: templates/flooding/infowindow_edit.html:21
 msgid "Edit scenario properties"
-msgstr ""
+msgstr "Bewerk scenario eigenschappen"
 
 #: templates/flooding/edit_scenario_properties.html:13
 msgid "The properties have been changed. You can now close this window."
-msgstr ""
+msgstr "De eigenschappen zijn veranderd. U kunt dit window nu sluiten."
 
 #: templates/flooding/edit_scenario_properties.html:18
 #: templates/flooding/infowindow_remarks.html:15
@@ -851,100 +787,103 @@ msgstr ""
 #: tools/importtool/templates/import/groupimport_new.html:24
 #: tools/importtool/templates/import/import_file_upload.html:32
 msgid "Submit"
-msgstr ""
+msgstr "Verzenden"
 
 #: templates/flooding/index.html:12
 msgid "Welcome"
-msgstr ""
+msgstr "Welkom"
 
 #: templates/flooding/index.html:15
 msgid "Welcome to Lizard-flooding. Follow one of the links below:"
-msgstr ""
+msgstr "Welkom bij Lizard-flooding. Volg een van de links hieronder:"
 
 #: templates/flooding/infowindow_approval.html:5
 #: templates/flooding/infowindow_approval.html:8
 msgid "Scenario approval"
-msgstr ""
+msgstr "Scenario goedkeuring"
 
 #: templates/flooding/infowindow_approval.html:15
-#: templates/flooding/showattachments.html:19 tools/importtool/models.py:425
+#: templates/flooding/showattachments.html:19 tools/importtool/models.py:577
 msgid "Date"
-msgstr ""
+msgstr "Datum"
 
 #: templates/flooding/infowindow_approval.html:16
 #: templates/flooding/showattachments.html:20
 msgid "By"
-msgstr ""
+msgstr "Door"
 
 #: templates/flooding/infowindow_approval.html:17
-#: tools/importtool/models.py:177
+#: tools/importtool/models.py:329
 msgid "Approved"
-msgstr ""
+msgstr "Goedgekeurd"
 
 #: templates/flooding/infowindow_edit.html:5
 #: templates/flooding/infowindow_edit.html:8
 msgid "Edit"
-msgstr ""
+msgstr "Bewerk"
 
 #: templates/flooding/infowindow_edit.html:12
 msgid "Attachment for inundation model"
-msgstr ""
+msgstr "Attachment voor inundatiemodel"
 
 #: templates/flooding/infowindow_edit.html:14
 msgid "Attachment for external water model"
-msgstr ""
+msgstr "Attachment voor extern watermodel"
 
 #: templates/flooding/infowindow_edit.html:16
 msgid "Attachment for scenario"
-msgstr ""
+msgstr "Attachment voor scenario"
 
 #: templates/flooding/infowindow_edit.html:18
 msgid "Attachment for project"
-msgstr ""
+msgstr "Attachment voor project"
 
 #: templates/flooding/infowindow_information.html:5
 #: templates/flooding/infowindow_information.html:8
 msgid "Scenario details"
-msgstr ""
+msgstr "Scenariodetails"
 
-#: templates/flooding/infowindow_information.html:16
-msgid "General"
-msgstr ""
-
-#: templates/flooding/infowindow_information.html:28
-msgid "Metadata"
-msgstr ""
-
-#: templates/flooding/infowindow_information.html:69
-#: tools/importtool/models.py:449
-#: tools/importtool/templates/import/import_file_upload.html:5
-msgid "Files"
-msgstr ""
+#: templates/flooding/infowindow_remarks.html:5
+#: templates/flooding/infowindow_remarks.html:8
+msgid "Scenario remarks"
+msgstr "Scenario opmerkingen"
 
 #: templates/flooding/project_list.html:14
 #: templates/flooding/project_list.html:19
 msgid "Project list"
-msgstr ""
+msgstr "Projectlijst"
 
 #: templates/flooding/project_list.html:26
 msgid "create project"
-msgstr ""
+msgstr "nieuw project"
 
-#: templates/flooding/scenario_list.html:20
+#: templates/flooding/scenario_accept_list.html:13
+msgid "Accept scenarios for "
+msgstr "Accepteer scenario's voor "
+
+#: templates/flooding/scenario_accept_list.html:16
+msgid "From project "
+msgstr "Uit project "
+
+#: templates/flooding/scenario_list.html:21
+msgid "Offer or accept a scenario for sharing"
+msgstr "Bied een scenario aan of accepteer een scenario"
+
+#: templates/flooding/scenario_list.html:23
 msgid "Scenario list"
-msgstr ""
+msgstr "Scenariolijst"
 
-#: templates/flooding/scenario_list.html:24
+#: templates/flooding/scenario_list.html:27
 msgid "create scenario"
-msgstr ""
+msgstr "nieuw scenario"
 
-#: templates/flooding/scenario_list.html:25
+#: templates/flooding/scenario_list.html:28
 msgid "Export as CSV"
-msgstr ""
+msgstr "Exporteer als CSV"
 
 #: templates/flooding/showattachments.html:8
 msgid "Attachments - "
-msgstr ""
+msgstr "Attachments - "
 
 #: templates/flooding/showattachments.html:13
 #: tools/importtool/templates/import/import_file_upload.html:16
@@ -955,7 +894,7 @@ msgstr ""
 
 #: templates/flooding/showattachments.html:44
 msgid "Add new attachment"
-msgstr ""
+msgstr "Voeg nieuw attachment toe"
 
 #: templates/flooding/task_detail.html:17
 msgid "Tstart"
@@ -977,69 +916,81 @@ msgstr ""
 msgid "Task list"
 msgstr ""
 
-#: tools/approvaltool/models.py:16 tools/importtool/models.py:103
-msgid "Import scenario"
+#: tools/approvaltool/models.py:15
+msgid "ROR"
+msgstr "ROR"
+
+#: tools/approvaltool/models.py:16
+msgid "Landelijk gebruik"
 msgstr ""
 
-#: tools/approvaltool/models.py:61
+#: tools/approvaltool/models.py:77
+msgid "yes"
+msgstr "ja"
+
+#: tools/approvaltool/models.py:79
+msgid "no"
+msgstr "nee"
+
+#: tools/approvaltool/models.py:168
 msgid "Permission level of user for performing this task"
 msgstr ""
 
-#: tools/exporttool/models.py:15
+#: tools/exporttool/models.py:16
 msgid "Export run"
 msgstr ""
 
-#: tools/exporttool/models.py:16
+#: tools/exporttool/models.py:17
 msgid "Export runs"
 msgstr ""
 
-#: tools/exporttool/models.py:25
+#: tools/exporttool/models.py:26
 msgid "Water depth map"
 msgstr ""
 
-#: tools/exporttool/models.py:35 tools/importtool/models.py:176
+#: tools/exporttool/models.py:36 tools/importtool/models.py:328
 msgid "Waiting"
 msgstr ""
 
-#: tools/exporttool/models.py:39
+#: tools/exporttool/models.py:40
 msgid "Klaar"
 msgstr ""
 
-#: tools/exporttool/models.py:121
+#: tools/exporttool/models.py:134
 msgid "Diked area"
 msgstr ""
 
-#: tools/exporttool/models.py:122
+#: tools/exporttool/models.py:135
 msgid "Province"
 msgstr ""
 
-#: tools/exporttool/models.py:123
+#: tools/exporttool/models.py:136
 msgid "Country"
 msgstr ""
 
-#: tools/exporttool/views.py:32 tools/exporttool/views.py:65
-#: tools/exporttool/views.py:99 tools/exporttool/views.py:183
+#: tools/exporttool/views.py:37 tools/exporttool/views.py:74
+#: tools/exporttool/views.py:116 tools/exporttool/views.py:220
 msgid "No permission to download export"
 msgstr ""
 
-#: tools/exporttool/views.py:53 tools/exporttool/views.py:82
-#: tools/exporttool/views.py:105 tools/exporttool/views.py:124
+#: tools/exporttool/views.py:59 tools/exporttool/views.py:93
+#: tools/exporttool/views.py:122 tools/exporttool/views.py:146
 msgid "Export tool"
 msgstr ""
 
-#: tools/exporttool/views.py:83 tools/exporttool/views.py:106
+#: tools/exporttool/views.py:95 tools/exporttool/views.py:124
 msgid "Export detail"
 msgstr ""
 
-#: tools/exporttool/views.py:107
+#: tools/exporttool/views.py:127
 msgid "Export detail scenarios and projects"
 msgstr ""
 
-#: tools/exporttool/views.py:121 tools/exporttool/views.py:142
+#: tools/exporttool/views.py:143 tools/exporttool/views.py:167
 msgid "No permission to create export"
 msgstr ""
 
-#: tools/exporttool/views.py:125
+#: tools/exporttool/views.py:148
 msgid "New export"
 msgstr ""
 
@@ -1103,191 +1054,213 @@ msgstr ""
 msgid "Area"
 msgstr ""
 
-#: tools/importtool/models.py:84
+#: tools/importtool/models.py:64
 msgid "Excel table (.xls)"
 msgstr ""
 
-#: tools/importtool/models.py:85
+#: tools/importtool/models.py:67
 msgid "Results (zipfile)"
 msgstr ""
 
-#: tools/importtool/models.py:104 tools/templates/tools/index.html:15
+#: tools/importtool/models.py:86
+msgid "Import scenario"
+msgstr ""
+
+#: tools/importtool/models.py:87 tools/templates/tools/index.html:15
 msgid "Import scenarios"
 msgstr ""
 
-#: tools/importtool/models.py:114
+#: tools/importtool/models.py:97
 msgid "None"
-msgstr ""
+msgstr "Geen"
 
-#: tools/importtool/models.py:115
+#: tools/importtool/models.py:98
 msgid "Waiting for validation"
 msgstr ""
 
-#: tools/importtool/models.py:116
+#: tools/importtool/models.py:99
 msgid "Action required"
 msgstr ""
 
-#: tools/importtool/models.py:117
+#: tools/importtool/models.py:100
 msgid "Approved for import"
 msgstr ""
 
-#: tools/importtool/models.py:118
+#: tools/importtool/models.py:101
 msgid "Disapproved for import"
 msgstr ""
 
-#: tools/importtool/models.py:119
+#: tools/importtool/models.py:102
 msgid "Imported"
 msgstr ""
 
-#: tools/importtool/models.py:131
+#: tools/importtool/models.py:115
 msgid "The owner of the scenario."
 msgstr ""
 
-#: tools/importtool/models.py:167
+#: tools/importtool/models.py:320
 msgid "Import scenario input field"
 msgstr ""
 
-#: tools/importtool/models.py:168
+#: tools/importtool/models.py:321
 msgid "Import scenarios input fields"
 msgstr ""
 
-#: tools/importtool/models.py:178
+#: tools/importtool/models.py:330
 msgid "Disapproved"
 msgstr ""
 
-#: tools/importtool/models.py:405
+#: tools/importtool/models.py:557
 msgid "Import scenario fields"
 msgstr ""
 
-#: tools/importtool/models.py:406
+#: tools/importtool/models.py:558
 msgid "Import scenarios fields"
 msgstr ""
 
-#: tools/importtool/models.py:420
+#: tools/importtool/models.py:572
 msgid "Integer"
 msgstr ""
 
-#: tools/importtool/models.py:421
+#: tools/importtool/models.py:573
 msgid "Float"
 msgstr ""
 
-#: tools/importtool/models.py:422
+#: tools/importtool/models.py:574
 msgid "String"
 msgstr ""
 
-#: tools/importtool/models.py:423
+#: tools/importtool/models.py:575
 msgid "Text"
 msgstr ""
 
-#: tools/importtool/models.py:424
+#: tools/importtool/models.py:576
 msgid "Interval (D d HH:MM)"
 msgstr ""
 
-#: tools/importtool/models.py:427
+#: tools/importtool/models.py:579
 msgid "Select"
 msgstr ""
 
-#: tools/importtool/models.py:428
+#: tools/importtool/models.py:580
 msgid "Boolean (True or False)"
 msgstr ""
 
-#: tools/importtool/models.py:443
+#: tools/importtool/models.py:606
 msgid "Meta"
 msgstr ""
 
-#: tools/importtool/models.py:444
+#: tools/importtool/models.py:607
 msgid "Location"
 msgstr ""
 
-#: tools/importtool/models.py:446
+#: tools/importtool/models.py:609
 msgid "External Water"
 msgstr ""
 
-#: tools/importtool/models.py:447
+#: tools/importtool/models.py:610
 msgid "Model"
 msgstr ""
 
-#: tools/importtool/models.py:448
+#: tools/importtool/models.py:611
 msgid "Remaining"
 msgstr ""
 
-#: tools/importtool/models.py:454
+#: tools/importtool/models.py:612
+#: tools/importtool/templates/import/import_file_upload.html:5
+msgid "Files"
+msgstr ""
+
+#: tools/importtool/models.py:619
 msgid "Hoe hoger hoe eerder in rij"
 msgstr ""
 
-#: tools/importtool/models.py:455
+#: tools/importtool/models.py:621
 msgid "Name of col. in import csv-file"
 msgstr ""
 
-#: tools/importtool/models.py:456
+#: tools/importtool/models.py:623
 msgid "Name of table in flooding database"
 msgstr ""
 
-#: tools/importtool/models.py:457
+#: tools/importtool/models.py:626
 msgid "Name of field in flooding database table"
 msgstr ""
 
-#: tools/importtool/models.py:458
+#: tools/importtool/models.py:629
 msgid "Name of imported files (match with resulttypes). Use #### for numbers"
 msgstr ""
 
-#: tools/importtool/models.py:467
+#: tools/importtool/models.py:641
 msgid "help text shown in excel file"
 msgstr ""
 
-#: tools/importtool/models.py:468
+#: tools/importtool/models.py:644
 msgid "help text shown when hovering over field"
 msgstr ""
 
-#: tools/importtool/models.py:469
+#: tools/importtool/models.py:647
 msgid "help text shown behind field"
 msgstr ""
 
-#: tools/importtool/views.py:68
+#: tools/importtool/views.py:60
 msgid "No permission to upload data or login"
 msgstr ""
 
-#: tools/importtool/views.py:95 tools/importtool/views.py:225
-#: tools/importtool/views.py:311 tools/importtool/views.py:364
-#: tools/importtool/views.py:736
+#: tools/importtool/views.py:94 tools/importtool/views.py:222
+#: tools/importtool/views.py:310 tools/importtool/views.py:346
+#: tools/importtool/views.py:480 tools/importtool/views.py:559
 msgid "Import tool"
 msgstr ""
 
-#: tools/importtool/views.py:113 tools/importtool/views.py:261
+#: tools/importtool/views.py:105 tools/importtool/views.py:258
 msgid "No permission to approve scenario or login"
 msgstr ""
 
-#: tools/importtool/views.py:227
+#: tools/importtool/views.py:224
 msgid "Approve import"
 msgstr ""
 
-#: tools/importtool/views.py:313
+#: tools/importtool/views.py:312
 msgid "Verify import"
 msgstr ""
 
-#: tools/importtool/views.py:366
+#: tools/importtool/views.py:348
 msgid "New import"
 msgstr ""
 
-#: tools/importtool/views.py:495 tools/importtool/views.py:566
-msgid "No permission to import scenarios or login"
-msgstr ""
-
-#: tools/importtool/views.py:737
-#: tools/importtool/templates/import/imports_overview.html:23
-msgid "Group import"
-msgstr ""
-
+#: tools/importtool/views.py:482
 #: tools/importtool/templates/import/import_file_upload.html:20
 msgid "Add files"
+msgstr ""
+
+#: tools/importtool/views.py:561
+#: tools/importtool/templates/import/imports_overview.html:23
+msgid "Group import"
 msgstr ""
 
 #: tools/importtool/templates/import/import_file_upload.html:22
 msgid "Already uploaded files"
 msgstr ""
 
+#: tools/importtool/templates/import/import_file_upload_success.html:5
+msgid "Success"
+msgstr ""
+
+#: tools/importtool/templates/import/import_file_upload_success.html:16
+msgid "The files have been added. The import scenario id is: "
+msgstr ""
+
+#: tools/importtool/templates/import/import_file_upload_success.html:21
+msgid "Go back to the import overview page."
+msgstr ""
+
 #: tools/importtool/templates/import/imports_overview.html:14
 msgid "Overview"
+msgstr ""
+
+#: tools/importtool/templates/import/imports_overview.html:21
+msgid "Scenario name"
 msgstr ""
 
 #: tools/importtool/templates/import/imports_overview.html:22

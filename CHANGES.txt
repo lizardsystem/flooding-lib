@@ -46,6 +46,20 @@ Steps taken:
   approvalobject/rule combination, ApprovalObjectState doesn't do that
   anymore
 
+Improved the scenario sharing pages.
+
+Approvers of scenarios that they have offered to other projects can
+now see the status of their scenarios' approvals in those other
+projects.
+
+If a scenario is now approved on some rules and not yet judged on
+others (their value is null), it is now neither approved nor
+disapproved. Used to be disapproved in this situation. A scenario is
+disapproved if its success value is False for at least one of the
+rules.
+
+Improved the translations somewhat.
+
 2.0 (2012-07-09)
 ----------------
 
