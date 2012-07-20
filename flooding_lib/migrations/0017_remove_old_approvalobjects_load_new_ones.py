@@ -56,7 +56,7 @@ class Migration(DataMigration):
                 'approvalobject': approvalobject,
                 'approvalrule': rule,
                 'remarks': '',
-                'creatorlog': 'Set automatically',
+                'creatorlog': '',
                 }
 
             if scenarioproject.scenario.status_cache == 20:  # STATUS_APPROVED
