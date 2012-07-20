@@ -4,12 +4,20 @@ import factory
 import mock
 
 from django.test import TestCase
+from django.utils.safestring import SafeString
+from django.utils.translation import ugettext as _
 
 from flooding_lib.tools.importtool import models as importmodels
+from flooding_lib.test_models import BreachF
+from flooding_lib.test_models import ExternalWaterF
 from flooding_lib.test_models import ScenarioF
+from flooding_lib.test_models import ScenarioBreachF
+from flooding_lib.test_models import WaterlevelF
+from flooding_lib.test_models import WaterlevelSetF
 from flooding_lib import models
 
 from flooding_lib.views_infowindow import find_imported_value
+from flooding_lib.views_infowindow import extra_infowindow_information_fields
 from flooding_lib.views_infowindow import display_string
 
 
@@ -139,3 +147,53 @@ class TestDisplayValueStr(TestCase):
             type=importmodels.InputField.TYPE_INTERVAL)
         value_str = display_string(inputfield, 2.5)
         self.assertEquals(value_str, '2 d 12:00')
+
+
+class TestExtraInfowindowInformationFields(TestCase):
+    def test_unknown_header(self):
+        self.assertEquals(
+            len(extra_infowindow_information_fields('unknown_header', {})),
+            0)
+
+    def test_scenario(self):
+        # Should add scenario ID
+        scenario = ScenarioF.create()
+
+        fields = extra_infowindow_information_fields(
+            'Scenario', {'scenario': scenario})
+
+        self.assertEquals(len(fields), 1)
+        self.assertEquals(fields[0].value_str, str(scenario.id))
+
+    def test_external_water(self):
+        # If external water is sea, and the scenariobreach has
+        # waterlevels, it should add a link to a externalwater graph
+        # image. The string is HTML, so it should be a SafeString. The
+        # link depends on the scenariobreach id.
+
+        scenario = ScenarioF.create()
+
+        externalwater = ExternalWaterF.create(
+            type=models.ExternalWater.TYPE_SEA)
+
+        breach = BreachF.create(externalwater=externalwater)
+
+        waterlevelset = WaterlevelSetF.create()
+        WaterlevelF.create(waterlevelset=waterlevelset)
+
+        scenariobreach = ScenarioBreachF.create(
+            scenario=scenario, breach=breach, waterlevelset=waterlevelset)
+
+        fields = extra_infowindow_information_fields(
+            _('External Water'), {
+                'externalwater': externalwater,
+                'scenariobreach': scenariobreach
+                })
+
+        self.assertEquals(len(fields), 1)
+
+        value = fields[0].value_str
+
+        self.assertTrue(isinstance(value, SafeString))
+        self.assertTrue('get_externalwater_graph_infowindow' in value)
+        self.assertTrue(str(scenariobreach.id) in value)

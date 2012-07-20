@@ -1,15 +1,18 @@
 # -*- coding: utf-8 -*-
 from string import Template
 import datetime
+import logging
 import math
 import string
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.files.base import ContentFile
+from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render_to_response
+from django.utils.safestring import SafeString
 from django.utils.translation import ugettext_lazy as _, ungettext
 
 from flooding_lib import coordinates
@@ -32,6 +35,8 @@ from flooding_lib.permission_manager import \
 from flooding_lib.tools.approvaltool.views import approvaltable
 from flooding_lib.tools.importtool.models import InputField
 from flooding_presentation.models import Animation
+
+logger = logging.getLogger(__name__)
 
 
 def format_timedelta(t_delta):
@@ -181,6 +186,33 @@ def display_string(inputfield, value):
     return str(value)
 
 
+def extra_infowindow_information_fields(header_title, data_objects):
+    class dummy_field(object):
+        pass
+
+    if header_title == _('Scenario'):
+        scenarioid = dummy_field()
+        scenarioid.name = _('Scenario ID')
+        scenarioid.value_str = str(data_objects['scenario'].id)
+        return (scenarioid,)
+
+    if header_title == _('External Water'):
+        graphurl = dummy_field()
+        if len(data_objects['scenariobreach'].
+               waterlevelset.waterlevel_set.all()) > 0:
+            image_src = (
+                reverse('flooding_service') +
+                "?action=get_externalwater_graph_infowindow&width=350&" +
+                "height=400&scenariobreach_id=" +
+                str(data_objects['scenariobreach'].id))
+            graphurl.name = _('External water graph')
+            graphurl.value_str = SafeString('<img src="' + image_src +
+                                            ' " width=350 height=400/>')
+            return (graphurl,)
+
+    return ()
+
+
 def infowindow_information(scenario):
     """
     - Get the list of headers and fields that the importtool has
@@ -229,14 +261,8 @@ def infowindow_information(scenario):
 
     # Add in scenario id under the 'scenario' header
     for header in grouped_input_fields:
-        if header['title'].lower() == 'scenario':
-            class dummy_field(object):
-                pass
-            scenarioid = dummy_field()
-            scenarioid.name = _('Scenario ID')
-            scenarioid.value_str = str(scenario.id)
-            header['fields'].insert(0, scenarioid)
-            break
+        header['fields'] += extra_infowindow_information_fields(
+            header['title'], data_objects)
 
     # Only keep headers with fields
     grouped_input_fields = [h for h in grouped_input_fields if h['fields']]

@@ -7,7 +7,7 @@ from django.test import TestCase
 
 from flooding_lib import models
 
-## Helper classes
+MULTIPOLYGON = 'MULTIPOLYGON(((0 0,4 0,4 4,0 4,0 0),(1 1,2 1,2 2,1 2,1 1)))'
 
 
 class FakeObject(object):
@@ -41,6 +41,82 @@ class ProjectF(factory.Factory):
     FACTORY_FOR = models.Project
 
     owner = User.objects.get_or_create(username='remco')[0]
+
+
+class ExternalWaterF(factory.Factory):
+    FACTORY_FOR = models.ExternalWater
+
+    name = 'dewoeligebaren'
+    type = models.ExternalWater.TYPE_SEA
+
+    deftsim = 0.0
+
+
+class RegionF(factory.Factory):
+    FACTORY_FOR = models.Region
+
+    name = 'Utrecht'
+    longname = 'Uuuuuuutrecht'
+    geom = MULTIPOLYGON
+
+
+class DikeF(factory.Factory):
+    FACTORY_FOR = models.Dike
+
+    name = "Een dijk"
+
+
+class BreachF(factory.Factory):
+    FACTORY_FOR = models.Breach
+
+    name = 'testname'
+
+    externalwater = factory.LazyAttribute(lambda obj: ExternalWaterF.create())
+    region = factory.LazyAttribute(lambda obj: RegionF.create())
+    dike = factory.LazyAttribute(lambda obj: DikeF.create())
+    defaulttide = factory.LazyAttribute(lambda obj: WaterlevelSetF.create())
+
+    levelnormfrequency = 1
+    groundlevel = 1
+    defrucritical = 0
+    internalnode = 'POINT(0 0)'
+    externalnode = 'POINT(0 0)'
+
+    geom = 'POINT(0 0)'
+
+
+class WaterlevelSetF(factory.Factory):
+    FACTORY_FOR = models.WaterlevelSet
+
+    type = models.WaterlevelSet.WATERLEVELSETTYPE_UNDEFINED
+
+
+class ScenarioBreachF(factory.Factory):
+    FACTORY_FOR = models.ScenarioBreach
+
+    scenario = factory.LazyAttribute(lambda obj: ScenarioF.create())
+    breach = factory.LazyAttribute(lambda obj: BreachF.create())
+    waterlevelset = factory.LazyAttribute(lambda obj: WaterlevelSetF.create())
+
+    widthbrinit = 1
+    methstartbreach = 1
+    tstartbreach = 1
+    hstartbreach = 1
+    brdischcoef = 1
+    brf1 = 1
+    brf2 = 1
+    bottomlevelbreach = 1
+    ucritical = 1
+    pitdepth = 1
+    tmaxdepth = 1
+    extwmaxlevel = 1
+
+
+class WaterlevelF(factory.Factory):
+    FACTORY_FOR = models.Waterlevel
+
+    time = 0
+    value = 0
 
 ## Test cases
 

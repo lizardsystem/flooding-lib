@@ -1,6 +1,14 @@
 Changelog of flooding-lib
 ===================================================
 
+2.0.1 (not yet released)
+------------------------
+
+Fix a bug where anonymous users couldn't see the regions they are
+allowed to see.
+
+Restore the tide waterlevel graph to the scenario information
+infowindow.
 
 2.0 (2012-07-09)
 ----------------
