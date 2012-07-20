@@ -143,7 +143,7 @@ class AnonymousPermissionManager(object):
         PSV = UserPermission.PERMISSION_SCENARIO_VIEW
         filter = Q(
             scenarioproject__project__projectgrouppermission__group=demogroup,
-            scenariproject__project__projectgrouppermission__permission=PSV,
+            scenarioproject__project__projectgrouppermission__permission=PSV,
             status_cache=Scenario.STATUS_APPROVED,
             status_cache__in=status_list)
 
