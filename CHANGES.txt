@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.0.1 (unreleased)
+2.0.1 (2012-07-20)
 ------------------
 
 Fix a bug where anonymous users couldn't see the regions they are
