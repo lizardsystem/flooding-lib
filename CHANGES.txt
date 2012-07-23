@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.0.4 (unreleased)
+2.0.4 (2012-07-23)
 ------------------
 
 We check the names of headers in the information infowindow to see if
