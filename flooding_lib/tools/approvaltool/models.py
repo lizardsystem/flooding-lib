@@ -26,7 +26,11 @@ class ApprovalObjectType(models.Model):
     @classmethod
     def default_approval_type(cls):
         """Default approval object type for projects."""
-        return cls.objects.get(type=cls.TYPE_PROJECT)
+        try:
+            return cls.objects.get(type=cls.TYPE_PROJECT)
+        except cls.DoesNotExist:
+            # Should only occur during testing
+            return None
 
 
 class ApprovalObjectLog(models.Model):
