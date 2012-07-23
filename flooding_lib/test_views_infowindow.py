@@ -18,7 +18,7 @@ from flooding_lib import models
 
 from flooding_lib.views_infowindow import find_imported_value
 from flooding_lib.views_infowindow import extra_infowindow_information_fields
-from flooding_lib.views_infowindow import display_string
+from flooding_lib.views_infowindow import display_unicode
 
 
 class FakeObject(object):
@@ -138,16 +138,30 @@ class TestFindImportedValue(TestCase):
             self.assertEquals(retvaluey, RD_Y)
 
 
-class TestDisplayValueStr(TestCase):
+class TestDisplayValueUnicode(TestCase):
     def test_none(self):
-        self.assertEquals(display_string(None, None), '')
+        self.assertEquals(display_unicode(None, None), '')
 
     def test_interval(self):
         inputfield = InputFieldF.build(
             type=importmodels.InputField.TYPE_INTERVAL)
-        value_str = display_string(inputfield, 2.5)
+        value_str = display_unicode(inputfield, 2.5)
         self.assertEquals(value_str, '2 d 12:00')
 
+    def test_unicode(self):
+        # Function used to be called display_string, then bugged on this...
+        s = (u"De EDO scenario\u2019s zijn opgesteld voor de landelijke "
+             u"voorbereiding op de gevolgen van overstromingen. Ze zijn "
+             u"ook input om de bovenregionale afstemming in de water- en "
+             u"openbare orde en veiligheid (OOV) sector vorm te geven.")
+
+        inputfield = InputFieldF.build(
+            type=importmodels.InputField.TYPE_STRING)
+
+        try:
+            display_unicode(inputfield, s)
+        except UnicodeEncodeError:
+            self.fail("display_unicode() failed on a Unicode string.")
 
 class TestExtraInfowindowInformationFields(TestCase):
     def test_unknown_header(self):

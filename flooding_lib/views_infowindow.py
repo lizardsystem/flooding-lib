@@ -172,18 +172,18 @@ def find_imported_value(fieldobject, data_objects):
     return value
 
 
-def display_string(inputfield, value):
+def display_unicode(inputfield, value):
     """Take a value and format it for output use. The wait to display it
     depends on the type of the inputfield (e.g. a float and an date interval
     are both floats, but displayed very differently)."""
 
     if value is None:
-        return ''
+        return u''
 
     if inputfield.type == InputField.TYPE_INTERVAL:
-        return get_intervalstring_from_dayfloat(value)
+        return unicode(get_intervalstring_from_dayfloat(value))
 
-    return str(value)
+    return unicode(value)
 
 
 def extra_infowindow_information_fields(header_title, data_objects):
@@ -250,7 +250,7 @@ def infowindow_information(scenario):
     for header in grouped_input_fields:
         for inputfield in header['fields']:
             value = find_imported_value(inputfield, data_objects)
-            value_str = display_string(inputfield, value)
+            value_str = display_unicode(inputfield, value)
 
             # Set the value_str on the inputfield object for easy
             # use in the template.
