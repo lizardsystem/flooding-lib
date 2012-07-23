@@ -4,8 +4,9 @@ Changelog of flooding-lib
 2.0.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
-
+We check the names of headers in the information infowindow to see if
+extra fields should be added there, but depending on the system, the
+names are translated or not. Current hackish fix is to test for both.
 
 2.0.3 (2012-07-23)
 ------------------

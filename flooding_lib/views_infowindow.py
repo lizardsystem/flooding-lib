@@ -13,7 +13,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render_to_response
 from django.utils.safestring import SafeString
-from django.utils.translation import ugettext_lazy as _, ungettext
+from django.utils.translation import ugettext_lazy as _, ungettext, ugettext
 
 from flooding_lib import coordinates
 from flooding_lib.dates import get_intervalstring_from_dayfloat
@@ -190,13 +190,19 @@ def extra_infowindow_information_fields(header_title, data_objects):
     class dummy_field(object):
         pass
 
-    if header_title == _('Scenario'):
+    # It is somewhat ridiculous that we need to test for both the
+    # translated and the untranslated versions, but I can't get it to
+    # work on both my development machine (which wants translated, as
+    # seems most logical) and staging (which doesn't work with
+    # translated) right now - RG20120723.
+
+    if header_title in ('Scenario', ugettext('Scenario')):
         scenarioid = dummy_field()
         scenarioid.name = _('Scenario ID')
         scenarioid.value_str = str(data_objects['scenario'].id)
         return (scenarioid,)
 
-    if header_title == _('External Water'):
+    if header_title in ('External Water', ugettext('External Water')):
         graphurl = dummy_field()
         if len(data_objects['scenariobreach'].
                waterlevelset.waterlevel_set.all()) > 0:
