@@ -80,6 +80,7 @@ class ApprovalObjectState(models.Model):
         if self.successful is None:
             return '-'
 
+
 class ApprovalObject(models.Model):
     """
     """

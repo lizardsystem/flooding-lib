@@ -71,6 +71,30 @@ class TestDecorators(TestCase):
         self.assertFalse(function.called)
 
 
+class TestAnonymousPermissionManager(TestCase):
+    def test_scenarios(self):
+        """If we have a Group named 'demo group', and a scenario in a
+        project where that groep has view permission, we should be
+        able to see it."""
+
+        group = Group(name='demo group')
+        group.save()
+
+        project = ProjectF.create()
+
+        group.projectgrouppermission_set.add(
+            ProjectGroupPermission(
+                group=group,
+                project=project,
+                permission=UserPermission.PERMISSION_SCENARIO_VIEW))
+
+        scenario = ScenarioF.create(status_cache=Scenario.STATUS_APPROVED)
+        scenario.set_project(project)
+
+        pm = permission_manager.AnonymousPermissionManager()
+        self.assertTrue(scenario.id in (s.id for s in pm.get_scenarios()))
+
+
 class TestUserPermissionManager(TestCase):
     def setUp(self):
         ApprovalObjectType.objects.create(

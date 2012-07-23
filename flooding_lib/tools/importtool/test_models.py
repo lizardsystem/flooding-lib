@@ -139,3 +139,28 @@ class TestImportScenario(TestCase):
             self.assertEquals(value.value, 3)
         except models.StringValue.DoesNotExist:
             raise AssertionError("integervalue does not exist")
+
+
+class TestInputField(TestCase):
+    def test_grouped_input_fields(self):
+        inputfield = InputFieldF.create(
+            header=models.InputField.HEADER_REMAINING)
+
+        gif = models.InputField.grouped_input_fields()
+
+        # There is an element in gif that has 'id' equal to the header we set
+        self.assertTrue(
+            any(giffield['id'] == models.InputField.HEADER_REMAINING
+                for giffield in gif))
+        for g in gif:
+            if g['id'] == models.InputField.HEADER_REMAINING:
+                giffield = g
+                break
+
+        # There is a 'title' field
+        self.assertTrue('title' in giffield)
+
+        # giffield['fields'] is an iterable of inputfields and one of
+        # them has the id ours has
+        self.assertTrue(
+            inputfield.id in (inpf.id for inpf in giffield['fields']))

@@ -1,6 +1,40 @@
 Changelog of flooding-lib
 ===================================================
 
+2.0.5 (unreleased)
+------------------
+
+- Nothing changed yet.
+
+
+2.0.4 (2012-07-23)
+------------------
+
+We check the names of headers in the information infowindow to see if
+extra fields should be added there, but depending on the system, the
+names are translated or not. Current hackish fix is to test for both.
+
+2.0.3 (2012-07-23)
+------------------
+
+- Nothing changed yet.
+
+
+2.0.2 (2012-07-23)
+------------------
+
+Made value_string() fit for use with Unicode-containing strings, and
+renamed it to value_unicode().
+
+
+2.0.1 (2012-07-20)
+------------------
+
+Fix a bug where anonymous users couldn't see the regions they are
+allowed to see.
+
+Restore the tide waterlevel graph to the scenario information
+infowindow.
 
 2.1 (unreleased)
 ----------------
