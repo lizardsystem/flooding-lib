@@ -635,6 +635,13 @@ class Project(models.Model):
         """Return a queryset of all scenarios attached to this project."""
         return self.scenarios.all()
 
+    def original_scenarios(self):
+        """Return a queryset of Scenarios that were originally in this project,
+        not added to it later."""
+        return Scenario.objects.filter(
+            scenarioproject__project=self,
+            scenarioproject__is_main_project=True)
+
 
 class UserPermission(models.Model):
     """userpermission

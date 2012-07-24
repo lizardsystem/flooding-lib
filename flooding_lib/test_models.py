@@ -409,3 +409,25 @@ class TestProject(TestCase):
         scenarioset = set(scenario.id for scenario in scenarios)
         self.assertTrue(scenario1.id in scenarioset)
         self.assertTrue(scenario2.id in scenarioset)
+
+    def test_original_scenarios(self):
+        # Three scenarios; two are originally in project1,
+        # the other is originally in project2 and was added to project1.
+        # Function should return the first two.
+        scenario1 = ScenarioF.create()
+        scenario2 = ScenarioF.create()
+        scenario3 = ScenarioF.create()
+        project1 = ProjectF.create()
+        project2 = ProjectF.create()
+
+        scenario1.set_project(project1)
+        scenario2.set_project(project1)
+        scenario3.set_project(project2)
+        project1.add_scenario(scenario3)
+
+        scenarios = project1.original_scenarios()
+
+        self.assertEquals(scenarios.count(), 2)
+        scenarioset = set(scenario.id for scenario in scenarios)
+        self.assertTrue(scenario1.id in scenarioset)
+        self.assertTrue(scenario2.id in scenarioset)

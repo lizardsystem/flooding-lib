@@ -4,7 +4,7 @@ Changelog of flooding-lib
 2.0.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+Adds 'original_scenarios' method to models.Project.
 
 
 2.0.4 (2012-07-23)
