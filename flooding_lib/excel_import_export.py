@@ -130,6 +130,33 @@ def get_header_style_for(rownr, colnr, header):
     return xlwt.easyxf(pattern + 'align: wrap on, vertical top;')
 
 
+def write_domeinlijst(worksheet, column, header):
+    if not header['fieldtype'] == 'Select':
+        return False
+
+    try:
+        codes = ast.literal_eval(header['inputfield'].options)
+    except SyntaxError:
+        # If the options field doesn't contain a valid dictionary,
+        # we're going to skip this input field.
+        return False
+
+    if not isinstance(codes, dict):
+        return False
+
+    worksheet.write(0, column, "Code")
+    worksheet.write(0, column + 1, header['fieldname'])
+
+    for rownr, code in enumerate(sorted(codes)):
+        worksheet.write(rownr + 1, column, code)
+        worksheet.write(rownr + 1, column + 1, codes[code])
+
+    column_width = 30 * 256  # ~ 30 characters
+    worksheet.col(column + 1).width = column_width
+
+    return True
+
+
 def create_excel_file(project, filename=None):
     """Create an Excel file containing the data of this project."""
 
@@ -169,27 +196,9 @@ def create_excel_file(project, filename=None):
     worksheet = workbook.add_sheet("Domeinlijst definities")
     column = 0
     for header in headers:
-        if not header['fieldtype'] == 'Select':
-            continue
-
-        try:
-            codes = ast.literal_eval(header['inputfield'].options)
-        except ValueError:
-            # If the options field doesn't contain a valid dictionary,
-            # we're going to skip this input field.
-            continue
-
-        worksheet.write(0, column, "Code")
-        worksheet.write(0, column + 1, header['fieldname'])
-
-        for rownr, code in enumerate(sorted(codes)):
-            worksheet.write(rownr + 1, column, code)
-            worksheet.write(rownr + 1, column + 1, codes[code])
-
-        column_width = 30 * 256  # ~ 30 characters
-        worksheet.col(column + 1).width = column_width
-
-        column += 2
+        column_written = write_domeinlijst(worksheet, column, header)
+        if column_written:
+            column += 2
 
     if filename is not None:
         workbook.save(filename)

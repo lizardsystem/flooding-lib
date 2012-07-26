@@ -56,7 +56,10 @@ class TestCreateExcelFile(TestCase):
         self.assertEquals(workbook, None)
         self.assertFalse(os.path.exists(filename))
 
-    def test_writes_headers_to_sheet(self):
+    @mock.patch(
+        'flooding_lib.excel_import_export.FieldInfo.rows',
+        return_value=())
+    def test_writes_headers_to_sheet(self, rowmock):
         """Function should use the result of fieldinfo.headers() to
         write the header."""
         headers = [
@@ -70,8 +73,8 @@ class TestCreateExcelFile(TestCase):
             'flooding_lib.excel_import_export.FieldInfo.headers',
             return_value=headers):
             with mock.patch(
-                'flooding_lib.excel_import_export.FieldInfo.rows',
-                return_value=()):
+                'flooding_lib.excel_import_export.write_domeinlijst',
+                return_value=True):
                 project = ProjectF.create()
                 ScenarioF.create().set_project(project)
                 filename = '/tmp/testfile.xls'
@@ -266,3 +269,85 @@ class TestScenarioRow(TestCase):
             columns.next()  # Skip scenario id
             self.assertEquals(columns.next().value, unicode(field_value))
             patched.assert_called_with(inputfield)
+
+
+class TestGetHeaderStyleFor(TestCase):
+    def test_wraps(self):
+        """All header text should wrap"""
+        with mock.patch('xlwt.easyxf') as easyxf:
+            eie.get_header_style_for(0, 0, {})
+            self.assertTrue("wrap on" in easyxf.call_args[0][0])
+
+    def test_row_1_bold(self):
+        with mock.patch('xlwt.easyxf') as easyxf:
+            eie.get_header_style_for(1, 1, {})
+            self.assertTrue("bold on" in easyxf.call_args[0][0])
+
+    def test_row_2_not_bold(self):
+        with mock.patch('xlwt.easyxf') as easyxf:
+            eie.get_header_style_for(2, 1, {})
+            self.assertTrue("bold on" not in easyxf.call_args[0][0])
+
+    def test_required_is_orange(self):
+        with mock.patch('xlwt.easyxf') as easyxf:
+            eie.get_header_style_for(1, 1, {'required': True})
+            self.assertTrue("fore_color orange" in easyxf.call_args[0][0])
+
+    def test_not_required_is_light_yellow(self):
+        with mock.patch('xlwt.easyxf') as easyxf:
+            eie.get_header_style_for(1, 1, {'required': False})
+            self.assertTrue(
+                "fore_color light_yellow" in easyxf.call_args[0][0])
+
+
+class TestWriteDomeinlijst(TestCase):
+    def test_false_if_wrong_fieldtype(self):
+        self.assertFalse(eie.write_domeinlijst(
+                None, 0, {'fieldtype': 'String'}))
+
+    def test_one_inputfield_one_code(self):
+        worksheet = mock.MagicMock()
+
+        inputfield = InputFieldF.build(
+            type=InputField.TYPE_SELECT,
+            options=repr({1: "first line"}))
+
+        header = {
+            'fieldtype': 'Select',
+            'inputfield': inputfield,
+            'fieldname': 'Test'
+            }
+
+        self.assertTrue(eie.write_domeinlijst(worksheet, 0, header))
+
+        expected = [
+            mock.call(0, 0, "Code"),
+            mock.call(0, 1, "Test"),
+            mock.call(1, 0, 1),
+            mock.call(1, 1, "first line")]
+
+        self.assertEquals(worksheet.write.call_args_list, expected)
+
+    def test_false_at_incorrect_options(self):
+        inputfield = InputFieldF.build(
+            type=InputField.TYPE_SELECT,
+            options="not a dictionary at all!")
+
+        header = {
+            'fieldtype': 'Select',
+            'inputfield': inputfield
+            }
+
+        self.assertFalse(eie.write_domeinlijst(None, 0, header))
+
+    def test_a_string_isnt_a_dict(self):
+        inputfield = InputFieldF.build(
+            type=InputField.TYPE_SELECT,
+            options=repr("not a dictionary at all!"))
+
+        header = {
+            'fieldtype': 'Select',
+            'inputfield': inputfield
+            }
+
+        self.assertFalse(eie.write_domeinlijst(None, 0, header))

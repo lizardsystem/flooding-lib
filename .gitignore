@@ -10,3 +10,5 @@ nosetests.xml
 test.db
 .#*
 ignore
+.coverage
+htmlcov
