@@ -120,7 +120,7 @@ def get_header_style_for(rownr, colnr, header):
             color = 'light_yellow'
         pattern = """
             borders: top thin, bottom thin, left thin, right thin;
-            pattern: fore_color {}, pattern solid;""".format(color)
+            pattern: fore_color {0}, pattern solid;""".format(color)
     else:
         pattern = ""
 
