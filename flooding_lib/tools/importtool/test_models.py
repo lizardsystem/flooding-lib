@@ -30,14 +30,18 @@ class ImportScenarioInputFieldF(factory.Factory):
 class InputFieldF(factory.Factory):
     FACTORY_FOR = models.InputField
 
-    name = 'test'
-    header = models.InputField.HEADER_REMAINING
-    type = models.InputField.TYPE_STRING
-    position = 0
-
-
-DAYFLOAT_FROM_INTERVALSTRING =\
-    'flooding_lib.tools.importtool.models.get_dayfloat_from_intervalstring'
+    name = 'dummy'
+    header = models.InputField.HEADER_SCENARIO
+    import_table_field = ''
+    destination_table = ''
+    destination_field = ''
+    type = models.InputField.TYPE_INTEGER
+    options = ''
+    visibility_dependency_value = ''
+    excel_hint = ''
+    hover_text = ''
+    hint_text = ''
+    required = False
 
 
 class TestImportScenarioInputField(TestCase):
@@ -86,7 +90,7 @@ class TestImportScenarioInputField(TestCase):
 
     def testSetGetInterval(self):
         with mock.patch(
-            DAYFLOAT_FROM_INTERVALSTRING,
+      'flooding_lib.tools.importtool.models.get_dayfloat_from_intervalstring',
             new=mock.MagicMock(return_value=5.5)) as mocked_function:
             isif = self.get_resulting_isif(
                 models.InputField.TYPE_INTERVAL, 'test_interval', '5 d 10:30')
@@ -164,3 +168,30 @@ class TestInputField(TestCase):
         # them has the id ours has
         self.assertTrue(
             inputfield.id in (inpf.id for inpf in giffield['fields']))
+
+
+class TestDisplayValueUnicode(TestCase):
+    def test_none(self):
+        inputfield = InputFieldF()
+        self.assertEquals(inputfield.display_unicode(None), '')
+
+    def test_interval(self):
+        inputfield = InputFieldF.build(
+            type=models.InputField.TYPE_INTERVAL)
+        value_str = inputfield.display_unicode(2.5)
+        self.assertEquals(value_str, '2 d 12:00')
+
+    def test_unicode(self):
+        # Function used to be called display_string, then bugged on this...
+        s = (u"De EDO scenario\u2019s zijn opgesteld voor de landelijke "
+             u"voorbereiding op de gevolgen van overstromingen. Ze zijn "
+             u"ook input om de bovenregionale afstemming in de water- en "
+             u"openbare orde en veiligheid (OOV) sector vorm te geven.")
+
+        inputfield = InputFieldF.build(
+            type=models.InputField.TYPE_STRING)
+
+        try:
+            inputfield.display_unicode(s)
+        except UnicodeEncodeError:
+            self.fail("display_unicode() failed on a Unicode string.")

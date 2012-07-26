@@ -4,7 +4,55 @@ Changelog of flooding-lib
 2.0.5 (unreleased)
 ------------------
 
+Fixes problems with translating fields from importtool classes (fix:
+use ugettext_lazy instead of ugettext, call unicode() in some places).
+
 Adds 'original_scenarios' method to models.Project.
+
+Stops using eval() to parse the "options" part of an InputField;
+ast.literal_eval() is safer.
+
+Exporting Excel files mostly works:
+    The Excel file format is modelled after the existing format that is
+    used by the importtool, and its example Excel files.
+
+    There is a header (the first four rows of the file) and after that,
+    one row per scenario in the file.
+
+    In the header, the leftmost column is empty. Then, there is a column
+    for each inputfield of the importtool. These are group by header, as
+    in the importtool.
+
+    Row 1 holds the name of the header (this will be repeated through
+    several columns)
+
+    Row 2 holds the name of the field
+
+    Row 3 holds the type of the field
+
+    Row 4 holds the 'Excel hint' of the field.
+
+    Required fields will have all their text in bold. A field is required
+    if it has a "hint_text" containing *, ** or ***. This includes fields
+    that don't have "required == True". The reason is that this Excel
+    output/input functionality is right now only for updating old data,
+    and old data only contains "type 1" scenarios.
+
+    For each row after the header, column 1 will contain the scenario's
+    primary key ID field, and the other columns will have the scenario's
+    existing data for the field in that column, if any.
+
+    There will be one Excel file per project, and it will contain all the
+    scenarios for which that project is the main project. If there are no
+    such scenarios, there won't be an Excel file.
+
+See flooding_lib.excel_import_export.py and the excel_files_for_all_projects
+management command.
+
+Getting a value out of a scenario using an inputfield (for the infowindow and for
+Excel files) is now in Scenario.value_for_inputfield(). Turning a value into a
+displayable string is in InputField.display_unicode(value).
+
 
 
 2.0.4 (2012-07-23)

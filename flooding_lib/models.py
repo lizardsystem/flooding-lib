@@ -14,7 +14,7 @@ from treebeard.al_tree import AL_Node  # Adjacent list implementation
 from flooding_presentation.models import PresentationLayer, PresentationType
 from flooding_lib.tools.approvaltool.models import ApprovalObject
 from flooding_lib.tools.approvaltool.models import ApprovalObjectType
-
+from flooding_lib import coordinates
 
 logger = logging.getLogger(__name__)
 
@@ -780,6 +780,88 @@ class ExtraScenarioInfo(models.Model):
             return None
 
 
+def find_imported_value(fieldobject, data_objects):
+    """Given an InputField object, find its values within the data_objects.
+
+    InputFields know in what sort of objects they should be saved --
+    in a Scenario, in a Breach, etc. We know in which objects all the
+    information _was_ saved, the ones given in data_objects.
+
+    Also some special hacks:
+
+    - There are two InputFields that both store their info in Breach's
+      geom field: x location and y location. So we handle that
+      hardcoded here.
+
+    - To make that worse, we also need to translate the stored WGS84
+      coordinates to the RD we use for display.
+
+    - Fields that store in 'Result' are ignored because we do them
+      elsewhere.
+
+    - A value of '-999' is interpreted as 'not present', and changed
+      to None. So is '999'.
+
+    The result is returned.
+    """
+
+    #######
+    # Import it here because doing so at the top of the file is a
+    # cyclical import.
+    #######
+    from flooding_lib.tools.importtool.models import InputField
+
+    value = None
+    table = fieldobject.destination_table.lower()
+    field = fieldobject.destination_field
+    if table == 'extrascenarioinfo':
+        info = ExtraScenarioInfo.get(
+            scenario=data_objects['scenario'], fieldname=field)
+        if info is not None:
+            value = info.value
+
+        if value is not None:
+            value_type = fieldobject.type
+            if value_type in (InputField.TYPE_INTEGER,):
+                value = int(value)
+            elif value_type in (
+                InputField.TYPE_FLOAT, InputField.TYPE_INTERVAL):
+                value = float(value)
+            elif value_type in (
+                InputField.TYPE_STRING, InputField.TYPE_TEXT,
+                InputField.TYPE_DATE,
+                InputField.TYPE_SELECT):
+                pass  # Already a string -- yes, Select as well!
+            elif value_type in (InputField.TYPE_BOOLEAN,):
+                value = bool(value)
+            elif value_type in (InputField.TYPE_FILE,):
+                # Don't know what to do
+                value = None
+
+    elif table in data_objects:
+        value = getattr(data_objects[table], field, None)
+        if table == 'breach' and field == 'geom':
+            # Show in RD
+            x, y = coordinates.wgs84_to_rd(
+                value.x, value.y)
+
+            if fieldobject.name.lower().startswith('x'):
+                value = x
+            if fieldobject.name.lower().startswith('y'):
+                value = y
+    elif table == 'result':
+        # We do these differently
+        pass
+    else:
+        # Unknown table, show it
+        value = '{0}/{1}'.format(table, field)
+
+    if value in (u'-999', -999, -999.0, 999.0, 999, u'999'):
+        value = None
+
+    return value
+
+
 class Scenario(models.Model):
     """scenario properties:
 
@@ -1093,6 +1175,31 @@ class Scenario(models.Model):
         projects in the queryset project_list"""
 
         return cls.objects.filter(scenarioproject__project__in=project_list)
+
+    def value_for_inputfield(self, inputfield):
+        """Given an inputfield from the importtool, find where the
+        value corresponding to it was stored and return it."""
+        if not hasattr(self, '_data_objects'):
+            breaches = self.breaches.all()
+
+            if not breaches:
+                logger.critical(
+                    "Scenario {0} has no breaches!!".format(self.id))
+                return None
+
+            breach = breaches[0]
+            scenariobreach = self.scenariobreach_set.get(breach=breach)
+
+            self._data_objects = {
+                'scenario': self,
+                'project': self.main_project,
+                'scenariobreach': scenariobreach,
+                'breach': breach,
+                'externalwater': breach.externalwater,
+                'region': breach.region
+                }
+
+        return find_imported_value(inputfield, self._data_objects)
 
 
 class ScenarioProject(models.Model):

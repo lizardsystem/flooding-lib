@@ -1,3 +1,4 @@
+import ast
 import logging
 import os
 import os.path
@@ -7,7 +8,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.gis.db import models
 from django.utils import simplejson
-from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext_lazy as _
 
 from flooding_base.models import Setting
 from flooding_lib.dates import get_dayfloat_from_intervalstring
@@ -611,7 +612,6 @@ class InputField(models.Model):
         (HEADER_REMAINING, _('Remaining')),
         (HEADER_FILES, _('Files')),
     )
-
     name = models.CharField(max_length=200, unique=True)
     header = models.IntegerField(
         choices=HEADER_CHOICES, default=HEADER_REMAINING)
@@ -658,6 +658,36 @@ class InputField(models.Model):
         else:
             raise NotImplementedError(
                 "self.type has an unknown value (%s)" % (str(self.type),))
+
+    def display_unicode(self, value, for_viewing_only=False):
+        """Take a value and format it for output use. The way to
+        display it depends on the type of the inputfield (e.g. a float
+        and an date interval are both floats, but displayed very
+        differently).
+
+        Note: this function is used for scenarios that are _already
+        imported_, not for the to-be-imported scenarios here in
+        importtool. So we can't use the IntervalValue etc classes
+        above.
+
+        If for_viewing_only is True, we can do some more conversions
+        that aren't possible in cases where the displayed value has to
+        be imported again (like in Excel files). It means that we can expand
+        'select' input fields.
+        """
+
+        if value is None:
+            return u''
+
+        if self.type == InputField.TYPE_INTERVAL:
+            return unicode(get_intervalstring_from_dayfloat(value))
+
+        if for_viewing_only and self.type == InputField.TYPE_SELECT:
+            options = ast.literal_eval(self.options)
+            if value in options:
+                return unicode(options[value])
+
+        return unicode(value)
 
     def get_or_create_value_object(self, importscenario_inputfield):
         value_object, _ = self.value_class.objects.get_or_create(
@@ -782,7 +812,9 @@ class InputField(models.Model):
         for header_id, header_title in cls.HEADER_CHOICES:
             header_listposition_map[header_id] = len(form_fields)
             form_fields.append(
-                {'id': header_id, 'title': header_title, 'fields': []})
+                {'id': header_id,
+                 'title': unicode(header_title),
+                 'fields': []})
 
         fields = cls.objects.all().order_by('-position')
 

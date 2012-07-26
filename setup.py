@@ -25,6 +25,7 @@ install_requires = [
     'factory-boy',
     'mock',
     'xlrd',
+    'xlwt',
 #    'pyproj', # We do need it, but requiring it doesn't work well
     ],
 
@@ -51,7 +52,7 @@ setup(name='flooding-lib',
       zip_safe=False,
       install_requires=install_requires,
       tests_require=tests_require,
-      extras_require = {'test': tests_require},
+      extras_require={'test': tests_require},
       entry_points={
           'console_scripts': [
           ]},

@@ -14,13 +14,10 @@ from django.shortcuts import render_to_response
 from django.utils.safestring import SafeString
 from django.utils.translation import ugettext_lazy as _, ungettext, ugettext
 
-from flooding_lib import coordinates
-from flooding_lib.dates import get_intervalstring_from_dayfloat
 from flooding_lib.forms import AttachmentForm
 from flooding_lib.forms import EditScenarioPropertiesForm
 from flooding_lib.forms import ScenarioNameRemarksForm
 from flooding_lib.models import Attachment
-from flooding_lib.models import ExtraScenarioInfo
 from flooding_lib.models import Scenario
 from flooding_lib.models import ScenarioBreach
 from flooding_lib.models import SobekModel
@@ -89,97 +86,7 @@ def infowindow(request):
         return showattachments(request, scenario_id)
 
 
-def find_imported_value(fieldobject, data_objects):
-    """Given an InputField object, find its values within the data_objects.
-
-    InputFields know in what sort of objects they should be saved --
-    in a Scenario, in a Breach, etc. We know in which objects all the
-    information _was_ saved, the ones given in data_objects.
-
-    Also some special hacks:
-
-    - There are two InputFields that both store their info in Breach's
-      geom field: x location and y location. So we handle that
-      hardcoded here.
-
-    - To make that worse, we also need to translate the stored WGS84
-      coordinates to the RD we use for display.
-
-    - Fields that store in 'Result' are ignored because we do them
-      elsewhere.
-
-    - A value of '-999' is interpreted as 'not present', and changed
-      to None. So is '999'.
-
-    The result is returned.
-    """
-
-    value = None
-    table = fieldobject.destination_table.lower()
-    field = fieldobject.destination_field
-    if table == 'extrascenarioinfo':
-        info = ExtraScenarioInfo.get(
-            scenario=data_objects['scenario'], fieldname=field)
-        if info is not None:
-            value = info.value
-
-        if value is not None:
-            value_type = fieldobject.type
-            if value_type in (InputField.TYPE_INTEGER,):
-                value = int(value)
-            elif value_type in (
-                InputField.TYPE_FLOAT, InputField.TYPE_INTERVAL):
-                value = float(value)
-            elif value_type in (
-                InputField.TYPE_STRING, InputField.TYPE_TEXT,
-                InputField.TYPE_DATE,
-                InputField.TYPE_SELECT):
-                pass  # Already a string -- yes, Select as well!
-            elif value_type in (InputField.TYPE_BOOLEAN,):
-                value = bool(value)
-            elif value_type in (InputField.TYPE_FILE,):
-                # Don't know what to do
-                value = None
-
-    elif table in data_objects:
-        value = getattr(data_objects[table], field, None)
-        if table == 'breach' and field == 'geom':
-            # Show in RD
-            x, y = coordinates.wgs84_to_rd(
-                value.x, value.y)
-
-            if fieldobject.name.lower().startswith('x'):
-                value = x
-            if fieldobject.name.lower().startswith('y'):
-                value = y
-    elif table == 'result':
-        # We do these differently
-        pass
-    else:
-        # Unknown table, show it
-        value = '{0}/{1}'.format(table, field)
-
-    if value in (u'-999', -999, -999.0, 999.0, 999, u'999'):
-        value = None
-
-    return value
-
-
-def display_unicode(inputfield, value):
-    """Take a value and format it for output use. The wait to display it
-    depends on the type of the inputfield (e.g. a float and an date interval
-    are both floats, but displayed very differently)."""
-
-    if value is None:
-        return u''
-
-    if inputfield.type == InputField.TYPE_INTERVAL:
-        return unicode(get_intervalstring_from_dayfloat(value))
-
-    return unicode(value)
-
-
-def extra_infowindow_information_fields(header_title, data_objects):
+def extra_infowindow_information_fields(header_title, scenario):
     class dummy_field(object):
         pass
 
@@ -192,18 +99,21 @@ def extra_infowindow_information_fields(header_title, data_objects):
     if header_title in ('Scenario', ugettext('Scenario')):
         scenarioid = dummy_field()
         scenarioid.name = _('Scenario ID')
-        scenarioid.value_str = str(data_objects['scenario'].id)
+        scenarioid.value_str = str(scenario.id)
         return (scenarioid,)
 
     if header_title in ('External Water', ugettext('External Water')):
         graphurl = dummy_field()
-        if len(data_objects['scenariobreach'].
+        breach = scenario.breaches.all()[0]
+        scenariobreach = scenario.scenariobreach_set.get(breach=breach)
+
+        if len(scenariobreach.
                waterlevelset.waterlevel_set.all()) > 0:
             image_src = (
                 reverse('flooding_service') +
                 "?action=get_externalwater_graph_infowindow&width=350&" +
                 "height=400&scenariobreach_id=" +
-                str(data_objects['scenariobreach'].id))
+                str(scenariobreach.id))
             graphurl.name = _('External water graph')
             graphurl.value_str = SafeString('<img src="' + image_src +
                                             ' " width=350 height=400/>')
@@ -234,22 +144,11 @@ def infowindow_information(scenario):
 
     grouped_input_fields = InputField.grouped_input_fields()
 
-    breach = scenario.breaches.all()[0]
-    scenariobreach = scenario.scenariobreach_set.get(breach=breach)
-
-    data_objects = {
-        'scenario': scenario,
-        'project': scenario.main_project,
-        'scenariobreach': scenariobreach,
-        'breach': breach,
-        'externalwater': breach.externalwater,
-        'region': breach.region
-        }
-
     for header in grouped_input_fields:
         for inputfield in header['fields']:
-            value = find_imported_value(inputfield, data_objects)
-            value_str = display_unicode(inputfield, value)
+            value = scenario.value_for_inputfield(inputfield)
+            value_str = inputfield.display_unicode(
+                value, for_viewing_only=True)
 
             # Set the value_str on the inputfield object for easy
             # use in the template.
@@ -261,7 +160,7 @@ def infowindow_information(scenario):
     # Add in scenario id under the 'scenario' header
     for header in grouped_input_fields:
         header['fields'] += extra_infowindow_information_fields(
-            header['title'], data_objects)
+            header['title'], scenario)
 
     # Only keep headers with fields
     grouped_input_fields = [h for h in grouped_input_fields if h['fields']]
