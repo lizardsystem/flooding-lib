@@ -2,6 +2,7 @@
 import functools
 import logging
 
+from django.views import generic
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group
 from django.db.models import Q
@@ -15,9 +16,23 @@ log = logging.getLogger('permission_manager')
 def receives_permission_manager(view):
     """Decorator that wraps a function that receives a request as its first
     argument, creates a permission manager using request.user, and passes it
-    as second argument to the function."""
+    as second argument to the function.
+
+    Hack: if the first argument is an instance of a Django class-based
+    view, we assume that the _second_ argument is request and function
+    as a method decorator."""
     @functools.wraps(view)
-    def wrapper(request, *args, **kwargs):
+    def wrapper(*args, **kwargs):
+        args = list(args)
+        request = args.pop(0)
+
+        if isinstance(request, generic.View):
+            self = request
+            request = args.pop(0)
+            permission_manager = get_permission_manager(request.user)
+            return view(
+                self, request, permission_manager, *args, **kwargs)
+
         permission_manager = get_permission_manager(request.user)
         return view(request, permission_manager, *args, **kwargs)
 

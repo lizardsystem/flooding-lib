@@ -79,3 +79,8 @@ class AttachmentForm(forms.Form):
 class EditScenarioPropertiesForm(forms.Form):
     animation_start = forms.IntegerField(
         label=_('Start animation'), min_value=0)
+
+
+class ExcelImportForm(forms.Form):
+    excel_file = forms.FileField(
+        label=_('Upload the modified Excel file to update the scenarios'))

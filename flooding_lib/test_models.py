@@ -36,6 +36,10 @@ class AttachmentF(factory.Factory):
     object_id = 1
 
 
+class SobekVersionF(factory.Factory):
+    FACTORY_FOR = models.SobekVersion
+
+
 class ExtraInfoFieldF(factory.Factory):
     FACTORY_FOR = models.ExtraInfoField
 
@@ -170,6 +174,18 @@ class TestAttachment(TestCase):
 
         self.assertEquals(
             attachment.filename, filename)
+
+    def test_has_unicode(self):
+        """Check that with __unicode__ returns is in fact unicode."""
+        attachment = AttachmentF(name=u"some name")
+        self.assertEquals(type(attachment.__unicode__()), unicode)
+
+
+class TestSobekVersion(TestCase):
+    def test_has_unicode(self):
+        """Check that with __unicode__ returns is in fact unicode."""
+        attachment = SobekVersionF(name=u"some name")
+        self.assertEquals(type(attachment.__unicode__()), unicode)
 
 
 class TestScenario(TestCase):

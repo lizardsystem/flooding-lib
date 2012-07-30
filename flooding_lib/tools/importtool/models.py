@@ -694,6 +694,9 @@ class InputField(models.Model):
             importscenario_inputfield=importscenario_inputfield)
         return value_object
 
+    def build_value_object(self):
+        return self.value_class()
+
     def get_editor_dict(self):
 
         item = {
@@ -825,3 +828,14 @@ class InputField(models.Model):
              append(field))
 
         return form_fields
+
+    @property
+    def ignore_in_scenario_excel_files(self):
+        """In scenario import/export excel files, we only want to read
+        fields that are related to the scenario (destination table is
+        scenario, extrascenarioinfo or scenariobreach) and that make
+        sense to import this way (files represented by just a string
+        are useless)."""
+        return ((self.destination_table.lower() not in (
+                    'scenario', 'scenariobreach', 'extrascenarioinfo')) or
+                (self.type == InputField.TYPE_FILE))

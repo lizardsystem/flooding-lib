@@ -1,7 +1,7 @@
 from setuptools import setup
 import os.path
 
-version = '2.1dev'
+version = '2.2dev'
 
 long_description = '\n\n'.join([
     open('README.txt').read(),
@@ -26,6 +26,7 @@ install_requires = [
     'mock',
     'xlrd',
     'xlwt',
+    'lizard_ui',
 #    'pyproj', # We do need it, but requiring it doesn't work well
     ],
 

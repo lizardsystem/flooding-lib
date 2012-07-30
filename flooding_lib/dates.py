@@ -14,7 +14,9 @@ def get_intervalstring_from_dayfloat(dayfloat):
     hoursfloat = (dayfloat - days) * 24
     hours = int(math.floor(hoursfloat))
     minutesfloat = (hoursfloat - hours) * 60
-    minutes = int(math.floor(minutesfloat))
+    minutes = int(math.floor(minutesfloat) + 0.5)  # Add 0.5 to avoid
+                                                   # unfortunate
+                                                   # rounding
 
     return "%d d %02d:%02d" % (days, hours, minutes)
 

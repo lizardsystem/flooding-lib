@@ -34,14 +34,34 @@ such scenarios, there won't be an Excel file.
 """
 
 import ast
+import logging
+import xlrd
 import xlwt
 
+from itertools import izip
+
+from django.db import transaction
+
 from flooding_lib.tools.importtool.models import InputField
+from flooding_lib.models import Scenario
+
+SCENARIO_DATA_WORKSHEET = "Scenario data"
+
+HEADER_ROWS = 4
+
+logger = logging.getLogger(__name__)
 
 
 class Cell(object):
-    def __init__(self, value):
+    def __init__(self, value, pattern=''):
         self.value = value
+        self.style = xlwt.easyxf(pattern)
+
+    def __repr__(self):
+        return unicode(self)
+
+    def __unicode__(self):
+        return u"Cell({0}) with style '{1}'".format(self.value, self.style)
 
 
 class ScenarioRow(object):
@@ -53,14 +73,18 @@ class ScenarioRow(object):
     def columns(self):
         # The first column is the scenario id, there is no input field for that
         # Skip the first column in headers
+        default_pattern = 'font: bold off; align: wrap on, vertical top;'
+
         self.headers.next()
-        yield Cell(self.scenario.id)  # Yield the value
+        yield Cell(self.scenario.id, default_pattern)  # Yield the value
 
         for header in self.headers:
             inputfield = header['inputfield']
             value = self.scenario.value_for_inputfield(inputfield)
+
             value_unicode = inputfield.display_unicode(value)
-            yield Cell(value_unicode)
+
+            yield Cell(value_unicode, default_pattern)
 
 
 class FieldInfo(object):
@@ -68,14 +92,20 @@ class FieldInfo(object):
         self.scenariolist = list(scenariolist)
 
     def add_extra_header_fields(self, header):
-        header['fieldname'] = header['inputfield'].name
-        header['fieldhint'] = header['inputfield'].excel_hint
-        header['required'] = '*' in header['inputfield'].hint_text
+        inputfield = header['inputfield']
 
-        for typeid, description in InputField.TYPE_CHOICES:
-            if typeid == header['inputfield'].type:
-                header['fieldtype'] = unicode(description)
-                break
+        header['fieldname'] = inputfield.name
+        header['fieldhint'] = inputfield.excel_hint
+        header['required'] = '*' in inputfield.hint_text
+        header['ignore'] = inputfield.ignore_in_scenario_excel_files
+
+        if header['ignore']:
+            header['fieldtype'] = u'(veld kan niet aangepast worden)'
+        else:
+            for typeid, description in InputField.TYPE_CHOICES:
+                if typeid == inputfield.type:
+                    header['fieldtype'] = unicode(description)
+                    break
 
         return header
 
@@ -114,7 +144,9 @@ def filename_for_project(project):
 
 def get_header_style_for(rownr, colnr, header):
     if colnr > 0 and rownr > 0:
-        if header.get('required', False):
+        if header.get('ignore', False):
+            color = 'gray25'
+        elif header.get('required', False):
             color = 'orange'
         else:
             color = 'light_yellow'
@@ -160,12 +192,16 @@ def write_domeinlijst(worksheet, column, header):
 def create_excel_file(project, filename=None):
     """Create an Excel file containing the data of this project."""
 
+    logger.debug(("Starting create_excel_file. Project id is {0}, "
+                 "filename is '{1}'.").format(project.id, filename))
+
     scenarios = project.original_scenarios()
     if not scenarios.count():
+        logger.debug("There are no scenarios in this project.")
         return None
 
     workbook = xlwt.Workbook(encoding='utf-8')
-    worksheet = workbook.add_sheet("Scenario data")
+    worksheet = workbook.add_sheet(SCENARIO_DATA_WORKSHEET)
 
     fieldinfo = FieldInfo(scenarios)
 
@@ -190,7 +226,9 @@ def create_excel_file(project, filename=None):
     # Write data
     for rownr, row in enumerate(fieldinfo.rows()):
         for colnr, cell in enumerate(row.columns()):
-            worksheet.write(len(header_fields) + rownr, colnr, cell.value)
+            if cell.value:
+                worksheet.write(
+                    len(header_fields) + rownr, colnr, cell.value, cell.style)
 
     # Domeinlijst definities
     worksheet = workbook.add_sheet("Domeinlijst definities")
@@ -201,6 +239,153 @@ def create_excel_file(project, filename=None):
             column += 2
 
     if filename is not None:
+        logger.debug("Saving workbook...")
         workbook.save(filename)
 
     return workbook
+
+
+def get_scenario_worksheet(path):
+    worksheet = xlrd.open_workbook(path).sheet_by_name(SCENARIO_DATA_WORKSHEET)
+    return worksheet
+
+
+def import_uploaded_excel_file(path):
+    """Check and import the Excel file. The whole operation is wrapped
+    in a database transaction, so that any problems won't change the
+    database. Returns a list of error messages; an empty list
+    indicates success."""
+
+    worksheet = get_scenario_worksheet(path)
+    header_titles = tuple(cell.value for cell in worksheet.row(1))
+
+    errors = []
+
+    class DummyException(Exception):
+        pass
+
+    try:
+        with transaction.commit_on_success():
+            header, header_errors = import_header(header_titles)
+
+            if header_errors:
+                errors += header_errors
+                raise DummyException()
+
+            for rownr in range(HEADER_ROWS, worksheet.nrows):
+                row_errors = import_scenario_row(
+                    header, rownr, worksheet.row(rownr))
+
+                if row_errors:
+                    errors += row_errors
+
+            if errors:
+                raise DummyException()
+    except DummyException:
+        pass
+
+    return errors
+
+
+class ImportedHeader(object):
+    """After importing, we want to know which field is where. This
+    class stores that information; call __getitem__ with a column
+    number and it will return an InputField, if any. Also, the class
+    can be iterated over and it will return InputFields in turn."""
+
+    class HeaderException(Exception):
+        def __init__(self, message):
+            self.message = message
+
+    def __init__(self, fields=None):
+        if fields is None:
+            fields = {}
+
+        self._fields = fields
+
+    def find_field_by_name(self, colnr, fieldname):
+        """If colnr >= 1, tries to find an InputField that corresponds to
+        the given name. Checks that fields do not occur twice. Keeps
+        track of which field is where.
+
+        Returns None if colnr is 0, because there won't be a field
+        there.  Raises an exception with an appropriate error message
+        in other cases."""
+        if colnr == 0:
+            return None
+
+        try:
+            field = InputField.objects.get(name=fieldname)
+        except InputField.DoesNotExist:
+            raise self.HeaderException(
+                "Veld met naam {0} niet gevonden.".format(fieldname))
+
+        if field in self._fields.values():
+            raise self.HeaderException(
+                "Veld met naam {0} komt twee keer voor.".format(fieldname))
+
+        self._fields[colnr] = field
+        return field
+
+    def __getitem__(self, column):
+        return self._fields[column]
+
+    def __iter__(self):
+        last_value = max(self._fields)
+        i = 1
+        while i <= last_value:
+            yield self._fields.get(i, None)
+            i += 1
+
+
+def import_header(header_titles):
+    errors = []
+    header = ImportedHeader()
+
+    for column, title in enumerate(header_titles):
+        try:
+            header.find_field_by_name(column, title)
+        except ImportedHeader.HeaderException as e:
+            errors.append(e.message)
+
+    return header, errors
+
+
+def import_scenario_row(header, rownr, row):
+    if not row:
+        return []
+
+    try:
+        scenarioidcell = row[0]
+        scenarioid = int(scenarioidcell.value)
+    except ValueError:
+        return ["Op regel {0} geen scenarionummer gevonden.".format(rownr)]
+
+    try:
+        scenario = Scenario.objects.get(pk=scenarioidcell.value)
+    except Scenario.DoesNotExist:
+        return ["Regel {0}: onbekend scenarionummer {1}.".
+                format(rownr, scenarioid)]
+
+    fieldvalues = row[1:]
+
+    errors = []
+    for cell, inputfield in izip(fieldvalues, header):
+        if inputfield.ignore_in_scenario_excel_files:
+            # InputField is of a type that can't be changed with this
+            # import (e.g., properties of the Project or Region)
+            continue
+
+        if not cell.value:
+            # Nothing filled in. Skip.
+            continue
+
+        value_object = inputfield.build_value_object()
+
+        try:
+            value_object.set(cell.value)
+        except ValueError as ve:
+            errors.append("Regel {0}: {1}.".format(rownr, ve))
+        scenario.set_value_for_inputfield(inputfield, value_object)
+
+    return errors

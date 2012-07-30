@@ -2,6 +2,7 @@ from django.conf.urls.defaults import patterns, url, include
 from django.conf import settings
 from django.contrib import databrowse
 
+from flooding_lib import views
 from flooding_lib.models import Project
 
 info_dict = {
@@ -167,11 +168,18 @@ urlpatterns = patterns(
         'flooding_lib.views_dev.service_result',
         name='flooding_service_result'),
 
-    #url(r'^floodingsa/$',
-    #    'flooding_lib.views.service_get_dict_for_lizardsa'),
+    url(r'^excel/$',
+        views.ExcelImportExportView.as_view(),
+        name='flooding_excel_import_export'),
 
+    url(r'^excel/(?P<project_id>\d+)/$',
+        views.ExcelImportExportViewProject.as_view(),
+        name='flooding_excel_import_export_project'),
 
-)
+    # Note no $ at the end, we want to add the filename
+    url(r'^excel/(?P<project_id>\d+)/',
+        'flooding_lib.views.excel_download',
+        name='flooding_excel_download'))
 
 
 if settings.DEBUG:

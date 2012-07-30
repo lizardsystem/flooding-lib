@@ -1,8 +1,22 @@
 Changelog of flooding-lib
 ===================================================
 
-2.0.5 (unreleased)
-------------------
+2.2 (unreleased)
+----------------
+
+Work on Excel import/export.
+
+Started styling data cells in the Excel file (turned wrap on). To do: styling of dates.
+
+Only InputFields relating directly to the current scenario (Scenario,
+ScenarioBreach, ExtraScenarioInfo) will be imported. Other fields
+(e.g. from Project) will be shown with gray headers for reference in
+the Excel file, but ignored by the import.
+
+Screens from exporting and importing Excel screens have been further improved.
+
+2.1 (2012-07-26)
+----------------
 
 Fixes problems with translating fields from importtool classes (fix:
 use ugettext_lazy instead of ugettext, call unicode() in some places).
@@ -53,7 +67,7 @@ Getting a value out of a scenario using an inputfield (for the infowindow and fo
 Excel files) is now in Scenario.value_for_inputfield(). Turning a value into a
 displayable string is in InputField.display_unicode(value).
 
-
+Added a simple view for exporting Excel files.
 
 2.0.4 (2012-07-23)
 ------------------

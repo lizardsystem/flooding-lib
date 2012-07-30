@@ -4,18 +4,26 @@ import flooding_lib.util.csvutil
 import datetime
 import logging
 import os
+import platform
 
-from django.conf import settings
-from django.core.paginator import Paginator
-from django.core.urlresolvers import reverse
-from django.db.models import Q
-from django.http import HttpResponse, Http404, HttpResponseRedirect
-from django.shortcuts import render_to_response, get_object_or_404
-from django.utils.translation import ugettext as _
-from django.views.static import serve
 import Image
 import ImageDraw
 
+from django.conf import settings
+from django.core.exceptions import PermissionDenied
+from django.core.paginator import Paginator
+from django.core.urlresolvers import reverse
+from django.db.models import Q
+from django.db.models import Count
+from django.http import HttpResponse, Http404, HttpResponseRedirect
+from django.shortcuts import render_to_response, get_object_or_404
+from django.utils.translation import ugettext as _
+from django.views.generic import TemplateView
+from django.views.static import serve
+
+import lizard_ui.views
+
+from flooding_base.models import Text
 from flooding_lib.models import (Project, UserPermission, Scenario,
     Region, RegionSet, Breach, ScenarioCutoffLocation, ScenarioBreach, Result,
     ResultType, Task, TaskType, SobekModel)
@@ -25,6 +33,8 @@ from flooding_lib.forms import ScenarioNameRemarksForm
 from flooding_lib.permission_manager import receives_permission_manager
 from flooding_lib.permission_manager import \
     receives_loggedin_permission_manager
+from flooding_lib import forms
+from flooding_lib import excel_import_export
 
 logger = logging.getLogger(__name__)
 
@@ -1379,4 +1389,119 @@ def result_download(request, result_id):
     # to determine it.
     response['Content-Type'] = ''
 
+    return response
+
+
+class ExcelImportExportView(lizard_ui.views.ViewContextMixin, TemplateView):
+    template_name = "flooding/excel_import_export.html"
+
+    @receives_permission_manager
+    def get(self, request, permission_manager):
+        self.permission_manager = permission_manager
+
+        return super(ExcelImportExportView, self).get(request)
+
+    def title(self):
+        return Text.get(slug="excel_import_export_title")
+
+    def summary(self):
+        return Text.get(slug="excel_import_export_summary")
+
+    def projects(self):
+        """Return only those projects in which the current user has
+        approval rights, and in which there is at least one
+        scenario."""
+        return self.permission_manager.get_projects(
+            permission=UserPermission.PERMISSION_SCENARIO_APPROVE).annotate(
+            num_scenarios=Count('scenarioproject')).filter(
+                    num_scenarios__gt=0)
+
+
+class ExcelImportExportViewProject(
+    lizard_ui.views.ViewContextMixin, TemplateView):
+    template_name = "flooding/excel_import_export_project.html"
+
+    @receives_permission_manager
+    def get(self, request, permission_manager, project_id):
+        self.form = forms.ExcelImportForm()
+        self.project_id = project_id
+
+        return super(ExcelImportExportViewProject, self).get(request)
+
+    @receives_permission_manager
+    def post(self, request, permission_manager, project_id):
+        self.form = forms.ExcelImportForm(request.POST, request.FILES)
+        self.project_id = project_id
+        self.excel_errors = []
+        if self.form.is_valid():
+            # Move file
+            filename = request.FILES['excel_file'].name
+            expected = self.project().excel_filename()
+            if filename != expected:
+                self.excel_error(
+                    'Wrong filename, expected "{0}".'.format(expected))
+            else:
+                dest_path = os.path.join('/tmp/', expected)
+                with open(dest_path, 'wb') as dest:
+                    for chunk in request.FILES['excel_file'].chunks():
+                        dest.write(chunk)
+
+                # Check it
+                errors = excel_import_export.import_uploaded_excel_file(
+                    dest_path)
+
+                # If successful, redirect
+                if not errors:
+                    return HttpResponseRedirect(
+                        reverse(
+                            'flooding_excel_import_export_project',
+                            kwargs={'project_id':self.project_id}))
+
+                self.excel_errors += errors
+
+        return super(ExcelImportExportViewProject, self).get(request)
+
+    def excel_error(self, message):
+        self.excel_errors.append(message)
+
+    def project(self):
+        if not hasattr(self, '_project'):
+            self._project = get_object_or_404(Project, pk=self.project_id)
+        return self._project
+
+
+@receives_loggedin_permission_manager
+def excel_download(request, permission_manager, project_id):
+    project = get_object_or_404(Project, pk=project_id)
+
+    if not permission_manager.check_project_permission(
+        project, UserPermission.PERMISSION_SCENARIO_APPROVE):
+        raise PermissionDenied()
+
+    filename = project.excel_filename()
+    directory = os.path.join(settings.BUILDOUT_DIR, "var", "excel")
+    full_path = os.path.join(directory, filename)
+    nginx_path = os.path.join('/download_excel', filename)
+
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    from flooding_lib import excel_import_export
+    excel_import_export.create_excel_file(project, full_path)
+
+    response = HttpResponse()
+    response['X-Sendfile'] = full_path  # Apache
+    response['X-Accel-Redirect'] = nginx_path  # Nginx
+
+    # Unset the Content-Type as to allow for the webserver
+    # to determine it.
+    response['Content-Type'] = ''
+
+    # Only works for Apache and Nginx, under Linux right now
+    if settings.DEBUG or not platform.system() == 'Linux':
+        logger.debug(
+            "With DEBUG off, we'd serve the programfile via webserver: \n%s",
+            response)
+        return serve(request, full_path, '/')
+    logger.debug("Serving programfile %s via webserver.", full_path)
     return response

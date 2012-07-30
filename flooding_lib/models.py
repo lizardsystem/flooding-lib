@@ -60,7 +60,7 @@ class Attachment(models.Model):
         db_table = 'flooding_attachment'
 
     def __unicode__(self):
-        return self.name
+        return unicode(self.name)
 
     @property
     def filename(self):
@@ -77,13 +77,8 @@ class SobekVersion(models.Model):
     name = models.CharField(max_length=200)
     fileloc_startfile = models.CharField(max_length=200)
 
-    '''
-    #is waarschijnlijk niet nodig
-    startfile = models.TextField()
-    '''
-
     def __unicode__(self):
-        return self.name
+        return unicode(self.name)
 
 
 class SobekModel(models.Model):
@@ -641,6 +636,11 @@ class Project(models.Model):
         return Scenario.objects.filter(
             scenarioproject__project=self,
             scenarioproject__is_main_project=True)
+
+    def excel_filename(self):
+        name = self.name.replace("""*<>[]=+"'/\\,.:;""", '')
+
+        return "{0} {1}.xls".format(self.id, name)
 
 
 class UserPermission(models.Model):

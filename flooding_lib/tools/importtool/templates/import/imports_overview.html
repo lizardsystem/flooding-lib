@@ -1,7 +1,7 @@
 {% extends "lizard/base.html" %}
 {% load i18n %}
-{% block title %}Lizard import tool{% endblock %}		
-{% block stylesheets %}	
+{% block title %}Lizard import tool{% endblock %}
+{% block stylesheets %}
 		<link rel="shortcut icon" href="{{ url_favicon }}">
 		<link href="{% url root_url %}static_media/style/style.css" media="screen" type="text/css" rel="stylesheet">
 		<link href="{% url root_url %}static_media/style/forms.css" media="screen" type="text/css" rel="stylesheet">
@@ -13,7 +13,7 @@
 		<h1>
 		{% trans "Overview" %}
 		</h1>
-		
+
 		<table class="timeseriesWrapper"><tr><td>
 			<table class="timeseries" summary="timeseries">
 				<thead class="headerTitle">
@@ -29,7 +29,7 @@
 				</thead>
 				<tbody>
 				{% if import_scenarios_list %}
-			 		{% for import_scenario in import_scenarios_list %}	        
+			 		{% for import_scenario in import_scenarios_list %}
 					    <tr class="{% cycle 'cellDark' 'cell'%}">
 				    		<td>{{import_scenario.0|date:"d-m-Y"}}</td>
 				    		<td><a href="{% url flooding_tools_import_verify import_scenario.1%}" >{{import_scenario.2}}</a></td>
@@ -39,17 +39,19 @@
 				    		<td>{{import_scenario.6}}</td>
 				    		{% if has_approve_rights %}
 				    			<td><a href="{% url flooding_tools_import_approve import_scenario.1%}" >keuren</a></td>
-				    		{% endif %}				    		
-				    	</tr>	     
+				    		{% endif %}
+				    	</tr>
 			    	{% endfor %}
 			    {% else %}
 			       <tr class='cellDark'><td COLSPAN=6> - </td></tr>
-			    {% endif %} 
-			    </tbody>   
+			    {% endif %}
+			    </tbody>
 			</table>
 		</table>
-		<BR>
+		<br>
 		<a href="{%url flooding_tools_import_new %}" >{% trans "Import new scenario" %}</a>
-		<BR>
-		<a href="{%url flooding_tools_import_group %}" >{% trans "Import groep scenario's" %}</a>	
+		<br>
+		<a href="{%url flooding_tools_import_group %}" >{% trans "Import groep scenario's" %}</a>
+                <br>
+		<a href="{%url flooding_excel_import_export %}">Exporteer of importeer metadata update bestaande scenario's</a>
 {% endblock content %}

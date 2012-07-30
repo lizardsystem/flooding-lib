@@ -13,12 +13,6 @@ from flooding_lib.tools.importtool.models import InputField
 from flooding_lib.tools.importtool.test_models import InputFieldF
 
 
-class FakeObject(object):
-    def __init__(self, **kwargs):
-        for k, v in kwargs.items():
-            setattr(self, k, v)
-
-
 class TestCreateExcelFile(TestCase):
     def test_creates_file(self):
         """If called with a project, TestCreateExcelFile creates an
@@ -96,7 +90,8 @@ class TestCreateExcelFile(TestCase):
                 os.remove(filename)
 
     def test_writes_data_to_sheet(self):
-        the_cells = (FakeObject(value='2'), FakeObject(value='3'))
+        the_cells = (eie.Cell(value='2', pattern=''),
+                     eie.Cell(value='3', pattern=''))
 
         class Row(object):
             def columns(self):
@@ -172,7 +167,9 @@ class TestFieldInfo(TestCase):
 
         activate('nl')
 
-        inputfield = InputFieldF(type=InputField.TYPE_DATE)
+        inputfield = InputFieldF(
+            type=InputField.TYPE_DATE,
+            destination_table='Scenario')
         fieldinfo = eie.FieldInfo([])
 
         header = fieldinfo.add_extra_header_fields({
@@ -181,6 +178,22 @@ class TestFieldInfo(TestCase):
         self.assertEquals(header['fieldtype'], u'Datum')
 
         deactivate()
+
+    def test_add_extra_header_fields_type_ignored(self):
+        """If an inputfield is ignored, we place a notice in the type field"""
+        activate('nl')
+
+        inputfield = InputFieldF(
+            type=InputField.TYPE_DATE,
+            destination_table='Project')
+        fieldinfo = eie.FieldInfo([])
+
+        header = fieldinfo.add_extra_header_fields({
+                'inputfield': inputfield})
+
+        # Field type contains a text within ( )
+        self.assertTrue(header['fieldtype'].startswith('(') and
+                        header['fieldtype'].endswith(')'))
 
     def test_add_extra_header_fields_hint(self):
         """header['fieldhint'] should be equal to the field's excel hint."""
@@ -288,6 +301,11 @@ class TestGetHeaderStyleFor(TestCase):
             eie.get_header_style_for(2, 1, {})
             self.assertTrue("bold on" not in easyxf.call_args[0][0])
 
+    def test_ignored_is_gray(self):
+        with mock.patch('xlwt.easyxf') as easyxf:
+            eie.get_header_style_for(1, 1, {'ignore': True})
+            self.assertTrue("fore_color gray" in easyxf.call_args[0][0])
+
     def test_required_is_orange(self):
         with mock.patch('xlwt.easyxf') as easyxf:
             eie.get_header_style_for(1, 1, {'required': True})
@@ -351,3 +369,204 @@ class TestWriteDomeinlijst(TestCase):
             }
 
         self.assertFalse(eie.write_domeinlijst(None, 0, header))
+
+
+class TestGetScenarioWorksheet(TestCase):
+    def test_trivial(self):
+        worksheet = object()
+        workbook_attrs = {
+            'sheet_by_name.return_value': worksheet
+            }
+        with mock.patch(
+            'xlrd.open_workbook',
+            return_value=mock.MagicMock(**workbook_attrs)) as patched:
+            sheet = eie.get_scenario_worksheet('path')
+
+            patched.assertCalledWith(('path',))
+            self.assertEquals(sheet, worksheet)
+
+
+class TestImportUploadedExcelFile(TestCase):
+    @mock.patch('flooding_lib.excel_import_export.import_header',
+                return_value=(None, []))
+    def test_calls_import_header(self, patched_import_header):
+        cell = mock.MagicMock(value=15)
+        cells = [cell]
+        sheetattrs = {'row.return_value': cells}
+        worksheet = mock.MagicMock(**sheetattrs)
+
+        with mock.patch(
+            'flooding_lib.excel_import_export.get_scenario_worksheet',
+            return_value=worksheet):
+            self.assertEquals([], eie.import_uploaded_excel_file(''))
+
+        patched_import_header.assertCalledWith(cells)
+
+    @mock.patch('flooding_lib.excel_import_export.import_header',
+                return_value=(None, ["error!"]))
+    def test_import_headers_returns_errors(self, patched_import_header):
+        cell = mock.MagicMock(value=15)
+        cells = [cell]
+        sheetattrs = {'row.return_value': cells}
+        worksheet = mock.MagicMock(**sheetattrs)
+
+        with mock.patch(
+            'flooding_lib.excel_import_export.get_scenario_worksheet',
+            return_value=worksheet):
+            self.assertEquals(["error!"], eie.import_uploaded_excel_file(''))
+
+    @mock.patch('flooding_lib.excel_import_export.import_header',
+                return_value=(eie.ImportedHeader(), []))
+    @mock.patch('flooding_lib.excel_import_export.import_scenario_row',
+                return_value=[])
+    def test_rows_calls_get_scenario_row(
+        self, patched_import_header, patched_import_scenario_row):
+        cell = object()
+        onecellrow = [cell]
+
+        def row(i):
+            if i < 4:
+                return []
+            return onecellrow
+
+        worksheet = mock.MagicMock(row=row, nrows=5)
+
+        with mock.patch(
+            'flooding_lib.excel_import_export.get_scenario_worksheet',
+            return_value=worksheet):
+            eie.import_uploaded_excel_file('')
+
+            patched_import_scenario_row.assertCalledWith(
+                (patched_import_header.return_value, 4, onecellrow))
+
+    @mock.patch('flooding_lib.excel_import_export.import_header',
+                return_value=(eie.ImportedHeader(), []))
+    @mock.patch('flooding_lib.excel_import_export.import_scenario_row',
+                return_value=["error!"])
+    def test_get_scenario_row_returns_errors(
+        self, patched_import_header, patched_import_scenario_row):
+        worksheet = mock.MagicMock(row=lambda i: [], nrows=5)
+
+        with mock.patch(
+            'flooding_lib.excel_import_export.get_scenario_worksheet',
+            return_value=worksheet):
+            errors = eie.import_uploaded_excel_file('')
+            self.assertEquals(errors, ["error!"])
+
+
+class TestImportedHeader(TestCase):
+    def test_trivial(self):
+        eie.ImportedHeader()
+
+    def test_returns_none_for_fieldnr_0(self):
+        self.assertEquals(
+            None,
+            eie.ImportedHeader().find_field_by_name(0, ''))
+
+    def test_finds_field(self):
+        name = u"dit is een input field"
+        field = InputFieldF.create(name=name)
+
+        fields = {}
+        header = eie.ImportedHeader(fields)
+
+        foundfield = header.find_field_by_name(1, name)
+
+        self.assertEquals(field, foundfield)
+        self.assertTrue(fields[1] is foundfield)
+
+    def test_exception_if_not_found(self):
+        header = eie.ImportedHeader()
+        self.assertRaises(
+            eie.ImportedHeader.HeaderException,
+            lambda: header.find_field_by_name(1, u"bestaat niet"))
+
+    def test_exception_if_occurs_twice(self):
+        name = u"dit is een input field"
+        InputFieldF.create(name=name)
+        header = eie.ImportedHeader()
+
+        header.find_field_by_name(1, name)
+
+        self.assertRaises(
+            eie.ImportedHeader.HeaderException,
+            lambda: header.find_field_by_name(2, name))
+
+    def test_getitem(self):
+        name = u"dit is een input field"
+        InputFieldF.create(name=name)
+        header = eie.ImportedHeader()
+
+        foundfield = header.find_field_by_name(1, name)
+
+        self.assertTrue(header[1] is foundfield)
+
+    def test_can_iterate(self):
+        name = u"dit is een input field"
+        field = InputFieldF.create(name=name)
+        header = eie.ImportedHeader()
+
+        header.find_field_by_name(1, name)
+
+        for i, iterfield in enumerate(header):
+            self.assertEquals(i, 0)  # We should only come here once
+            self.assertEquals(field, iterfield)
+
+
+class TestImportHeader(TestCase):
+    def test_trivial(self):
+        header_titles = ["title"]
+        find_field_by_name = mock.MagicMock()
+        with mock.patch(
+       'flooding_lib.excel_import_export.ImportedHeader',
+            return_value=mock.MagicMock(
+                find_field_by_name=find_field_by_name)):
+            eie.import_header(header_titles)
+            find_field_by_name.assert_called_with(0, "title")
+
+    def test_find_field_throws_exception(self):
+        header_titles = ["title"]
+
+        # Safe it here because otherwise it'll be mocked...
+        real_exception = eie.ImportedHeader.HeaderException
+
+        def throwing(column, title):
+            raise real_exception("message")
+
+        find_field_by_name = mock.MagicMock(side_effect=throwing)
+        with mock.patch(
+       'flooding_lib.excel_import_export.ImportedHeader',
+            return_value=mock.MagicMock(
+                find_field_by_name=find_field_by_name),
+            HeaderException=real_exception):
+            _, errors = eie.import_header(header_titles)
+            self.assertEquals(errors, ["message"])
+
+
+class TestImportScenarioRow(TestCase):
+    def test_empty_row(self):
+        """Shouldn't really do anything, just return"""
+        errors = eie.import_scenario_row(eie.ImportedHeader(), 5, [])
+        self.assertEquals(errors, [])
+
+    def test_empty_scenario_id(self):
+        """Should give an error message mentioning the row nr"""
+        errors = eie.import_scenario_row(
+            eie.ImportedHeader(), 66, [mock.MagicMock(value="")])
+
+        self.assertEquals(len(errors), 1)
+        self.assertTrue("66" in errors[0])
+
+    def test_bad_scenario_id(self):
+        errors = eie.import_scenario_row(
+            eie.ImportedHeader(), 66, [mock.MagicMock(value="scenarioid")])
+
+        self.assertEquals(len(errors), 1)
+        self.assertTrue("66" in errors[0])
+
+    def test_unknown_scenario_id(self):
+        errors = eie.import_scenario_row(
+            eie.ImportedHeader(), 66, [mock.MagicMock(value=42313)])
+
+        self.assertEquals(len(errors), 1)
+        self.assertTrue("66" in errors[0])

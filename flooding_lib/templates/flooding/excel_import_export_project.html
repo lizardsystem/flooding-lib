@@ -1,0 +1,34 @@
+{% extends "lizard/base.html" %}
+{% load utils %}
+{% load i18n %}
+
+{% block title %}
+Flooding: Metadata update
+{% endblock %}
+
+{% block content %}
+<script type="text/javascript" src="{% url root_url %}static_media/weblib/jquery/jquery-1.3.2.min.js"></script>
+<script type="text/javascript" src="{% url root_url %}static_media/flooding_lib/share_scenarios.js"></script>
+
+<h2>{{ view.project.name }}</h2>
+<p><a href="{% url flooding_excel_download view.project_id %}{{ view.project.excel_filename }}">Download Excel file met de huidige metadata</a></p>
+
+{% if view.excel_errors %}
+Er zijn fouten bij het inlezen van het Excel bestand, waardoor het niet ingelezen is:
+<ul>
+{% for error in view.excel_errors %}
+<li>{{ error }}</li>
+{% endfor %}
+</ul>
+{% endif %}
+<form
+   action="{% url flooding_excel_import_export_project view.project_id %}"
+   enctype="multipart/form-data"
+   method="post">
+{% csrf_token %}
+{{ view.form.as_p }}
+<input type="submit" value="{% trans 'Send' %}" />
+</form>
+
+{% endblock %}
+

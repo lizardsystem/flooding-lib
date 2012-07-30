@@ -169,6 +169,26 @@ class TestInputField(TestCase):
         self.assertTrue(
             inputfield.id in (inpf.id for inpf in giffield['fields']))
 
+    def test_ignore_in_scenario_excel_files_scenario(self):
+        """In scenario import/export excel files, we only want to read
+        fields that are related to the scenario (destination table is
+        scenario, extrascenarioinfo or scenariobreach) and that make
+        sense to import this way (files represented by just a string
+        are useless)."""
+        inputfield = InputFieldF.build(destination_table='Scenario')
+        self.assertFalse(inputfield.ignore_in_scenario_excel_files)
+
+    def test_ignore_in_scenario_excel_files_project(self):
+        inputfield = InputFieldF.build(destination_table='Project')
+        self.assertTrue(inputfield.ignore_in_scenario_excel_files)
+
+    def test_ignore_in_scenario_excel_files_scenario_file(self):
+        inputfield = InputFieldF.build(
+            destination_table='Scenario',
+            type=models.InputField.TYPE_FILE
+            )
+        self.assertTrue(inputfield.ignore_in_scenario_excel_files)
+
 
 class TestDisplayValueUnicode(TestCase):
     def test_none(self):
