@@ -276,8 +276,8 @@ class TestScenarioRow(TestCase):
             break
 
     def test_rest_calls_value_for_inputfield(self):
-        field_value = object()
-        inputfield = InputFieldF.build()
+        field_value = 3
+        inputfield = InputFieldF.build(type=InputField.TYPE_INTEGER)
 
         with mock.patch(
             'flooding_lib.models.Scenario.value_for_inputfield',
@@ -287,7 +287,7 @@ class TestScenarioRow(TestCase):
 
             columns = scenariorow.columns()
             columns.next()  # Skip scenario id
-            self.assertEquals(columns.next().value, unicode(field_value))
+            self.assertEquals(columns.next().value, field_value)
             patched.assert_called_with(inputfield)
 
 

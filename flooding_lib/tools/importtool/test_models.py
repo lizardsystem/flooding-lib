@@ -86,7 +86,8 @@ class TestImportScenarioInputField(TestCase):
 
     def testSetIntervalRaisesOnWrongFormat(self):
         self.assertRaises(ValueError, lambda: self.get_resulting_isif(
-            models.InputField.TYPE_INTERVAL, 'test_interval', 0.0))
+            models.InputField.TYPE_INTERVAL, 'test_interval',
+            "this is not the right format for an interval"))
 
     def testSetGetInterval(self):
         with mock.patch(
