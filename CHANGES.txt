@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.2.3 (unreleased)
+2.2.3 (2012-07-31)
 ------------------
 
 Split the scenario sharing screen into a table of projects and a
