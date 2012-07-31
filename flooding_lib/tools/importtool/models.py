@@ -442,13 +442,22 @@ class StringValue(models.Model):
     value = models.CharField(max_length=200, blank=True, null=True)
 
     def set(self, value):
-        self.value = str(value)
+        self.value = unicode(value)
+
+    def to_excel(self):
+        return self.value
 
 
 class DateValue(StringValue):
     """The class responsible for saving Dates"""
     def set(self, value):
-        self.value = str(value)
+        if isinstance(value, float):
+            self.value = get_intervalstring_from_dayfloat(value)
+        else:
+            self.value = unicode(value)
+
+    def to_excel(self):
+        return self.value
 
     class Meta:
         proxy = True
@@ -463,11 +472,17 @@ class IntegerValue(models.Model):
     def set(self, value):
         self.value = int(value)
 
+    def to_excel(self):
+        return self.value
+
 
 class SelectValue(IntegerValue):
     """The class responsible for saving Selects"""
     class Meta:
         proxy = True
+
+    def to_excel(self):
+        return self.value
 
 
 class BooleanValue(IntegerValue):
@@ -480,6 +495,9 @@ class BooleanValue(IntegerValue):
             self.value = 0
         else:
             raise ValueError('boolean value is not true or false')
+
+    def to_excel(self):
+        return "true" if self.value else "false"
 
     class Meta:
         proxy = True
@@ -494,12 +512,19 @@ class FloatValue(models.Model):
     def set(self, value):
         self.value = float(value)
 
+    def to_excel(self):
+        return self.value
+
 
 class IntervalValue(FloatValue):
     """The class responsible for saving Intervals"""
     def set(self, value):
-        value = get_dayfloat_from_intervalstring(value)
+        if isinstance(value, (str, unicode)):
+            value = get_dayfloat_from_intervalstring(value)
         self.value = float(value)
+
+    def to_excel(self):
+        return get_intervalstring_from_dayfloat(self.value)
 
     class Meta:
         proxy = True
@@ -512,7 +537,10 @@ class TextValue(models.Model):
     value = models.TextField(blank=True, null=True)
 
     def set(self, value):
-        self.value = str(value)
+        self.value = unicode(value)
+
+    def to_excel(self):
+        return self.value
 
 
 def get_import_upload_files_path(instance, filename):
@@ -651,6 +679,16 @@ class InputField(models.Model):
         return u'%s - %s' % (self.get_header_display(), self.name)
 
     @property
+    def parsed_options(self):
+        if not self.options:
+            return {}
+
+        try:
+            return ast.literal_eval(self.options)
+        except SyntaxError:
+            return {}
+
+    @property
     def value_class(self):
         """Return the value class for this input field's type."""
         if self.type in self.TYPE_VALUE_CLASSES:
@@ -683,11 +721,29 @@ class InputField(models.Model):
             return unicode(get_intervalstring_from_dayfloat(value))
 
         if for_viewing_only and self.type == InputField.TYPE_SELECT:
-            options = ast.literal_eval(self.options)
-            if value in options:
+            if value in self.parsed_options:
                 return unicode(options[value])
 
         return unicode(value)
+
+    def to_excel(self, value):
+        if value is None:
+            return u''
+
+        if (self.type == InputField.TYPE_SELECT and
+            isinstance(value, (str, unicode))):
+            # We'd expect an int, but they've given us a string. Is it
+            # in the option list?
+            for k, v in self.parsed_options.items():
+                if v == value:
+                    value = k
+                    break
+            else:
+                return u''
+
+        value_object = self.build_value_object()
+        value_object.set(value)
+        return value_object.to_excel()
 
     def get_or_create_value_object(self, importscenario_inputfield):
         value_object, _ = self.value_class.objects.get_or_create(

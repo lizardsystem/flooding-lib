@@ -13,6 +13,13 @@ from flooding_lib.tools.importtool.models import InputField
 from flooding_lib.tools.importtool.test_models import InputFieldF
 
 
+class TestMakeStyle(TestCase):
+    def test_memoizes(self):
+        """Call it twice, should return the exact same object."""
+
+        self.assertTrue(eie.make_style('') is eie.make_style(''))
+
+
 class TestCreateExcelFile(TestCase):
     def test_creates_file(self):
         """If called with a project, TestCreateExcelFile creates an
@@ -175,7 +182,7 @@ class TestFieldInfo(TestCase):
         header = fieldinfo.add_extra_header_fields({
                 'inputfield': inputfield})
 
-        self.assertEquals(header['fieldtype'], u'Datum')
+        self.assertEquals(header['fieldtype'], u'Datum (DD/MM/JJJJ)')
 
         deactivate()
 
@@ -287,32 +294,38 @@ class TestScenarioRow(TestCase):
 class TestGetHeaderStyleFor(TestCase):
     def test_wraps(self):
         """All header text should wrap"""
-        with mock.patch('xlwt.easyxf') as easyxf:
+        with mock.patch(
+            'flooding_lib.excel_import_export.make_style') as easyxf:
             eie.get_header_style_for(0, 0, {})
             self.assertTrue("wrap on" in easyxf.call_args[0][0])
 
     def test_row_1_bold(self):
-        with mock.patch('xlwt.easyxf') as easyxf:
+        with mock.patch(
+            'flooding_lib.excel_import_export.make_style') as easyxf:
             eie.get_header_style_for(1, 1, {})
             self.assertTrue("bold on" in easyxf.call_args[0][0])
 
     def test_row_2_not_bold(self):
-        with mock.patch('xlwt.easyxf') as easyxf:
+        with mock.patch(
+            'flooding_lib.excel_import_export.make_style') as easyxf:
             eie.get_header_style_for(2, 1, {})
             self.assertTrue("bold on" not in easyxf.call_args[0][0])
 
     def test_ignored_is_gray(self):
-        with mock.patch('xlwt.easyxf') as easyxf:
+        with mock.patch(
+            'flooding_lib.excel_import_export.make_style') as easyxf:
             eie.get_header_style_for(1, 1, {'ignore': True})
             self.assertTrue("fore_color gray" in easyxf.call_args[0][0])
 
     def test_required_is_orange(self):
-        with mock.patch('xlwt.easyxf') as easyxf:
+        with mock.patch(
+            'flooding_lib.excel_import_export.make_style') as easyxf:
             eie.get_header_style_for(1, 1, {'required': True})
             self.assertTrue("fore_color orange" in easyxf.call_args[0][0])
 
     def test_not_required_is_light_yellow(self):
-        with mock.patch('xlwt.easyxf') as easyxf:
+        with mock.patch(
+            'flooding_lib.excel_import_export.make_style') as easyxf:
             eie.get_header_style_for(1, 1, {'required': False})
             self.assertTrue(
                 "fore_color light_yellow" in easyxf.call_args[0][0])

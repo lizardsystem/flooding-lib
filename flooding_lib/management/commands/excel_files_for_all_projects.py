@@ -9,6 +9,6 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         activate("nl")  # Nederlands
 
-        for project in models.Project.objects.all():
+        for project in models.Project.objects.filter(pk=3).all():
             filename = excel_import_export.filename_for_project(project)
             excel_import_export.create_excel_file(project, filename)

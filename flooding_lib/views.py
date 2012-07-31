@@ -1455,7 +1455,7 @@ class ExcelImportExportViewProject(
                     return HttpResponseRedirect(
                         reverse(
                             'flooding_excel_import_export_project',
-                            kwargs={'project_id':self.project_id}))
+                            kwargs={'project_id': self.project_id}))
 
                 self.excel_errors += errors
 

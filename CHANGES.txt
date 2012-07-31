@@ -15,6 +15,14 @@ the Excel file, but ignored by the import.
 
 Screens from exporting and importing Excel screens have been further improved.
 
+Work on getting the fiels to show right in Excel, and then be parsed
+correctly afterwards.  Actually entering the imported values into the
+database at the end is not implemented yet, nor is checking of
+permissions.
+
+Because we are doing a release today, the link in the importtool page to these
+exports is disabled.
+
 2.1 (2012-07-26)
 ----------------
 

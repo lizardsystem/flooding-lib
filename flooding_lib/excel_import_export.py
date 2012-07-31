@@ -42,6 +42,7 @@ from itertools import izip
 
 from django.db import transaction
 
+from flooding_lib.util.decorators import memoized
 from flooding_lib.tools.importtool.models import InputField
 from flooding_lib.models import Scenario
 
@@ -52,10 +53,20 @@ HEADER_ROWS = 4
 logger = logging.getLogger(__name__)
 
 
+@memoized
+def make_style(pattern):
+    """We need to make this a memoized function because each call to
+    easyxf creates a new XF object, and Excel files have a limit of
+    4094 of them. If we create one per cell, we can go over that, but
+    by memoizing them we only get one per pattern (and we use less
+    than 10 different patterns)."""
+    return xlwt.easyxf(pattern)
+
+
 class Cell(object):
     def __init__(self, value, pattern=''):
         self.value = value
-        self.style = xlwt.easyxf(pattern)
+        self.style = make_style(pattern)
 
     def __repr__(self):
         return unicode(self)
@@ -82,9 +93,8 @@ class ScenarioRow(object):
             inputfield = header['inputfield']
             value = self.scenario.value_for_inputfield(inputfield)
 
-            value_unicode = inputfield.display_unicode(value)
-
-            yield Cell(value_unicode, default_pattern)
+            value_excel = inputfield.to_excel(value)
+            yield Cell(value_excel, default_pattern)
 
 
 class FieldInfo(object):
@@ -102,10 +112,13 @@ class FieldInfo(object):
         if header['ignore']:
             header['fieldtype'] = u'(veld kan niet aangepast worden)'
         else:
-            for typeid, description in InputField.TYPE_CHOICES:
-                if typeid == inputfield.type:
-                    header['fieldtype'] = unicode(description)
-                    break
+            if inputfield.type == InputField.TYPE_DATE:
+                header['fieldtype'] = u"Datum (DD/MM/JJJJ)"
+            else:
+                for typeid, description in InputField.TYPE_CHOICES:
+                    if typeid == inputfield.type:
+                        header['fieldtype'] = unicode(description)
+                        break
 
         return header
 
@@ -157,9 +170,9 @@ def get_header_style_for(rownr, colnr, header):
         pattern = ""
 
     if rownr == 1:
-        return xlwt.easyxf(
+        return make_style(
             pattern + 'font: bold on; align: wrap on, vertical top;')
-    return xlwt.easyxf(pattern + 'align: wrap on, vertical top;')
+    return make_style(pattern + 'align: wrap on, vertical top;')
 
 
 def write_domeinlijst(worksheet, column, header):
@@ -386,6 +399,7 @@ def import_scenario_row(header, rownr, row):
             value_object.set(cell.value)
         except ValueError as ve:
             errors.append("Regel {0}: {1}.".format(rownr, ve))
-        scenario.set_value_for_inputfield(inputfield, value_object)
+        scenario
+#        scenario.set_value_for_inputfield(inputfield, value_object)
 
     return errors
