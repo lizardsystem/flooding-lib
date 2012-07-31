@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.2 (unreleased)
+2.2 (2012-07-31)
 ----------------
 
 Work on Excel import/export.
