@@ -4,7 +4,7 @@ Changelog of flooding-lib
 2.3 (unreleased)
 ----------------
 
-- Nothing changed yet.
+A few tests weren't updated yet to the latest versions of some methods.
 
 
 2.2 (2012-07-31)
