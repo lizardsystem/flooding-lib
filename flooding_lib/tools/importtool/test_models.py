@@ -145,6 +145,47 @@ class TestImportScenario(TestCase):
         except models.StringValue.DoesNotExist:
             raise AssertionError("integervalue does not exist")
 
+    def test_update_scenario_name_doesnt_exist(self):
+        """If there is no inputfield with a scenario name, set the
+        name to '-'"""
+        importscenario = ImportScenarioF()
+        importscenario.update_scenario_name()
+        self.assertEquals(importscenario.name, "-")
+
+    def test_update_scenario_name_works(self):
+        importscenario = ImportScenarioF()
+
+        inputfield = InputFieldF.create(
+            type=models.InputField.TYPE_STRING,
+            destination_table="Scenario",
+            destination_field="name")
+
+        isif = ImportScenarioInputFieldF.create(
+            importscenario=importscenario,
+            inputfield=inputfield)
+
+        isif.setValue("name!")
+
+        importscenario.update_scenario_name()
+        self.assertEquals(importscenario.name, "name!")
+
+    def test_update_scenario_name_empty(self):
+        importscenario = ImportScenarioF()
+
+        inputfield = InputFieldF.create(
+            type=models.InputField.TYPE_STRING,
+            destination_table="Scenario",
+            destination_field="name")
+
+        isif = ImportScenarioInputFieldF.create(
+            importscenario=importscenario,
+            inputfield=inputfield)
+
+        isif.setValue("")
+
+        importscenario.update_scenario_name()
+        self.assertEquals(importscenario.name, "-")
+
 
 class TestInputField(TestCase):
     def test_grouped_input_fields(self):
@@ -189,6 +230,19 @@ class TestInputField(TestCase):
             type=models.InputField.TYPE_FILE
             )
         self.assertTrue(inputfield.ignore_in_scenario_excel_files)
+
+    def test_parsed_options_correct(self):
+        inputfield = InputFieldF(options=str({"whee": 3}))
+        options = inputfield.parsed_options
+        self.assertEquals(options["whee"], 3)
+
+    def test_parsed_options_empty(self):
+        inputfield = InputFieldF(options='')
+        self.assertEquals(inputfield.parsed_options, {})
+
+    def test_parsed_options_syntax_error(self):
+        inputfield = InputFieldF(options="whee")
+        self.assertEquals(inputfield.parsed_options, {})
 
 
 class TestDisplayValueUnicode(TestCase):

@@ -685,7 +685,7 @@ class InputField(models.Model):
 
         try:
             return ast.literal_eval(self.options)
-        except SyntaxError:
+        except (SyntaxError, ValueError):
             return {}
 
     @property
@@ -721,7 +721,8 @@ class InputField(models.Model):
             return unicode(get_intervalstring_from_dayfloat(value))
 
         if for_viewing_only and self.type == InputField.TYPE_SELECT:
-            if value in self.parsed_options:
+            options = self.parsed_options
+            if value in options:
                 return unicode(options[value])
 
         return unicode(value)

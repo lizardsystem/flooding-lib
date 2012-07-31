@@ -4,7 +4,8 @@ Changelog of flooding-lib
 2.3 (unreleased)
 ----------------
 
-- Nothing changed yet.
+Fix bug in showing the value of a Select field (Variable didn't
+exist. Should have made a test in the first place.)
 
 
 2.2.1 (2012-07-31)
