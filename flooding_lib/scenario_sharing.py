@@ -111,11 +111,6 @@ def project_field(scenario, project_id):
 @require_GET
 @receives_loggedin_permission_manager
 def list_view(request, permission_manager):
-
-    # Users can EITHER approve scenarios in normal projects, or in the
-    # special, not in both. So we can look at the first of the
-    # projects they have approval access to and see what kind of user
-    # we have here.
     projects = permission_manager.get_projects(
         permission=models.UserPermission.PERMISSION_SCENARIO_APPROVE)
     if len(projects) == 0:
@@ -126,13 +121,33 @@ def list_view(request, permission_manager):
         # Handle these in a separate function
         return list_view_accepting_project(request, permission_manager)
 
-    scenarios = (models.Scenario.in_project_list(projects).filter(
-            scenarioproject__is_main_project=True))
+    return render_to_response('flooding/scenario_share_project_list.html', {
+            'breadcrumbs': [
+                {'name': _('Flooding'),
+                 'url': reverse('flooding')},
+                {'name': _('Scenarios'),
+                 'url': reverse('flooding_scenarios_url')},
+                {'name': _('Share scenarios')}
+                ],
+            'projects': projects,
+            })
+
+
+@require_GET
+@receives_loggedin_permission_manager
+def list_project_view(request, permission_manager, project_id):
+    project = models.Project.objects.get(pk=project_id)
+
+    if not permission_manager.check_project_permission(
+        project,
+        permission=models.UserPermission.PERMISSION_SCENARIO_APPROVE):
+        return HttpResponse(
+            _("You do not have approval permission in this project."))
+
+    scenarios = project.original_scenarios()
 
     project_dict = dict()
     for scenario in scenarios:
-        project = scenario.main_project
-
         if project not in project_dict:
             project_dict[project] = []
 

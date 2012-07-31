@@ -972,7 +972,7 @@ class Scenario(models.Model):
     @property
     def main_project(self):
         try:
-            sp = ScenarioProject.objects.get(
+            sp = ScenarioProject.objects.select_related(depth=1).get(
                 scenario=self, is_main_project=True)
             return sp.project
         except ScenarioProject.DoesNotExist:
@@ -993,7 +993,8 @@ class Scenario(models.Model):
         using the project's default approval object.
 
         Currently just returns self.approvalobject, but will be changed."""
-        scenarioproject = ScenarioProject.objects.get(
+        scenarioproject = ScenarioProject.objects.select_related(
+            depth=1).get(
             scenario=self, project=project)
 
         scenarioproject.ensure_has_approvalobject()
