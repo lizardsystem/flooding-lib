@@ -62,7 +62,7 @@ def infowindow(request):
         callbackfunction = request.REQUEST.get('callback')
         form_id = request.REQUEST.get('formId')
         return infowindow_remarks(
-            request, scenario_id, callbackfunction, form_id)
+            request, scenario, callbackfunction, form_id)
 
     elif action_name == 'approval':  # POST AND GET difference handled
                                      # in 'return method'
@@ -174,14 +174,14 @@ def infowindow_information(scenario):
 
 @receives_loggedin_permission_manager
 def infowindow_remarks(
-    request, permission_manager, scenario_id, callbackfunction, form_id):
+    request, permission_manager, scenario, callbackfunction, form_id):
     """Edits scenario name and remarks"""
-    scenario = get_object_or_404(Scenario, pk=scenario_id)
 
     if not(permission_manager.check_project_permission(
             scenario.main_project,
             UserPermission.PERMISSION_SCENARIO_EDIT_SIMPLE)):
-        return HttpResponse(_("No permission to import scenario or login"))
+        return HttpResponse(
+            unicode(_("No permission to import scenario or login")))
     if request.method == 'POST':
         form = ScenarioNameRemarksForm(request.POST, instance=scenario)
         if form.is_valid():
@@ -215,7 +215,8 @@ def infowindow_approval(
     else:
         # No project found in which the user has Approve rights for
         # this scenario.
-        return HttpResponse(_("No permission to import scenario or login"))
+        return HttpResponse(
+            unicode(_("No permission to import scenario or login")))
 
     items = dict(request.REQUEST.items())
 
@@ -247,7 +248,8 @@ def infowindow_edit(request, permission_manager, scenario_id):
     if not(permission_manager.check_project_permission(
             used_scenario.main_project,
             UserPermission.PERMISSION_SCENARIO_EDIT)):
-        return HttpResponse(_("No permission to import scenario or login"))
+        return HttpResponse(
+            unicode(_("No permission to import scenario or login")))
 
     return render_to_response(
         'flooding/infowindow_edit.html',
@@ -353,7 +355,8 @@ def editproperties(request, permission_manager, scenario_id):
     if not(permission_manager.check_project_permission(
             used_scenario.main_project,
             UserPermission.PERMISSION_SCENARIO_EDIT)):
-        return HttpResponse(_("No permission to import scenario or login"))
+        return HttpResponse(
+            unicode(_("No permission to import scenario or login")))
 
     succeeded = False
     if request.method == "POST":
