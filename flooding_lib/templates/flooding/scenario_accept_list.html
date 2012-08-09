@@ -11,30 +11,35 @@ Flooding: {% trans 'Accept scenarios' %}
 <script type="text/javascript" src="{% url root_url %}static_media/flooding_lib/share_scenarios.js"></script>
 
 <h1>{% trans 'Accept scenarios for ' %}{{ toproject.name }}</h1>
+<table>
+<thead></thead>
 {% for fromproject, scenarios in projects %}
 	<div  style="overflow:auto">
-          <h2>{% trans 'From project ' %}{{ fromproject.name }}</h2>
-          <table>
+          <tr>
+            <td colspan="5">
+              <h2>{% trans 'From project ' %}{{ fromproject.name }}</h2>
+            </td>
+          </tr>
 	    <thead>
-	      <th>Scenario ID</th>
+              <th>Regio</th>
+              <th>Bres</th>
               <th>Scenarionaam</th>
-              <th>Status</th>
-	      <th>Offered by</th>
-	      <th>Accept</th>
+	      <th>Aangeboden door</th>
+	      <th>Accepteer</th>
             </thead>
 	    {% for scenario in scenarios %}
             <tr>
-	      <td>{{ scenario.scenario.id }}</td>
-	      <td>{{ scenario.scenario.name }}</td>
-	      <td>{{ scenario.scenario.get_status_cache_display }}</td>
-              <td>{{ scenario.shared_by.username }}</td>
+              <td>{{ scenario.scenario.breaches.all.0.region }}</td>
+              <td>{{ scenario.scenario.breaches.all.0 }}</td>
+	      <td title="{{ scenario.scenario.remarks }}">{{ scenario.scenario.name }}</td>
+              <td>{{ scenario.shared_by.get_full_name }}</td>
 	      <td class="shareaction"
 		  data-action="accept"
 		  data-scenario-id="{{ scenario.scenario.id }}"
-		  data-project-id="{{ toproject.id }}"><a href="#">Accept</a></td>
+		  data-project-id="{{ toproject.id }}"><a href="#">Accepteer</a></td>
             </tr>
 	    {% endfor %}
-	  </table>
 	</div>
 {% endfor%}
+</table>
 {% endblock %}

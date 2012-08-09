@@ -4,7 +4,15 @@ Changelog of flooding-lib
 2.3 (unreleased)
 ----------------
 
-- Nothing changed yet.
+More information about scenarios when offering / accepting them.
+
+Only allow Approved scenarios to be offered.
+
+Fixed display of intervals.
+
+Fixed a few internal server errors where a lazy translation was
+immediately returned as a HttpResponse (need to call unicode() on them
+first).
 
 
 2.2.4 (2012-07-31)

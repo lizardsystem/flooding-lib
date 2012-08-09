@@ -17,7 +17,8 @@ Flooding: {% trans 'Share scenarios' %}
           <h2>{{ project.name }}</h2>
           <table>
 	    <thead>
-	      <th>Scenario ID</th>
+              <th>Regio</th>
+              <th>Bres</th>
               <th>Scenarionaam</th>
               <th>Status</th>
 	      {% for projectid, projectname in otherprojects %}
@@ -26,10 +27,12 @@ Flooding: {% trans 'Share scenarios' %}
             </thead>
 	    {% for scenario in scenarios %}
             <tr>
-	      <td>{{ scenario.scenario.id }}</td>
+              <td>{{ scenario.scenario.breaches.all.0.region }}</td>
+              <td>{{ scenario.scenario.breaches.all.0 }}</td>
 	      <td>{{ scenario.scenario.name }}</td>
 	      <td>{{ scenario.scenario.get_status_cache_display }}</td>
 	      {% for extrafield in scenario.extra_fields %}
+              {% if scenario.scenario.is_approved %}
 	      <td class="shareaction"
 		  data-scenario-id="{{ extrafield.scenario_id }}"
 		  data-project-id="{{ extrafield.project_id }}"
@@ -53,6 +56,9 @@ Flooding: {% trans 'Share scenarios' %}
                   </ul>
                 {% endif %}
 	      </td>
+              {% else %}
+              <td></td>
+              {% endif %}
 	      {% endfor %}
             </tr>
 	    {% endfor %}

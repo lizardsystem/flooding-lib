@@ -115,7 +115,7 @@ def list_view(request, permission_manager):
         permission=models.UserPermission.PERMISSION_SCENARIO_APPROVE)
     if len(projects) == 0:
         return HttpResponse(
-            _("You do not have approval permission in any project."))
+            unicode(_("You do not have approval permission in any project.")))
 
     if projects[0].id in PROJECT_IDS:
         # Handle these in a separate function
@@ -142,7 +142,7 @@ def list_project_view(request, permission_manager, project_id):
         project,
         permission=models.UserPermission.PERMISSION_SCENARIO_APPROVE):
         return HttpResponse(
-            _("You do not have approval permission in this project."))
+            unicode(_("You do not have approval permission in this project.")))
 
     scenarios = project.original_scenarios()
 

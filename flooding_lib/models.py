@@ -1076,6 +1076,10 @@ class Scenario(models.Model):
         self.status_cache = new_status
         self.save()
 
+    @property
+    def is_approved(self):
+        return self.status_cache == self.STATUS_APPROVED
+
     def get_absolute_url(self):
         return reverse('flooding_scenario_detail',
                        kwargs={'object_id': self.pk})
