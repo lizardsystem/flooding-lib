@@ -135,14 +135,15 @@ class SobekModel(models.Model):
                  self.model_version))
 
     def get_summary_str(self):
-        """Return object summary in str, with markdown layout
+        """Return object summary in unicode, with markdown layout
         """
-        summary = ''
-        summary += ('* %s: %s\n' %
+        summary = u''
+
+        summary += (u'* %s: %s\n' %
                     (_('type'), self.TYPE_DICT[self.sobekmodeltype]))
-        summary += ('* %s: %d\n' %
+        summary += (u'* %s: %d\n' %
                     (_('case'), self.model_case))
-        summary += ('* %s: %s' %
+        summary += (u'* %s: %s' %
                     (_('version'), self.model_version))
         return summary
 
@@ -190,7 +191,7 @@ class CutoffLocation(models.Model):
         db_table = 'flooding_cutofflocation'
 
     def __unicode__(self):
-        return self.name
+        return unicode(self.name)
 
     def isinternal(self):
         """Returns if CutoffLocation is an internal cutoff location
@@ -260,7 +261,7 @@ class ExternalWater(models.Model):
         db_table = 'flooding_externalwater'
 
     def __unicode__(self):
-        return self.name
+        return unicode(self.name)
 
 
 class Dike(models.Model):
@@ -277,7 +278,7 @@ class Dike(models.Model):
         db_table = 'flooding_dike'
 
     def __unicode__(self):
-        return self.name
+        return unicode(self.name)
 
 
 class WaterlevelSet(models.Model):
@@ -306,7 +307,7 @@ class WaterlevelSet(models.Model):
         db_table = 'flooding_waterlevelset'
 
     def __unicode__(self):
-        return self.name
+        return unicode(self.name)
 
 
 class Waterlevel(models.Model):
@@ -329,7 +330,7 @@ class Waterlevel(models.Model):
 
     def __unicode__(self):
         return (u'%s: %s, %f' %
-                (self.waterlevelset.__unicode__(),
+                (unicode(self.waterlevelset),
                  str(datetime.timedelta(self.time)), self.value))
 
 
@@ -350,7 +351,7 @@ class Map(models.Model):
         db_table = 'flooding_map'
 
     def __unicode__(self):
-        return self.name
+        return unicode(self.name)
 
 
 class Region(models.Model):

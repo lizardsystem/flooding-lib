@@ -14,6 +14,7 @@ from flooding_lib.tools.importtool import models as importmodels
 from flooding_lib.tools.importtool.test_models import InputFieldF
 
 MULTIPOLYGON = 'MULTIPOLYGON(((0 0,4 0,4 4,0 4,0 0),(1 1,2 1,2 2,1 2,1 1)))'
+POINT = 'POINT(0 0)'
 
 
 class FakeObject(object):
@@ -38,6 +39,28 @@ class AttachmentF(factory.Factory):
 
 class SobekVersionF(factory.Factory):
     FACTORY_FOR = models.SobekVersion
+
+
+class SobekModelF(factory.Factory):
+    FACTORY_FOR = models.SobekModel
+
+    sobekversion = SobekVersionF.create()
+    sobekmodeltype = 1
+    model_case = 0
+    model_srid = 28992
+
+
+class CutoffLocationF(factory.Factory):
+    FACTORY_FOR = models.CutoffLocation
+
+    bottomlevel = 0.0
+    width = 1.0
+    type = 1  # sluis (_('lock'))
+    geom = POINT
+
+
+class DikeF(factory.Factory):
+    FACTORY_FOR = models.Dike
 
 
 class ExtraInfoFieldF(factory.Factory):
@@ -145,6 +168,11 @@ class WaterlevelF(factory.Factory):
     time = 0
     value = 0
 
+
+class MapF(factory.Factory):
+    FACTORY_FOR = models.Map
+
+
 ## Test cases
 
 
@@ -184,8 +212,93 @@ class TestAttachment(TestCase):
 class TestSobekVersion(TestCase):
     def test_has_unicode(self):
         """Check that with __unicode__ returns is in fact unicode."""
-        attachment = SobekVersionF(name=u"some name")
-        self.assertEquals(type(attachment.__unicode__()), unicode)
+        sobekversion = SobekVersionF(name=u"some name")
+        self.assertEquals(type(sobekversion.__unicode__()), unicode)
+
+
+class TestSobekModel(TestCase):
+    def test_has_unicode(self):
+        sobekmodel = SobekModelF()
+        self.assertEquals(type(sobekmodel.__unicode__()), unicode)
+
+    def test_get_summary_str(self):
+        """Check that it returns something and is Unicode"""
+        sobekmodel = SobekModelF()
+        summary = sobekmodel.get_summary_str()
+        self.assertEquals(type(summary), unicode)
+        self.assertTrue(summary)
+
+
+class TestCutoffLocation(TestCase):
+    def test_has_unicode(self):
+        cutofflocation = CutoffLocationF()
+        self.assertEquals(type(cutofflocation.__unicode__()), unicode)
+
+    def test_isinternal(self):
+        """Returns if CutoffLocation is an internal cutoff location
+
+        True if it is exclusively connected to region's,
+        False if it is exclusively connected to external waters
+        None else
+        """
+        cutofflocation = CutoffLocationF()
+        # Should be None because we didn't connect it at all
+        self.assertEquals(cutofflocation.isinternal(), None)
+
+    def test_isinternal_connected_to_region(self):
+        cutofflocation = CutoffLocationF.create()
+        cutofflocation.region_set.add(RegionF.create())
+
+        self.assertEquals(cutofflocation.isinternal(), True)
+
+    def test_isinternal_connected_to_externalwater(self):
+        cutofflocation = CutoffLocationF.create()
+        cutofflocation.externalwater_set.add(ExternalWaterF.create())
+
+        self.assertEquals(cutofflocation.isinternal(), False)
+
+    def test_isinternal_connected_to_both(self):
+        cutofflocation = CutoffLocationF.create()
+        cutofflocation.region_set.add(RegionF.create())
+        cutofflocation.externalwater_set.add(ExternalWaterF.create())
+
+        self.assertEquals(cutofflocation.isinternal(), None)
+
+    def test_getdeftclose_seconds(self):
+        cutofflocation = CutoffLocationF.build(deftclose=1)
+        self.assertEquals(cutofflocation.get_deftclose_seconds(), 86400)
+
+
+class TestExternalWater(TestCase):
+    def test_has_unicode(self):
+        externalwater = ExternalWaterF.build()
+        self.assertEquals(type(externalwater.__unicode__()), unicode)
+
+
+class TestDike(TestCase):
+    def test_has_unicode(self):
+        dike = DikeF.build()
+        self.assertEquals(type(dike.__unicode__()), unicode)
+
+
+class TestWaterlevelSet(TestCase):
+    def test_has_unicode(self):
+        waterlevelset = WaterlevelSetF.build()
+        self.assertEquals(type(waterlevelset.__unicode__()), unicode)
+
+
+class TestWaterlevel(TestCase):
+    def test_has_unicode(self):
+        waterlevel = WaterlevelF.build(
+            waterlevelset=WaterlevelSetF.create())
+
+        self.assertEquals(type(waterlevel.__unicode__()), unicode)
+
+
+class TestMap(TestCase):
+    def test_has_unicode(self):
+        map = MapF.build()
+        self.assertEquals(type(map.__unicode__()), unicode)
 
 
 class TestScenario(TestCase):
