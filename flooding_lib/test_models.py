@@ -718,6 +718,17 @@ class TestProject(TestCase):
         self.assertTrue(scenario1.id in scenarioset)
         self.assertTrue(scenario2.id in scenarioset)
 
+    def test_original_scenarios_deleted(self):
+        """original_scenarios() shouldn't return deleted scenarios."""
+        scenario = ScenarioF.create(
+            status_cache=models.Scenario.STATUS_DELETED)
+        project = ProjectF.create()
+        scenario.set_project(project)
+
+        scenarios = project.original_scenarios()
+
+        self.assertEquals(scenarios.count(), 0)
+
 
 class TestFindImportedValue(TestCase):
     def test_get_integer_from_scenario(self):

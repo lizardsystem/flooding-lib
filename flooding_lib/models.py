@@ -633,10 +633,11 @@ class Project(models.Model):
 
     def original_scenarios(self):
         """Return a queryset of Scenarios that were originally in this project,
-        not added to it later."""
+        not added to it later. Doesn't include deleted scenarios."""
         return Scenario.objects.filter(
             scenarioproject__project=self,
-            scenarioproject__is_main_project=True)
+            scenarioproject__is_main_project=True).exclude(
+            status_cache=Scenario.STATUS_DELETED)
 
     def excel_filename(self):
         name = self.name.replace("""*<>[]=+"'/\\,.:;""", '')
