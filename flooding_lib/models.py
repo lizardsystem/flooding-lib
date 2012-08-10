@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import datetime
 import logging
+import operator
 import os
 
 from django.contrib.auth.models import User, Group
@@ -420,20 +421,19 @@ class RegionSet(AL_Node):
         filter_active can be set to None, True or False. If True, it will
         only return the regions where the active flag is set to
         True. Same for False.
-        """
-        all_regions = {}
-        for r in self.regions.all():
-            if filter_active is None or r.active == filter_active:
-                all_regions[r.id] = r
-        for d in self.get_descendants():
-            for r in d.regions.all():
-                if filter_active is None or r.active == filter_active:
-                    all_regions[r.id] = r
-        return Region.objects.filter(id__in=all_regions.keys())
 
-    @models.permalink
-    def get_absolute_url(self):
-        return ('node-view', ('al', str(self.id),))
+        Returns a list, ordered by name.
+        """
+        all_regions = set(
+            region for region in self.regions.all()
+            if filter_active is None or region.active == filter_active)
+
+        for d in self.get_descendants():
+            for region in d.regions.all():
+                if filter_active is None or region.active == filter_active:
+                    all_regions.add(region)
+
+        return sorted(all_regions, key=operator.attrgetter('name'))
 
     def __unicode__(self):
         return self.name

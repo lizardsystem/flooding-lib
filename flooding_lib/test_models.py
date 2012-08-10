@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import factory
 import mock
 
@@ -110,6 +112,12 @@ class RegionF(factory.Factory):
     geom = MULTIPOLYGON
 
 
+class RegionSetF(factory.Factory):
+    FACTORY_FOR = models.RegionSet
+
+    name = "testregionset"
+
+
 class DikeF(factory.Factory):
     FACTORY_FOR = models.Dike
 
@@ -172,6 +180,37 @@ class WaterlevelF(factory.Factory):
 class MapF(factory.Factory):
     FACTORY_FOR = models.Map
 
+    name = "testmap"
+
+
+class TaskExecutorF(factory.Factory):
+    FACTORY_FOR = models.TaskExecutor
+
+    name = "testtaskexecutor"
+
+
+class ResultTypePresentationTypeF(factory.Factory):
+    FACTORY_FOR = models.ResultType_PresentationType
+
+    remarks = "testremarks"
+
+
+class StrategyF(factory.Factory):
+    FACTORY_FOR = models.Strategy
+
+    name = "teststrategy"
+
+
+class MeasureF(factory.Factory):
+    FACTORY_FOR = models.Measure
+
+    name = "testmeasure"
+
+
+class EmbankmentUnitF(factory.Factory):
+    FACTORY_FOR = models.EmbankmentUnit
+
+    unit_id = "test"
 
 ## Test cases
 
@@ -295,10 +334,108 @@ class TestWaterlevel(TestCase):
         self.assertEquals(type(waterlevel.__unicode__()), unicode)
 
 
+class TestRegion(TestCase):
+    def test_unicode_with_long_name(self):
+        region = RegionF.build(longname="whee")
+
+        uni = region.__unicode__()
+
+        self.assertEquals(uni, "whee")
+        self.assertTrue(isinstance(uni, unicode))
+
+    def test_unicode_without_long_name(self):
+        region = RegionF.build(
+            longname=None, name="whe")
+
+        uni = region.__unicode__()
+
+        self.assertEquals(uni, "whe")
+        self.assertTrue(isinstance(uni, unicode))
+
+
+class TestRegionSet(TestCase):
+    def test_has_unicode(self):
+        regionset = RegionSetF.build()
+        uni = regionset.__unicode__()
+        self.assertTrue(uni)
+        self.assertTrue(isinstance(uni, unicode))
+
+    def test_get_all_regions_empty(self):
+        regionset = RegionSetF.create()
+
+        self.assertEquals(len(regionset.get_all_regions()), 0)
+
+    def test_get_all_regions_returns_own_regions(self):
+        region = RegionF.create()
+        regionset = RegionSetF.create()
+        regionset.regions.add(region)
+
+        all_regions = regionset.get_all_regions(filter_active=None)
+        self.assertEquals(len(all_regions), 1)
+        self.assertTrue(region in all_regions)
+
+    def test_get_all_regions_returns_descendants_regions(self):
+        region = RegionF.create()
+        regionsetparent = RegionSetF.create()
+        regionsetchild = RegionSetF.create(parent=regionsetparent)
+        regionsetchild.regions.add(region)
+
+        all_regions = regionsetparent.get_all_regions(filter_active=None)
+        self.assertEquals(len(all_regions), 1)
+        self.assertTrue(region in all_regions)
+
+    def test_get_all_regions_returns_descendants_regions2(self):
+        region = RegionF.create()
+        regionsetparent = RegionSetF.create()
+        regionsetchild = RegionSetF.create(parent=regionsetparent)
+        regionsetgrandchild = RegionSetF.create(parent=regionsetchild)
+        regionsetgrandchild.regions.add(region)
+
+        all_regions = regionsetparent.get_all_regions(filter_active=None)
+        self.assertEquals(len(all_regions), 1)
+        self.assertTrue(region in all_regions)
+
+    def test_get_all_regions_returns_region_only_once(self):
+        region = RegionF.create()
+
+        regionsetparent = RegionSetF.create()
+        regionsetparent.regions.add(region)
+        regionsetchild1 = RegionSetF.create(parent=regionsetparent)
+        regionsetchild1.regions.add(region)
+        regionsetchild2 = RegionSetF.create(parent=regionsetparent)
+        regionsetchild2.regions.add(region)
+
+        all_regions = regionsetparent.get_all_regions(filter_active=None)
+        self.assertTrue(len(all_regions), 1)
+
+    def test_get_all_regions_filter_active_works(self):
+        regionset = RegionSetF.create()
+        regionset.regions.add(RegionF.create(active=True))
+        regionset.regions.add(RegionF.create(active=False))
+
+        regions = regionset.get_all_regions(filter_active=False)
+        self.assertEquals(len(regions), 1)
+        self.assertFalse(regions[0].active)
+
+    def test_get_all_regions_sorting_works(self):
+        regionset = RegionSetF.create()
+        regionset.regions.add(RegionF.create(name='B'))
+        regionset.regions.add(RegionF.create(name='A'))
+        regionset.regions.add(RegionF.create(name='C'))
+
+        regions = regionset.get_all_regions(filter_active=None)
+        self.assertEquals(len(regions), 3)
+        self.assertEquals(regions[0].name, 'A')
+        self.assertEquals(regions[1].name, 'B')
+        self.assertEquals(regions[2].name, 'C')
+
+
 class TestMap(TestCase):
     def test_has_unicode(self):
         map = MapF.build()
-        self.assertEquals(type(map.__unicode__()), unicode)
+        uni = map.__unicode__()
+        self.assertTrue(uni)
+        self.assertTrue(isinstance(uni, unicode))
 
 
 class TestScenario(TestCase):
@@ -661,3 +798,52 @@ class TestFindImportedValue(TestCase):
                 inputfieldy, {'breach': breach})
             self.assertEquals(retvaluex, RD_X)
             self.assertEquals(retvaluey, RD_Y)
+
+
+class TestTaskExecutor(TestCase):
+    def test_has_unicode(self):
+        task_executor = TaskExecutorF.build()
+
+        uni = task_executor.__unicode__()
+
+        self.assertTrue(uni)
+        self.assertTrue(isinstance(uni, unicode))
+
+
+class TestResultTypePresentationType(TestCase):
+    def test_has_unicode(self):
+        rtpt = ResultTypePresentationTypeF.build()
+        uni = rtpt.__unicode__()
+
+        self.assertTrue(uni)
+        self.assertTrue(isinstance(uni, unicode))
+
+
+class TestStrategy(TestCase):
+    def test_has_unicode(self):
+        strategy = StrategyF.build()
+
+        uni = strategy.__unicode__()
+
+        self.assertTrue(uni)
+        self.assertTrue(isinstance(uni, unicode))
+
+
+class TestMeasure(TestCase):
+    def test_has_unicode(self):
+        measure = MeasureF.build()
+
+        uni = measure.__unicode__()
+
+        self.assertTrue(uni)
+        self.assertTrue(isinstance(uni, unicode))
+
+
+class TestEmbankmentUnit(TestCase):
+    def test_has_unicode(self):
+        embankment_unit = EmbankmentUnitF.build()
+
+        uni = embankment_unit.__unicode__()
+
+        self.assertTrue(uni)
+        self.assertTrue(isinstance(uni, unicode))

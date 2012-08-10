@@ -340,7 +340,7 @@ def service_get_regions(
         filter_active = None
     else:
         filter_active = True
-    regions = regionset.get_all_regions(filter_active).order_by('name')
+    regions = regionset.get_all_regions(filter_active)
     result_list = [{'id': r.id, 'name': str(r.name)} for r in regions]
     return HttpResponse(
         simplejson.dumps(result_list), mimetype="application/json")
