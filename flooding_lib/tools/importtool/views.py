@@ -188,7 +188,7 @@ def approve_import(request, import_scenario_id):
             k[header[0]] = len(f)
             f.append({
                     'id': header[0],
-                    'title': header[1],
+                    'title': unicode(header[1]),
                     'fields': []})
 
         fields = InputField.objects.all().order_by('-position')
@@ -210,7 +210,7 @@ def approve_import(request, import_scenario_id):
 
     state_valuemap = {}
     for option in ImportScenario.IMPORT_STATE_CHOICES:
-        state_valuemap[option[0]] = option[1]
+        state_valuemap[option[0]] = unicode(option[1])
 
     state_valuemap = simplejson.dumps(state_valuemap, sort_keys=True)
 
@@ -284,7 +284,10 @@ def verify_import(request, import_scenario_id):
 
         for header in InputField.HEADER_CHOICES:
             k[header[0]] = len(f)
-            f.append({'id': header[0], 'title': header[1], 'fields': []})
+            f.append({
+                    'id': header[0],
+                    'title': unicode(header[1]),
+                    'fields': []})
 
         fields = InputField.objects.all().order_by('-position')
 
