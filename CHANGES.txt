@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.4 (unreleased)
+2.4 (2012-08-14)
 ----------------
 
 Don't show deleted scenarios on the scenario sharing screen.
