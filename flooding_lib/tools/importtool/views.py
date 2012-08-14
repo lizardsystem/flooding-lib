@@ -363,7 +363,7 @@ def post_new_import(posted_values, owner):
     approvalobject = ApprovalObject.objects.create(
         name="vanuit importtool")
     approvalobject.approvalobjecttype.add(
-        ApprovalObjectType.objects.get(pk=1))
+        ApprovalObjectType.default_approval_type())
     importscenario = ImportScenario.objects.create(
         owner=owner, name='-',
         approvalobject=approvalobject)

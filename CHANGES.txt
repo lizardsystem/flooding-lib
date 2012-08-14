@@ -4,7 +4,10 @@ Changelog of flooding-lib
 2.5 (unreleased)
 ----------------
 
-- Nothing changed yet.
+Importing a new scenario relied on a specific ApprovalObjectType id to
+exist (1), which doesn't on production. Instead it should use
+default_approval_type() class method that was already made for this
+exact purpose...
 
 
 2.4 (2012-08-14)
