@@ -1,8 +1,8 @@
 Changelog of flooding-lib
 ===================================================
 
-2.5 (unreleased)
-----------------
+2.4.2 (2012-08-14)
+------------------
 
 Another crash in import: lazy translations of model choices sometimes
 need explicit unicode() calls.
