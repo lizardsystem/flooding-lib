@@ -257,7 +257,8 @@ class TestDisplayValueUnicode(TestCase):
         self.assertEquals(value_str, '2 d 12:00')
 
     def test_unicode(self):
-        # Function used to be called display_string, then bugged on this...
+        """Function used to be called display_string, then bugged on
+        this..."""
         s = (u"De EDO scenario\u2019s zijn opgesteld voor de landelijke "
              u"voorbereiding op de gevolgen van overstromingen. Ze zijn "
              u"ook input om de bovenregionale afstemming in de water- en "

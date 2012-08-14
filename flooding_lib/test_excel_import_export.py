@@ -1,3 +1,4 @@
+"""Tests for excel_import_export.py."""
 import mock
 import os
 import xlrd
@@ -10,10 +11,12 @@ from flooding_lib import excel_import_export as eie
 from flooding_lib.test_models import ProjectF
 from flooding_lib.test_models import ScenarioF
 from flooding_lib.tools.importtool.models import InputField
+from flooding_lib.tools.importtool.models import IntegerValue
 from flooding_lib.tools.importtool.test_models import InputFieldF
 
 
 class TestMakeStyle(TestCase):
+    """Test the make style function"""
     def test_memoizes(self):
         """Call it twice, should return the exact same object."""
 
@@ -21,6 +24,7 @@ class TestMakeStyle(TestCase):
 
 
 class TestCreateExcelFile(TestCase):
+    """Test the ceate_excel_file function"""
     def test_creates_file(self):
         """If called with a project, TestCreateExcelFile creates an
         Excel file and returns the path of that file."""
@@ -34,7 +38,7 @@ class TestCreateExcelFile(TestCase):
 
         os.remove(filename)
 
-    def test_creates_field_info_object(TestCase):
+    def test_creates_field_info_object(self):
         """Check that it calls project.original_scenarios and passes
         the result to FieldInfo."""
         scenariolistmock = mock.MagicMock()
@@ -123,25 +127,12 @@ class TestCreateExcelFile(TestCase):
                 os.remove(filename)
 
 
-class TestFilenameForProject(TestCase):
-    def test_correct_filename(self):
-        """The generated file's name should contain the project id and
-        the project's name."""
-
-        pname = "Test project name for testing"
-        project = ProjectF.create(name=pname)
-        pid = str(project.id)
-
-        path = eie.filename_for_project(project)
-
-        filename = os.path.basename(path)
-
-        self.assertTrue(pid in filename)
-        self.assertTrue(pname in filename)
-
-
 class TestFieldInfo(TestCase):
+    """Tests for the FieldInfo class."""
+
     def test_headers_from_inputfields(self):
+        """Test that it uses the headers from
+        grouped_input_fields()."""
         inputfield = InputFieldF.build(name="testfield")
         grouped_input_fields = [{
                 'id': 1, 'title': 'testheader', 'fields': [
@@ -169,10 +160,26 @@ class TestFieldInfo(TestCase):
         self.assertEquals(header['fieldname'], 'test 123')
 
     def test_add_extra_header_fields_type(self):
-        """header['fieldtype'] should be equal to the translated
-        string version of the field's type."""
+        """header['fieldtype'] should be equal to the translated version
+        of the choice's description."""
 
         activate('nl')
+
+        inputfield = InputFieldF(
+            type=InputField.TYPE_STRING,
+            destination_table='Scenario')
+        fieldinfo = eie.FieldInfo([])
+
+        header = fieldinfo.add_extra_header_fields({
+                'inputfield': inputfield})
+
+        self.assertEquals(header['fieldtype'], u'Tekst')
+
+        deactivate()
+
+    def test_add_extra_header_fields_type_date(self):
+        """header['fieldtype'] should be equal to a specific string in
+        case the inputfield's type is TYPE_DATE."""
 
         inputfield = InputFieldF(
             type=InputField.TYPE_DATE,
@@ -184,11 +191,9 @@ class TestFieldInfo(TestCase):
 
         self.assertEquals(header['fieldtype'], u'Datum (DD/MM/JJJJ)')
 
-        deactivate()
 
     def test_add_extra_header_fields_type_ignored(self):
         """If an inputfield is ignored, we place a notice in the type field"""
-        activate('nl')
 
         inputfield = InputFieldF(
             type=InputField.TYPE_DATE,
@@ -557,6 +562,7 @@ class TestImportHeader(TestCase):
 
 
 class TestImportScenarioRow(TestCase):
+    """Tests for the import_scenario_row function."""
     def test_empty_row(self):
         """Shouldn't really do anything, just return"""
         errors = eie.import_scenario_row(eie.ImportedHeader(), 5, [])
@@ -571,6 +577,8 @@ class TestImportScenarioRow(TestCase):
         self.assertTrue("66" in errors[0])
 
     def test_bad_scenario_id(self):
+        """Tests that a row with a badly formed scenario id returns an
+        error, and that the error message includes the line number."""
         errors = eie.import_scenario_row(
             eie.ImportedHeader(), 66, [mock.MagicMock(value="scenarioid")])
 
@@ -578,8 +586,104 @@ class TestImportScenarioRow(TestCase):
         self.assertTrue("66" in errors[0])
 
     def test_unknown_scenario_id(self):
+        """Tests that using a nonexisting scenario id results in an
+        error, and that the error message includes the line number."""
         errors = eie.import_scenario_row(
             eie.ImportedHeader(), 66, [mock.MagicMock(value=42313)])
+
+        self.assertEquals(len(errors), 1)
+        self.assertTrue("66" in errors[0])
+
+
+class FakeCell(object):
+    """Helper object to hold a value; fake Excel cell."""
+    def __init__(self, value):
+        self.value = value
+
+
+class TestImportScenarioRow2(TestCase):
+    """More tests for import_scenario_row. These tests assume that
+    there is a scenario, and has helper functions to create a header
+    and a number of cells."""
+
+    def setUp(self):
+        """Create a scenario, let the first field of the row contain a
+        cell with that scenario's ID."""
+        self.scenario = ScenarioF.create()
+        self.rowstart = [FakeCell(unicode(self.scenario.id))]
+
+    def build_header(self, *inputfields):
+        """Build an eie.ImportedHeader object using named
+        inputfields."""
+        fields = {}
+        i = 1
+        for inputfield in inputfields:
+            fields[i] = inputfield
+            i += 1
+        return eie.ImportedHeader(fields)
+
+    @mock.patch('flooding_lib.models.Scenario.set_value_for_inputfield')
+    def test_skips_ignored_inputfield(self, mocked_setvalue):
+        """Some destination tables, e.g. Project, can't be modified
+        from this import and should be skipped."""
+        inputfield = InputFieldF.build(
+            destination_table='Project',
+            type=InputField.TYPE_INTEGER)
+        cell = FakeCell(value=3)
+
+        header = self.build_header(inputfield)
+
+        eie.import_scenario_row(
+            header, 66, self.rowstart + [cell])
+
+        self.assertFalse(mocked_setvalue.called)
+
+    @mock.patch('flooding_lib.models.Scenario.set_value_for_inputfield')
+    def test_skips_empty_cell(self, mocked_setvalue):
+        """If a cell isn't filled in, skip it."""
+        inputfield = InputFieldF.build(
+            destination_table='Scenario',
+            type=InputField.TYPE_INTEGER)
+        cell = FakeCell(value=u'')
+
+        header = self.build_header(inputfield)
+
+        eie.import_scenario_row(
+            header, 66, self.rowstart + [cell])
+
+        self.assertFalse(mocked_setvalue.called)
+
+    @mock.patch('flooding_lib.models.Scenario.set_value_for_inputfield')
+    def test_some_inputfield(self, mocked_setvalue):
+        """Test with an integer inputfield and see what happens."""
+
+        inputfield = InputFieldF.build(
+            destination_table='scenario',
+            type=InputField.TYPE_INTEGER)
+        cell = FakeCell(value=3)
+
+        header = self.build_header(inputfield)
+
+        eie.import_scenario_row(
+            header, 66, self.rowstart + [cell])
+
+        self.assertTrue(mocked_setvalue.called)
+        c_inputfield, c_value = mocked_setvalue.call_args[0]
+
+        self.assertTrue(c_inputfield is inputfield)
+        self.assertTrue(isinstance(c_value, IntegerValue))
+
+    def test_wrong_value_raises_error(self):
+        """A nonsensical value in a cell returns an error message."""
+        inputfield = InputFieldF.build(
+            destination_table='scenario',
+            type=InputField.TYPE_INTEGER)
+        cell = FakeCell(value="whee")
+
+        header = self.build_header(inputfield)
+
+        errors = eie.import_scenario_row(
+            header, 66, self.rowstart + [cell])
 
         self.assertEquals(len(errors), 1)
         self.assertTrue("66" in errors[0])

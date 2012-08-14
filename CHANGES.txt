@@ -6,6 +6,13 @@ Changelog of flooding-lib
 
 Don't show deleted scenarios on the scenario sharing screen.
 
+More work on the Excel export/import. Imported Excel files are now
+actually saved in the database. This is still a work in progress.
+
+Fix a bug that prevents Javascript displaying the 'import new
+scenario' page (doubly-escaped Javascript).
+
+Some cleanup, more tests, more translated strings.
 
 2.3 (2012-08-09)
 ----------------

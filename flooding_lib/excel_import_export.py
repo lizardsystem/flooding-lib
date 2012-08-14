@@ -33,6 +33,10 @@ scenarios for which that project is the main project. If there are no
 such scenarios, there won't be an Excel file.
 """
 
+# Python 3 is coming to town
+from __future__ import print_function, unicode_literals
+from __future__ import absolute_import, division
+
 import ast
 import logging
 import xlrd
@@ -58,32 +62,29 @@ def make_style(pattern):
     """We need to make this a memoized function because each call to
     easyxf creates a new XF object, and Excel files have a limit of
     4094 of them. If we create one per cell, we can go over that, but
-    by memoizing them we only get one per pattern (and we use less
+    by memoizing them we only get one per pattern (and we use fewer
     than 10 different patterns)."""
     return xlwt.easyxf(pattern)
 
 
 class Cell(object):
+    """Helper class to represent an Excel cell. Has a value and a
+    style."""
     def __init__(self, value, pattern=''):
         self.value = value
         self.style = make_style(pattern)
 
-    def __repr__(self):
-        return unicode(self)
-
-    def __unicode__(self):
-        return u"Cell({0}) with style '{1}'".format(self.value, self.style)
-
 
 class ScenarioRow(object):
+    """A row of cells for some scenario."""
     def __init__(self, scenario, headers):
         self.scenario = scenario
         self.headers = iter(headers)  # Explicitly turn into iter
                                       # because it may be one already
 
     def columns(self):
-        # The first column is the scenario id, there is no input field for that
-        # Skip the first column in headers
+        """The first column is the scenario id, there is no input
+        field for that Skip the first column in headers."""
         default_pattern = 'font: bold off; align: wrap on, vertical top;'
 
         self.headers.next()
@@ -98,10 +99,16 @@ class ScenarioRow(object):
 
 
 class FieldInfo(object):
+    """This class can say what to put in each Excel cell, be it a
+    header or a scenario row."""
     def __init__(self, scenariolist):
         self.scenariolist = list(scenariolist)
 
     def add_extra_header_fields(self, header):
+        """Helper function that adds some elements to the header
+        dictionary that don't come from
+        InputField.grouped_input_fields()."""
+
         inputfield = header['inputfield']
 
         header['fieldname'] = inputfield.name
@@ -134,6 +141,9 @@ class FieldInfo(object):
                     }
 
     def headers(self):
+        """Generate a dictionary for each header column, used in the
+        template and to generate the scenario rows."""
+
         # First column is empty
         yield {
             'headername': '',
@@ -146,16 +156,15 @@ class FieldInfo(object):
             yield self.add_extra_header_fields(header)
 
     def rows(self):
+        """The actual rows of data are constructed using the
+        scenariolist and the headers."""
         for scenario in self.scenariolist:
             yield ScenarioRow(scenario, self.headers())
 
 
-def filename_for_project(project):
-    return (u"/tmp/{0} {1}.xls".format(project.id, project.name)
-            .encode("utf-8"))
-
-
 def get_header_style_for(rownr, colnr, header):
+    """Return a style object for the header field in given rownr and
+    colnr."""
     if colnr > 0 and rownr > 0:
         if header.get('ignore', False):
             color = 'gray25'
@@ -365,7 +374,14 @@ def import_header(header_titles):
 
 
 def import_scenario_row(header, rownr, row):
+    """Given a row from the excel sheet, and the header, import it
+    into the database. Returns a list of error messages. Perhaps there
+    will be data written to the database even in case of errors, which
+    shouldn't be a problem because this function will be called within
+    a transaction that won't be committed if there are errors."""
+
     if not row:
+        # Empty row, skip.
         return []
 
     try:
@@ -379,6 +395,8 @@ def import_scenario_row(header, rownr, row):
     except Scenario.DoesNotExist:
         return ["Regel {0}: onbekend scenarionummer {1}.".
                 format(rownr, scenarioid)]
+
+    # XXX Check permissions for that scenario
 
     fieldvalues = row[1:]
 
@@ -399,7 +417,7 @@ def import_scenario_row(header, rownr, row):
             value_object.set(cell.value)
         except ValueError as ve:
             errors.append("Regel {0}: {1}.".format(rownr, ve))
-        scenario
-#        scenario.set_value_for_inputfield(inputfield, value_object)
+
+        scenario.set_value_for_inputfield(inputfield, value_object)
 
     return errors

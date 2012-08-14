@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
+"""Models for the flooding_lib app."""
+
 import datetime
 import logging
 import operator
 import os
+
+from treebeard.al_tree import AL_Node  # Adjacent list implementation
 
 from django.contrib.auth.models import User, Group
 from django.contrib.contenttypes import generic
@@ -10,7 +14,6 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.gis.db import models
 from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext as _
-from treebeard.al_tree import AL_Node  # Adjacent list implementation
 
 from flooding_presentation.models import PresentationLayer, PresentationType
 from flooding_lib.tools.approvaltool.models import ApprovalObject
@@ -485,21 +488,6 @@ class Breach(models.Model):
         db_table = 'flooding_breach'
         ordering = ["name"]
 
-    def get_all_projects(self):
-        """find out all projects that the current breach is part of"""
-        all_regionsets = {}
-        all_projects = {}
-        #collect all regionsets
-        for rs in self.region.regionset_set.all():
-            all_regionsets[rs.id] = rs
-            for rs_ancestor in rs.get_ancestors():
-                all_regionsets[rs_ancestor.id] = rs_ancestor
-        #find all projects that contain at least one of the regionsets
-        for rs in all_regionsets.values():
-            for p in rs.project_set.all():
-                all_projects[p.id] = p
-        return all_projects
-
     def __unicode__(self):
         return self.name
 
@@ -640,9 +628,11 @@ class Project(models.Model):
             status_cache=Scenario.STATUS_DELETED)
 
     def excel_filename(self):
+        """Return a valid unicode filename for an Excel file for this
+        project."""
         name = self.name.replace("""*<>[]=+"'/\\,.:;""", '')
 
-        return "{0} {1}.xls".format(self.id, name)
+        return u"{0} {1}.xls".format(self.id, name)
 
 
 class UserPermission(models.Model):
@@ -826,14 +816,18 @@ def find_imported_value(fieldobject, data_objects):
             value_type = fieldobject.type
             if value_type in (InputField.TYPE_INTEGER,):
                 value = int(value)
+            if value_type in (InputField.TYPE_SELECT,):
+                try:
+                    value = int(value)
+                except ValueError:
+                    pass  # Keep the string version of value
             elif value_type in (
                 InputField.TYPE_FLOAT, InputField.TYPE_INTERVAL):
                 value = float(value)
             elif value_type in (
                 InputField.TYPE_STRING, InputField.TYPE_TEXT,
-                InputField.TYPE_DATE,
-                InputField.TYPE_SELECT):
-                pass  # Already a string -- yes, Select as well!
+                InputField.TYPE_DATE):
+                pass  # Already a string
             elif value_type in (InputField.TYPE_BOOLEAN,):
                 value = bool(value)
             elif value_type in (InputField.TYPE_FILE,):
@@ -1183,9 +1177,9 @@ class Scenario(models.Model):
 
         return cls.objects.filter(scenarioproject__project__in=project_list)
 
-    def value_for_inputfield(self, inputfield):
-        """Given an inputfield from the importtool, find where the
-        value corresponding to it was stored and return it."""
+    def gather_data_objects(self):
+        """Return various data objects related to this
+        scenario. Cached."""
         if not hasattr(self, '_data_objects'):
             breaches = self.breaches.all()
 
@@ -1206,7 +1200,47 @@ class Scenario(models.Model):
                 'region': breach.region
                 }
 
-        return find_imported_value(inputfield, self._data_objects)
+        return self._data_objects
+
+    def value_for_inputfield(self, inputfield):
+        """Given an inputfield from the importtool, find where the
+        value corresponding to it was stored and return it."""
+        data_objects = self.gather_data_objects()
+
+        if data_objects is not None:
+            return find_imported_value(
+                inputfield, self.gather_data_objects())
+
+    def set_value_for_inputfield(self, inputfield, value_object):
+        """Given an inputfield and a value object, actually set that
+        value on this scenario and save it."""
+        table = inputfield.destination_table.lower()
+        field = inputfield.destination_field
+
+        if table not in ('scenario', 'scenariobreach', 'extrascenarioinfo'):
+            raise NotImplementedError("Shouldn't happen.")
+
+        if table == 'scenario':
+            # Set it directly
+            setattr(self, field, value_object.value)
+            self.save()
+
+        elif table == 'scenariobreach':
+            scenariobreach = self.gather_data_objects()['scenariobreach']
+
+            setattr(scenariobreach, field, value_object.value)
+            scenariobreach.save()
+
+        elif table == 'extrascenarioinfo':
+            esi = ExtraScenarioInfo.get(
+                scenario=self, fieldname=field)
+            if esi is None:
+                eif = ExtraInfoField.objects.get(name=field)
+                esi = ExtraScenarioInfo(
+                    scenario=self,
+                    extrainfofield=eif)
+            esi.value = unicode(value_object.value)
+            esi.save()
 
 
 class ScenarioProject(models.Model):

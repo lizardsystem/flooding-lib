@@ -359,30 +359,3 @@ def service_compose_scenario(request, permission_manager, breach_id):
          'bottomlevelbreach': bottomlevelbreach,
          'breach': breach
          })
-
-
-'''
-vul loccutoffs_ids
-loccutoffs_tclose
-
-nog naar kijken: start_calculation
-!mis maxdeflevel
-! geeft niet altijd wat terug - breach.get_all_projects()
-
-    breach.region.name
-    breach.name
-    breach.canalbottomlevel
-    #breach.decheight
-    breach.decheightbaselevel
-    #breach.defaulttide_id
-    #breach.defbaselevel
-    #breach.defrucritical,
-    breach.get_all_projects
-    breach.groundlevel
-    #breach.levelnormfrequency
-
-    breach.region.normfrequency
-
-    'deftpeak', 'deftsim', 'deftstorm', 'maxlevel', 'minlevel', 'name',
-    'type'
-'''

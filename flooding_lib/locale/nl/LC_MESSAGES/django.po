@@ -34,7 +34,7 @@ msgstr "Opmerkingen"
 
 #: forms.py:48 templates/flooding/task_detail.html:19
 msgid "Successful"
-msgstr ""
+msgstr "Succesvol"
 
 #: forms.py:68 templates/flooding/showattachments.html:22
 #: tools/importtool/models.py:578
@@ -72,7 +72,7 @@ msgstr "kanaal"
 
 #: models.py:103 models.py:109
 msgid "inundation"
-msgstr ""
+msgstr "overstroming"
 
 #: models.py:133 views_infowindow.py:332
 msgid "Sobek models"
@@ -84,11 +84,11 @@ msgstr "type"
 
 #: models.py:149
 msgid "case"
-msgstr ""
+msgstr "geval"
 
 #: models.py:151
 msgid "version"
-msgstr ""
+msgstr "versie"
 
 #: models.py:165
 msgid "lock"
@@ -108,7 +108,7 @@ msgstr ""
 
 #: models.py:169 models.py:295
 msgid "undefined"
-msgstr ""
+msgstr "onbekend"
 
 #: models.py:170
 msgid "generic_internal"
@@ -116,11 +116,11 @@ msgstr ""
 
 #: models.py:193
 msgid "Cutoff location"
-msgstr ""
+msgstr "Onderbrekingslocatie"
 
 #: models.py:194
 msgid "Cutoff locations"
-msgstr ""
+msgstr "Onderbrekingslocaties"
 
 #: models.py:227
 msgid "sea"
@@ -216,11 +216,11 @@ msgstr "Bressen"
 
 #: models.py:546
 msgid "Cutoff location set"
-msgstr ""
+msgstr "Groep onderbrekingslocaties"
 
 #: models.py:547
 msgid "Cutoff location sets"
-msgstr ""
+msgstr "Onderbrekingslocatie groepen"
 
 #: models.py:581 views_infowindow.py:334 tools/approvaltool/models.py:14
 #: tools/exporttool/templates/export/exports_run_detail_scenarios_and_projects.html:21
@@ -286,11 +286,11 @@ msgstr "locatie"
 
 #: models.py:723
 msgid "model"
-msgstr ""
+msgstr "model"
 
 #: models.py:724
 msgid "other"
-msgstr ""
+msgstr "andere"
 
 #: models.py:725
 msgid "files"
@@ -302,7 +302,7 @@ msgstr ""
 
 #: models.py:727
 msgid "metadata"
-msgstr ""
+msgstr "metadata"
 
 #: models.py:728
 msgid "breaches"
@@ -452,20 +452,20 @@ msgstr ""
 
 #: models.py:1265
 msgid "Result type"
-msgstr ""
+msgstr "Resultaattype"
 
 #: models.py:1266
 msgid "Result types"
-msgstr ""
+msgstr "Resultaattypes"
 
 #: models.py:1298 tools/exporttool/models.py:126
 msgid "Result"
-msgstr ""
+msgstr "Resultaat"
 
 #: models.py:1299 views.py:1303 templates/flooding/index.html:19
 #: tools/exporttool/models.py:127
 msgid "Results"
-msgstr ""
+msgstr "Resultaten"
 
 #: models.py:1319
 msgid "Cutoff location sobek model setting"
@@ -1108,7 +1108,7 @@ msgstr ""
 
 #: tools/importtool/models.py:330
 msgid "Disapproved"
-msgstr ""
+msgstr "Afgekeurd"
 
 #: tools/importtool/models.py:557
 msgid "Import scenario fields"
@@ -1120,19 +1120,19 @@ msgstr ""
 
 #: tools/importtool/models.py:572
 msgid "Integer"
-msgstr ""
+msgstr "Geheel getal"
 
 #: tools/importtool/models.py:573
 msgid "Float"
-msgstr ""
+msgstr "Getal met decimalen"
 
 #: tools/importtool/models.py:574
 msgid "String"
-msgstr ""
+msgstr "Tekst"
 
 #: tools/importtool/models.py:575
 msgid "Text"
-msgstr ""
+msgstr "Tekst"
 
 #: tools/importtool/models.py:576
 msgid "Interval (D d HH:MM)"

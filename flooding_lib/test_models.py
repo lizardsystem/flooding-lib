@@ -1,3 +1,5 @@
+"""Tests for flooding_lib/models.py."""
+
 from __future__ import unicode_literals
 
 import factory
@@ -430,6 +432,16 @@ class TestRegionSet(TestCase):
         self.assertEquals(regions[2].name, 'C')
 
 
+class TestBreach(TestCase):
+    """Tests for Breach model."""
+    def test_has_unicode(self):
+        """Does the __unicode__ method return unicode."""
+        breach = BreachF.build()
+        uni = breach.__unicode__()
+        self.assertTrue(uni)
+        self.assertTrue(isinstance(uni, unicode))
+
+
 class TestMap(TestCase):
     def test_has_unicode(self):
         map = MapF.build()
@@ -627,6 +639,76 @@ class TestScenario(TestCase):
 
         self.assertEquals(
             scenario.status_cache, models.Scenario.STATUS_DELETED)
+
+    def test_set_value_raises_not_implemented(self):
+        """The function supports only a few destination tables, should
+        raise NotImplementedError if another table is asked for."""
+        scenario = ScenarioF.build()
+        inputfield = InputFieldF.build(
+            destination_table="Project")
+
+        self.assertRaises(
+            NotImplementedError,
+            lambda: scenario.set_value_for_inputfield(inputfield, None))
+
+    def test_set_value_for_inputfield_on_scenario_sets_value(self):
+        """See if a value is really set."""
+        scenario = ScenarioF.create()
+
+        inputfield = InputFieldF.build(
+            destination_table='Scenario',
+            destination_field='name',
+            type=importmodels.InputField.TYPE_STRING)
+
+        value_object = inputfield.build_value_object()
+        value_object.set("new name")
+
+        scenario.set_value_for_inputfield(inputfield, value_object)
+
+        # Was it saved?
+        scenario = models.Scenario.objects.get(pk=scenario.id)
+
+        self.assertEquals(scenario.name, "new name")
+
+    def test_set_value_for_inputfield_sets_scenariobreach_value(self):
+        """See if an inputfield using ScenarioBreach is set."""
+        scenario = ScenarioF.create()
+        ScenarioBreachF.create(scenario=scenario)
+
+        inputfield = InputFieldF.build(
+            destination_table='ScenarioBreach',
+            destination_field='widthbrinit',
+            type=importmodels.InputField.TYPE_FLOAT)
+
+        value_object = inputfield.build_value_object()
+        value_object.set(0.5)
+
+        scenario.set_value_for_inputfield(inputfield, value_object)
+
+        # Was it saved?
+        if hasattr(scenario, '_data_objects'):
+            del scenario._data_objects
+
+        scenariobreach = scenario.gather_data_objects()['scenariobreach']
+        self.assertEquals(scenariobreach.widthbrinit, 0.5)
+
+    def test_set_value_for_inputfield_sets_extrascenarioinfo(self):
+        """See if an inputfield using ExtraScenarioInfo is set."""
+        scenario = ScenarioF.create()
+        ExtraInfoFieldF.create(name="test")
+        inputfield = InputFieldF.build(
+            destination_table='ExtraScenarioInfo',
+            destination_field='test',
+            type=importmodels.InputField.TYPE_FLOAT)
+
+        value_object = inputfield.build_value_object()
+        value_object.set(0.5)
+
+        scenario.set_value_for_inputfield(inputfield, value_object)
+
+        # Was it saved?
+        esi = models.ExtraScenarioInfo.get(scenario, 'test')
+        self.assertEquals(esi.value, u'0.5')
 
 
 class TestProject(TestCase):

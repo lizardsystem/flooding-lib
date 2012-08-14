@@ -489,7 +489,9 @@ class BooleanValue(IntegerValue):
     """The class responsible for saving Booleans"""
 
     def set(self, value):
-        if value.lower() in ['true', 'yes', 'ja']:
+        if isinstance(value, bool):
+            self.value = 1 if value else 0
+        elif value.lower() in ['true', 'yes', 'ja']:
             self.value = 1
         elif value.lower() in ['false', 'no', 'nee']:
             self.value = 0
@@ -740,7 +742,12 @@ class InputField(models.Model):
                     value = k
                     break
             else:
-                return u''
+                # Is it an int in disguise?
+                try:
+                    value = int(value)
+                except ValueError:
+                    # No.
+                    return u''
 
         value_object = self.build_value_object()
         value_object.set(value)
@@ -752,7 +759,7 @@ class InputField(models.Model):
         return value_object
 
     def build_value_object(self):
-        return self.value_class()
+        return (self.value_class)()
 
     def get_editor_dict(self):
 
