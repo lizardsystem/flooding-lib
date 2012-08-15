@@ -1,7 +1,10 @@
 import ast
+import datetime
 import logging
 import os
 import os.path
+import re
+import xlrd
 from shutil import copyfile
 
 from django.conf import settings
@@ -449,15 +452,67 @@ class StringValue(models.Model):
 
 
 class DateValue(StringValue):
-    """The class responsible for saving Dates"""
+    """The class responsible for saving Dates
+
+    We want to store dates in the database with the format
+    "YYYY-MM-DD". All other formats are not dates and should be dealt
+    with. Ideally we'd store them in actual date fields, but that is
+    still in the future.
+
+    There are also still values in the database that look like
+    "40725.0". These represent Excel date values and should be
+    migrated out of the database. Note that Excel dates are
+    ambiguously defined and you can't really translate them without
+    having the corresponding Excel workbook at hand...
+
+    set() expects either:
+    - A date or datetime object
+    - A string with the format YYYY-MM-DD
+    - A float or string that looks like a float, which will be
+      interpreted as an Excel date
+
+    """
+
+    DATE_REGEX = '[0-9]{4}-[0-9][0-9]-[0-9][0-9]'
+    def _set_from_float(self, value):
+            excel_date = xlrd.xldate_as_tuple(value, 0)[:3]
+            self.value = unicode(datetime.date(*excel_date))
+
     def set(self, value):
-        if isinstance(value, float):
-            self.value = get_intervalstring_from_dayfloat(value)
+        error = False
+
+        if isinstance(value, datetime.date):
+            # datetime is a subclass of date, also goes here
+            self.value = unicode(value)[:10]  # Only yyyy-mm-dd portion
+        elif isinstance(value, (float, int)):
+            self._set_from_float(value)
+        elif isinstance(value, (str, unicode)):
+            if re.match(DateValue.DATE_REGEX, value):
+                self.value = unicode(value)
+            else:
+                # Is it a float?
+                try:
+                    self._set_from_float(float(value))
+                except ValueError:
+                    # No
+                    error = True
         else:
-            self.value = unicode(value)
+            error = True
+
+        if error:
+            raise ValueError("Datum in onbekend formaat: {0}".format(value))
+
 
     def to_excel(self):
-        return self.value
+        """Return a datetime.date object."""
+        if re.match(DateValue.DATE_REGEX, self.value):
+            # This is how it should work
+            y, m, d = (int(v) for v in self.value.split('-'))
+            return datetime.date(y, m, d)
+
+        # This is legacy
+        excel_date = xlrd.xldate_as_tuple(float(self.value), 0)[:3]
+        return unicode(datetime.date(*excel_date))
 
     class Meta:
         proxy = True
@@ -481,8 +536,36 @@ class SelectValue(IntegerValue):
     class Meta:
         proxy = True
 
+    def set(self, value, parsed_options=None):
+        logger.debug("VALUE = {0}".format(value))
+        logger.debug("PARSED_OPTIONS = {0}".format(parsed_options))
+        if parsed_options is None:
+            parsed_options = dict()
+
+        if isinstance(value, (str, unicode)):
+            # We'd expect an int, but they've given us a string. Is it
+            # in the option list?
+            for k, v in parsed_options.items():
+                if v == value:
+                    value = k
+                    break
+            else:
+                # Is it an int (or float, Excel has no ints) in disguise?
+                try:
+                    value = int(float(value))
+                except ValueError:
+                    raise ValueError(
+               "Kan `{0}' niet herkennen als een waarde van een domeinlijst"
+                        .format(value))
+
+        if parsed_options and value not in parsed_options:
+            raise ValueError(
+                "Waarde `{0}' niet gevonden in domeinlijst".format(value))
+
+        self.value = value
+
     def to_excel(self):
-        return self.value
+        return int(self.value)
 
 
 class BooleanValue(IntegerValue):
@@ -733,24 +816,13 @@ class InputField(models.Model):
         if value is None:
             return u''
 
-        if (self.type == InputField.TYPE_SELECT and
-            isinstance(value, (str, unicode))):
-            # We'd expect an int, but they've given us a string. Is it
-            # in the option list?
-            for k, v in self.parsed_options.items():
-                if v == value:
-                    value = k
-                    break
-            else:
-                # Is it an int in disguise?
-                try:
-                    value = int(value)
-                except ValueError:
-                    # No.
-                    return u''
-
         value_object = self.build_value_object()
-        value_object.set(value)
+
+        if self.type == InputField.TYPE_SELECT:
+            value_object.set(value, self.parsed_options)
+        else:
+            value_object.set(value)
+
         return value_object.to_excel()
 
     def get_or_create_value_object(self, importscenario_inputfield):

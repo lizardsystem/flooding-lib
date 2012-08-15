@@ -56,23 +56,32 @@ HEADER_ROWS = 4
 
 logger = logging.getLogger(__name__)
 
+DEFAULT_NUM_FORMAT = '#.##'
 
 @memoized
-def make_style(pattern):
+def make_style(pattern, num_format_str=DEFAULT_NUM_FORMAT):
     """We need to make this a memoized function because each call to
     easyxf creates a new XF object, and Excel files have a limit of
     4094 of them. If we create one per cell, we can go over that, but
     by memoizing them we only get one per pattern (and we use fewer
     than 10 different patterns)."""
-    return xlwt.easyxf(pattern)
+    return xlwt.easyxf(pattern, num_format_str=num_format_str)
 
 
 class Cell(object):
     """Helper class to represent an Excel cell. Has a value and a
     style."""
-    def __init__(self, value, pattern=''):
+    def __init__(self, value, pattern='', inputfield=None):
+        """If an inputfield is given, it may be used to add
+        information to the pattern (e.g., formatting for dates)."""
+
         self.value = value
-        self.style = make_style(pattern)
+
+        num_format_str = DEFAULT_NUM_FORMAT
+        if inputfield and inputfield.type == InputField.TYPE_DATE:
+            num_format_str = 'dd/mm/yyyy'
+
+        self.style = make_style(pattern, num_format_str)
 
 
 class ScenarioRow(object):
@@ -95,7 +104,7 @@ class ScenarioRow(object):
             value = self.scenario.value_for_inputfield(inputfield)
 
             value_excel = inputfield.to_excel(value)
-            yield Cell(value_excel, default_pattern)
+            yield Cell(value_excel, default_pattern, inputfield)
 
 
 class FieldInfo(object):
@@ -118,14 +127,13 @@ class FieldInfo(object):
 
         if header['ignore']:
             header['fieldtype'] = u'(veld kan niet aangepast worden)'
+        elif inputfield.type == InputField.TYPE_DATE:
+            header['fieldtype'] = u"Datum (DD/MM/JJJJ)"
         else:
-            if inputfield.type == InputField.TYPE_DATE:
-                header['fieldtype'] = u"Datum (DD/MM/JJJJ)"
-            else:
-                for typeid, description in InputField.TYPE_CHOICES:
-                    if typeid == inputfield.type:
-                        header['fieldtype'] = unicode(description)
-                        break
+            for typeid, description in InputField.TYPE_CHOICES:
+                if typeid == inputfield.type:
+                    header['fieldtype'] = unicode(description)
+                    break
 
         return header
 
@@ -149,7 +157,7 @@ class FieldInfo(object):
             'headername': '',
             'fieldname': '',
             'fieldtype': '',
-            'fieldhint': ''
+            'fieldhint': '(intern scenarionummer, niet veranderen)'
             }
 
         for header in self.headers_from_inputfields():
@@ -414,10 +422,12 @@ def import_scenario_row(header, rownr, row):
         value_object = inputfield.build_value_object()
 
         try:
-            value_object.set(cell.value)
+            if inputfield.type == InputField.TYPE_SELECT:
+                value_object.set(cell.value, inputfield.parsed_options)
+            else:
+                value_object.set(cell.value)
+            scenario.set_value_for_inputfield(inputfield, value_object)
         except ValueError as ve:
             errors.append("Regel {0}: {1}.".format(rownr, ve))
-
-        scenario.set_value_for_inputfield(inputfield, value_object)
 
     return errors

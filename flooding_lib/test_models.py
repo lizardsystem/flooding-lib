@@ -27,6 +27,7 @@ class FakeObject(object):
         for attribute, value in kwargs.iteritems():
             setattr(self, attribute, value)
 
+
 class UnicodeTester(object):
     """Mixin for testing __unicode__."""
     def assert_has_unicode(self, ob):

@@ -1,4 +1,9 @@
 """Tests for excel_import_export.py."""
+
+# Python 3 is coming to town
+from __future__ import print_function, unicode_literals
+from __future__ import absolute_import, division
+
 import mock
 import os
 import xlrd
@@ -21,6 +26,17 @@ class TestMakeStyle(TestCase):
         """Call it twice, should return the exact same object."""
 
         self.assertTrue(eie.make_style('') is eie.make_style(''))
+
+
+class TestCell(TestCase):
+    """Tests for Cell."""
+    @mock.patch('flooding_lib.excel_import_export.make_style')
+    def test_date_inputfield_has_number_format(self, mocked_make_style):
+        inputfield = InputFieldF(type=InputField.TYPE_DATE)
+        eie.Cell(40725.0, inputfield=inputfield)
+
+        num_format = mocked_make_style.call_args[0][1]
+        self.assertEquals(num_format, 'dd/mm/yyyy')
 
 
 class TestCreateExcelFile(TestCase):
@@ -191,7 +207,6 @@ class TestFieldInfo(TestCase):
 
         self.assertEquals(header['fieldtype'], u'Datum (DD/MM/JJJJ)')
 
-
     def test_add_extra_header_fields_type_ignored(self):
         """If an inputfield is ignored, we place a notice in the type field"""
 
@@ -227,7 +242,10 @@ class TestFieldInfo(TestCase):
             self.assertEquals(fields[0]['headername'], '')
             self.assertEquals(fields[0]['fieldname'], '')
             self.assertEquals(fields[0]['fieldtype'], '')
-            self.assertEquals(fields[0]['fieldhint'], '')
+
+            # fieldhint isn't empty, we've placed a hint about the
+            # scenario ids there.
+            #self.assertEquals(fields[0]['fieldhint'], '')
 
     def test_headers_calls_methods(self):
         header = object()

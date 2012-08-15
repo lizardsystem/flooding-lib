@@ -1,3 +1,4 @@
+import datetime
 import factory
 import mock
 
@@ -42,6 +43,34 @@ class InputFieldF(factory.Factory):
     hover_text = ''
     hint_text = ''
     required = False
+
+
+class TestDateValue(TestCase):
+    def setUp(self):
+        self.dateobject = models.DateValue()
+
+    def test_accepts_date_object(self):
+        self.dateobject.set(datetime.date(2012, 8, 15))
+        self.assertEquals(self.dateobject.value, "2012-08-15")
+
+    def test_accepts_datetime_object(self):
+        self.dateobject.set(datetime.datetime(2012, 8, 15))
+        self.assertEquals(self.dateobject.value, "2012-08-15")
+
+    def test_accepts_excel_float(self):
+        self.dateobject.set(40725.0)
+        self.assertEquals(self.dateobject.value, "2011-07-01")
+
+    def test_accepts_excel_date_as_string(self):
+        self.dateobject.set("40725.0")
+        self.assertEquals(self.dateobject.value, "2011-07-01")
+
+    def test_accepts_normal_value(self):
+        self.dateobject.set("2012-08-15")
+        self.assertEquals(self.dateobject.value, "2012-08-15")
+
+    def test_otherwise_value_error(self):
+        self.assertRaises(ValueError, lambda: self.dateobject.set("whee"))
 
 
 class TestImportScenarioInputField(TestCase):

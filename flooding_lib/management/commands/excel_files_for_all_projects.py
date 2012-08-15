@@ -1,4 +1,5 @@
-"""Helper command to generate Excel files, for testing. Not for production use."""
+"""Helper command to generate Excel files, for testing. Not for
+production use."""
 
 # Python 3 is coming to town
 from __future__ import print_function, unicode_literals
