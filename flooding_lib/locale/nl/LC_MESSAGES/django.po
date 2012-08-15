@@ -866,8 +866,8 @@ msgid "From project "
 msgstr "Uit project "
 
 #: templates/flooding/scenario_list.html:21
-msgid "Offer or accept a scenario for sharing"
-msgstr "Bied een scenario aan of accepteer een scenario"
+msgid "Offer a scenario for use in the ROR and/or national use projects"
+msgstr "Bied hier een scenario aan voor de ROR en/of landelijk gebruik"
 
 #: templates/flooding/scenario_list.html:23
 msgid "Scenario list"
