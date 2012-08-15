@@ -124,6 +124,10 @@ class ApprovalObject(models.Model):
             creatorlog=creator,
             remarks=remarks)
 
+    def update_scenario_status(self):
+        for scenarioproject in self.scenarioproject_set.all():
+            scenarioproject.scenario.update_status()
+
     @classmethod
     def setup(cls, name, approvalobjecttype):
         """Create new ApprovalObject and also created the rules for it."""

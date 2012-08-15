@@ -4,7 +4,8 @@ Changelog of flooding-lib
 2.6 (unreleased)
 ----------------
 
-- Nothing changed yet.
+Fix bug where a scenario's status wasn't updated after it was
+approved.
 
 
 2.5 (2012-08-15)
