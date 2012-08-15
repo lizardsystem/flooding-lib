@@ -4,8 +4,12 @@ Changelog of flooding-lib
 2.5 (unreleased)
 ----------------
 
-- Nothing changed yet.
+Decided that dates will always be saved in YYYY-MM-DD where they have
+to be stored as strings. Changed importool.DateValue to reflect that.
 
+Improved error checking of Excel import/export.
+
+Improved Excel formatting of dates and numbers.
 
 2.4.2 (2012-08-14)
 ------------------
