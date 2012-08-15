@@ -58,6 +58,7 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_NUM_FORMAT = '#.##'
 
+
 @memoized
 def make_style(pattern, num_format_str=DEFAULT_NUM_FORMAT):
     """We need to make this a memoized function because each call to
@@ -419,13 +420,8 @@ def import_scenario_row(header, rownr, row):
             # Nothing filled in. Skip.
             continue
 
-        value_object = inputfield.build_value_object()
-
         try:
-            if inputfield.type == InputField.TYPE_SELECT:
-                value_object.set(cell.value, inputfield.parsed_options)
-            else:
-                value_object.set(cell.value)
+            value_object = inputfield.build_value_object(cell.value)
             scenario.set_value_for_inputfield(inputfield, value_object)
         except ValueError as ve:
             errors.append("Regel {0}: {1}.".format(rownr, ve))

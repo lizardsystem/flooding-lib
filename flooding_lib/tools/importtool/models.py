@@ -474,6 +474,7 @@ class DateValue(StringValue):
     """
 
     DATE_REGEX = '[0-9]{4}-[0-9][0-9]-[0-9][0-9]'
+
     def _set_from_float(self, value):
             excel_date = xlrd.xldate_as_tuple(value, 0)[:3]
             self.value = unicode(datetime.date(*excel_date))
@@ -501,7 +502,6 @@ class DateValue(StringValue):
 
         if error:
             raise ValueError("Datum in onbekend formaat: {0}".format(value))
-
 
     def to_excel(self):
         """Return a datetime.date object."""
@@ -816,13 +816,7 @@ class InputField(models.Model):
         if value is None:
             return u''
 
-        value_object = self.build_value_object()
-
-        if self.type == InputField.TYPE_SELECT:
-            value_object.set(value, self.parsed_options)
-        else:
-            value_object.set(value)
-
+        value_object = self.build_value_object(value)
         return value_object.to_excel()
 
     def get_or_create_value_object(self, importscenario_inputfield):
@@ -830,8 +824,16 @@ class InputField(models.Model):
             importscenario_inputfield=importscenario_inputfield)
         return value_object
 
-    def build_value_object(self):
-        return (self.value_class)()
+    def build_value_object(self, value=None):
+        value_object = (self.value_class)()
+
+        if value is not None:
+            if self.type == InputField.TYPE_SELECT:
+                value_object.set(value, self.parsed_options)
+            else:
+                value_object.set(value)
+
+        return value_object
 
     def get_editor_dict(self):
 

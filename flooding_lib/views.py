@@ -10,6 +10,7 @@ import Image
 import ImageDraw
 
 from django.conf import settings
+from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
 from django.core.urlresolvers import reverse
 from django.db.models import Q

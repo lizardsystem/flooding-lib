@@ -1068,7 +1068,6 @@ class Scenario(models.Model):
         Updates status_cache. Called by Task.save()
         """
         new_status = self.get_status()
-        logger.debug("In update_status, new_status = "+str(new_status))
         self.status_cache = new_status
         self.save()
 

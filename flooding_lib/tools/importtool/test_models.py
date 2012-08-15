@@ -273,6 +273,24 @@ class TestInputField(TestCase):
         inputfield = InputFieldF(options="whee")
         self.assertEquals(inputfield.parsed_options, {})
 
+    def test_build_value_object(self):
+        inputfield = InputFieldF(type=models.InputField.TYPE_INTEGER)
+        value_object = inputfield.build_value_object()
+        self.assertTrue(isinstance(value_object, models.IntegerValue))
+
+    def test_build_value_object_with_value(self):
+        inputfield = InputFieldF(type=models.InputField.TYPE_INTEGER)
+        value_object = inputfield.build_value_object(3)
+        self.assertEquals(value_object.value, 3)
+
+    @mock.patch('flooding_lib.tools.importtool.models.SelectValue.set')
+    def test_build_value_object_uses_options(self, mocked_set):
+        inputfield = InputFieldF(
+            type=models.InputField.TYPE_SELECT,
+            options="{3: 'whee'}")
+        inputfield.build_value_object(3)
+        self.assertEquals(mocked_set.call_args[0][1], {3: 'whee'})
+
 
 class TestDisplayValueUnicode(TestCase):
     def test_none(self):
