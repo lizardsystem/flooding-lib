@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import factory
 import mock
 
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 
@@ -26,6 +26,15 @@ class FakeObject(object):
     def __init__(self, **kwargs):
         for attribute, value in kwargs.iteritems():
             setattr(self, attribute, value)
+
+class UnicodeTester(object):
+    """Mixin for testing __unicode__."""
+    def assert_has_unicode(self, ob):
+        """Assert that ob's __unicode__ returns a non-empty unicode
+        string."""
+        uni = ob.__unicode__()
+        self.assertTrue(uni)
+        self.assertTrue(isinstance(uni, unicode))
 
 ## Model factories
 
@@ -57,6 +66,7 @@ class SobekModelF(factory.Factory):
 class CutoffLocationF(factory.Factory):
     FACTORY_FOR = models.CutoffLocation
 
+    name = "some cutoff location"
     bottomlevel = 0.0
     width = 1.0
     type = 1  # sluis (_('lock'))
@@ -76,14 +86,6 @@ class ExtraInfoFieldF(factory.Factory):
     position = 0
 
 
-class ExtraScenarioInfoF(factory.Factory):
-    FACTORY_FOR = models.ExtraScenarioInfo
-
-    extrainfofield = ExtraInfoFieldF(name='forextrascenarioinfo')
-    scenario = FakeObject()
-    value = None
-
-
 class ScenarioF(factory.Factory):
     FACTORY_FOR = models.Scenario
 
@@ -91,10 +93,37 @@ class ScenarioF(factory.Factory):
     tsim = 0.0
 
 
+class ExtraScenarioInfoF(factory.Factory):
+    FACTORY_FOR = models.ExtraScenarioInfo
+
+    extrainfofield = ExtraInfoFieldF(name='forextrascenarioinfo')
+    scenario = ScenarioF.build()
+    value = None
+
+
 class ProjectF(factory.Factory):
     FACTORY_FOR = models.Project
 
     owner = User.objects.get_or_create(username='remco')[0]
+    friendlyname = "hoi!"
+
+
+class UserPermissionF(factory.Factory):
+    """Factory for UserPermission."""
+    FACTORY_FOR = models.UserPermission
+
+    user = User.objects.get_or_create(username='remco')[0]
+    permission = models.UserPermission.PERMISSION_SCENARIO_VIEW
+
+
+class ProjectGroupPermissionF(factory.Factory):
+    """Factory for ProjectGroupPermission."""
+    FACTORY_FOR = models.ProjectGroupPermission
+
+    group = Group.objects.get_or_create(name="some group")[0]
+    project = ProjectF.build()
+
+    permission = models.UserPermission.PERMISSION_SCENARIO_VIEW
 
 
 class ExternalWaterF(factory.Factory):
@@ -145,6 +174,20 @@ class BreachF(factory.Factory):
     geom = 'POINT(0 0)'
 
 
+class BreachSobekModelF(factory.Factory):
+    """Factory for BreachSobekModel."""
+    FACTORY_FOR = models.BreachSobekModel
+
+    sobekid = "some sobek id"
+
+
+class CutoffLocationSetF(factory.Factory):
+    """Factory for CutoffLocationSet."""
+    FACTORY_FOR = models.CutoffLocationSet
+
+    name = "some cutofflocationset"
+
+
 class WaterlevelSetF(factory.Factory):
     FACTORY_FOR = models.WaterlevelSet
 
@@ -170,6 +213,60 @@ class ScenarioBreachF(factory.Factory):
     pitdepth = 1
     tmaxdepth = 1
     extwmaxlevel = 1
+
+
+class ScenarioCutoffLocationF(factory.Factory):
+    """Factory for ScenarioCutoffLocation."""
+    FACTORY_FOR = models.ScenarioCutoffLocation
+
+    scenario = factory.LazyAttribute(lambda obj: ScenarioF.create())
+    cutofflocation = factory.LazyAttribute(
+        lambda obj: CutoffLocationF.create())
+
+
+class ProgramF(factory.Factory):
+    """Factory for Program."""
+    FACTORY_FOR = models.Program
+
+    name = "some program"
+
+
+class ResultTypeF(factory.Factory):
+    """Factory for ResultType."""
+    FACTORY_FOR = models.ResultType
+
+    name = "result type name"
+
+
+class CutoffLocationSobekModelSettingF(factory.Factory):
+    """Factory for CutoffLocationSobekModelSetting."""
+    FACTORY_FOR = models.CutoffLocationSobekModelSetting
+
+    cutofflocation = factory.LazyAttribute(
+        lambda obj: CutoffLocationF.create())
+    sobekmodel = factory.LazyAttribute(
+        lambda obj: SobekModelF.create())
+
+    sobekid = "some sobekid"
+
+
+class TaskTypeF(factory.Factory):
+    """Factory for TaskType."""
+    FACTORY_FOR = models.TaskType
+
+    id = 150
+    name = "PNG creation"
+
+
+class TaskF(factory.Factory):
+    """Factory for Task."""
+    FACTORY_FOR = models.Task
+
+    scenario = factory.LazyAttribute(lambda obj: ScenarioF.create())
+    remarks = ''
+    tasktype = factory.LazyAttribute(lambda obj: TaskTypeF.create())
+
+    creatorlog = "test"
 
 
 class WaterlevelF(factory.Factory):
@@ -233,7 +330,7 @@ class TestHelperFunctions(TestCase):
             models.get_attachment_path(instance, 'filename.zip'))
 
 
-class TestAttachment(TestCase):
+class TestAttachment(UnicodeTester, TestCase):
     def testFilename(self):
         path = 'some/path/with/several.periods.txt'
         filename = 'several.periods.txt'
@@ -246,21 +343,20 @@ class TestAttachment(TestCase):
 
     def test_has_unicode(self):
         """Check that with __unicode__ returns is in fact unicode."""
-        attachment = AttachmentF(name=u"some name")
-        self.assertEquals(type(attachment.__unicode__()), unicode)
+        self.assert_has_unicode(AttachmentF(name=u"some name"))
 
 
-class TestSobekVersion(TestCase):
+class TestSobekVersion(UnicodeTester, TestCase):
     def test_has_unicode(self):
         """Check that with __unicode__ returns is in fact unicode."""
-        sobekversion = SobekVersionF(name=u"some name")
-        self.assertEquals(type(sobekversion.__unicode__()), unicode)
+        self.assert_has_unicode(SobekVersionF(name=u"some name"))
 
 
-class TestSobekModel(TestCase):
+class TestSobekModel(UnicodeTester, TestCase):
+    """Tests for SobekModel."""
     def test_has_unicode(self):
-        sobekmodel = SobekModelF()
-        self.assertEquals(type(sobekmodel.__unicode__()), unicode)
+        """Check that with __unicode__ returns is in fact unicode."""
+        self.assert_has_unicode(SobekModelF())
 
     def test_get_summary_str(self):
         """Check that it returns something and is Unicode"""
@@ -270,10 +366,11 @@ class TestSobekModel(TestCase):
         self.assertTrue(summary)
 
 
-class TestCutoffLocation(TestCase):
+class TestCutoffLocation(UnicodeTester, TestCase):
+    """Tests for CutoffLocation."""
     def test_has_unicode(self):
-        cutofflocation = CutoffLocationF()
-        self.assertEquals(type(cutofflocation.__unicode__()), unicode)
+        """Check that with __unicode__ returns is in fact unicode."""
+        self.assert_has_unicode(CutoffLocationF())
 
     def test_isinternal(self):
         """Returns if CutoffLocation is an internal cutoff location
@@ -442,15 +539,43 @@ class TestBreach(TestCase):
         self.assertTrue(isinstance(uni, unicode))
 
 
-class TestMap(TestCase):
+class TestBreachSobekModel(TestCase):
+    """Tests for BreachSobekModel."""
     def test_has_unicode(self):
-        map = MapF.build()
-        uni = map.__unicode__()
+        """Test whether it returns unicode."""
+        sobekmodel = SobekModelF.create()
+        breach = BreachF.create()
+
+        bsm = BreachSobekModelF.create(
+            sobekmodel=sobekmodel, breach=breach)
+
+        uni = bsm.__unicode__()
+        self.assertTrue(uni)
+        self.assertTrue(isinstance(uni, unicode))
+
+
+class TestMap(TestCase):
+    """Tests for Map."""
+    def test_has_unicode(self):
+        """Test whether it returns unicode."""
+        amap = MapF.build()
+        uni = amap.__unicode__()
+        self.assertTrue(uni)
+        self.assertTrue(isinstance(uni, unicode))
+
+
+class TestCutoffLocationSet(TestCase):
+    """Tests for CutoffLocationSet."""
+    def test_has_unicode(self):
+        """Test whether it returns unicode."""
+        cls = CutoffLocationSetF.build()
+        uni = cls.__unicode__()
         self.assertTrue(uni)
         self.assertTrue(isinstance(uni, unicode))
 
 
 class TestScenario(TestCase):
+    """Tests for Scenario."""
     def setUp(self):
         self.aot = ApprovalObjectType.objects.create(
             type=ApprovalObjectType.TYPE_PROJECT)
@@ -810,6 +935,99 @@ class TestProject(TestCase):
         scenarios = project.original_scenarios()
 
         self.assertEquals(scenarios.count(), 0)
+
+    def test_has_unicode(self):
+        """Test whether it returns unicode."""
+        project = ProjectF.build()
+        uni = project.__unicode__()
+        self.assertTrue(uni)
+        self.assertTrue(isinstance(uni, unicode))
+
+
+class TestScenarioBreach(UnicodeTester, TestCase):
+    """Tests for ScenarioBreach."""
+    def test_has_unicode(self):
+        """Test whether it returns unicode."""
+        scenariobreach = ScenarioBreachF.build()
+        self.assert_has_unicode(scenariobreach)
+
+
+class TestScenarioCutoffLocation(UnicodeTester, TestCase):
+    """Tests for ScenarioCutoffLocation."""
+    def test_has_unicode(self):
+        """Test whether it has unicode."""
+        scl = ScenarioCutoffLocationF.build()
+        self.assert_has_unicode(scl)
+
+
+class TestProgram(UnicodeTester, TestCase):
+    """Tests for Program."""
+    def test_has_unicode(self):
+        """Test whether it has unicode."""
+        program = ProgramF.build()
+        self.assert_has_unicode(program)
+
+
+class TestResultType(UnicodeTester, TestCase):
+    """Tests for ResultType."""
+    def test_has_unicode(self):
+        """Test whether it has unicode."""
+        resulttype = ResultTypeF.build()
+        self.assert_has_unicode(resulttype)
+
+
+class TestCutoffLocationSobekModelSetting(UnicodeTester, TestCase):
+    """Tests for CutoffLocationSobekModelSetting."""
+    def test_has_unicode(self):
+        """Test whether it has unicode."""
+        clsms = CutoffLocationSobekModelSettingF.build()
+        self.assert_has_unicode(clsms)
+
+
+class TestTaskType(UnicodeTester, TestCase):
+    """Tests for TaskType."""
+    def test_has_unicode(self):
+        """Test whether it has unicode."""
+        tasktype = TaskTypeF.build()
+        self.assert_has_unicode(tasktype)
+
+
+class TestTask(UnicodeTester, TestCase):
+    """Tests for Task."""
+    def test_has_unicode(self):
+        """Test whether it has unicode."""
+        task = TaskF.build()
+        self.assert_has_unicode(task)
+
+
+class TestUserPermission(TestCase):
+    """Tests for UserPermission."""
+    def test_has_unicode(self):
+        userpermission = UserPermissionF.build()
+        uni = userpermission.__unicode__()
+        self.assertTrue(uni)
+        self.assertTrue(isinstance(uni, unicode))
+
+
+class TestProjectGroupPermission(UnicodeTester, TestCase):
+    """Tests for ProjectGroupPermission."""
+    def test_has_unicode(self):
+        """Check if __unicode__ is valid."""
+        self.assert_has_unicode(ProjectGroupPermissionF.build())
+
+
+class TestExtraInfoField(UnicodeTester, TestCase):
+    """Tests for ExtraInfoField."""
+    def test_has_unicode(self):
+        """Check if __unicode__ is valid."""
+        self.assert_has_unicode(ExtraInfoFieldF.build())
+
+
+class TestExtraScenarioInfo(UnicodeTester, TestCase):
+    """Tests for ExtraScenarioInfo."""
+    def test_has_unicode(self):
+        """Check if __unicode__ is valid."""
+        self.assert_has_unicode(ExtraScenarioInfoF.build())
 
 
 class TestFindImportedValue(TestCase):

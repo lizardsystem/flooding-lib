@@ -508,13 +508,13 @@ class BreachSobekModel(models.Model):
     sobekid = models.CharField(max_length=200)
 
     class Meta:
+        """Options."""
         unique_together = (("sobekmodel", "breach"),)
         db_table = 'flooding_breachsobekmodel'
 
     def __unicode__(self):
-        return ("%s - %s: %s" %
-                (self.sobekmodel.__unicode__(), self.breach.__unicode__(),
-                 self.sobekid))
+        return u"{0} - {1}: {2}".format(
+            self.sobekmodel, self.breach, self.sobekid)
 
 
 class CutoffLocationSet(models.Model):
@@ -1422,7 +1422,7 @@ class ResultType(models.Model):
         db_table = 'flooding_resulttype'
 
     def __unicode__(self):
-        return self.shortname_dutch
+        return self.shortname_dutch or self.name
 
 
 class Result(models.Model):
