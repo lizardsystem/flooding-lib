@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.5 (unreleased)
+2.5 (2012-08-15)
 ----------------
 
 Decided that dates will always be saved in YYYY-MM-DD where they have
