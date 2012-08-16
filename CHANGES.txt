@@ -4,7 +4,13 @@ Changelog of flooding-lib
 2.7 (unreleased)
 ----------------
 
-- Nothing changed yet.
+A boolean in an ExtraScenarioInfo field is not an int, but a string
+like "1" or "0" -- fix the function that turns it into a bool.
+
+Fix typos in excel_import_export_project.html template.
+
+We can't use a filter on project_id in scenarioproject, needs to be
+project__id.
 
 
 2.6 (2012-08-16)
