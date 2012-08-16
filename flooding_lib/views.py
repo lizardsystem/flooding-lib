@@ -1457,7 +1457,7 @@ class ExcelImportExportViewProject(
                     scenarioproject.scenario_id
                     for scenarioproject in
                     ScenarioProject.objects.filter(
-                        project_id=project_id).all())
+                        project__id=project_id).all())
                 # Check it
                 errors = excel_import_export.import_uploaded_excel_file(
                     dest_path, allowed_scenario_ids)

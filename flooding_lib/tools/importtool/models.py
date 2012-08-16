@@ -568,7 +568,7 @@ class BooleanValue(IntegerValue):
     """The class responsible for saving Booleans"""
 
     def set(self, value):
-        if isinstance(value, bool):
+        if isinstance(value, (bool, int)):
             self.value = 1 if value else 0
         elif value.lower() in ['true', 'yes', 'ja']:
             self.value = 1

@@ -837,7 +837,8 @@ def find_imported_value(fieldobject, data_objects):
                 InputField.TYPE_DATE):
                 pass  # Already a string
             elif value_type in (InputField.TYPE_BOOLEAN,):
-                value = bool(value)
+                # Value is a string like "1" or "0"
+                value = bool(int(value))
             elif value_type in (InputField.TYPE_FILE,):
                 # Don't know what to do
                 value = None
