@@ -434,7 +434,7 @@ class TestImportUploadedExcelFile(TestCase):
         with mock.patch(
             'flooding_lib.excel_import_export.get_scenario_worksheet',
             return_value=worksheet):
-            self.assertEquals([], eie.import_uploaded_excel_file(''))
+            self.assertEquals([], eie.import_uploaded_excel_file('', set()))
 
         patched_import_header.assertCalledWith(cells)
 
@@ -449,7 +449,9 @@ class TestImportUploadedExcelFile(TestCase):
         with mock.patch(
             'flooding_lib.excel_import_export.get_scenario_worksheet',
             return_value=worksheet):
-            self.assertEquals(["error!"], eie.import_uploaded_excel_file(''))
+            self.assertEquals(
+                ["error!"],
+                eie.import_uploaded_excel_file('', set()))
 
     @mock.patch('flooding_lib.excel_import_export.import_header',
                 return_value=(eie.ImportedHeader(), []))
@@ -467,13 +469,18 @@ class TestImportUploadedExcelFile(TestCase):
 
         worksheet = mock.MagicMock(row=row, nrows=5)
 
+        allowed_ids = set()
+
         with mock.patch(
             'flooding_lib.excel_import_export.get_scenario_worksheet',
             return_value=worksheet):
-            eie.import_uploaded_excel_file('')
+            eie.import_uploaded_excel_file('', allowed_ids)
 
             patched_import_scenario_row.assertCalledWith(
-                (patched_import_header.return_value, 4, onecellrow))
+                (patched_import_header.return_value,
+                 4,
+                 onecellrow,
+                 allowed_ids))
 
     @mock.patch('flooding_lib.excel_import_export.import_header',
                 return_value=(eie.ImportedHeader(), []))
@@ -486,7 +493,7 @@ class TestImportUploadedExcelFile(TestCase):
         with mock.patch(
             'flooding_lib.excel_import_export.get_scenario_worksheet',
             return_value=worksheet):
-            errors = eie.import_uploaded_excel_file('')
+            errors = eie.import_uploaded_excel_file('', set())
             self.assertEquals(errors, ["error!"])
 
 
@@ -583,13 +590,13 @@ class TestImportScenarioRow(TestCase):
     """Tests for the import_scenario_row function."""
     def test_empty_row(self):
         """Shouldn't really do anything, just return"""
-        errors = eie.import_scenario_row(eie.ImportedHeader(), 5, [])
+        errors = eie.import_scenario_row(eie.ImportedHeader(), 5, [], set())
         self.assertEquals(errors, [])
 
     def test_empty_scenario_id(self):
         """Should give an error message mentioning the row nr"""
         errors = eie.import_scenario_row(
-            eie.ImportedHeader(), 66, [mock.MagicMock(value="")])
+            eie.ImportedHeader(), 66, [mock.MagicMock(value="")], set())
 
         self.assertEquals(len(errors), 1)
         self.assertTrue("66" in errors[0])
@@ -598,7 +605,8 @@ class TestImportScenarioRow(TestCase):
         """Tests that a row with a badly formed scenario id returns an
         error, and that the error message includes the line number."""
         errors = eie.import_scenario_row(
-            eie.ImportedHeader(), 66, [mock.MagicMock(value="scenarioid")])
+            eie.ImportedHeader(), 66,
+            [mock.MagicMock(value="scenarioid")], set())
 
         self.assertEquals(len(errors), 1)
         self.assertTrue("66" in errors[0])
@@ -607,11 +615,24 @@ class TestImportScenarioRow(TestCase):
         """Tests that using a nonexisting scenario id results in an
         error, and that the error message includes the line number."""
         errors = eie.import_scenario_row(
-            eie.ImportedHeader(), 66, [mock.MagicMock(value=42313)])
+            eie.ImportedHeader(), 66, [mock.MagicMock(value=42313)], set())
 
         self.assertEquals(len(errors), 1)
         self.assertTrue("66" in errors[0])
 
+    def test_disallowed_scenario_id(self):
+        """Tests that using a scenario id that exists but isn't in
+        allowed scenario id fails."""
+        scenario = ScenarioF.create()
+        allowed_ids = set((scenario.id+1,))
+        errors = eie.import_scenario_row(
+            eie.ImportedHeader(),
+            66,
+            [mock.MagicMock(value=scenario.id)],
+            allowed_ids)
+
+        self.assertEquals(len(errors), 1)
+        self.assertTrue("66" in errors[0])
 
 class FakeCell(object):
     """Helper object to hold a value; fake Excel cell."""
@@ -629,6 +650,7 @@ class TestImportScenarioRow2(TestCase):
         cell with that scenario's ID."""
         self.scenario = ScenarioF.create()
         self.rowstart = [FakeCell(unicode(self.scenario.id))]
+        self.allowed_ids = set((self.scenario.id,))
 
     def build_header(self, *inputfields):
         """Build an eie.ImportedHeader object using named
@@ -652,7 +674,7 @@ class TestImportScenarioRow2(TestCase):
         header = self.build_header(inputfield)
 
         eie.import_scenario_row(
-            header, 66, self.rowstart + [cell])
+            header, 66, self.rowstart + [cell], self.allowed_ids)
 
         self.assertFalse(mocked_setvalue.called)
 
@@ -667,7 +689,7 @@ class TestImportScenarioRow2(TestCase):
         header = self.build_header(inputfield)
 
         eie.import_scenario_row(
-            header, 66, self.rowstart + [cell])
+            header, 66, self.rowstart + [cell], self.allowed_ids)
 
         self.assertFalse(mocked_setvalue.called)
 
@@ -683,7 +705,7 @@ class TestImportScenarioRow2(TestCase):
         header = self.build_header(inputfield)
 
         eie.import_scenario_row(
-            header, 66, self.rowstart + [cell])
+            header, 66, self.rowstart + [cell], self.allowed_ids)
 
         self.assertTrue(mocked_setvalue.called)
         c_inputfield, c_value = mocked_setvalue.call_args[0]
@@ -701,7 +723,7 @@ class TestImportScenarioRow2(TestCase):
         header = self.build_header(inputfield)
 
         errors = eie.import_scenario_row(
-            header, 66, self.rowstart + [cell])
+            header, 66, self.rowstart + [cell], self.allowed_ids)
 
         self.assertEquals(len(errors), 1)
         self.assertTrue("66" in errors[0])

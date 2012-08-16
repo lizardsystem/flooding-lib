@@ -5,6 +5,7 @@ import datetime
 import logging
 import os
 import platform
+import time
 
 import Image
 import ImageDraw
@@ -26,7 +27,7 @@ import lizard_ui.views
 from flooding_base.models import Text
 from flooding_lib.models import (Project, UserPermission, Scenario,
     Region, RegionSet, Breach, ScenarioCutoffLocation, ScenarioBreach, Result,
-    ResultType, Task, TaskType, SobekModel)
+    ResultType, Task, TaskType, SobekModel, ScenarioProject)
 from flooding_lib.forms import ScenarioBreachForm, ProjectForm
 from flooding_lib.forms import ScenarioForm, ScenarioCutoffLocationForm
 from flooding_lib.forms import ScenarioNameRemarksForm
@@ -1433,6 +1434,11 @@ class ExcelImportExportViewProject(
         self.form = forms.ExcelImportForm(request.POST, request.FILES)
         self.project_id = project_id
         self.excel_errors = []
+
+        if not permission_manager.check_project_permission(
+            self.project(), UserPermission.PERMISSION_SCENARIO_EDIT):
+            raise PermissionDenied()
+
         if self.form.is_valid():
             # Move file
             filename = request.FILES['excel_file'].name
@@ -1446,9 +1452,15 @@ class ExcelImportExportViewProject(
                     for chunk in request.FILES['excel_file'].chunks():
                         dest.write(chunk)
 
+                # Only scenario_ids from this project are allowed
+                allowed_scenario_ids = set(
+                    scenarioproject.scenario_id
+                    for scenarioproject in
+                    ScenarioProject.objects.filter(
+                        project_id=project_id).all())
                 # Check it
                 errors = excel_import_export.import_uploaded_excel_file(
-                    dest_path)
+                    dest_path, allowed_scenario_ids)
 
                 # If successful, redirect
                 if not errors:
@@ -1469,39 +1481,60 @@ class ExcelImportExportViewProject(
             self._project = get_object_or_404(Project, pk=self.project_id)
         return self._project
 
+    def last_changed(self):
+        filename = os.path.join(
+            settings.EXCEL_DIRECTORY, self.project().excel_filename())
+
+        if not os.path.exists(filename):
+            return u"het bestand bestaat nog niet"
+
+        mtime = time.localtime(os.path.getmtime(filename))
+        return unicode(datetime.datetime(
+                mtime.tm_year, mtime.tm_mon, mtime.tm_mday,
+                mtime.tm_hour, mtime.tm_min, mtime.tm_sec))
+
 
 @receives_loggedin_permission_manager
 def excel_download(request, permission_manager, project_id):
     project = get_object_or_404(Project, pk=project_id)
 
+    # Check permissions
     if not permission_manager.check_project_permission(
-        project, UserPermission.PERMISSION_SCENARIO_APPROVE):
+        project, UserPermission.PERMISSION_SCENARIO_VIEW):
         raise PermissionDenied()
 
     filename = project.excel_filename()
-    directory = os.path.join(settings.BUILDOUT_DIR, "var", "excel")
+    directory = settings.EXCEL_DIRECTORY
     full_path = os.path.join(directory, filename)
-    nginx_path = os.path.join('/download_excel', filename)
 
+    # Make sure the directory exists
     if not os.path.exists(directory):
         os.makedirs(directory)
 
-    from flooding_lib import excel_import_export
-    excel_import_export.create_excel_file(project, full_path)
+    if (not os.path.exists(full_path) or
+        not project.excel_generation_too_slow()):
+        # Generate it if it's not there or generating isn't too slow
+        from flooding_lib import excel_import_export
+        excel_import_export.create_excel_file(project, full_path)
 
+    # Send the file:
     response = HttpResponse()
-    response['X-Sendfile'] = full_path  # Apache
-    response['X-Accel-Redirect'] = nginx_path  # Nginx
 
     # Unset the Content-Type as to allow for the webserver
     # to determine it.
     response['Content-Type'] = ''
 
-    # Only works for Apache and Nginx, under Linux right now
+    # Apache
+    response['X-Sendfile'] = full_path
+
+    # Nginx
+    nginx_path = os.path.join('/download_excel', filename)
+    response['X-Accel-Redirect'] = nginx_path
+
+    # Sending by webserver only works for Apache and Nginx, under
+    # Linux right now. Otherwise and in development, use Django's
+    # static serve.
     if settings.DEBUG or not platform.system() == 'Linux':
-        logger.debug(
-            "With DEBUG off, we'd serve the programfile via webserver: \n%s",
-            response)
         return serve(request, full_path, '/')
-    logger.debug("Serving programfile %s via webserver.", full_path)
+
     return response

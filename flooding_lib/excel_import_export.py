@@ -281,7 +281,7 @@ def get_scenario_worksheet(path):
     return worksheet
 
 
-def import_uploaded_excel_file(path):
+def import_uploaded_excel_file(path, allowed_scenario_ids):
     """Check and import the Excel file. The whole operation is wrapped
     in a database transaction, so that any problems won't change the
     database. Returns a list of error messages; an empty list
@@ -305,7 +305,7 @@ def import_uploaded_excel_file(path):
 
             for rownr in range(HEADER_ROWS, worksheet.nrows):
                 row_errors = import_scenario_row(
-                    header, rownr, worksheet.row(rownr))
+                    header, rownr, worksheet.row(rownr), allowed_scenario_ids)
 
                 if row_errors:
                     errors += row_errors
@@ -382,7 +382,7 @@ def import_header(header_titles):
     return header, errors
 
 
-def import_scenario_row(header, rownr, row):
+def import_scenario_row(header, rownr, row, allowed_scenario_ids):
     """Given a row from the excel sheet, and the header, import it
     into the database. Returns a list of error messages. Perhaps there
     will be data written to the database even in case of errors, which
@@ -405,7 +405,9 @@ def import_scenario_row(header, rownr, row):
         return ["Regel {0}: onbekend scenarionummer {1}.".
                 format(rownr, scenarioid)]
 
-    # XXX Check permissions for that scenario
+    if scenarioid not in allowed_scenario_ids:
+        return ["Regel {0}: Scenario {1} zit niet in dit project."
+                .format(rownr, scenarioid)]
 
     fieldvalues = row[1:]
 

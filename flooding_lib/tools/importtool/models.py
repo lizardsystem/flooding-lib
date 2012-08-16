@@ -280,8 +280,6 @@ class ImportScenario(models.Model):
             filepath = filepath.replace('\\', '/')
             dest_file = dest_file.replace('\\', '/')
 
-            logger.debug("VALUE = " + filepath)
-            logger.debug("DEST_FILE = " + dest_file)
             copyfile(filepath, dest_file)
 
     def import_into_flooding(self, username):
@@ -537,8 +535,6 @@ class SelectValue(IntegerValue):
         proxy = True
 
     def set(self, value, parsed_options=None):
-        logger.debug("VALUE = {0}".format(value))
-        logger.debug("PARSED_OPTIONS = {0}".format(parsed_options))
         if parsed_options is None:
             parsed_options = dict()
 
@@ -816,8 +812,11 @@ class InputField(models.Model):
         if value is None:
             return u''
 
-        value_object = self.build_value_object(value)
-        return value_object.to_excel()
+        try:
+            value_object = self.build_value_object(value)
+            return value_object.to_excel()
+        except ValueError:
+            return u''
 
     def get_or_create_value_object(self, importscenario_inputfield):
         value_object, _ = self.value_class.objects.get_or_create(

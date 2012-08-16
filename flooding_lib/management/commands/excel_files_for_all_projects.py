@@ -7,6 +7,7 @@ from __future__ import absolute_import, division
 
 import os
 
+from django.conf import settings
 from django.core.management.base import BaseCommand
 
 from flooding_lib import models
@@ -19,6 +20,10 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         activate("nl")  # Nederlands
 
-        for project in models.Project.objects.filter(pk=3).all():
-            filename = os.path.join('/tmp', project.excel_filename())
-            excel_import_export.create_excel_file(project, filename)
+        for project in models.Project.objects.all():
+            filename = os.path.join(
+                settings.EXCEL_DIRECTORY,
+                project.excel_filename())
+            if not os.path.exists(filename):
+                print("Creating Excel for project {0}.".format(project.id))
+                excel_import_export.create_excel_file(project, filename)

@@ -8,6 +8,7 @@ import os
 
 from treebeard.al_tree import AL_Node  # Adjacent list implementation
 
+from django.conf import settings
 from django.contrib.auth.models import User, Group
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
@@ -633,6 +634,13 @@ class Project(models.Model):
         name = self.name.replace("""*<>[]=+"'/\\,.:;""", '')
 
         return u"{0} {1}.xls".format(self.id, name)
+
+    def excel_generation_too_slow(self):
+        """Does Excel generation for this project take too long?"""
+
+        # If there is a file, use that...
+        return os.path.exists(os.path.join(
+                settings.EXCEL_DIRECTORY, self.excel_filename()))
 
 
 class UserPermission(models.Model):

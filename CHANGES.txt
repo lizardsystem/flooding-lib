@@ -4,7 +4,23 @@ Changelog of flooding-lib
 2.6 (unreleased)
 ----------------
 
-- Nothing changed yet.
+Added security checks to Excel download/upload. An Excel upload for a
+given project can only modify scenarios that are in that
+project. Downloading needs SCENARIO_VIEW rights, uploading
+SCENARIO_EDIT.
+
+Made Excel generation more robust. In case of an exception in setting
+up a cell (e.g., a scenario has a region.name that isn't in the option
+list of the inputfield for region names) then the cell will be filled
+with the empty string.
+
+Started code that will allow the fast projects to be created on
+demand, while slow projects will only be generated once per hour. The
+user is notified of this, including the last modification time of the
+available file. It doesn't do proper locking yet so downloading it
+while it's being generated anew probably goes wrong, and there isn't
+actually any measurement of time yet -- right now, all projects are
+considered slow...
 
 
 2.5.2 (2012-08-15)
