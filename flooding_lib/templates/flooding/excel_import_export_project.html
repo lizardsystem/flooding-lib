@@ -12,7 +12,7 @@ Flooding: Metadata update
 
 <h2>{{ view.project.name }}</h2>
 {% if view.project.excel_generation_too_slow %}
-<p>Het bestand dat u hier kunt downloaden werd gegenereerd op: <strong>{{ view.last_changed }}</strong>. Aanpassingen zijn pas zichtbaar nadat het bestand opnieuw gegenereerd is. Dit gebeurt momenteel <strong> eens per twee uur</strong>.</p>
+<p style="max-width: 600px;">Het bestand dat u hier kunt downloaden werd gegenereerd op: <strong>{{ view.last_changed }}</strong>. Momenteel worden de te downloaden bestanden nachtelijk ververst, aanpassingen zijn dus pas de volgende dag zichtbaar in de Excel files. Aanpassingen zijn wel direct zichtbaar op de rest van de site.</p>
 {% endif %}
 <p><a href="{% url flooding_excel_download view.project_id %}{{ view.project.excel_filename }}">Download Excel file met de huidige metadata</a></p>
 

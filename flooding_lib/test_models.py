@@ -944,6 +944,22 @@ class TestProject(TestCase):
         self.assertTrue(uni)
         self.assertTrue(isinstance(uni, unicode))
 
+    def test_absolute_url_works(self):
+        project = ProjectF.create()
+        self.assertTrue(project.get_absolute_url())
+
+    def test_excel_filename_contains_id(self):
+        project = ProjectF.build()
+        project.id = 66
+        self.assertTrue('66' in project.excel_filename())
+
+    def test_excel_file_strips_strange_characters(self):
+        project = ProjectF.build(
+            name="clearly/illegal/<filename>")
+        project.id = 66
+        excel_filename = project.excel_filename()
+        self.assertEquals("66 clearlyillegalfilename.xls", excel_filename)
+
 
 class TestScenarioBreach(UnicodeTester, TestCase):
     """Tests for ScenarioBreach."""

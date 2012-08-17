@@ -1,5 +1,4 @@
-"""Helper command to generate Excel files, for testing. Not for
-production use."""
+"""Helper command to generate Excel files. Called from cron."""
 
 # Python 3 is coming to town
 from __future__ import print_function, unicode_literals
@@ -24,6 +23,6 @@ class Command(BaseCommand):
             filename = os.path.join(
                 settings.EXCEL_DIRECTORY,
                 project.excel_filename())
-            if not os.path.exists(filename):
-                print("Creating Excel for project {0}.".format(project.id))
-                excel_import_export.create_excel_file(project, filename)
+
+            #print("Creating Excel for project {0}.".format(project.id))
+            excel_import_export.create_excel_file(project, filename)

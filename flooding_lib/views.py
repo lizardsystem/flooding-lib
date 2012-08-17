@@ -24,6 +24,7 @@ from django.views.static import serve
 
 import lizard_ui.views
 
+from flooding_lib.util import viewutil
 from flooding_base.models import Text
 from flooding_lib.models import (Project, UserPermission, Scenario,
     Region, RegionSet, Breach, ScenarioCutoffLocation, ScenarioBreach, Result,
@@ -1517,24 +1518,8 @@ def excel_download(request, permission_manager, project_id):
         from flooding_lib import excel_import_export
         excel_import_export.create_excel_file(project, full_path)
 
-    # Send the file:
-    response = HttpResponse()
-
-    # Unset the Content-Type as to allow for the webserver
-    # to determine it.
-    response['Content-Type'] = ''
-
-    # Apache
-    response['X-Sendfile'] = full_path
-
-    # Nginx
-    nginx_path = os.path.join('/download_excel', filename)
-    response['X-Accel-Redirect'] = nginx_path
-
-    # Sending by webserver only works for Apache and Nginx, under
-    # Linux right now. Otherwise and in development, use Django's
-    # static serve.
-    if settings.DEBUG or not platform.system() == 'Linux':
-        return serve(request, full_path, '/')
-
-    return response
+    return viewutil.serve_file(
+        request=request,
+        dirname=directory,
+        filename=filename,
+        nginx_dirname='/download_excel')

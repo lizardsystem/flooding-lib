@@ -568,19 +568,6 @@ class Project(models.Model):
         ordering = ('friendlyname', 'name', 'owner', )
         db_table = 'flooding_project'
 
-    #Project -> RegionSet (+) -> (RegionSet ->) Region(+) -> Breach
-    def get_all_breaches(self):
-        all_regions = {}
-        all_breaches = {}
-        #get all regions from all regionsets
-        for rs in self.regionsets.all():
-            for r in rs.get_all_regions():
-                all_regions[r.id] = r
-        for r in all_regions.values():
-            for b in r.breach_set.all():
-                all_breaches[b.id] = b
-        return all_breaches.values()
-
     def count_scenarios(self):
         """returns number of scenarios attached to this project."""
         return self.scenarios.count()
@@ -631,9 +618,9 @@ class Project(models.Model):
     def excel_filename(self):
         """Return a valid unicode filename for an Excel file for this
         project."""
-        name = self.name.replace("""*<>[]=+"'/\\,.:;""", '')
+        name = self.name.encode('utf8').translate(None, """*<>[]=+"'/\\,.:;""")
 
-        return u"{0} {1}.xls".format(self.id, name)
+        return b"{0} {1}.xls".format(self.id, name)
 
     def excel_generation_too_slow(self):
         """Does Excel generation for this project take too long?"""

@@ -45,6 +45,7 @@ import xlwt
 from itertools import izip
 
 from django.db import transaction
+from django.utils.html import strip_tags
 
 from flooding_lib.util.decorators import memoized
 from flooding_lib.tools.importtool.models import InputField
@@ -121,8 +122,8 @@ class FieldInfo(object):
 
         inputfield = header['inputfield']
 
-        header['fieldname'] = inputfield.name
-        header['fieldhint'] = inputfield.excel_hint
+        header['fieldname'] = strip_tags(inputfield.name)
+        header['fieldhint'] = strip_tags(inputfield.excel_hint)
         header['required'] = '*' in inputfield.hint_text
         header['ignore'] = inputfield.ignore_in_scenario_excel_files
 

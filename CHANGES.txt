@@ -4,7 +4,7 @@ Changelog of flooding-lib
 2.7 (unreleased)
 ----------------
 
-- Nothing changed yet.
+More shall fixes and UI tweaks for the Excel import/export.
 
 
 2.6.1 (2012-08-16)
