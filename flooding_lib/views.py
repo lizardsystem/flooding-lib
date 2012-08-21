@@ -4,7 +4,6 @@ import flooding_lib.util.csvutil
 import datetime
 import logging
 import os
-import platform
 import time
 
 import Image

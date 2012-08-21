@@ -624,7 +624,7 @@ class TestImportScenarioRow(TestCase):
         """Tests that using a scenario id that exists but isn't in
         allowed scenario id fails."""
         scenario = ScenarioF.create()
-        allowed_ids = set((scenario.id+1,))
+        allowed_ids = set((scenario.id + 1,))
         errors = eie.import_scenario_row(
             eie.ImportedHeader(),
             66,
@@ -633,6 +633,7 @@ class TestImportScenarioRow(TestCase):
 
         self.assertEquals(len(errors), 1)
         self.assertTrue("66" in errors[0])
+
 
 class FakeCell(object):
     """Helper object to hold a value; fake Excel cell."""
