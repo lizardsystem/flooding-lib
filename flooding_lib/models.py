@@ -1235,7 +1235,7 @@ class Scenario(models.Model):
                 esi = ExtraScenarioInfo(
                     scenario=self,
                     extrainfofield=eif)
-            esi.value = unicode(value_object.value)
+            esi.value = unicode(value_object)
             esi.save()
 
 

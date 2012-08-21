@@ -1,3 +1,7 @@
+# Python 3 is coming to town
+from __future__ import print_function, unicode_literals
+from __future__ import absolute_import, division
+
 import datetime
 import factory
 import mock
@@ -45,6 +49,16 @@ class InputFieldF(factory.Factory):
     required = False
 
 
+class TestStringValue(TestCase):
+    """StringValues are trivial and only need a single test."""
+    def test_trivial(self):
+        string_value = models.StringValue()
+        string_value.set('teststring')
+
+        self.assertEquals(unicode(string_value), u'teststring')
+        self.assertEquals(string_value.to_excel(), u'teststring')
+
+
 class TestDateValue(TestCase):
     def setUp(self):
         self.dateobject = models.DateValue()
@@ -71,6 +85,164 @@ class TestDateValue(TestCase):
 
     def test_otherwise_value_error(self):
         self.assertRaises(ValueError, lambda: self.dateobject.set("whee"))
+
+    def test_strange_value_value_error(self):
+        self.assertRaises(ValueError, lambda: self.dateobject.set(object()))
+
+    def test_to_excel(self):
+        self.dateobject.set("2012-08-21")
+        d = self.dateobject.to_excel()
+
+        self.assertTrue(isinstance(d, datetime.date))
+        self.assertEquals(unicode(d), "2012-08-21")
+
+    def test_to_excel_legacy(self):
+        self.dateobject.value = "40725.0"
+        d = self.dateobject.to_excel()
+
+        self.assertTrue(isinstance(d, datetime.date))
+        self.assertEquals(unicode(d), "2011-07-01")
+
+    def test_unicode(self):
+        self.dateobject.value = "2012-08-21"
+        self.assertEquals(unicode(self.dateobject), "2012-08-21")
+
+
+class TestIntegerValue(TestCase):
+    def test_trivial(self):
+        integervalue = models.IntegerValue()
+
+        integervalue.set(3)
+        self.assertEquals(integervalue.to_excel(), 3)
+        self.assertEquals(unicode(integervalue), "3")
+
+    def test_from_string(self):
+        integervalue = models.IntegerValue()
+        integervalue.set("3.0")
+        self.assertEquals(integervalue.value, 3)
+
+
+class TestSelectValue(TestCase):
+    def setUp(self):
+        self.selectvalue = models.SelectValue()
+        self.selectvalueoptions = models.SelectValue()
+
+    def test_set_integer_trivial(self):
+        self.selectvalue = models.SelectValue()
+        self.selectvalue.set(10)
+
+        self.assertEquals(self.selectvalue.value, 10)
+        self.assertEquals(self.selectvalue.to_excel(), 10)
+        self.assertEquals(unicode(self.selectvalue), "10")
+
+    def test_string_without_options_raises_valueerror(self):
+        self.assertRaises(
+            ValueError,
+            lambda: self.selectvalue.set("some string"))
+
+    def test_unknown_option_raises_valueerror(self):
+        self.assertRaises(
+            ValueError,
+            lambda: self.selectvalueoptions.set(
+                1,
+                parsed_options={2: "some string"}))
+
+    def test_string_unknown_option_raises_valueerror(self):
+        self.assertRaises(
+            ValueError,
+            lambda: self.selectvalueoptions.set(
+                "some string",
+                parsed_options={1: "some other string"}))
+
+    def test_string_known_option_works(self):
+        self.selectvalueoptions.set(
+            "some known string",
+            parsed_options={1: "some known string"})
+
+        self.assertEquals(self.selectvalueoptions.value, 1)
+
+    def test_unicode_is_the_string_representation_from_options(self):
+        self.selectvalueoptions.set(
+            1,
+            parsed_options={1: "some string"})
+        self.assertEquals(unicode(self.selectvalueoptions), "some string")
+
+    def test_unicode_is_unicode_of_integer_otherwise(self):
+        self.selectvalue.set(3)
+        self.assertEquals(unicode(self.selectvalue), "3")
+
+
+class TestBooleanValue(TestCase):
+    def setUp(self):
+        self.booleanvalue = models.BooleanValue()
+
+    def true(self):
+        self.assertEquals(self.booleanvalue.value, 1)
+
+    def false(self):
+        self.assertEquals(self.booleanvalue.value, 0)
+
+    def test_int_input(self):
+        self.booleanvalue.set(5)
+        self.true()
+        self.booleanvalue.set(0)
+        self.false()
+
+    def test_string_input(self):
+        self.booleanvalue.set("True")
+        self.true()
+        self.booleanvalue.set("false")
+        self.false()
+        self.booleanvalue.set("ja")
+        self.true()
+        self.booleanvalue.set("nee")
+        self.false()
+
+    def test_unknown_raises_value_error(self):
+        self.assertRaises(ValueError, lambda: self.booleanvalue.set("whee"))
+
+    def test_to_excel(self):
+        self.booleanvalue.set(True)
+        self.assertEquals(self.booleanvalue.to_excel(), "true")
+
+    def test_unicode(self):
+        self.booleanvalue.set(True)
+        self.assertEquals(unicode(self.booleanvalue), "1")
+
+
+class TestFloatValue(TestCase):
+    """Nothing special about floats."""
+    def test_trivial(self):
+        floatvalue = models.FloatValue()
+        floatvalue.set("3.66")
+        self.assertEquals(floatvalue.value, 3.66)
+        self.assertEquals(floatvalue.to_excel(), 3.66)
+        self.assertEquals(unicode(floatvalue), "3.66")
+
+
+class TestIntervalValue(TestCase):
+    def test_trivial(self):
+        intervalvalue = models.IntervalValue()
+        intervalvalue.set(3.5)
+
+        self.assertEquals(intervalvalue.value, 3.5)
+        self.assertEquals(unicode(intervalvalue), "3.5")
+        self.assertEquals(intervalvalue.to_excel(), "3 d 12:00")
+
+    def test_string_input(self):
+        intervalvalue = models.IntervalValue()
+        intervalvalue.set("3 d 12:00")
+        self.assertEquals(intervalvalue.value, 3.5)
+
+
+class TestTextValue(TestCase):
+    """TextValues seem trivial."""
+    def test_trivial(self):
+        textvalue = models.TextValue()
+        textvalue.set("whee")
+        self.assertEquals(textvalue.value, "whee")
+        self.assertEquals(textvalue.to_excel(), "whee")
+        self.assertEquals(unicode(textvalue), "whee")
 
 
 class TestImportScenarioInputField(TestCase):

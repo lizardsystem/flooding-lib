@@ -445,6 +445,9 @@ class StringValue(models.Model):
     def set(self, value):
         self.value = unicode(value)
 
+    def __unicode__(self):
+        return self.value
+
     def to_excel(self):
         return self.value
 
@@ -503,14 +506,14 @@ class DateValue(StringValue):
 
     def to_excel(self):
         """Return a datetime.date object."""
-        if re.match(DateValue.DATE_REGEX, self.value):
+        if re.match(DateValue.DATE_REGEX, (self.value or "")):
             # This is how it should work
             y, m, d = (int(v) for v in self.value.split('-'))
             return datetime.date(y, m, d)
 
         # This is legacy
         excel_date = xlrd.xldate_as_tuple(float(self.value), 0)[:3]
-        return unicode(datetime.date(*excel_date))
+        return datetime.date(*excel_date)
 
     class Meta:
         proxy = True
@@ -523,10 +526,16 @@ class IntegerValue(models.Model):
     value = models.IntegerField(blank=True, null=True)
 
     def set(self, value):
-        self.value = int(value)
+        if isinstance(value, int):
+            self.value = value
+        else:
+            self.value = int(float(value))
 
     def to_excel(self):
         return self.value
+
+    def __unicode__(self):
+        return unicode(self.value)
 
 
 class SelectValue(IntegerValue):
@@ -537,6 +546,8 @@ class SelectValue(IntegerValue):
     def set(self, value, parsed_options=None):
         if parsed_options is None:
             parsed_options = dict()
+
+        self.parsed_options = parsed_options
 
         if isinstance(value, (str, unicode)):
             # We'd expect an int, but they've given us a string. Is it
@@ -562,6 +573,11 @@ class SelectValue(IntegerValue):
 
     def to_excel(self):
         return int(self.value)
+
+    def __unicode__(self):
+        if self.parsed_options and self.value in self.parsed_options:
+            return self.parsed_options[self.value]
+        return super(SelectValue, self).__unicode__()
 
 
 class BooleanValue(IntegerValue):
@@ -596,9 +612,13 @@ class FloatValue(models.Model):
     def to_excel(self):
         return self.value
 
+    def __unicode__(self):
+        return unicode(self.value)
+
 
 class IntervalValue(FloatValue):
-    """The class responsible for saving Intervals"""
+    """The class responsible for saving Intervals. Intervals
+    are stored as a float number of days."""
     def set(self, value):
         if isinstance(value, (str, unicode)):
             value = get_dayfloat_from_intervalstring(value)
@@ -621,6 +641,9 @@ class TextValue(models.Model):
         self.value = unicode(value)
 
     def to_excel(self):
+        return self.value
+
+    def __unicode__(self):
         return self.value
 
 

@@ -11,5 +11,6 @@ omit =
     eggs/*
     local_checkouts/*
     parts/*
+    src/*
 
 ignore_errors = true
