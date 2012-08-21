@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.7 (unreleased)
+2.7 (2012-08-21)
 ----------------
 
 Change the way that select fields in ExtraScenarioInfo rows are saved
