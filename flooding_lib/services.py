@@ -1259,40 +1259,35 @@ def service(request):
 
     if request.method == 'GET':
         query = request.GET
+
+        if 'action' not in query and 'ACTION' not in query:
+            raise Http404
+
         action_name = query.get('action', query.get('ACTION')).lower()
 
+        # I have no idea why we let the user decide which permission level
+        # to use, but OK...
+        permission = int(
+            query.get('permission',
+                      UserPermission.PERMISSION_SCENARIO_VIEW))
+
         if action_name == 'get_projects':
-            permission = int(
-                query.get('permission',
-                          UserPermission.PERMISSION_SCENARIO_VIEW))
             return service_get_projects(request, permission)
 
         elif action_name == 'get_scenarios_from_project':
             project_id = query.get('project_id')
-            permission = int(
-                query.get('permission',
-                          UserPermission.PERMISSION_SCENARIO_VIEW))
             return service_get_scenarios_from_project(
                 request, project_id, permission=permission)
 
         elif action_name == 'get_scenarios':
-            permission = int(
-                query.get('permission',
-                          UserPermission.PERMISSION_SCENARIO_VIEW))
             return service_get_scenarios(request, permission=permission)
 
         elif action_name == 'get_scenarios_export_list':
             project_id = query.get('project_id')
-            permission = int(
-                query.get('permission',
-                          UserPermission.PERMISSION_SCENARIO_VIEW))
             return service_get_scenarios_export_list(
                 request, project_id, permission)
 
         elif action_name == 'get_scenario_tree':
-            permission = int(
-                query.get('permission',
-                          UserPermission.PERMISSION_SCENARIO_VIEW))
             breach_id = query.get('breach_id', None)
             true_or_false = {'0': False, '1': True, 'None': None}
             filter_onlyprojectswithscenario = true_or_false[
@@ -1318,44 +1313,26 @@ def service(request):
 
         elif action_name == 'get_results_from_scenario':
             scenario_id = query.get('scenario_id')
-            permission = int(
-                query.get('permission',
-                          UserPermission.PERMISSION_SCENARIO_VIEW))
             return service_get_results_from_scenario(
                 request, scenario_id, permission=permission)
 
         elif action_name == 'get_tasks_from_scenario':
             scenario_id = query.get('scenario_id')
-            permission = int(
-                query.get('permission',
-                          UserPermission.PERMISSION_SCENARIO_VIEW))
             return service_get_tasks_from_scenario(
                 request, scenario_id, permission=permission)
 
         elif action_name == 'get_cutofflocations_from_scenario':
             scenario_id = query.get('scenario_id')
-            permission = int(
-                query.get('permission',
-                          UserPermission.PERMISSION_SCENARIO_VIEW))
             return service_get_cutofflocations_from_scenario(
                 request, scenario_id, permission=permission)
 
         elif action_name == 'get_regionsets':
-            permission = int(
-                query.get('permission',
-                          UserPermission.PERMISSION_SCENARIO_VIEW))
             return service_get_regionsets(request, permission=permission)
 
         elif action_name == 'get_all_regions':
-            permission = int(
-                query.get('permission',
-                          UserPermission.PERMISSION_SCENARIO_VIEW))
             return service_get_all_regions(request, permission=permission)
 
         elif action_name == 'get_region_tree':
-            permission = int(
-                query.get('permission',
-                          UserPermission.PERMISSION_SCENARIO_VIEW))
             filter_has_model = int(query.get('has_model', 0))
 
             return service_get_region_tree(
@@ -1371,9 +1348,6 @@ def service(request):
         elif action_name == 'get_breach_tree':
 
             region_id = query.get('region_id')
-            permission = int(
-                query.get('permission',
-                          UserPermission.PERMISSION_SCENARIO_VIEW))
             filter_bool_dict = {'1': True, '0': False}
 
             active = query.get('active', '0')
@@ -1403,9 +1377,6 @@ def service(request):
 
         elif action_name == 'get_regions':
             regionset_id = query.get('regionset_id')
-            permission = int(
-                query.get('permission',
-                          UserPermission.PERMISSION_SCENARIO_VIEW))
             return service_get_regions(
                 request, regionset_id, permission=permission)
         elif action_name == 'get_region_maps':
@@ -1428,9 +1399,6 @@ def service(request):
 
         elif action_name == 'get_cutofflocations_from_cutofflocationset':
             cutofflocationset_id = query.get('cutofflocationset_id', None)
-            permission = int(
-                query.get('permission',
-                          UserPermission.PERMISSION_SCENARIO_VIEW))
             return service_get_cutofflocations_from_cutofflocationset(
                 request,
                 cutofflocationset_id=cutofflocationset_id,

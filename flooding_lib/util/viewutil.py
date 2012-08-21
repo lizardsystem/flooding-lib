@@ -21,6 +21,13 @@ def serve_file(request, dirname, filename, nginx_dirname, debug=None):
     if debug is None:
         debug = settings.DEBUG
 
+    # Sending by webserver only works for Apache and Nginx, under
+    # Linux right now. Otherwise and in development, use Django's
+    # static serve.
+    if debug or not platform.system() == 'Linux':
+        return static.serve(
+            request, os.path.join(dirname, filename), '/')
+
     response = http.HttpResponse()
 
     # Unset the Content-Type as to allow for the webserver
@@ -33,12 +40,5 @@ def serve_file(request, dirname, filename, nginx_dirname, debug=None):
     # Nginx
     nginx_path = os.path.join(nginx_dirname, filename)
     response['X-Accel-Redirect'] = nginx_path
-
-    # Sending by webserver only works for Apache and Nginx, under
-    # Linux right now. Otherwise and in development, use Django's
-    # static serve.
-    if debug or not platform.system() == 'Linux':
-        return static.serve(
-            request, os.path.join(dirname, filename), '/')
 
     return response
