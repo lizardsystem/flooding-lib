@@ -490,3 +490,30 @@ class TestDisplayValueUnicode(TestCase):
             inputfield.display_unicode(s)
         except UnicodeEncodeError:
             self.fail("display_unicode() failed on a Unicode string.")
+
+    def test_select_for_editing(self):
+        """Should return the number."""
+        inputfield = InputFieldF(
+            type=models.InputField.TYPE_SELECT,
+            options=repr({1: "whee"}))
+
+        self.assertEquals(inputfield.display_unicode(1), "1")
+
+    def test_select_for_viewing(self):
+        """Should return the descriptions."""
+        inputfield = InputFieldF(
+            type=models.InputField.TYPE_SELECT,
+            options=repr({1: "whee"}))
+
+        self.assertEquals(
+            inputfield.display_unicode(1, for_viewing_only=True),
+            "whee")
+
+    def test_select_unknown_value_just_returns_it(self):
+        inputfield = InputFieldF(
+            type=models.InputField.TYPE_SELECT,
+            options=repr({1: "whee"}))
+
+        self.assertEquals(
+            inputfield.display_unicode("grr"),
+            "grr")

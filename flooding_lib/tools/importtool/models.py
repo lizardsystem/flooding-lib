@@ -824,10 +824,13 @@ class InputField(models.Model):
         if self.type == InputField.TYPE_INTERVAL:
             return unicode(get_intervalstring_from_dayfloat(value))
 
-        if for_viewing_only and self.type == InputField.TYPE_SELECT:
-            options = self.parsed_options
-            if value in options:
-                return unicode(options[value])
+        if self.type == InputField.TYPE_SELECT:
+            try:
+                value_object = self.build_value_object(value)
+                value = (value_object if for_viewing_only
+                         else value_object.value)
+            except ValueError:
+                pass
 
         return unicode(value)
 
