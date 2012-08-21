@@ -7,6 +7,7 @@ from django.test import TestCase, client
 
 from flooding_lib import services
 
+
 class TestService(TestCase):
     def setUp(self):
         self.request_factory = client.RequestFactory()
