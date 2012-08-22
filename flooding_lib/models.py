@@ -1238,6 +1238,12 @@ class Scenario(models.Model):
             esi.value = unicode(value_object)
             esi.save()
 
+    def has_values_for(self, inputfields):
+        return all(
+            self.value_for_inputfield(inputfield) is not None
+            for inputfield in inputfields
+            if inputfield.required)
+
 
 class ScenarioProject(models.Model):
     """Table implementing the ManyToMany relation between Scenario and Project.

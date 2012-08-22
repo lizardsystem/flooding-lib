@@ -836,6 +836,33 @@ class TestScenario(TestCase):
         esi = models.ExtraScenarioInfo.get(scenario, 'test')
         self.assertEquals(esi.value, u'0.5')
 
+    def test_has_all_required_metadata(self):
+        scenario = ScenarioF.create()
+        scenariobreach = ScenarioBreachF.create(
+            scenario=scenario,
+            extwbaselevel=None)
+
+        if1 = InputFieldF.build(
+            destination_table='Scenario',
+            destination_field='whee',
+            required=True)
+        if2 = InputFieldF.build(
+            destination_table='ScenarioBreach',
+            destination_field='extwbaselevel',
+            required=True)
+
+        self.assertFalse(scenario.has_values_for((if1,)))
+        scenario.whee = "something"
+        self.assertTrue(scenario.has_values_for((if1,)))
+        self.assertFalse(scenario.has_values_for((if1, if2)))
+
+        scenariobreach.extwbaselevel = 3.0
+        scenariobreach.save()
+
+        del scenario._data_objects  # Clear cache
+
+        self.assertTrue(scenario.has_values_for((if1, if2)))
+
 
 class TestProject(TestCase):
     def setUp(self):
