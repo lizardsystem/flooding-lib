@@ -292,11 +292,10 @@ class TestScenarioRow(TestCase):
     def test_first_is_scenario_id(self):
         scenario = ScenarioF.create()
 
-        scenariorow = eie.ScenarioRow(scenario, ())
+        scenariorow = eie.ScenarioRow(scenario, ({},))
 
-        for column in scenariorow.columns():
-            self.assertEquals(column.value, scenario.id)
-            break
+        column = list(scenariorow.columns())[0]
+        self.assertEquals(column.value, scenario.id)
 
     def test_rest_calls_value_for_inputfield(self):
         field_value = 3
