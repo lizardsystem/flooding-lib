@@ -4,7 +4,12 @@ Changelog of flooding-lib
 2.8 (unreleased)
 ----------------
 
-- Nothing changed yet.
+Fix showing scenarios under projects in the user interface. A scenario
+can occur in multiple projects, which means that it should be shown
+under both projects in the user interface. Also, if a scenario that is
+visible for a user because it is in a project that the user has rights
+to is also in another project that the user doesn't have right to, the
+second project shouldn't be shown at all. Both fixed.
 
 
 2.7 (2012-08-21)

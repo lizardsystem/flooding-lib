@@ -274,27 +274,38 @@ def service_get_scenario_tree(
     scenario_list = permission_manager.get_scenarios(
         breach_id, permission, filter_scenariostatus)
 
+    permitted_projects = permission_manager.get_projects(permission)
     #only projects with scenario
     if filter_onlyprojectswithscenario:
         project_list = Project.in_scenario_list(scenario_list).distinct()
     else:
-        project_list = permission_manager.get_projects(permission)
+        project_list = permitted_projects
 
     object_list = []
-    for project in project_list:
-        object_list.append({'pid': project.id,
-                            'name': project.__unicode__(),
-                            'parentid': None,
-                            'isscenario': False,
-                            'status': 0,
-                            })
+    projects_shown = set()
+
     for scenario in scenario_list:
-            object_list.append({'sid': scenario.id,
-                                'name': scenario.__unicode__(),
-                                'parentid': scenario.main_project.id,
-                                'isscenario': True,
-                                'status': scenario.get_status(),
-                                'strategy_id': scenario.strategy_id,
+        # If a scenario is in multiple projects, we add it to the object
+        # list once for each project.
+        for project in scenario.projects.all():
+            if project in permitted_projects:
+                projects_shown.add(project.id)
+                object_list.append({'sid': scenario.id,
+                                    'name': scenario.__unicode__(),
+                                    'parentid': project.id,
+                                    'isscenario': True,
+                                    'status': scenario.get_status(),
+                                    'strategy_id': scenario.strategy_id,
+                                    })
+    for project in project_list:
+        # Only show the projects under which there are actually
+        # scenarios visible to this user.
+        if project.id in projects_shown:
+            object_list.append({'pid': project.id,
+                                'name': project.__unicode__(),
+                                'parentid': None,
+                                'isscenario': False,
+                                'status': 0,
                                 })
 
     return HttpResponse(

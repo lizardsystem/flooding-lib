@@ -106,7 +106,7 @@ class ProjectF(factory.Factory):
     FACTORY_FOR = models.Project
 
     owner = User.objects.get_or_create(username='remco')[0]
-    friendlyname = "hoi!"
+    friendlyname = "friendly name of ProjectF"
 
 
 class UserPermissionF(factory.Factory):
