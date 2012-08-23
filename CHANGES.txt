@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.8 (unreleased)
+2.8 (2012-08-23)
 ----------------
 
 Fix showing scenarios under projects in the user interface. A scenario
