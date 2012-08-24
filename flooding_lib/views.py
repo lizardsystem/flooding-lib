@@ -37,6 +37,7 @@ from flooding_lib.permission_manager import \
 from flooding_lib import forms
 from flooding_lib import excel_import_export
 
+
 logger = logging.getLogger(__name__)
 
 #-----------------------'constants' - make a copy when using them----

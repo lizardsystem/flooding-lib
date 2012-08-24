@@ -142,11 +142,7 @@ def service_save_new_scenario(request):
     scenario.code = '2s_c_%i' % scenario.id
     scenario.save()
 
-    task = Task.objects.create(
-        scenario=scenario,
-        tasktype=TaskType.objects.get(pk=50),
-        creatorlog=request.user.get_full_name(),
-        tstart=datetime.datetime.now())
+    scenario.setup_initial_task(request.user)
 
     useManualInput = query.get("useManualInput", False)
     if useManualInput == 'false' or useManualInput == False:

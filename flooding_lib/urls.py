@@ -118,7 +118,6 @@ urlpatterns = patterns(
         'flooding_lib.views.task',
         name='flooding_task_detail'),
 
-
     url(r'^service/$',
         'flooding_lib.services.service',
         name='flooding_service'),

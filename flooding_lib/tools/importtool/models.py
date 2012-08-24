@@ -298,7 +298,7 @@ class ImportScenario(models.Model):
         self.create_scenariobreach(import_values['ScenarioBreach'])
         self.create_extra_scenario_info(import_values['ExtraScenarioInfo'])
         self.copy_result_files(import_values['Result'])
-        self.scenario.create_calculated_status(username)
+        self.scenario.setup_imported_task(username)
 
         self.state = ImportScenario.IMPORT_STATE_IMPORTED
         self.save()

@@ -20,6 +20,7 @@ from flooding_presentation.models import PresentationLayer, PresentationType
 from flooding_lib.tools.approvaltool.models import ApprovalObject
 from flooding_lib.tools.approvaltool.models import ApprovalObjectType
 from flooding_lib import coordinates
+from flooding_worker import models as workermodels
 
 logger = logging.getLogger(__name__)
 
@@ -924,7 +925,7 @@ class Scenario(models.Model):
     code = models.CharField(max_length=15, null=True)
 
     workflow_template = models.ForeignKey(
-        'flooding_worker.WorkflowTemplate',
+        workermodels.WorkflowTemplate,
         db_column='workflow_template',
         null=True)
 
@@ -1274,11 +1275,29 @@ class Scenario(models.Model):
             esi.value = unicode(value_object)
             esi.save()
 
+    def setup_initial_task(self, user):
+        Task.objects.create(
+            scenario=self,
+            tasktype=TaskType.objects.get(pk=TaskType.TYPE_SCENARIO_CREATE),
+            creatorlog=user.get_full_name(),
+            tstart=datetime.datetime.now())
+        workflow_template = workermodels.WorkflowTemplate.objects.get(
+            code=workermodels.WorkflowTemplate.DEFAULT_TEMPLATE_CODE)
+        self.workflow_template_id = workflow_template
+        self.save()
+
     def has_values_for(self, inputfields):
         return all(
             self.value_for_inputfield(inputfield) is not None
             for inputfield in inputfields
             if inputfield.required)
+
+    def setup_imported_task(self, username):
+        self.create_calculated_status(username)
+        workflow_template = workermodels.WorkflowTemplate.objects.get(
+            code=workermodels.WorkflowTemplate.IMPORTED_TEMPLATE_CODE)
+        self.workflow_template_id = workflow_template
+        self.save()
 
 
 class ScenarioProject(models.Model):

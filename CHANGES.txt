@@ -4,7 +4,9 @@ Changelog of flooding-lib
 2.10 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Added functionality to add a workflow_template to new scenario.
+
+- Added migration to create default workflow_templates.
 
 
 2.9 (2012-08-24)
