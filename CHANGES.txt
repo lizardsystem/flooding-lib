@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.9 (unreleased)
+2.9 (2012-08-24)
 ----------------
 
 There were problems related to having a scenario in multiple projects,
