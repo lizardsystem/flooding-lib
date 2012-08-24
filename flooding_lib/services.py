@@ -288,7 +288,10 @@ def service_get_scenario_tree(
         # If a scenario is in multiple projects, we add it to the object
         # list once for each project.
         for project in scenario.projects.all():
-            if project in permitted_projects:
+            if (project in permitted_projects and
+                scenario.visible_in_project(
+                    permission_manager, project, permission)):
+
                 projects_shown.add(project.id)
                 object_list.append({'sid': scenario.id,
                                     'name': scenario.__unicode__(),

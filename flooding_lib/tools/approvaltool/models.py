@@ -124,8 +124,12 @@ class ApprovalObject(models.Model):
             creatorlog=creator,
             remarks=remarks)
 
+        self.update_scenario_status()
+
     def update_scenario_status(self):
+        """Update scenario status and approval cache."""
         for scenarioproject in self.scenarioproject_set.all():
+            scenarioproject.update_approved_status(self)
             scenarioproject.scenario.update_status()
 
     @classmethod

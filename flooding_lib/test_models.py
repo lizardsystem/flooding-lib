@@ -10,6 +10,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 
 from flooding_lib import models
+from flooding_lib import permission_manager
 from flooding_lib.tools.approvaltool.models import ApprovalObjectType
 from flooding_lib.tools.approvaltool.models import ApprovalRule
 from flooding_lib.tools.approvaltool.models import ApprovalObjectState
@@ -100,6 +101,14 @@ class ExtraScenarioInfoF(factory.Factory):
     extrainfofield = ExtraInfoFieldF(name='forextrascenarioinfo')
     scenario = ScenarioF.build()
     value = None
+
+
+class ScenarioProjectF(factory.Factory):
+    FACTORY_FOR = models.ScenarioProject
+
+    scenario = factory.LazyAttribute(lambda obj: ScenarioF.create())
+    project = factory.LazyAttribute(lambda obj: ProjectF.create())
+    is_main_project = True
 
 
 class ProjectF(factory.Factory):
@@ -862,6 +871,92 @@ class TestScenario(TestCase):
         del scenario._data_objects  # Clear cache
 
         self.assertTrue(scenario.has_values_for((if1, if2)))
+
+    def test_visible_in_project_other_permission(self):
+        """Always returns true if permission isn't scenario_view."""
+        scenario = ScenarioF.build()
+
+        self.assertTrue(scenario.visible_in_project(
+                None, None,
+                permission=models.UserPermission.PERMISSION_SCENARIO_APPROVE))
+
+    def test_visible_in_project_user_can_approve(self):
+        """If the user has approval rights, he can see the scenario."""
+        scenario = ScenarioF.create()
+        project = ProjectF.create()
+        group = Group.objects.create()
+        user = User.objects.create()
+
+        scenario.set_project(project)
+        user.groups.add(group)
+        user.userpermission_set.add(
+            models.UserPermission(
+                permission=models.UserPermission.PERMISSION_SCENARIO_APPROVE,
+                user=user))
+        group.projectgrouppermission_set.add(
+            models.ProjectGroupPermission(
+                group=group, project=project,
+                permission=models.UserPermission.PERMISSION_SCENARIO_APPROVE))
+
+        pm = permission_manager.get_permission_manager(user)
+
+        self.assertTrue(scenario.visible_in_project(pm, project))
+
+    def test_visible_in_project_false_if_not_approved(self):
+        scenario = ScenarioF.create()
+        project = ProjectF.create()
+        scenario.set_project(project)
+
+        pm = permission_manager.AnonymousPermissionManager()
+
+        self.assertFalse(scenario.visible_in_project(pm, project))
+
+    def test_visible_in_project_true_if_approved(self):
+        scenario = ScenarioF.create()
+        project = ProjectF.create()
+        scenario.set_project(project)
+
+        scenarioproject = scenario.scenarioproject(project)
+        scenarioproject.approved = True
+        scenarioproject.save()
+
+        pm = permission_manager.AnonymousPermissionManager()
+
+        self.assertTrue(scenario.visible_in_project(pm, project))
+
+
+class TestScenarioProject(TestCase):
+    def test_approved(self):
+        sp = ScenarioProjectF.build()
+        self.assertTrue(sp.approved is None)
+
+        ao = mock.MagicMock()
+        ao.approved = True
+
+        sp.update_approved_status(ao)
+        self.assertTrue(sp.approved)
+
+    def test_disapproved(self):
+        sp = ScenarioProjectF.build()
+        self.assertTrue(sp.approved is None)
+
+        ao = mock.MagicMock()
+        ao.approved = False
+        ao.disapproved = True
+
+        sp.update_approved_status(ao)
+        self.assertTrue(sp.approved is False)
+
+    def test_neither(self):
+        sp = ScenarioProjectF.build()
+        self.assertTrue(sp.approved is None)
+
+        ao = mock.MagicMock()
+        ao.approved = False
+        ao.disapproved = False
+
+        sp.update_approved_status(ao)
+        self.assertTrue(sp.approved is None)
 
 
 class TestProject(TestCase):

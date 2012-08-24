@@ -61,8 +61,6 @@ def approvaltable(request, approvalobject_id, ignore_post=False):
 
             answer['lines'] = get_lines(approvalobject, approvalrules)
 
-            approvalobject.update_scenario_status()
-
         return simplejson.dumps(answer)
 
     else:

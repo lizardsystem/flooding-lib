@@ -11,6 +11,7 @@ from flooding_lib import permission_manager
 from flooding_lib.models import UserPermission
 from flooding_lib.models import ProjectGroupPermission
 from flooding_lib.models import Scenario
+from flooding_lib.models import ScenarioProject
 from flooding_lib.test_models import ScenarioF
 from flooding_lib.test_models import ProjectF
 
@@ -106,6 +107,10 @@ class TestUserPermissionManager(TestCase):
         scenario = ScenarioF.create(status_cache=Scenario.STATUS_APPROVED)
         project = ProjectF.create()
         scenario.set_project(project)
+        scenarioproject = ScenarioProject.objects.get(
+            scenario=scenario, project=project)
+        scenarioproject.approved = True
+        scenarioproject.save()
 
         user, _ = User.objects.get_or_create(username='remco')
         group = Group()
@@ -148,6 +153,10 @@ class TestUserPermissionManager(TestCase):
         # User can only see approved scenarios
         scenario = ScenarioF.create(status_cache=Scenario.STATUS_APPROVED)
         scenario.set_project(project)
+        scenarioproject = ScenarioProject.objects.get(
+            scenario=scenario, project=project)
+        scenarioproject.approved = True
+        scenarioproject.save()
         # So can't see this one
         scenario2 = ScenarioF.create(status_cache=Scenario.STATUS_WAITING)
         scenario2.set_project(project)
@@ -184,9 +193,13 @@ class TestUserPermissionManager(TestCase):
         project1 = ProjectF.create()
         project2 = ProjectF.create()
 
-        # An approved scenario is originally in project1
+        # An approved scenario is originally in project1 and approved there
         scenario = ScenarioF.create(status_cache=Scenario.STATUS_APPROVED)
         scenario.set_project(project1)
+        scenarioproject = ScenarioProject.objects.get(
+            scenario=scenario, project=project1)
+        scenarioproject.approved = True
+        scenarioproject.save()
 
         # Our user's group has view rights in project2
         group.projectgrouppermission_set.add(
@@ -200,8 +213,17 @@ class TestUserPermissionManager(TestCase):
         # We can't see the scenario
         self.assertEquals(len(pm.get_scenarios()), 0)
 
-        # But if we add the scenario to the second project
+        # If we add the scenario to the second project
         project2.add_scenario(scenario)
+
+        # Then we still can't, because it's not approved there
+        self.assertEquals(len(pm.get_scenarios()), 0)
+
+        # But once it's approved in project2...
+        scenarioproject2 = ScenarioProject.objects.get(
+            scenario=scenario, project=project2)
+        scenarioproject2.approved = True
+        scenarioproject2.save()
 
         # Then we can!
         self.assertEquals(len(pm.get_scenarios()), 1)

@@ -976,6 +976,11 @@ class Scenario(models.Model):
                  .format(unicode(self)), self.pk))
             raise ValueError
 
+    def scenarioproject(self, project):
+        return ScenarioProject.objects.select_related(
+            depth=1).get(
+            scenario=self, project=project)
+
     def approval_object(self, project):
         """Get the approval object relating to this scenario and that project,
         if any. Returns ScenarioProject.DoesNotExist if this scenario isn't in
@@ -985,13 +990,44 @@ class Scenario(models.Model):
         using the project's default approval object.
 
         Currently just returns self.approvalobject, but will be changed."""
-        scenarioproject = ScenarioProject.objects.select_related(
-            depth=1).get(
-            scenario=self, project=project)
-
+        scenarioproject = self.scenarioproject(project)
         scenarioproject.ensure_has_approvalobject()
 
         return scenarioproject.approvalobject
+
+    def visible_in_project(
+        self, permission_manager, project,
+        permission=UserPermission.PERMISSION_SCENARIO_VIEW):
+        """Does NOT check whether the user has rights to see this
+        scenario at all, use the permission manager for that.
+
+        This function decides whether, given that the user is allowed
+        to see this scenario, it should be visible _in this
+        project_."""
+
+        # The permission manager makes sure we get only the scenarios
+        # this user can see. However, because we want to show it in
+        # more than one project sometimes, we have to do some extra
+        # work to see _in which projects_ this user can see the
+        # scenario so we only display it there.
+        #
+        # - If permission is other than SCENARIO_VIEW, no extra checks
+        # - are needed.
+        # - If the user has no approval rights, he can only see
+        #   scenarios that are approved in that project.
+        # - If the user has approval rights in some project, no
+        #   approval checks are needed in that project.
+
+        if permission != UserPermission.PERMISSION_SCENARIO_VIEW:
+            return True
+
+        if permission_manager.check_permission(
+            UserPermission.PERMISSION_SCENARIO_APPROVE):
+            if permission_manager.check_project_permission(
+                project, UserPermission.PERMISSION_SCENARIO_APPROVE):
+                return True
+
+        return bool(self.scenarioproject(project).approved)
 
     def main_approval_object(self):
         """Return the approval object belonging to the main project."""
@@ -1259,6 +1295,12 @@ class ScenarioProject(models.Model):
     approvalobject = models.ForeignKey(
         ApprovalObject, blank=True, null=True, default=None)
 
+    # Cache that is set by approvalobject. Values like ApprovalObject
+    # approved and disapproved properties; if the scenario is neither
+    # approved nor disapproved in this scenario, the value should be
+    # None (null).
+    approved = models.NullBooleanField(blank=True, null=True)
+
     def ensure_has_approvalobject(self):
         """Create an approvalobject for this scenario/project
         connection if there isn't one yet."""
@@ -1267,6 +1309,15 @@ class ScenarioProject(models.Model):
                 name="Project's default approval object",
                 approvalobjecttype=self.project.approval_object_type)
             self.save()
+
+    def update_approved_status(self, approvalobject):
+        if approvalobject.approved:
+            self.approved = True
+        elif approvalobject.disapproved:
+            self.approved = False
+        else:
+            self.approved = None
+        self.save()
 
 
 class ScenarioBreach(models.Model):

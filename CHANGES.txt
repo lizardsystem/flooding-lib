@@ -4,7 +4,32 @@ Changelog of flooding-lib
 2.9 (unreleased)
 ----------------
 
-- Nothing changed yet.
+There were problems related to having a scenario in multiple projects,
+approval, and visibility on the site.
+
+- To normal users, only approved scenarios should be visible. This needs
+  to check approval status in the right project (the project that gives
+  the user viewing rights).
+
+- For users with approval rights, an unapproved scenario is also visible,
+  however the approval rights and unapproved status should relate to the
+  same project.
+
+- In the user interface, it may have been established that a user can
+  see a given scenario, but it is still possible that it should be
+  shown to the user only in some projects, not in all the projects the
+  scenario may be in.
+
+These issues were fixed.
+
+In general, checking for the scenario statuses 'STATUS_APPROVED' and
+'STATUS_DISAPPROVED' is dubious because they related only to the main
+project and should maybe be removed in the future.
+
+The scenarioproject table now has a cacheing 'approved' nullboolean that
+is faster to use than the equivalent functions on ApprovalObject that need
+to hit the database. There is a schema migration and a data migration to
+create this field.
 
 
 2.8 (2012-08-23)

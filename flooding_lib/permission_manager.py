@@ -272,13 +272,31 @@ class UserPermissionManager(object):
     def get_scenarios(
         self, breach=None, permission=UserPermission.PERMISSION_SCENARIO_VIEW,
         status_list=None):
-        """work in progress
+        """
+        If permission is SCENARIO_VIEW, and the user does not have
+        SCENARIO_APPROVE rights, then only show scenarios that are
+        approved within the project that gives the user the view
+        rights.
 
-        scenarios met view en permission recht - alle
-        scenarios met view recht - alleen met status approved
+        Otherwise, return a queryset of distinct scenarios to which
+        user has the given permission.
 
+        If a breach is given, return only scenarios involving that
+        breach.
 
-        get list of scenarios"""
+        If a status_list is given, return only scenarios with a status
+        in that list.
+
+        Bug: In theory it is possible that a scenario has view rights
+        to a scenario in some project, that the scenario is approved
+        within that project, but not approved in its main project. And
+        that status_list asks for approved projects only. In that
+        case, the scenario won't be visible because its status will
+        not be STATUS_APPROVED.
+        """
+
+        PSA = UserPermission.PERMISSION_SCENARIO_APPROVE
+        PSV = UserPermission.PERMISSION_SCENARIO_VIEW
 
         if not self.check_permission(permission):
             return Scenario.objects.filter(pk=-1)
@@ -286,16 +304,13 @@ class UserPermissionManager(object):
         if status_list == None:
             status_list = [a for a, b in Scenario.STATUS_CHOICES]
 
-        if permission == UserPermission.PERMISSION_SCENARIO_VIEW:
-            PSV = UserPermission.PERMISSION_SCENARIO_VIEW
+        if permission == PSV:
             filter = Q(
   scenarioproject__project__projectgrouppermission__group__user=self.user,
   scenarioproject__project__projectgrouppermission__permission=PSV,
-                status_cache=Scenario.STATUS_APPROVED,
+  scenarioproject__approved=True,
                 status_cache__in=status_list)
-            if self.check_permission(
-                UserPermission.PERMISSION_SCENARIO_APPROVE):
-                PSA = UserPermission.PERMISSION_SCENARIO_APPROVE
+            if self.check_permission(PSA):
                 filter = filter | Q(
   scenarioproject__project__projectgrouppermission__group__user=self.user,
   scenarioproject__project__projectgrouppermission__permission=PSA,
