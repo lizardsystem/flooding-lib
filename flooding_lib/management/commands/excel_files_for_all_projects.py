@@ -19,10 +19,12 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         activate("nl")  # Nederlands
 
-        for project in models.Project.objects.all():
+        for project in models.Project.objects.filter(pk=98):
             filename = os.path.join(
                 settings.EXCEL_DIRECTORY,
                 project.excel_filename())
 
             #print("Creating Excel for project {0}.".format(project.id))
-            excel_import_export.create_excel_file(project, filename)
+            excel_import_export.create_excel_file(
+                project, project.original_scenarios(), filename,
+                include_approval=True)

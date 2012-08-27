@@ -50,8 +50,10 @@ from django.utils.html import strip_tags
 from flooding_lib.util.decorators import memoized
 from flooding_lib.tools.importtool.models import InputField
 from flooding_lib.models import Scenario
+from flooding_lib.tools.approvaltool import models as approvalmodels
 
 SCENARIO_DATA_WORKSHEET = "Scenario data"
+SCENARIO_APPROVAL_WORKSHEET = "Goedkeuring"
 
 HEADER_ROWS = 4
 
@@ -115,6 +117,10 @@ class FieldInfo(object):
     def __init__(self, scenariolist):
         self.scenariolist = list(scenariolist)
 
+    def scenarios(self):
+        """Return an iterator over the scenariolist."""
+        return iter(self.scenariolist)
+
     def add_extra_header_fields(self, header):
         """Helper function that adds some elements to the header
         dictionary that don't come from
@@ -171,6 +177,10 @@ class FieldInfo(object):
         for scenario in self.scenariolist:
             yield ScenarioRow(scenario, self.headers())
 
+    def __nonzero__(self):
+        """Returns true if there are scenarios in the list."""
+        return bool(self.scenariolist)
+
 
 def get_header_style_for(rownr, colnr, header):
     """Return a style object for the header field in given rownr and
@@ -221,32 +231,15 @@ def write_domeinlijst(worksheet, column, header):
     return True
 
 
-def create_excel_file(project, filename=None):
-    """Create an Excel file containing the data of this project."""
-
-    logger.debug(("Starting create_excel_file. Project id is {0}, "
-                 "filename is '{1}'.").format(project.id, filename))
-
-    scenarios = project.original_scenarios()
-    if not scenarios.count():
-        logger.debug("There are no scenarios in this project.")
-        return None
-
-    workbook = xlwt.Workbook(encoding='utf-8')
-    worksheet = workbook.add_sheet(SCENARIO_DATA_WORKSHEET)
-
-    fieldinfo = FieldInfo(scenarios)
-
+def create_metadata_worksheet(worksheet, fieldinfo):
     header_fields = ('headername', 'fieldname', 'fieldtype', 'fieldhint')
 
     worksheet.row(1).height = int(0.84 * 72 * 20)  # 0.84"
     worksheet.row(2).height = int(0.36 * 72 * 20)  # 0.36"
     worksheet.row(3).height = int(1.43 * 72 * 20)  # 1.43"
 
-    headers = list(fieldinfo.headers())
-
     # Write the header
-    for column, header in enumerate(headers):
+    for column, header in enumerate(fieldinfo.headers()):
         for rownr, headerfield in enumerate(header_fields):
             style = get_header_style_for(rownr, column, header)
             worksheet.write(rownr, column, header[headerfield], style)
@@ -262,13 +255,96 @@ def create_excel_file(project, filename=None):
                 worksheet.write(
                     len(header_fields) + rownr, colnr, cell.value, cell.style)
 
-    # Domeinlijst definities
-    worksheet = workbook.add_sheet("Domeinlijst definities")
+
+def create_domeinlijst_worksheet(worksheet, fieldinfo):
     column = 0
-    for header in headers:
+    for header in fieldinfo.headers():
         column_written = write_domeinlijst(worksheet, column, header)
         if column_written:
             column += 2
+
+
+def create_approval_worksheet(project, worksheet, scenarios):
+    # In theory it is possible that one scenario has completely
+    # different approval rules than another scenario. Therefore we
+    # keep a dict that keeps track of which rule goes in which column,
+    # write all the data first, and only then write all the column
+    # headers.
+    rule_columns = dict()
+    next_rule_column = 3
+
+    # We want to show the value for this inputfield. Doing it using
+    # scenario.value_for_inputfield() isn't the quickest way, but it
+    # is the cleanest.
+    scenario_id_inputfield = InputField.objects.get(
+        name='Scenario Identificatie')
+
+    for i, scenario in enumerate(scenarios):
+        row = i + 4
+        worksheet.write(row, 0, scenario.id)
+        worksheet.write(
+            row, 1, scenario.value_for_inputfield(
+                scenario_id_inputfield))
+        worksheet.write(row, 2, scenario.name)
+
+        approval_object = scenario.approval_object(project)
+        for statenr, state in enumerate(approval_object.states()):
+            if state.approvalrule_id not in rule_columns:
+                rule_columns[state.approvalrule_id] = next_rule_column
+                next_rule_column += 2
+            col = rule_columns[state.approvalrule_id]
+
+            if state.successful is not None:
+                worksheet.write(row, col, int(state.successful))
+
+            if state.remarks:
+                worksheet.write(row, col + 1, state.remarks)
+
+    # Write the headers for each rule
+    for ruleid, col in rule_columns.items():
+        rule = approvalmodels.ApprovalRule.objects.get(pk=ruleid)
+
+        # Two columns: one for the value of the approvalstate
+        # (successful or not), one for any remarks that may have been
+        # recorded. Rule name has bold: on.
+        worksheet.write(1, col, rule.name, make_style(
+                'font: bold on; align: wrap on, vertical top;'))
+        worksheet.write(2, col, rule.description)
+        worksheet.write(3, col, '(1 = goedgekeurd, 0 = afgekeurd)')
+
+        worksheet.write(1, col + 1, rule.name, make_style(
+                'font: bold on; align: wrap on, vertical top;'))
+        worksheet.write(2, col + 1, 'Opmerkingen')
+
+    # Set the column widths
+    for colnr in range(next_rule_column):
+        width = 30 if colnr >= 2 else 10
+        worksheet.col(colnr).width = width * 256  # chars
+
+
+def create_excel_file(
+    project, scenarios, filename=None, include_approval=False):
+    """Create an Excel file containing the data of this project."""
+
+    logger.debug(("Starting create_excel_file. Project id is {0}, "
+                 "filename is '{1}'.").format(project.id, filename))
+
+    fieldinfo = FieldInfo(scenarios)
+    if not fieldinfo:
+        logger.debug("There are no scenarios in this project.")
+        return None
+
+    workbook = xlwt.Workbook(encoding='utf-8')
+
+    worksheet = workbook.add_sheet(SCENARIO_DATA_WORKSHEET)
+    create_metadata_worksheet(worksheet, fieldinfo)
+
+    worksheet = workbook.add_sheet("Domeinlijst definities")
+    create_domeinlijst_worksheet(worksheet, fieldinfo)
+
+    if include_approval:
+        worksheet = workbook.add_sheet(SCENARIO_APPROVAL_WORKSHEET)
+        create_approval_worksheet(project, worksheet, scenarios)
 
     if filename is not None:
         logger.debug("Saving workbook...")
@@ -277,45 +353,148 @@ def create_excel_file(project, filename=None):
     return workbook
 
 
-def get_scenario_worksheet(path):
-    worksheet = xlrd.open_workbook(path).sheet_by_name(SCENARIO_DATA_WORKSHEET)
+def get_worksheet(path, name):
+    worksheet = xlrd.open_workbook(path).sheet_by_name(name)
     return worksheet
 
 
+@transaction.commit_manually
 def import_uploaded_excel_file(path, allowed_scenario_ids):
     """Check and import the Excel file. The whole operation is wrapped
     in a database transaction, so that any problems won't change the
     database. Returns a list of error messages; an empty list
     indicates success."""
 
-    worksheet = get_scenario_worksheet(path)
+    worksheet = get_worksheet(path, SCENARIO_DATA_WORKSHEET)
     header_titles = tuple(cell.value for cell in worksheet.row(1))
 
     errors = []
 
-    class DummyException(Exception):
-        pass
+    header, header_errors = import_header(header_titles)
+
+    if header_errors:
+        errors += header_errors
+
+    for rownr in range(HEADER_ROWS, worksheet.nrows):
+        row_errors = import_scenario_row(
+            header, rownr, worksheet.row(rownr), allowed_scenario_ids)
+
+        if row_errors:
+            errors += row_errors
+
+    if errors:
+        transaction.rollback()
+    else:
+        transaction.commit()
+
+    return errors
+
+
+def find_approval_rules(worksheet):
+    rule_dict = dict()
+    errors = []
+
+    rulenames = list(worksheet.row(1))[3:]
+
+    colnr = 0
+    while colnr < len(rulenames):
+        rulename1 = rulenames[colnr].value
+        if (colnr + 1 >= len(rulenames)):
+            errors.append(
+                "De naam van een goedkeuringsregel moet boven twee kolommen"
+                "staan.")
+            return errors, rule_dict
+        rulename2 = rulenames[colnr + 1].value
+
+        if rulename1:
+            if rulename1 != rulename2:
+                errors.append(("De naam van de goedkeuringsregel in kolom {0}"
+                               "is niet dezelfde als die in kolom {1}.")
+                              .format(colnr, colnr + 1))
+                return errors, rule_dict
+
+            try:
+                rule = approvalmodels.ApprovalRule.objects.get(name=rulename1)
+                rule_dict[colnr] = rule
+            except approvalmodels.ApprovalRule.DoesNotExist:
+                errors.append("Regel met naam '{0}' niet gevonden.".format(
+                        rulename1))
+
+        colnr += 2
+
+    return errors, rule_dict
+
+
+def import_scenario_approval(
+    rule_dict, rownr, row, allowed_scenario_ids, project, username):
+    if not row:
+        # Empty row, skip.
+        return []
 
     try:
-        with transaction.commit_on_success():
-            header, header_errors = import_header(header_titles)
+        scenarioidcell = row[0]
+        scenarioid = int(scenarioidcell.value)
+    except (ValueError, TypeError):
+        return ["Op regel {0} geen scenarionummer gevonden.".format(rownr)]
 
-            if header_errors:
-                errors += header_errors
-                raise DummyException()
+    try:
+        scenario = Scenario.objects.get(pk=scenarioidcell.value)
+    except Scenario.DoesNotExist:
+        return ["Regel {0}: onbekend scenarionummer {1}.".
+                format(rownr, scenarioid)]
 
-            for rownr in range(HEADER_ROWS, worksheet.nrows):
-                row_errors = import_scenario_row(
-                    header, rownr, worksheet.row(rownr), allowed_scenario_ids)
+    if scenarioid not in allowed_scenario_ids:
+        return ["Regel {0}: Scenario {1} zit niet in dit project."
+                .format(rownr, scenarioid)]
 
-                if row_errors:
-                    errors += row_errors
+    approvalobject = scenario.approval_object(project)
+    approval_values = row[3:]
 
-            if errors:
-                raise DummyException()
-    except DummyException:
-        pass
+    col = 0
+    while col in rule_dict and col < len(row):
+        rule = rule_dict[col]
+        approval_value = approval_values[col].value
+        approval_remark = approval_values[col + 1].value
 
+        record_approval(
+            approvalobject, username, rule, approval_value, approval_remark)
+        col += 2
+
+    scenario.update_status()
+    return []
+
+
+def record_approval(
+    approvalobject, username, rule, approval_value, approval_remark):
+    approval_value = unicode(approval_value).strip()
+
+    if approval_value not in ("0", "1"):
+        return
+
+    successful = approval_value == "1"
+
+    approvalobject.approve(rule, successful, username, approval_remark)
+
+
+@transaction.commit_manually
+def import_upload_excel_file_for_approval(
+    project, username, path, allowed_scenario_ids):
+    worksheet = get_worksheet(path, SCENARIO_APPROVAL_WORKSHEET)
+
+    errors, rule_dict = find_approval_rules(worksheet)
+    if not errors:
+        for rownr in range(HEADER_ROWS, worksheet.nrows):
+            row_errors = import_scenario_approval(
+                rule_dict, rownr, worksheet.row(rownr),
+                allowed_scenario_ids, project, username)
+
+            if row_errors:
+                errors += row_errors
+
+    if errors:
+        transaction.rollback()
+    else:
+        transaction.commit()
     return errors
 
 

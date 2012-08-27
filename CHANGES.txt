@@ -8,6 +8,12 @@ Changelog of flooding-lib
 
 - Added migration to create default workflow_templates.
 
+- Add a 'Goedkeuring' sheet to the Excel metadata export. It shows
+  scenarioid, scenario identification and scenario name, and the
+  approval status for each of the applicable approval rules, plus
+  remarks in an extra column. Code for generation and importing is now
+  done and unit testing, but not tested "for real" yet because we will
+  first make the necessary user interface in a branch.
 
 2.9 (2012-08-24)
 ----------------
@@ -38,7 +44,6 @@ The scenarioproject table now has a cacheing 'approved' nullboolean that
 is faster to use than the equivalent functions on ApprovalObject that need
 to hit the database. There is a schema migration and a data migration to
 create this field.
-
 
 2.8 (2012-08-23)
 ----------------

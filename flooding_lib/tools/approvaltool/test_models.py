@@ -1,6 +1,42 @@
-from django.test import TestCase
+# Python 3 is coming to town
+from __future__ import print_function, unicode_literals
+from __future__ import absolute_import, division
 
+import factory
+import mock
+
+from django.test import TestCase
+from flooding_lib.test_models import ScenarioF, ProjectF
 from flooding_lib.tools.approvaltool import models
+
+
+class ApprovalObjectTypeF(factory.Factory):
+    FACTORY_FOR = models.ApprovalObjectType
+
+    name = "approval object type"
+    type = models.ApprovalObjectType.TYPE_PROJECT
+
+
+class ApprovalRuleF(factory.Factory):
+    FACTORY_FOR = models.ApprovalRule
+
+    name = "approval rule"
+    description = "approval rule description"
+
+
+class ApprovalObjectF(factory.Factory):
+    FACTORY_FOR = models.ApprovalObject
+
+    name = "approval object"
+
+
+class ApprovalObjectStateF(factory.Factory):
+    FACTORY_FOR = models.ApprovalObjectState
+
+    approvalobject = factory.LazyAttribute(
+        lambda obj: ApprovalObjectF())
+    approvalrule = factory.LazyAttribute(
+        lambda obj: ApprovalRuleF())
 
 
 class TestApprovalObjectType(TestCase):
@@ -22,7 +58,25 @@ class TestApprovalObjectType(TestCase):
 
 class TestApprovalObjectState(TestCase):
     """No functionality yet, so no tests either"""
-    pass
+    def test_has_unicode(self):
+        approvalobjectstate = ApprovalObjectStateF.build()
+        u = unicode(approvalobjectstate)
+        self.assertTrue(u)
+        self.assertTrue(isinstance(u, unicode))
+
+    def test_returns(self):
+        approvalobjectstate = ApprovalObjectStateF.build()
+        approvalobjectstate.successful = None
+        unknown = approvalobjectstate.successful_string()
+        approvalobjectstate.successful = True
+        yes = approvalobjectstate.successful_string()
+        approvalobjectstate.successful = False
+        no = approvalobjectstate.successful_string()
+
+        self.assertEquals(unknown, '-')
+        self.assertNotEquals(yes, unknown)
+        self.assertNotEquals(no, unknown)
+        self.assertNotEquals(yes, no)
 
 
 class TestApprovalObject(TestCase):
@@ -46,6 +100,12 @@ class TestApprovalObject(TestCase):
                 approvalobject=ao))
         self.assertEquals(len(rules), 1)
         self.assertEquals(rules[0].name, 'test_rule')
+
+    def test_has_unicode(self):
+        approvalobject = ApprovalObjectF.build()
+        u = unicode(approvalobject)
+        self.assertTrue(u)
+        self.assertTrue(isinstance(u, unicode))
 
     def test_state(self):
         aot = models.ApprovalObjectType.objects.create(
@@ -187,3 +247,24 @@ class TestApprovalObject(TestCase):
         state2.save()
         self.assertTrue(ao.approved)
         self.assertFalse(ao.disapproved)
+
+    @mock.patch('flooding_lib.models.Scenario.update_status')
+    def test_calls_update_status(self, mocked_update_status):
+        approvalobjecttype = ApprovalObjectTypeF.create()
+
+        scenario = ScenarioF.create()
+        project = ProjectF.create(
+            approval_object_type=approvalobjecttype)
+        scenario.set_project(project)
+        approval_object = scenario.approval_object(project)
+        approval_object.update_scenario_status()
+
+        self.assertTrue(mocked_update_status.called)
+
+
+class TestApprovalRule(TestCase):
+    def test_has_unicode(self):
+        rule = ApprovalRuleF.build()
+        u = unicode(rule)
+        self.assertTrue(u)
+        self.assertTrue(isinstance(u, unicode))

@@ -98,7 +98,8 @@ class ApprovalObject(models.Model):
 
     def states(self):
         return ApprovalObjectState.objects.filter(
-            approvalobject=self).order_by('approvalrule__position')
+            approvalobject=self).select_related().order_by(
+            'approvalrule__position')
 
     def state(self, rule):
         state, created = ApprovalObjectState.objects.get_or_create(

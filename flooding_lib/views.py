@@ -1516,7 +1516,8 @@ def excel_download(request, permission_manager, project_id):
         not project.excel_generation_too_slow()):
         # Generate it if it's not there or generating isn't too slow
         from flooding_lib import excel_import_export
-        excel_import_export.create_excel_file(project, full_path)
+        excel_import_export.create_excel_file(
+            project, project.original_scenarios(), full_path)
 
     return viewutil.serve_file(
         request=request,

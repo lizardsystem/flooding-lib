@@ -18,6 +18,52 @@ from flooding_lib.test_models import ScenarioF
 from flooding_lib.tools.importtool.models import InputField
 from flooding_lib.tools.importtool.models import IntegerValue
 from flooding_lib.tools.importtool.test_models import InputFieldF
+from flooding_lib.tools.approvaltool import test_models as testapprovalmodels
+from flooding_lib.tools.approvaltool import models as approvalmodels
+
+
+class MockCell(object):
+    def __init__(self, value, style=None):
+        self.value = value
+        self.style = style
+
+
+class MockWorksheet(object):
+    """An object with a write() method that remembers what was written
+    where.
+
+    It's a very bad mock of a worksheet, works only for our tests here -
+    col() returns a MagicMock, while row() is an iterator over cells values.
+    """
+    def __init__(self):
+        self.cells = dict()
+
+    def write(self, row, col, content, style=None):
+        self.cells[(row, col)] = MockCell(content, style)
+
+    def col(self, colnr):
+        return mock.MagicMock()
+
+    @property
+    def nrows(self):
+        if not self.cells:
+            return 0
+        return max(row for row, col in self.cells) + 1
+
+    def row(self, rownr):
+        if not self.cells:
+            return
+
+        maxcol = max(col for row, col in self.cells)
+        col = 0
+        while col <= maxcol:
+            yield self.cells.get((rownr, col), MockCell(None))
+            col += 1
+
+    def content(self, row, col):
+        if (row, col) not in self.cells:
+            return None
+        return self.cells[(row, col)].value
 
 
 class TestMakeStyle(TestCase):
@@ -46,34 +92,41 @@ class TestCreateExcelFile(TestCase):
         Excel file and returns the path of that file."""
         project = ProjectF.create()
         # Add a scenario
-        ScenarioF.create().set_project(project)
+        scenario = ScenarioF.create()
+        scenario.set_project(project)
         filename = "/tmp/create_excel_file.xls"
 
-        eie.create_excel_file(project, filename)
+        eie.create_excel_file(project, [scenario], filename)
         self.assertTrue(os.path.exists(filename))
 
         os.remove(filename)
+
+    @mock.patch('flooding_lib.excel_import_export.create_approval_worksheet')
+    def test_calls_approval_worksheet(self, mocked_create):
+        project = ProjectF.create()
+        scenario = ScenarioF.create()
+        scenario.set_project(project)
+
+        eie.create_excel_file(project, [scenario], include_approval=True)
+        self.assertTrue(mocked_create.called)
 
     def test_creates_field_info_object(self):
         """Check that it calls project.original_scenarios and passes
         the result to FieldInfo."""
         scenariolistmock = mock.MagicMock()
 
+        project = ProjectF()
         with mock.patch(
-            'flooding_lib.models.Project.original_scenarios',
-            new=mock.MagicMock(return_value=scenariolistmock)):
-            project = ProjectF()
-            with mock.patch(
-                'flooding_lib.excel_import_export.FieldInfo'):
-                eie.create_excel_file(project)
-                eie.FieldInfo.assert_called_with(scenariolistmock)
+            'flooding_lib.excel_import_export.FieldInfo'):
+            eie.create_excel_file(project, scenariolistmock)
+            eie.FieldInfo.assert_called_with(scenariolistmock)
 
     def test_no_scenarios(self):
         """If there are no scenarios, function should return None and
         there should be no file."""
         project = ProjectF.create()
         filename = "/tmp/create_excel_file.xls"
-        workbook = eie.create_excel_file(project, filename)
+        workbook = eie.create_excel_file(project, (), filename)
         self.assertEquals(workbook, None)
         self.assertFalse(os.path.exists(filename))
 
@@ -97,10 +150,11 @@ class TestCreateExcelFile(TestCase):
                 'flooding_lib.excel_import_export.write_domeinlijst',
                 return_value=True):
                 project = ProjectF.create()
-                ScenarioF.create().set_project(project)
+                scenario = ScenarioF.create()
+                scenario.set_project(project)
                 filename = '/tmp/testfile.xls'
 
-                eie.create_excel_file(project, filename)
+                eie.create_excel_file(project, [scenario], filename)
 
                 workbook = xlrd.open_workbook(filename)
                 self.assertEquals(workbook.nsheets, 2)
@@ -129,10 +183,11 @@ class TestCreateExcelFile(TestCase):
             with mock.patch('flooding_lib.excel_import_export.FieldInfo.rows',
                             return_value=[Row()]):
                 project = ProjectF.create()
-                ScenarioF.create().set_project(project)
+                scenario = ScenarioF.create()
+                scenario.set_project(project)
                 filename = '/tmp/testfile.xls'
 
-                eie.create_excel_file(project, filename)
+                eie.create_excel_file(project, [scenario], filename)
 
                 workbook = xlrd.open_workbook(filename)
                 self.assertEquals(workbook.nsheets, 2)
@@ -163,6 +218,13 @@ class TestFieldInfo(TestCase):
             self.assertEquals(len(headers), 1)
             self.assertEquals(headers[0]['headername'], 'testheader')
             self.assertEquals(headers[0]['inputfield'], inputfield)
+
+    def test_scenarios(self):
+        scenario = ScenarioF.build()
+        fieldinfo = eie.FieldInfo([scenario])
+
+        for s in fieldinfo.scenarios():
+            self.assertTrue(s is scenario)
 
     def test_add_extra_header_fields_name(self):
         """header['fieldname'] should be equal to the field's name."""
@@ -406,7 +468,7 @@ class TestWriteDomeinlijst(TestCase):
         self.assertFalse(eie.write_domeinlijst(None, 0, header))
 
 
-class TestGetScenarioWorksheet(TestCase):
+class TestGetWorksheet(TestCase):
     def test_trivial(self):
         worksheet = object()
         workbook_attrs = {
@@ -415,7 +477,7 @@ class TestGetScenarioWorksheet(TestCase):
         with mock.patch(
             'xlrd.open_workbook',
             return_value=mock.MagicMock(**workbook_attrs)) as patched:
-            sheet = eie.get_scenario_worksheet('path')
+            sheet = eie.get_worksheet('path', 'name')
 
             patched.assertCalledWith(('path',))
             self.assertEquals(sheet, worksheet)
@@ -431,7 +493,7 @@ class TestImportUploadedExcelFile(TestCase):
         worksheet = mock.MagicMock(**sheetattrs)
 
         with mock.patch(
-            'flooding_lib.excel_import_export.get_scenario_worksheet',
+            'flooding_lib.excel_import_export.get_worksheet',
             return_value=worksheet):
             self.assertEquals([], eie.import_uploaded_excel_file('', set()))
 
@@ -446,7 +508,7 @@ class TestImportUploadedExcelFile(TestCase):
         worksheet = mock.MagicMock(**sheetattrs)
 
         with mock.patch(
-            'flooding_lib.excel_import_export.get_scenario_worksheet',
+            'flooding_lib.excel_import_export.get_worksheet',
             return_value=worksheet):
             self.assertEquals(
                 ["error!"],
@@ -471,7 +533,7 @@ class TestImportUploadedExcelFile(TestCase):
         allowed_ids = set()
 
         with mock.patch(
-            'flooding_lib.excel_import_export.get_scenario_worksheet',
+            'flooding_lib.excel_import_export.get_worksheet',
             return_value=worksheet):
             eie.import_uploaded_excel_file('', allowed_ids)
 
@@ -490,10 +552,52 @@ class TestImportUploadedExcelFile(TestCase):
         worksheet = mock.MagicMock(row=lambda i: [], nrows=5)
 
         with mock.patch(
-            'flooding_lib.excel_import_export.get_scenario_worksheet',
+            'flooding_lib.excel_import_export.get_worksheet',
             return_value=worksheet):
             errors = eie.import_uploaded_excel_file('', set())
             self.assertEquals(errors, ["error!"])
+
+
+class TestFindApprovalRules(TestCase):
+    def test_trivial(self):
+        worksheet = MockWorksheet()
+        eie.find_approval_rules(worksheet)
+
+    def test_only_one_name(self):
+        worksheet = MockWorksheet()
+        worksheet.write(1, 3, "whee")
+
+        errors, rule_dict = eie.find_approval_rules(worksheet)
+        self.assertTrue(errors)
+
+    def test_names_not_the_same(self):
+        worksheet = MockWorksheet()
+        worksheet.write(1, 3, "whee")
+        worksheet.write(1, 4, "wheeeee!")
+
+        errors, rule_dict = eie.find_approval_rules(worksheet)
+        self.assertTrue(errors)
+
+    def test_unknown_name(self):
+        worksheet = MockWorksheet()
+        worksheet.write(1, 3, "whee")
+        worksheet.write(1, 4, "whee")
+
+        errors, rule_dict = eie.find_approval_rules(worksheet)
+        self.assertTrue(errors)
+
+    def test_known_rule(self):
+        name = "some rule"
+        rule = testapprovalmodels.ApprovalRuleF.create(
+            name=name)
+
+        worksheet = MockWorksheet()
+        worksheet.write(1, 3, name)
+        worksheet.write(1, 4, name)
+
+        errors, rule_dict = eie.find_approval_rules(worksheet)
+        self.assertFalse(errors)
+        self.assertEquals(rule_dict[0], rule)
 
 
 class TestImportedHeader(TestCase):
@@ -634,12 +738,6 @@ class TestImportScenarioRow(TestCase):
         self.assertTrue("66" in errors[0])
 
 
-class FakeCell(object):
-    """Helper object to hold a value; fake Excel cell."""
-    def __init__(self, value):
-        self.value = value
-
-
 class TestImportScenarioRow2(TestCase):
     """More tests for import_scenario_row. These tests assume that
     there is a scenario, and has helper functions to create a header
@@ -649,7 +747,7 @@ class TestImportScenarioRow2(TestCase):
         """Create a scenario, let the first field of the row contain a
         cell with that scenario's ID."""
         self.scenario = ScenarioF.create()
-        self.rowstart = [FakeCell(unicode(self.scenario.id))]
+        self.rowstart = [MockCell(unicode(self.scenario.id))]
         self.allowed_ids = set((self.scenario.id,))
 
     def build_header(self, *inputfields):
@@ -669,7 +767,7 @@ class TestImportScenarioRow2(TestCase):
         inputfield = InputFieldF.build(
             destination_table='Project',
             type=InputField.TYPE_INTEGER)
-        cell = FakeCell(value=3)
+        cell = MockCell(value=3)
 
         header = self.build_header(inputfield)
 
@@ -684,7 +782,7 @@ class TestImportScenarioRow2(TestCase):
         inputfield = InputFieldF.build(
             destination_table='Scenario',
             type=InputField.TYPE_INTEGER)
-        cell = FakeCell(value=u'')
+        cell = MockCell(value=u'')
 
         header = self.build_header(inputfield)
 
@@ -700,7 +798,7 @@ class TestImportScenarioRow2(TestCase):
         inputfield = InputFieldF.build(
             destination_table='scenario',
             type=InputField.TYPE_INTEGER)
-        cell = FakeCell(value=3)
+        cell = MockCell(value=3)
 
         header = self.build_header(inputfield)
 
@@ -718,7 +816,7 @@ class TestImportScenarioRow2(TestCase):
         inputfield = InputFieldF.build(
             destination_table='scenario',
             type=InputField.TYPE_INTEGER)
-        cell = FakeCell(value="whee")
+        cell = MockCell(value="whee")
 
         header = self.build_header(inputfield)
 
@@ -727,3 +825,202 @@ class TestImportScenarioRow2(TestCase):
 
         self.assertEquals(len(errors), 1)
         self.assertTrue("66" in errors[0])
+
+
+class TestCreateApprovalWorksheet(TestCase):
+    def setUp(self):
+        # Lots of setup
+
+        InputFieldF.create(name='Scenario Identificatie')
+
+        self.approvalobjecttype = testapprovalmodels.ApprovalObjectTypeF()
+        self.approvalrule = approvalmodels.ApprovalRule.objects.create(
+            name="some rule",
+            description="some description")
+        self.approvalobjecttype.approvalrule.add(self.approvalrule)
+
+        self.project = ProjectF.create(
+            approval_object_type=self.approvalobjecttype)
+        self.scenario = ScenarioF.create(
+            name="scenario name")
+        self.scenario.set_project(self.project)
+
+    def test_writes_fields(self):
+        worksheet = MockWorksheet()
+
+        eie.create_approval_worksheet(self.project, worksheet, [self.scenario])
+
+        # id and name
+        self.assertEquals(worksheet.content(4, 0), self.scenario.id)
+        self.assertEquals(worksheet.content(4, 2), "scenario name")
+
+        # name of rule
+        self.assertEquals(worksheet.content(1, 3), "some rule")
+
+        # value
+        self.assertEquals(worksheet.content(4, 3), None)
+
+    def test_value_of_approval_state(self):
+        worksheet = MockWorksheet()
+
+        state = (self.scenario.approval_object(self.project)
+                 .state(self.approvalrule))
+
+        state.successful = True
+        state.save()
+
+        eie.create_approval_worksheet(self.project, worksheet, [self.scenario])
+        # Test if there is a 1 there
+        self.assertEquals(worksheet.content(4, 3), 1)
+
+    def test_remarks(self):
+        worksheet = MockWorksheet()
+
+        state = (self.scenario.approval_object(self.project)
+                 .state(self.approvalrule))
+
+        state.remarks = "some remarks"
+        state.save()
+
+        eie.create_approval_worksheet(self.project, worksheet, [self.scenario])
+        self.assertEquals(worksheet.content(4, 4), "some remarks")
+
+
+class TestImportScenarioApproval(TestCase):
+    def setUp(self):
+        self.approvalobjecttype = testapprovalmodels.ApprovalObjectTypeF()
+        self.approvalrule = approvalmodels.ApprovalRule.objects.create(
+            name="some rule",
+            description="some description")
+        self.approvalobjecttype.approvalrule.add(self.approvalrule)
+        self.scenario = ScenarioF.create()
+        self.project = ProjectF.create(
+            approval_object_type=self.approvalobjecttype)
+        self.scenario.set_project(self.project)
+
+    def test_trivial(self):
+        """Only a scenario id, no real data."""
+        errors = eie.import_scenario_approval(
+            {}, 1, [MockCell(self.scenario.id)], [self.scenario.id],
+            self.project, "remco")
+        self.assertEquals(errors, [])
+
+    def test_empty_row(self):
+        """Returns [] (no errors, otherwise skips."""
+        self.assertEquals(
+            [],
+            eie.import_scenario_approval({}, 1, [], [], self.project, "remco"))
+
+    def test_no_scenarioid_returns_error(self):
+        errors = eie.import_scenario_approval(
+                {}, 1, [MockCell(None)], [self.scenario.id],
+                self.project, "remco")
+        self.assertTrue(errors)
+
+    def test_unknown_scenarioid_returns_error(self):
+        unknown_scenario_id = self.scenario.id + 31337
+
+        errors = eie.import_scenario_approval(
+                {}, 1,
+                [MockCell(unknown_scenario_id)],
+                [unknown_scenario_id],
+                self.project, "remco")
+        self.assertTrue(errors)
+
+    def test_scenarioid_not_allowed_returns_error(self):
+        errors = eie.import_scenario_approval(
+                {}, 1, [MockCell(self.scenario.id)], [],
+                self.project, "remco")
+        self.assertTrue(errors)
+
+    def test_correct_ruledict_etc_fills_in_value(self):
+        rule_dict = {0: self.approvalrule}
+
+        row = [MockCell(self.scenario.id), None, None,
+               MockCell(1), MockCell("opmerking")]
+
+        allowed_scenario_ids = [self.scenario.id]
+
+        errors = eie.import_scenario_approval(
+            rule_dict, 4, row, allowed_scenario_ids, self.project, "remco")
+
+        self.assertFalse(errors)
+
+        state = (self.scenario.approval_object(self.project).
+                 state(self.approvalrule))
+
+        self.assertEquals(state.successful, True)
+        self.assertEquals(state.remarks, "opmerking")
+        self.assertEquals(state.creatorlog, "remco")
+
+        self.assertTrue(self.scenario.approval_object(self.project).approved)
+        self.assertTrue(self.scenario.scenarioproject(self.project).approved)
+
+
+class TestImportExcelFileForApproval(TestCase):
+    @mock.patch('flooding_lib.excel_import_export.get_worksheet')
+    @mock.patch('flooding_lib.excel_import_export.find_approval_rules',
+                return_value=(["error"], None))
+    @mock.patch('django.db.transaction.rollback')
+    def test_find_approval_rules_error_means_rollback(
+        self, patched_get_worksheet,
+        patched_find_approval_rules, patched_rollback):
+        eie.import_upload_excel_file_for_approval(
+            None, "remco", "norealfile.xls", [])
+
+        self.assertTrue(patched_rollback.called)
+
+    @mock.patch('flooding_lib.excel_import_export.find_approval_rules',
+                return_value=([], None))
+    @mock.patch('django.db.transaction.commit')
+    def test_find_approval_rules_works_empty_worksheet_no_errors(
+        self, patched_find_approval_rules, patched_commit):
+        worksheet = MockWorksheet()
+        with mock.patch('flooding_lib.excel_import_export.get_worksheet',
+                        return_value=worksheet):
+            eie.import_upload_excel_file_for_approval(
+                None, "remco", "norealfile.xls", [])
+
+        self.assertTrue(patched_commit.called)
+
+    @mock.patch('django.db.transaction.rollback')
+    def test_put_row_in_worksheet_row_returns_errors(
+        self, patched_rollback):
+        scenario = ScenarioF.create()
+        project = ProjectF.create()
+        scenario.set_project(project)
+
+        worksheet = MockWorksheet()
+        worksheet.write(eie.HEADER_ROWS, 1, scenario.id)
+        rule_dict = dict()
+        allowed_scenario_ids = []  # This will give an error
+
+        with mock.patch('flooding_lib.excel_import_export.get_worksheet',
+                        return_value=worksheet):
+            with mock.patch(
+                'flooding_lib.excel_import_export.find_approval_rules',
+                return_value=([], rule_dict)):
+                eie.import_upload_excel_file_for_approval(
+                    project, 'remco', 'somepath.xls', allowed_scenario_ids)
+
+        self.assertTrue(patched_rollback.called)
+
+
+class TestRecordApproval(TestCase):
+    @mock.patch(
+        'flooding_lib.tools.approvaltool.models.ApprovalObject.approve')
+    def test_trivial(self, mocked_approve):
+        approvalobject = testapprovalmodels.ApprovalObjectF.build()
+        rule = object()
+
+        eie.record_approval(approvalobject, 'remco', rule, "1", "whee")
+        mocked_approve.assert_called_with(rule, True, "remco", "whee")
+
+    @mock.patch(
+        'flooding_lib.tools.approvaltool.models.ApprovalObject.approve')
+    def test_not_called_for_nonsense(self, mocked_approve):
+        approvalobject = testapprovalmodels.ApprovalObjectF.build()
+        rule = object()
+
+        eie.record_approval(approvalobject, 'remco', rule, "nonsense", "whee")
+        self.assertFalse(mocked_approve.called)
