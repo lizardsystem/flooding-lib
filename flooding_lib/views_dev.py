@@ -11,7 +11,7 @@ from flooding_lib.models import Breach, WaterlevelSet, Measure, Region
 from flooding_lib.models import ExternalWater, UserPermission, Project
 from flooding_lib.models import Scenario, SobekModel, Strategy
 from flooding_lib.models import ScenarioCutoffLocation, CutoffLocation
-from flooding_lib.models import TaskType, Task, Waterlevel, ScenarioBreach
+from flooding_lib.models import Waterlevel, ScenarioBreach
 from flooding_lib.permission_manager import receives_permission_manager
 from nens.sobek import SobekHIS
 from django.views.decorators.cache import never_cache
@@ -142,7 +142,7 @@ def service_save_new_scenario(request):
     scenario.code = '2s_c_%i' % scenario.id
     scenario.save()
 
-    scenario.setup_initial_task(request.user)
+    task = scenario.setup_initial_task(request.user)
 
     useManualInput = query.get("useManualInput", False)
     if useManualInput == 'false' or useManualInput == False:

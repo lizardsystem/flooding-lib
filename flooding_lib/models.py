@@ -1276,15 +1276,18 @@ class Scenario(models.Model):
             esi.save()
 
     def setup_initial_task(self, user):
-        Task.objects.create(
+        task = Task.objects.create(
             scenario=self,
             tasktype=TaskType.objects.get(pk=TaskType.TYPE_SCENARIO_CREATE),
             creatorlog=user.get_full_name(),
             tstart=datetime.datetime.now())
-        workflow_template = workermodels.WorkflowTemplate.objects.get(
-            code=workermodels.WorkflowTemplate.DEFAULT_TEMPLATE_CODE)
-        self.workflow_template_id = workflow_template
+
+#        workflow_template = workermodels.WorkflowTemplate.objects.get(
+#            code=workermodels.WorkflowTemplate.DEFAULT_TEMPLATE_CODE)
+#        self.workflow_template_id = workflow_template
         self.save()
+
+        return task
 
     def has_values_for(self, inputfields):
         return all(
@@ -1294,9 +1297,9 @@ class Scenario(models.Model):
 
     def setup_imported_task(self, username):
         self.create_calculated_status(username)
-        workflow_template = workermodels.WorkflowTemplate.objects.get(
-            code=workermodels.WorkflowTemplate.IMPORTED_TEMPLATE_CODE)
-        self.workflow_template_id = workflow_template
+#        workflow_template = workermodels.WorkflowTemplate.objects.get(
+#            code=workermodels.WorkflowTemplate.IMPORTED_TEMPLATE_CODE)
+#        self.workflow_template_id = workflow_template
         self.save()
 
 
