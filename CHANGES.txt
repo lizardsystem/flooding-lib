@@ -4,7 +4,8 @@ Changelog of flooding-lib
 2.11 (unreleased)
 -----------------
 
-- Nothing changed yet.
+If a user uploading an Excel file for a project has approval rights in
+that project, the approval information in that file as read as well.
 
 
 2.10 (2012-08-28)

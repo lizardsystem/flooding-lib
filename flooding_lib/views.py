@@ -1463,6 +1463,13 @@ class ExcelImportExportViewProject(
                 errors = excel_import_export.import_uploaded_excel_file(
                     dest_path, allowed_scenario_ids)
 
+                if permission_manager.check_project_permission(
+                   self.project(), UserPermission.PERMISSION_SCENARIO_APPROVE):
+                    errors += (excel_import_export.
+                               import_upload_excel_file_for_approval(
+                            self.project(), request.user.get_full_name(),
+                            dest_path, allowed_scenario_ids))
+
                 # If successful, redirect
                 if not errors:
                     return HttpResponseRedirect(
