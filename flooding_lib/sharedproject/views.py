@@ -6,6 +6,7 @@ from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
+from django.utils.translation import ugettext as _
 from django.views.generic import TemplateView
 
 import lizard_ui.views
@@ -162,8 +163,8 @@ def post_excel(request, project, province):
         filename = request.FILES['excel_file'].name
         if not filename.startswith(province.name):
             errors += [
-                'Filename begint niet met de naam van de provincie. '
-                'Verkeerde file?']
+                _('Filename does not start with the name of the province. '
+                  'Wrong file?')]
         else:
             dest_path = os.path.join('/tmp', filename)
             with open(dest_path, 'wb') as dest:
