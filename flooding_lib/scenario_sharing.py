@@ -7,7 +7,7 @@ currently two examples of such projects, ROR and 'Voor landelijk
 gebruik', and those two examples are hardcoded.
 
 Users with approval permission in a normal project can see a list of
-their scenarios and offer to share them with one of the receiving
+
 projects. Users with approval permission in those other projects can
 see a list of projects offered to them and accept them. When that
 happens, the scenario is added to the project and it will stay in two
@@ -40,6 +40,8 @@ from django.views.decorators.http import require_GET, require_POST
 from flooding_lib import models
 from flooding_lib.permission_manager import \
     receives_loggedin_permission_manager
+from flooding_lib.tools.importtool import models as importmodels
+from flooding_lib.tools.approvaltool import models as approvalmodels
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +58,10 @@ def project_field(scenario, project_id):
 
     # Possible situations:
     # Scenario is completely unrelated to project_id as yet
-    #   Actions: offer it
+    #   Scenario has all required metadata filled-in
+    #      Actions: offer it
+    #   It does not
+    #      Say so
     # Scenario is already offered to the project
     #   Actions: rescind offer
     # Scenario is already part of the project
@@ -80,10 +85,16 @@ def project_field(scenario, project_id):
                 get(scenario=scenario, project__id=project_id))
         except models.ScenarioProject.DoesNotExist:
             # Scenario not in project
-            fielddict.update({
-                    'message': _("Offer to project"),
-                    'action': 'add',
-                    })
+            if scenario.has_values_for(importmodels.InputField.objects.all()):
+                fielddict.update({
+                        'message': _("Offer to project"),
+                        'action': 'add',
+                        })
+            else:
+                fielddict.update({
+                        'message': _("Not all required data present"),
+                        'action': '',
+                        })
         else:
             # Scenario in project
             scenarioproject.ensure_has_approvalobject()
@@ -258,7 +269,23 @@ def action_view(request, permission_manager):
     if action == 'accept':
         models.ScenarioShareOffer.objects.filter(
             scenario=scenario, new_project=project).delete()
-        project.add_scenario(scenario)
+
+        # Add the scenario
+        scenarioproject = project.add_scenario(scenario)
+
+        # Hardcoded: set the check for metadata completeness automatically
+        scenarioproject.ensure_has_approvalobject()
+        metadata_complete_rule = approvalmodels.ApprovalRule.objects.get(pk=6)
+        success = scenario.has_values_for(
+            importmodels.InputField.objects.all())
+        scenarioproject.approvalobject.approve(
+            rule=metadata_complete_rule,
+            success=success,
+            creator=request.user.username,
+            remarks=(
+                "Set automatically while adding to project {0}."
+                .format(project)))
+
         return HttpResponse(simplejson.dumps({'message': ''}))
 
     field = project_field(scenario, project.id)

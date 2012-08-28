@@ -26,7 +26,7 @@ def serve_file(request, dirname, filename, nginx_dirname, debug=None):
     # static serve.
     if debug or not platform.system() == 'Linux':
         return static.serve(
-            request, os.path.join(dirname, filename), '/')
+            request, filename, dirname)
 
     response = http.HttpResponse()
 

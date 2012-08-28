@@ -15,6 +15,17 @@ Changelog of flooding-lib
   done and unit testing, but not tested "for real" yet because we will
   first make the necessary user interface in a branch.
 
+- Added a 'flooding_lib.sharedproject' sub-app that will hold pages
+  and models to do with the ROR and Landelijk gebruik projects.
+  A 'ROR dashboard' is now available under /flooding/shared/ror/,
+  down- and uploading Excel files per province works.
+
+- Make it mandatory to first collect all the necessary metadata before
+  a scenario can be shared.
+
+- Automatically set the value for the 'Metadata complete' approval
+  rule when a scenario is accepted into one of the national projects.
+
 2.9 (2012-08-24)
 ----------------
 

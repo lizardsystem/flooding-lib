@@ -595,8 +595,10 @@ class Project(models.Model):
                 "Tried to add scenario (pk={0}) to its own main project."
                 .format(scenario.pk))
 
-        ScenarioProject.objects.get_or_create(
+        scenarioproject, _ = ScenarioProject.objects.get_or_create(
             project=self, scenario=scenario, is_main_project=False)
+
+        return scenarioproject
 
     @classmethod
     def in_scenario_list(cls, scenario_list):

@@ -4,6 +4,7 @@ from django.contrib import databrowse
 
 from flooding_lib import views
 from flooding_lib.models import Project
+import flooding_lib.sharedproject.urls
 
 info_dict = {
     'queryset': Project.objects.all(),
@@ -182,7 +183,11 @@ urlpatterns = patterns(
     # Note no $ at the end, we want to add the filename
     url(r'^excel/(?P<project_id>\d+)/',
         'flooding_lib.views.excel_download',
-        name='flooding_excel_download'))
+        name='flooding_excel_download'),
+
+    (r'^shared/', include(flooding_lib.sharedproject.urls))
+)
+
 
 
 if settings.DEBUG:

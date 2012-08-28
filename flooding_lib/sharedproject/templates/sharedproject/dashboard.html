@@ -1,0 +1,50 @@
+{% extends "lizard/base.html" %}
+{% load utils %}
+{% load i18n %}
+
+{% block title %}
+Flooding: {% trans 'Share scenarios' %}
+{% endblock %}
+
+{% block content %}
+<script type="text/javascript" src="{% url root_url %}static_media/weblib/jquery/jquery-1.3.2.min.js"></script>
+<h2>{{ view.project }} dashboard</h2>
+
+<table>
+<thead>
+<th>Naam</th>
+<th>Aantal scenarios</th>
+<th>Goedgekeurd</th>
+<th>Afgekeurd</th>
+<th>Nog te keuren</th>
+<th>Excel</th>
+<th>Uploaden</th>
+</thead>
+{% for province, stats in view.provinces_with_stats %}
+<tr>
+<td>{{ province }}</td>
+<td>{{ stats.amount }}</td>
+<td>{{ stats.approved }}</td>
+<td>{{ stats.disapproved }}</td>
+<td>{{ stats.notyetapproved }}</td>
+<td>
+{% if stats.amount %}
+<a href="{% url sharedproject_dashboard_excel "ror" province.id %}{{ province.name }}.xls">Download</a>
+{% endif %}
+</td>
+<td>
+{% if stats.amount %}
+<form
+   action="{% url sharedproject_dashboard_excel "ror" province.id %}"
+   enctype="multipart/form-data"
+   method="post">
+{% csrf_token %}
+<input type="file" name="excel_file" id="id_excel_file" />
+<input type="submit" value="{% trans 'Send' %}" />
+</form>
+{% endif %}
+</td>
+</tr>
+{% endfor %}
+</table>
+{% endblock %}

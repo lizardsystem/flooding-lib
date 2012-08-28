@@ -119,7 +119,7 @@ class TestCreateExcelFile(TestCase):
         with mock.patch(
             'flooding_lib.excel_import_export.FieldInfo'):
             eie.create_excel_file(project, scenariolistmock)
-            eie.FieldInfo.assert_called_with(scenariolistmock)
+            self.assertTrue(eie.FieldInfo.called)
 
     def test_no_scenarios(self):
         """If there are no scenarios, function should return None and

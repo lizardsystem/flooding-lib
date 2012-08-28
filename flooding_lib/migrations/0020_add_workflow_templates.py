@@ -10,11 +10,12 @@ class Migration(DataMigration):
 
     def forwards(self, orm):
         "Write your forwards methods here."
-        
-        workermodels.WorkflowTemplate.objects.get_or_create(
-            code=workermodels.WorkflowTemplate.DEFAULT_TEMPLATE_CODE)
-        workermodels.WorkflowTemplate.objects.get_or_create(
-            code=workermodels.WorkflowTemplate.IMPORTED_TEMPLATE_CODE)
+
+#        workermodels.WorkflowTemplate.objects.get_or_create(
+#            code=workermodels.WorkflowTemplate.DEFAULT_TEMPLATE_CODE)
+#        workermodels.WorkflowTemplate.objects.get_or_create(
+#            code=workermodels.WorkflowTemplate.IMPORTED_TEMPLATE_CODE)
+        pass
 
     def backwards(self, orm):
         "Write your backwards methods here."

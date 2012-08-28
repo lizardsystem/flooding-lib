@@ -270,6 +270,13 @@ def create_approval_worksheet(project, worksheet, scenarios):
     # keep a dict that keeps track of which rule goes in which column,
     # write all the data first, and only then write all the column
     # headers.
+
+    scenarios = list(scenarios)
+
+    logger.debug(("Create_approval_worksheet. Project is '{0}', "
+                 "number of scenarios is {1}.").format(
+            project, len(scenarios)))
+
     rule_columns = dict()
     next_rule_column = 3
 
@@ -328,6 +335,8 @@ def create_excel_file(
 
     logger.debug(("Starting create_excel_file. Project id is {0}, "
                  "filename is '{1}'.").format(project.id, filename))
+
+    scenarios = list(scenarios)
 
     fieldinfo = FieldInfo(scenarios)
     if not fieldinfo:
@@ -427,6 +436,8 @@ def find_approval_rules(worksheet):
 
 def import_scenario_approval(
     rule_dict, rownr, row, allowed_scenario_ids, project, username):
+    logger.debug("Importing rownr {0}".format(rownr))
+
     if not row:
         # Empty row, skip.
         return []
@@ -452,6 +463,7 @@ def import_scenario_approval(
 
     col = 0
     while col in rule_dict and col < len(row):
+        logger.debug("col = {0}".format(col))
         rule = rule_dict[col]
         approval_value = approval_values[col].value
         approval_remark = approval_values[col + 1].value
@@ -468,10 +480,21 @@ def record_approval(
     approvalobject, username, rule, approval_value, approval_remark):
     approval_value = unicode(approval_value).strip()
 
-    if approval_value not in ("0", "1"):
+    logger.debug(("record_approval: approvalobject={approvalobject} "
+                  "username={username} rule={rule} "
+                  "approval_value={approval_value}"
+                  " approval_remark={approval_remark}").format(
+                approvalobject=approvalobject,
+                username=username,
+                rule=rule,
+                approval_value=approval_value,
+                approval_remark=approval_remark
+                ))
+
+    if approval_value not in ("0.0", "1.0", "0", "1"):
         return
 
-    successful = approval_value == "1"
+    successful = approval_value in ("1", "1.0")
 
     approvalobject.approve(rule, successful, username, approval_remark)
 
@@ -482,6 +505,7 @@ def import_upload_excel_file_for_approval(
     worksheet = get_worksheet(path, SCENARIO_APPROVAL_WORKSHEET)
 
     errors, rule_dict = find_approval_rules(worksheet)
+    logger.debug("Found rule_dict: {0}".format(rule_dict))
     if not errors:
         for rownr in range(HEADER_ROWS, worksheet.nrows):
             row_errors = import_scenario_approval(
