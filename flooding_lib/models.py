@@ -1284,9 +1284,9 @@ class Scenario(models.Model):
             creatorlog=user.get_full_name(),
             tstart=datetime.datetime.now())
 
-#        workflow_template = workermodels.WorkflowTemplate.objects.get(
-#            code=workermodels.WorkflowTemplate.DEFAULT_TEMPLATE_CODE)
-#        self.workflow_template_id = workflow_template
+        workflow_template = workermodels.WorkflowTemplate.objects.get(
+            code=workermodels.WorkflowTemplate.DEFAULT_TEMPLATE_CODE)
+        self.workflow_template = workflow_template
         self.save()
 
         return task
@@ -1299,9 +1299,9 @@ class Scenario(models.Model):
 
     def setup_imported_task(self, username):
         self.create_calculated_status(username)
-#        workflow_template = workermodels.WorkflowTemplate.objects.get(
-#            code=workermodels.WorkflowTemplate.IMPORTED_TEMPLATE_CODE)
-#        self.workflow_template_id = workflow_template
+        workflow_template = workermodels.WorkflowTemplate.objects.get(
+            code=workermodels.WorkflowTemplate.IMPORTED_TEMPLATE_CODE)
+        self.workflow_template = workflow_template
         self.save()
 
 
