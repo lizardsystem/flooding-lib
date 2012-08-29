@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.11.2 (unreleased)
+2.11.2 (2012-08-29)
 -------------------
 
 Uncommented the workflow_template setting lines.
