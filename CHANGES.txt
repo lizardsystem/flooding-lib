@@ -4,7 +4,8 @@ Changelog of flooding-lib
 2.12 (unreleased)
 -----------------
 
-- Nothing changed yet.
+Fix: excel_files_for_all_projects only generated files for project 98,
+now back to working for all of them.
 
 
 2.11 (2012-08-29)

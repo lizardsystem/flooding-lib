@@ -19,7 +19,7 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         activate("nl")  # Nederlands
 
-        for project in models.Project.objects.filter(pk=98):
+        for project in models.Project.objects.all():
             filename = os.path.join(
                 settings.EXCEL_DIRECTORY,
                 project.excel_filename())
