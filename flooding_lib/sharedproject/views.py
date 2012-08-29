@@ -56,6 +56,8 @@ class Dashboard(View):
 
     def dispatch(self, request, *args, **kwargs):
         self.form = forms.ExcelImportForm()
+        self.messages = request.session.get('messages', None)
+        request.session['messages'] = None
 
         self.permission_manager = permission_manager.get_permission_manager(
             request.user)
@@ -105,8 +107,7 @@ class Dashboard(View):
 
             return (scenario for scenario in scenarios
                     if (
-                    not self.province or self.province.in_province(scenario))
-)
+                    not self.province or self.province.in_province(scenario)))
         return self._scenarios
 
 
@@ -179,9 +180,12 @@ def post_excel(request, project, province):
                     project, request.user.username,
                     dest_path, allowed_scenario_ids))
 
-            if not errors:
-                return HttpResponseRedirect(
-                    reverse(
-                        'sharedproject_dashboard'))
+            if errors:
+                request.session['messages'] = errors
             else:
-                return HttpResponse('\n'.join(errors))
+                request.session['messages'] = ['Opslaan is geslaagd.']
+
+            return HttpResponseRedirect(
+                reverse(
+                    'sharedproject_dashboard'))
+

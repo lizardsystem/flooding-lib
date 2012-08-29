@@ -458,6 +458,8 @@ def import_scenario_approval(
         return ["Regel {0}: Scenario {1} zit niet in dit project."
                 .format(rownr, scenarioid)]
 
+    errors = []
+
     approvalobject = scenario.approval_object(project)
     approval_values = row[3:]
 
@@ -468,12 +470,15 @@ def import_scenario_approval(
         approval_value = approval_values[col].value
         approval_remark = approval_values[col + 1].value
 
-        record_approval(
+        approvalerrors = record_approval(
             approvalobject, username, rule, approval_value, approval_remark)
+        for error in approvalerrors:
+            errors.append("Regel {0}: {1}".format(rownr, error))
+
         col += 2
 
     scenario.update_status()
-    return []
+    return errors
 
 
 def record_approval(
@@ -491,12 +496,17 @@ def record_approval(
                 approval_remark=approval_remark
                 ))
 
+    if approval_value in (None, ""):
+        return []  # Skip
+
     if approval_value not in ("0.0", "1.0", "0", "1"):
-        return
+        return ["Goedkeuring moet een waarde van 0 of 1 hebben, niet '{0}'."
+                .format(approval_value)]
 
     successful = approval_value in ("1", "1.0")
 
     approvalobject.approve(rule, successful, username, approval_remark)
+    return []
 
 
 @transaction.commit_manually

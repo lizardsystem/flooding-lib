@@ -7,6 +7,11 @@ Changelog of flooding-lib
 If a user uploading an Excel file for a project has approval rights in
 that project, the approval information in that file as read as well.
 
+Error messages on the ROR dashboard has improved, in the sense that they
+are actually shown now. There is also a success message.
+
+Invalid approval values (values other than 0 or 1) now result in an
+error message instead of being silently ignored.
 
 2.10 (2012-08-28)
 -----------------

@@ -189,7 +189,6 @@ urlpatterns = patterns(
 )
 
 
-
 if settings.DEBUG:
     #databrowse is for debugging purposes, so it is disabled in production
     urlpatterns += patterns(
