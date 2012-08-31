@@ -4,8 +4,13 @@ Changelog of flooding-lib
 2.12 (unreleased)
 -----------------
 
-- Nothing changed yet.
-
+Fix two bugs:
+- Sometimes a scenario was seen as missing some required metadata, but
+  if that metadata is outside of the control of the scenario owner
+  that should be ignored
+- Sometimes the data owner information (which is used to decide which
+  province a scenario is in) is stored as an int, sometimes as a
+  string. The province-deciding function can now use both.
 
 2.11.2 (2012-08-29)
 -------------------
