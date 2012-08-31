@@ -1295,7 +1295,8 @@ class Scenario(models.Model):
         return all(
             self.value_for_inputfield(inputfield) is not None
             for inputfield in inputfields
-            if inputfield.required)
+            if (inputfield.required and not
+                inputfield.ignore_in_scenario_excel_files))
 
     def setup_imported_task(self, username):
         self.create_calculated_status(username)
