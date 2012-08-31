@@ -937,6 +937,11 @@ class Scenario(models.Model):
     # elsewhere.
     project_id = models.IntegerField(null=True)
 
+    # Set by 'task 155' in the new flooding-worker tasks.
+    has_sobek_presentation = models.NullBooleanField()
+    # Set by 'task 185' in the new flooding-worker tasks.
+    has_hisssm_presentation = models.NullBooleanField()
+
     class Meta:
         ordering = ('name', 'owner', )
         verbose_name = _('Scenario')
@@ -1079,6 +1084,11 @@ class Scenario(models.Model):
                 return self.STATUS_APPROVED
             elif self.main_approval_object().disapproved:
                 return self.STATUS_DISAPPROVED
+
+            # Flooding-worker tasks set this
+            elif self.has_sobek_presentation or self.has_hisssm_presentation:
+                return self.STATUS_CALCULATED
+
             elif ((task.is_type(TaskType.TYPE_SOBEK_PNG_CALCULATION) or
                    task.is_type(TaskType.TYPE_HIS_SSM_CALCULATION) or
                    task.tasktype.id in [155, 170, 185])  # XXX

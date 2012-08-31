@@ -4,7 +4,9 @@ Changelog of flooding-lib
 2.13 (unreleased)
 -----------------
 
-- Nothing changed yet.
+Add two boolean fields 'has_sobek_presentation' and
+'has_hisssm_presentation' to Scenario that will be set to True by
+flooding-worker tasks 155 and 185 when they are successful.
 
 
 2.12 (2012-08-31)
