@@ -35,7 +35,11 @@ class Province(models.Model):
                 "Verplichte metadata Eigenaar niet gevonden bij scenario {}".
                 format(scenario))
 
-        return Owner.objects.get(id=ownerid).province
+        try:
+            int(ownerid)
+            return Owner.objects.get(id=ownerid).province
+        except ValueError:
+            return Owner.objects.get(name=ownerid).province
 
     def in_province(self, scenario):
         return Province.province_for(scenario) == self
