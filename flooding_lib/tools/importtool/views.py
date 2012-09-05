@@ -630,7 +630,7 @@ def post_group_import(request, form):
                     approvalobject = ApprovalObject.objects.create(
                         name=scenario_name)
                     approvalobject.approvalobjecttype.add(
-                        ApprovalObjectType.objects.get(pk=1))
+                        ApprovalObjectType.default_approval_type())
                     importscenario = ImportScenario.objects.create(
                         owner=request.user, name=scenario_name,
                         approvalobject=approvalobject,
