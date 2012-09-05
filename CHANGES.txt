@@ -1,8 +1,8 @@
 Changelog of flooding-lib
 ===================================================
 
-2.14 (unreleased)
------------------
+2.13.1 (2012-09-05)
+-------------------
 
 Fix a bug in groupimport; a primary key (id=1) was hardcoded for an
 approval object type, even though that primary key doesn't exist
