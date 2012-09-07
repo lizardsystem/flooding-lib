@@ -4,7 +4,8 @@ Changelog of flooding-lib
 2.14 (unreleased)
 -----------------
 
-- Nothing changed yet.
+Add functionality for auto-start of seanrio's calculation on create 
+and import a new scenario.
 
 
 2.13.1 (2012-09-05)

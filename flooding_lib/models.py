@@ -21,6 +21,7 @@ from flooding_lib.tools.approvaltool.models import ApprovalObject
 from flooding_lib.tools.approvaltool.models import ApprovalObjectType
 from flooding_lib import coordinates
 from flooding_worker import models as workermodels
+from flooding_worker import executor as workerexecutor
 
 logger = logging.getLogger(__name__)
 
@@ -1298,7 +1299,7 @@ class Scenario(models.Model):
             code=workermodels.WorkflowTemplate.DEFAULT_TEMPLATE_CODE)
         self.workflow_template = workflow_template
         self.save()
-
+        workerexecutor.start_workflow(self.id, self.workflow_template.id)
         return task
 
     def has_values_for(self, inputfields):
@@ -1313,6 +1314,7 @@ class Scenario(models.Model):
         workflow_template = workermodels.WorkflowTemplate.objects.get(
             code=workermodels.WorkflowTemplate.IMPORTED_TEMPLATE_CODE)
         self.workflow_template = workflow_template
+        workerexecutor.start_workflow(self.id, self.workflow_template.id)
         self.save()
 
 
