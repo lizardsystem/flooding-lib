@@ -14,8 +14,9 @@ ZIPFILE = '/tmp/test.zip'
 
 class TestTemporarilyUnzipped(TestCase):
     def test_trivial(self):
-        os.remove(TMPFILE)
-        os.remove(ZIPFILE)
+        for f in (TMPFILE, ZIPFILE):
+            if os.path.exists(f):
+                os.remove(f)
 
         f = open(TMPFILE, 'w')
         f.write("whee\n")
