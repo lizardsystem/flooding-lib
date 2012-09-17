@@ -3,6 +3,7 @@ from zipfile import ZipFile, ZIP_DEFLATED, BadZipfile
 import datetime
 import functools
 import operator
+import os
 import re
 import xlrd
 
@@ -28,6 +29,7 @@ from flooding_lib.tools.importtool.models import GroupImport
 from flooding_lib.tools.importtool.models import ImportScenario
 from flooding_lib.tools.importtool.models import ImportScenarioInputField
 from flooding_lib.tools.importtool.models import InputField
+from flooding_lib.util.files import remove_comments_from_asc_files
 
 
 def checks_permission(permission, message):
@@ -461,6 +463,9 @@ def save_uploadfile_in_zipfile(
 
     nzf.close()
 
+    # Remove comment line from .asc and .inc files after uploading
+    remove_comments_from_asc_files(os.path.dirname(dest_zipfile_name))
+
 
 @checks_permission('importtool.can_upload',
                    _("No permission to import scenario or login"))
@@ -516,6 +521,8 @@ def upload_import_scenario_files(request, import_scenario_id):
 def post_upload_import_scenario_files(form, files, importscenario):
     # got it only working with creating explicitly the
     # contentfile and saving it as 'file'
+    destination_dirs = set()
+
     for filename in files:
         field_ref = InputField.objects.filter(
             name=filename)[0]  # Assumption: filename is unique
@@ -537,6 +544,12 @@ def post_upload_import_scenario_files(form, files, importscenario):
         save_uploadfile_in_zipfile(
             file_content, upload_filename,
             destination, field_ref.destination_filename)
+        destination_dirs.add(os.path.dirname(destination))
+
+    # We remove the comment line from .asc and .inc files, after
+    # uploading
+    for ddir in destination_dirs:
+        remove_comments_from_asc_files(ddir)
 
     return render_to_response(
         'import/import_file_upload_success.html', {

@@ -4,13 +4,21 @@ Changelog of flooding-lib
 2.15 (unreleased)
 -----------------
 
-- Nothing changed yet.
+Added functions to walk a directory tree structure and scan all its
+files, even files included in .zip files.
+
+Added functions that check if any of those have is an .asc or .inc
+with a comment line (starting with /*), and remove it.
+
+Also add a management command for that.
+
+Also add that functionality to uploaded files in the importtool.
 
 
 2.14 (2012-09-07)
 -----------------
 
-Add functionality for auto-start of seanrio's calculation on create 
+Add functionality for auto-start of seanrio's calculation on create
 and import a new scenario.
 
 
