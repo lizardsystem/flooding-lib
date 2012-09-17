@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.15 (unreleased)
+2.15 (2012-09-17)
 -----------------
 
 Added functions to walk a directory tree structure and scan all its
