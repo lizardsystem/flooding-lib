@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.16 (unreleased)
+2.16 (2012-09-21)
 -----------------
 
 If there are ROR scenarios under a breach, and user is allowed to see
