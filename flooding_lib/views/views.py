@@ -18,11 +18,9 @@ from django.db.models import Count
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.utils.translation import ugettext as _
-from django.views.generic import TemplateView
 from django.views.static import serve
 
-import lizard_ui.views
-
+from flooding_lib.views.classbased import BaseView
 from flooding_lib.util import viewutil
 from flooding_base.models import Text
 from flooding_lib.models import (Project, UserPermission, Scenario,
@@ -1394,7 +1392,7 @@ def result_download(request, result_id):
     return response
 
 
-class ExcelImportExportView(lizard_ui.views.ViewContextMixin, TemplateView):
+class ExcelImportExportView(BaseView):
     template_name = "flooding/excel_import_export.html"
 
     @receives_permission_manager
@@ -1419,8 +1417,7 @@ class ExcelImportExportView(lizard_ui.views.ViewContextMixin, TemplateView):
                     num_scenarios__gt=0)
 
 
-class ExcelImportExportViewProject(
-    lizard_ui.views.ViewContextMixin, TemplateView):
+class ExcelImportExportViewProject(BaseView):
     template_name = "flooding/excel_import_export_project.html"
 
     @receives_permission_manager

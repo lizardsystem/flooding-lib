@@ -3,6 +3,7 @@ from django.conf import settings
 from django.contrib import databrowse
 
 from flooding_lib import views
+from flooding_lib.views import pages
 from flooding_lib.models import Project
 import flooding_lib.sharedproject.urls
 
@@ -94,7 +95,7 @@ urlpatterns = patterns(
         name='flooding_scenario_breach_delete'),
 
     url(r'^infowindow/$',
-        'flooding_lib.views_infowindow.infowindow',
+        'flooding_lib.views.infowindow.infowindow',
         name='infowindow'),
 
     url(r'^fractal/$',
@@ -169,7 +170,7 @@ urlpatterns = patterns(
 
     url(r'^service/result/(?P<object_id>\d+)/(?P<location_nr>\d+)' +
         r'/(?P<parameter_nr>\d+)/$',
-        'flooding_lib.views_dev.service_result',
+        'flooding_lib.views.service_result',
         name='flooding_service_result'),
 
     url(r'^excel/$',
@@ -185,7 +186,11 @@ urlpatterns = patterns(
         'flooding_lib.views.excel_download',
         name='flooding_excel_download'),
 
-    (r'^shared/', include(flooding_lib.sharedproject.urls))
+    (r'^shared/', include(flooding_lib.sharedproject.urls)),
+
+    url(r'^breachinfo/(?P<project_id>\d+)/(?P<breach_id>\d+)/$',
+        pages.BreachInfoView.as_view(),
+        name='flooding_breachinfo_page'),
 )
 
 

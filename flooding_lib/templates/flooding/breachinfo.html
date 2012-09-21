@@ -1,0 +1,42 @@
+{% extends "lizard/base.html" %}
+{% load utils %}
+{% load i18n %}
+{% load l10n %}
+{% load human %}
+
+{% block title %}
+Flooding: {% trans 'Breach information' %}
+{% endblock %}
+
+{% block content %}
+<h1>Scenario overzicht {{ view.project }}, breslocatie {{ view.breach }}</h1>
+
+<div  style="overflow:auto">
+  <table>
+    <thead>
+      <th>ID</th>
+      <th>Scenario</th>
+      <th>Orig. project</th>
+      <th>Overschrijdingsfreq</th>
+      <th>Schade o.g.</th>
+      <th>Slachtoffers</th>
+      <th>Oppervlak o.g.</th>
+      <th>Inundatievolume</th>
+    </thead>
+    {% for scenario in view.scenarios %}
+    <tr>
+      <td>{{ scenario.id }}</td>
+      <td>{{ scenario }}</td>
+      <td>{{ scenario.main_project }}</td>
+      <td>{{ scenario.frequency }}</td>
+      <td>&euro; {{ scenario.financial_damage|readable }}</td>
+      <td>{{ scenario.casualties }}</td>
+      <td>{{ scenario.inundated_area.value|readable }} {{ scenario.inundated_area.unit }}</td>
+      <td>{{ scenario.inundation_volume.value|readable }} {{ scenario.inundation_volume.unit }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+
+{% endblock %}
+

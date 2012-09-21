@@ -12,6 +12,7 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.utils import simplejson
 from django.views.decorators.cache import never_cache
 
+from flooding_lib import scenario_sharing
 from flooding_base.models import Setting
 from flooding_lib.models import Breach
 from flooding_lib.models import CutoffLocationSet
@@ -27,13 +28,13 @@ from flooding_lib.models import SobekModel
 from flooding_lib.models import Strategy
 from flooding_lib.models import UserPermission
 from flooding_lib.permission_manager import receives_permission_manager
-from flooding_lib.views_dev import get_externalwater_csv
-from flooding_lib.views_dev import get_externalwater_graph
-from flooding_lib.views_dev import get_externalwater_graph_infowindow
-from flooding_lib.views_dev import get_externalwater_graph_session
-from flooding_lib.views_dev import service_compose_scenario
-from flooding_lib.views_dev import service_save_new_scenario
-from flooding_lib.views_dev import service_select_strategy
+from flooding_lib.views import get_externalwater_csv
+from flooding_lib.views import get_externalwater_graph
+from flooding_lib.views import get_externalwater_graph_infowindow
+from flooding_lib.views import get_externalwater_graph_session
+from flooding_lib.views import service_compose_scenario
+from flooding_lib.views import service_save_new_scenario
+from flooding_lib.views import service_select_strategy
 
 SPHERICAL_MERCATOR = (
     '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 ' +
@@ -178,6 +179,28 @@ def service_get_region_maps(request,
     return response
 
 
+def breach_info_url(breach, permission_manager):
+    """If user has approval rights in one of the special projects
+    (ROR, etc), and this breach has scenarios in that project, a link
+    to the breach info page will be shown next to it. Otherwise,
+    return None."""
+
+    for project_id in scenario_sharing.PROJECT_IDS:
+        project = Project.objects.get(pk=project_id)
+        if not permission_manager.check_project_permission(
+            project=project,
+            permission=UserPermission.PERMISSION_SCENARIO_APPROVE):
+            continue
+
+        if permission_manager.get_scenarios(breach=breach).filter(
+            scenarioproject__project=project).exists():
+            return reverse(
+                'flooding_breachinfo_page',
+                kwargs=dict(project_id=project_id, breach_id=breach.id))
+
+    return None
+
+
 @never_cache
 @receives_permission_manager
 def service_get_breach_tree(
@@ -228,26 +251,26 @@ def service_get_breach_tree(
     externalwater_list = ExternalWater.objects.filter(
         breach__in=breach_list).distinct()
 
-    object_list = []
-    #add externalwaters
-    for ew in externalwater_list:
-        object_list.append({'id': -1 * ew.id,
-                            'name': ew.__unicode__(),
-                            'type': ew.type,
-                            'parentid': None,
-                            'isbreach': False,
-                            })
-    #add breaches
-    for breach in breach_list:
-        loc = breach.geom
-        object_list.append({'id': breach.id,
-                            'name': breach.__unicode__(),
-                            'parentid': -1 * breach.externalwater.id,
-                            'isbreach': True,
-                            'x': loc.x,
-                            'y': loc.y,
-                            }
-                           )
+    object_list = [
+        {'id': -ew.id,
+         'name': unicode(ew),
+         'type': ew.type,
+         'parentid': None,
+         'isbreach': False,
+         'info_url': None,
+         }
+        for ew in externalwater_list]
+
+    object_list += [
+        {'id': breach.id,
+         'name': unicode(breach),
+         'parentid': -breach.externalwater.id,
+         'isbreach': True,
+         'x': breach.geom.x,
+         'y': breach.geom.y,
+         'info_url': breach_info_url(breach, permission_manager),
+         }
+        for breach in breach_list]
 
     return HttpResponse(
         simplejson.dumps(object_list), mimetype="application/json")

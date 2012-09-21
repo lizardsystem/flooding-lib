@@ -12,7 +12,7 @@ from flooding_lib.test_models import WaterlevelF
 from flooding_lib.test_models import WaterlevelSetF
 from flooding_lib import models
 
-from flooding_lib.views_infowindow import extra_infowindow_information_fields
+from flooding_lib.views.infowindow import extra_infowindow_information_fields
 
 
 class FakeObject(object):

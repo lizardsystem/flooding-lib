@@ -20,9 +20,4 @@ urlpatterns = patterns(
     url(r'^testmapping/$',
         'flooding_visualization.views.testmapping',
         name='visualization_testmapping'),
-
-    # url(r'^test_mpl/$',
-    #     'flooding_visualization.views_dev.test_mpl'),
-
-
 )

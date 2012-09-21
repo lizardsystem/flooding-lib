@@ -4,8 +4,21 @@ Changelog of flooding-lib
 2.16 (unreleased)
 -----------------
 
-- Nothing changed yet.
+If there are ROR scenarios under a breach, and user is allowed to see
+them, show an (I) icon next to the breach
 
+Add a view and a template for the page that shows them.
+
+Add several class based view mixins, we're going to use those
+consistently from now on.
+
+Start pages.py for standalone pages.
+
+Add methods to Scenario for getting results and presentation layers.
+
+Add new resulttypes for total inundation volume and inundated area.
+
+Make numbers in the new breach info page human readable.
 
 2.15 (2012-09-17)
 -----------------

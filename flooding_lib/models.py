@@ -1317,6 +1317,37 @@ class Scenario(models.Model):
         workerexecutor.start_workflow(self.id, self.workflow_template.id)
         self.save()
 
+    def presentation_layer_of_type(self, type_id):
+        pls = list(self.presentationlayer.filter(
+                presentationtype__id=type_id))
+
+        return pls[0] if pls else None
+
+    def casualties(self):
+        CASUALTIES_TYPE_ID = 20
+        pl = self.presentation_layer_of_type(CASUALTIES_TYPE_ID)
+        return int(pl.value) if pl else None
+
+    def financial_damage(self):
+        DAMAGE_AREA_TYPE_ID = 21
+        pl = self.presentation_layer_of_type(DAMAGE_AREA_TYPE_ID)
+        return pl.value if pl else None
+
+    def get_result(
+        self, resulttype=None, resulttype_id=None, shortname_dutch=None):
+        """Find a result object using some information about the resulttype"""
+        if not resulttype:
+            if resulttype_id is not None:
+                resulttype = ResultType.objects.get(pk=resulttype_id)
+            else:
+                resulttype = ResultType.objects.get(
+                    shortname_dutch=shortname_dutch)
+
+        try:
+            return Result.objects.get(scenario=self, resulttype=resulttype)
+        except Result.DoesNotExist:
+            return Result(scenario=self, resulttype=resulttype)
+
 
 class ScenarioProject(models.Model):
     """Table implementing the ManyToMany relation between Scenario and Project.
