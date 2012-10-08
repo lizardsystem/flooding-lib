@@ -2,11 +2,16 @@
 {% load utils %}
 {% load i18n %}
 {% load l10n %}
+{% load flooding_util %}
 {% load human %}
 
 {% block title %}
 Flooding: {% trans 'Breach information' %}
 {% endblock %}
+
+{% block javascripts %}
+<script type="text/javascript" src="/static_media/weblib/OpenLayers-2.8/OpenLayers.js" type="text/javascript"> </script>
+{% endblock javascripts %}
 
 {% block content %}
 <h1>Scenario overzicht {{ view.project }}, breslocatie {{ view.breach }}</h1>
@@ -14,15 +19,18 @@ Flooding: {% trans 'Breach information' %}
 <div  style="overflow:auto">
   <table>
     <thead>
-      <th>ID</th>
-      <th>Scenario</th>
-      <th>Orig. project</th>
-      <th>Overschrijdingsfreq</th>
-      <th>Schade o.g.</th>
-      <th>Slachtoffers</th>
-      <th>Oppervlak o.g.</th>
-      <th>Inundatievolume</th>
+      <tr>
+      <td>ID</td>
+      <td>Scenario</td>
+      <td>Orig. project</td>
+      <td>Overschrijdingsfreq</td>
+      <td>Schade o.g.</td>
+      <td>Slachtoffers</td>
+      <td>Oppervlak o.g.</td>
+      <td>Inundatievolume</td>
+      </tr>
     </thead>
+    <tbody>
     {% for scenario in view.scenarios %}
     <tr>
       <td>{{ scenario.id }}</td>
@@ -31,12 +39,42 @@ Flooding: {% trans 'Breach information' %}
       <td>{{ scenario.frequency }}</td>
       <td>&euro; {{ scenario.financial_damage|readable }}</td>
       <td>{{ scenario.casualties }}</td>
-      <td>{{ scenario.inundated_area.value|readable }} {{ scenario.inundated_area.unit }}</td>
-      <td>{{ scenario.inundation_volume.value|readable }} {{ scenario.inundation_volume.unit }}</td>
+      <td>
+        {% if scenario.inundated_area.value|is_not_None %}
+        {{ scenario.inundated_area.value|readable }} {{ scenario.inundated_area.unit }}
+        {% endif %}
+      </td>
+      <td>
+        {% if scenario.inundation_volume.value|is_not_None %}
+        {{ scenario.inundation_volume.value|readable }} {{ scenario.inundation_volume.unit }}
+        {% endif %}
+      </td>
     </tr>
     {% endfor %}
+    </tbody>
   </table>
 </div>
 
+{% for scenario in view.scenarios %}
+{% if 1 %}
+<img src="{{ scenario.max_waterdepth_image }}" width="400" height="400"
+     title="{{ scenario.name }}"/>
+{% else %}
+<div id="map-{{scenario.id}}" style="width: 600px; height: 300px;"></div>
+
+<script type="text/javascript">
+(function () {
+    var map = new OpenLayers.Map('map-{{scenario.id}}');
+    var wms = new OpenLayers.Layer.WMS("OpenLayers WMS", "http://labs.metacarta.com/wms/vmap0", {layers: "basic"});
+    map.addLayers([wms]);
+
+    (new OpenLayers.Layer.Image("Test", "{{ scenario.max_waterdepth_image }}")).setMap(map);
+
+    map.zoomToMaxExtent();
+})();
+
+</script>
+{% endif %}
+{% endfor %}
 {% endblock %}
 

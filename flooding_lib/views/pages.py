@@ -2,6 +2,9 @@
 
 import logging
 
+from django.core.urlresolvers import reverse
+from django.utils import safestring
+
 from flooding_lib import models
 from flooding_lib.views import classbased
 
@@ -36,5 +39,18 @@ class BreachInfoView(classbased.BaseView):
                 shortname_dutch="overstroomd gebied")
             scenario.inundation_volume = scenario.get_result(
                 shortname_dutch="inundatievolume")
+            try:
+                scenario.max_waterdepth_image = self._max_water_depth_image(
+                    scenario)
+            except Exception as e:
+                logger.debug(e)
 
         return scenarios
+
+    def _max_water_depth_image(self, scenario):
+        pl = scenario.presentationlayer.filter(
+            presentationtype__id=11)[0]
+        url = reverse('presentation')
+        return safestring.SafeString(
+            '{url}?action=get_gridframe&result_id={id}'.format(
+                url=url, id=pl.id))
