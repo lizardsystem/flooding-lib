@@ -4,7 +4,9 @@ Changelog of flooding-lib
 2.17 (unreleased)
 -----------------
 
-- Nothing changed yet.
+Fix (?) deleting comment lines at import time.
+
+Work on Breach info page.
 
 
 2.16 (2012-09-21)
