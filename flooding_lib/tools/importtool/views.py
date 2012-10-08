@@ -435,6 +435,10 @@ def save_uploadfile_in_zipfile_groupimport(
             found = True
 
     nzf.close()
+
+    # Remove comment line from .asc and .inc files after uploading
+    remove_comments_from_asc_files(os.path.dirname(dest_zipfile_name))
+
     if not found:
         raise KeyError('File not found')
 
@@ -545,11 +549,6 @@ def post_upload_import_scenario_files(form, files, importscenario):
             file_content, upload_filename,
             destination, field_ref.destination_filename)
         destination_dirs.add(os.path.dirname(destination))
-
-    # We remove the comment line from .asc and .inc files, after
-    # uploading
-    for ddir in destination_dirs:
-        remove_comments_from_asc_files(ddir)
 
     return render_to_response(
         'import/import_file_upload_success.html', {
