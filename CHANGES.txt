@@ -4,7 +4,8 @@ Changelog of flooding-lib
 2.17.2 (unreleased)
 -------------------
 
-- Nothing changed yet.
+Don't show images on breach info page if there aren't any for this
+scenario.
 
 
 2.17.1 (2012-10-09)

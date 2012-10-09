@@ -63,6 +63,7 @@ Flooding: {% trans 'Breach information' %}
 
 {% for scenario in view.scenarios %}
 {% if 1 %}
+{% if scenario.max_waterdepth_image %}
 <div style="float: left;">
 <h3>{{ scenario.id }}: {{ scenario.name }}</h3>
 <a href="{{ scenario.max_waterdepth_image }}">
@@ -70,6 +71,7 @@ Flooding: {% trans 'Breach information' %}
      title="{{ scenario.name }}" style="border: solid black 1px;"/>
 </a>
 </div>
+{% endif %}
 {% else %}
 <div id="map-{{scenario.id}}" style="width: 600px; height: 300px;"></div>
 
