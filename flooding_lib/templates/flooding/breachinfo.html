@@ -37,8 +37,14 @@ Flooding: {% trans 'Breach information' %}
       <td>{{ scenario }}</td>
       <td>{{ scenario.main_project }}</td>
       <td>{{ scenario.frequency }}</td>
-      <td>&euro; {{ scenario.financial_damage|readable }}</td>
-      <td>{{ scenario.casualties }}</td>
+      <td>
+        {% if scenario.financial_damage|is_not_None %}
+        &euro; {{ scenario.financial_damage|readable }}</td>
+        {% endif %}
+      <td>
+        {% if scenario.casualties|is_not_None %}
+        {{ scenario.casualties }}</td>
+        {% endif %}
       <td>
         {% if scenario.inundated_area.value|is_not_None %}
         {{ scenario.inundated_area.value|readable }} {{ scenario.inundated_area.unit }}
