@@ -4,8 +4,15 @@ Changelog of flooding-lib
 2.18 (unreleased)
 -----------------
 
-- Nothing changed yet.
+The remove comments script would unzip files that don't fit on the
+filesystem. Now it has a fixed limit of 1G for the unzipped files.
 
+Added a management command that can restore the old approval comments
+that were lost when we moved to all-approvaltool approvals.
+
+Decreased width of the headers of max water depth images on the breach
+info screen; it's nice that the images themselves aren't large, but if
+their title is too wide you still can't see them side to side.
 
 2.17.2 (2012-10-09)
 -------------------

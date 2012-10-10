@@ -9,11 +9,15 @@ import zipfile
 """Utilities for working with files in general."""
 
 
+class ZipfileTooLarge(Exception):
+    pass
+
+
 class temporarily_unzipped(object):
     """Context manager that unzips a zip file, allowing code to change
     the files in it, and eventually zips the files back again."""
 
-    def __init__(self, path, rezip_on_exceptions=False):
+    def __init__(self, path, rezip_on_exceptions=False, max_size=None):
         """path is a path leading to a zipfile.
 
         By default, if an exception is raised inside the context
@@ -23,13 +27,27 @@ class temporarily_unzipped(object):
 
         self.path = path
         self.rezip_on_exceptions = rezip_on_exceptions
+        self.max_size = max_size
 
     def __enter__(self):
         # Create a temp directory
         self.tmpdir = tempfile.mkdtemp()
 
         # Unzip everything to it
-        zipf = zipfile.ZipFile(self.path, 'r')
+        # Pass a file descriptor, much faster because otherwise the file
+        # is opened many times if there are many files in it
+        zipf = zipfile.ZipFile(open(self.path, 'rb'))
+
+        # If a max size is given, check the total file sizes of files within
+        if self.max_size is not None:
+            uncompressed_size = sum(
+                fileinfo.file_size
+                for fileinfo in zipf.infolist())
+            if uncompressed_size > self.max_size:
+                raise ZipfileTooLarge(
+                    "Contents of {0} are too large ({1} bytes)".
+                    format(self.path, uncompressed_size))
+
         self.namelist = zipf.namelist()
         zipf.extractall(path=self.tmpdir)
         zipf.close()
@@ -59,7 +77,8 @@ def filename_matches(filename, extensions):
                for extension in extensions)
 
 
-def all_files_in(path, extensions=None, enter_zipfiles=False):
+def all_files_in(path, extensions=None, enter_zipfiles=False, verbose=False,
+                 max_uncompressed_zip_size=None):
     """Walk all directories under path and yield full paths to all the
     files in it.
 
@@ -90,11 +109,18 @@ def all_files_in(path, extensions=None, enter_zipfiles=False):
             elif enter_zipfiles and filename.lower().endswith('.zip'):
                 # If we enter zipfiles and this is one, loop over the
                 # files inside it.
-                with temporarily_unzipped(full_path) as files_in_zip:
-                    for unzipped_file in files_in_zip:
-                        if filename_matches(unzipped_file, extensions):
-                            # File matches, yield it
-                            yield unzipped_file
+                try:
+                    with temporarily_unzipped(
+                        full_path,
+                        max_size=max_uncompressed_zip_size) as files_in_zip:
+                        for unzipped_file in files_in_zip:
+                            if filename_matches(unzipped_file, extensions):
+                                # File matches, yield it
+                                yield unzipped_file
+                except (zipfile.BadZipfile, ZipfileTooLarge) as e:
+                    if verbose:
+                        print("Exception for {0}: {1}".
+                              format(full_path, e))
 
 
 def first_line(path):
@@ -124,7 +150,11 @@ def remove_comments_from_asc_files(path, verbose=False):
     if the first line starts with '/*', remove that line."""
 
     for filename in all_files_in(
-        path, extensions=('.asc', '.inc'), enter_zipfiles=True):
+        path,
+        extensions=('.asc', '.inc'),
+        enter_zipfiles=True,
+        verbose=verbose,
+        max_uncompressed_zip_size=1000000000):  # 1G
         line = first_line(filename)
         if line.startswith('/*'):
             if verbose:
