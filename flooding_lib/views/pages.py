@@ -2,14 +2,19 @@
 
 import logging
 
+import json
+
 from django.core.urlresolvers import reverse
-from django.utils import safestring
+
+from flooding_presentation.views import external_file_location
 
 from flooding_lib import models
 from flooding_lib.views import classbased
+from flooding_lib.util import geo
 
 logger = logging.getLogger(__name__)
 
+PRESENTATIONTYPE_MAX_WATERDEPTH = 11
 
 class BreachInfoView(classbased.BaseView):
     required_permission = models.UserPermission.PERMISSION_SCENARIO_VIEW
@@ -42,6 +47,8 @@ class BreachInfoView(classbased.BaseView):
             try:
                 scenario.max_waterdepth_image = self._max_water_depth_image(
                     scenario)
+                scenario.max_waterdepth_extent = self._get_water_depth_extent(
+                    scenario)
             except Exception as e:
                 logger.debug(e)
 
@@ -49,8 +56,15 @@ class BreachInfoView(classbased.BaseView):
 
     def _max_water_depth_image(self, scenario):
         pl = scenario.presentationlayer.filter(
-            presentationtype__id=11)[0]
+            presentationtype__id=PRESENTATIONTYPE_MAX_WATERDEPTH)[0]
         url = reverse('presentation')
-        return safestring.SafeString(
-            '{url}?action=get_gridframe&result_id={id}'.format(
-                url=url, id=pl.id))
+        return '{url}?action=get_gridframe&result_id={id}'.format(
+            url=url, id=pl.id)
+
+    def _get_water_depth_extent(self, scenario):
+        pl = scenario.presentationlayer.filter(
+            presentationtype__id=PRESENTATIONTYPE_MAX_WATERDEPTH)[0]
+        pgn = pl.presentationgrid.png_default_legend.file_location
+        pgn = external_file_location(pgn)
+
+        return json.dumps(geo.GeoImage(pgn).extent())
