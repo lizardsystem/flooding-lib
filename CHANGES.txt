@@ -4,7 +4,9 @@ Changelog of flooding-lib
 2.20 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Added tasks and perform_task.py.
+
+- Changed references flooding_worker to lizard_worker.
 
 
 2.19 (2012-10-15)

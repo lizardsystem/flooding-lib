@@ -318,7 +318,7 @@ class Migration(DataMigration):
             'status_cache': ('django.db.models.fields.IntegerField', [], {'default': 'None', 'null': 'True'}),
             'strategy': ('django.db.models.fields.related.ForeignKey', [], {'default': 'None', 'to': "orm['flooding_lib.Strategy']", 'null': 'True', 'blank': 'True'}),
             'tsim': ('django.db.models.fields.FloatField', [], {}),
-            'workflow_template': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['flooding_worker.WorkflowTemplate']", 'null': 'True', 'db_column': "'workflow_template'"})
+            'workflow_template': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['lizard_worker.WorkflowTemplate']", 'null': 'True', 'db_column': "'workflow_template'"})
         },
         'flooding_lib.scenario_presentationlayer': {
             'Meta': {'object_name': 'Scenario_PresentationLayer', 'db_table': "'flooding_scenario_presentationlayer'"},
@@ -486,7 +486,7 @@ class Migration(DataMigration):
             'value_source_parameter_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
             'value_type': ('django.db.models.fields.IntegerField', [], {})
         },
-        'flooding_worker.workflowtemplate': {
+        'lizard_worker.workflowtemplate': {
             'Meta': {'object_name': 'WorkflowTemplate'},
             'code': ('django.db.models.fields.IntegerField', [], {'max_length': '30'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})

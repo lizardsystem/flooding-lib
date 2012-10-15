@@ -16,7 +16,7 @@ INSTALLED_APPS = [
     'flooding_lib.tools.approvaltool',
     'flooding_presentation',
     'flooding_visualization',
-    'flooding_worker',
+    'lizard_worker',
     'django_extensions',
     'django_nose',
     'flooding_base',
