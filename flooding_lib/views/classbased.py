@@ -12,7 +12,8 @@ class SetKwargsOnSelfMixin(object):
         for key, value in kwargs.items():
             setattr(self, key, value)
 
-        return super(SetKwargsOnSelfMixin, self).dispatch(request, *args)
+        return super(
+            SetKwargsOnSelfMixin, self).dispatch(request, *args)
 
 
 class PermissionManagerMixin(object):

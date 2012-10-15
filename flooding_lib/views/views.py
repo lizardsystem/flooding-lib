@@ -1420,20 +1420,16 @@ class ExcelImportExportView(BaseView):
 class ExcelImportExportViewProject(BaseView):
     template_name = "flooding/excel_import_export_project.html"
 
-    @receives_permission_manager
-    def get(self, request, permission_manager, project_id):
+    def get(self, request):
         self.form = forms.ExcelImportForm()
-        self.project_id = project_id
 
         return super(ExcelImportExportViewProject, self).get(request)
 
-    @receives_permission_manager
-    def post(self, request, permission_manager, project_id):
+    def post(self, request):
         self.form = forms.ExcelImportForm(request.POST, request.FILES)
-        self.project_id = project_id
         self.excel_errors = []
 
-        if not permission_manager.check_project_permission(
+        if not self.permission_manager.check_project_permission(
             self.project(), UserPermission.PERMISSION_SCENARIO_EDIT):
             raise PermissionDenied()
 
@@ -1455,12 +1451,12 @@ class ExcelImportExportViewProject(BaseView):
                     scenarioproject.scenario_id
                     for scenarioproject in
                     ScenarioProject.objects.filter(
-                        project__id=project_id).all())
+                        project__id=self.project_id).all())
                 # Check it
                 errors = excel_import_export.import_uploaded_excel_file(
                     dest_path, allowed_scenario_ids)
 
-                if permission_manager.check_project_permission(
+                if self.permission_manager.check_project_permission(
                    self.project(), UserPermission.PERMISSION_SCENARIO_APPROVE):
                     errors += (excel_import_export.
                                import_upload_excel_file_for_approval(
