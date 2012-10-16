@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.20 (unreleased)
+2.20 (2012-10-16)
 -----------------
 
 - Added tasks and perform_task.py.
