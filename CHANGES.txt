@@ -4,8 +4,15 @@ Changelog of flooding-lib
 2.21 (unreleased)
 -----------------
 
-- Nothing changed yet.
+Adds a view that returns a zipfile containing all the result files of a
+given scenario, possibly first unzipped. The view checks whether the
+user has approval permissions in at least one of the projects the
+scenario belongs to.
 
+Adds the view to the breach info page as a 'download' link for each
+scenario listed.
+
+Adds a 'check_scenario_permission' method to the permission manager.
 
 2.20 (2012-10-16)
 -----------------

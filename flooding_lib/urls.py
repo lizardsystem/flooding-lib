@@ -191,6 +191,10 @@ urlpatterns = patterns(
     url(r'^breachinfo/(?P<project_id>\d+)/(?P<breach_id>\d+)/$',
         pages.BreachInfoView.as_view(),
         name='flooding_breachinfo_page'),
+
+    url(r'^scenario/(?P<scenario_id>\d+)/results/',
+        'flooding_lib.views.zipped.scenario_results_zipfile',
+        name='flooding_results_zipped'),
 )
 
 

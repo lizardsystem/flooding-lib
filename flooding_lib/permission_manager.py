@@ -105,6 +105,10 @@ class SuperuserPermissionManager(object):
         """Superuser has all permissions."""
         return True
 
+    def check_scenario_permission(self, scenario, permission):
+        """Superuser has all permissions."""
+        return True
+
 
 class AnonymousPermissionManager(object):
     def get_projects(self, permission=UserPermission.PERMISSION_SCENARIO_VIEW):
@@ -209,6 +213,12 @@ class AnonymousPermissionManager(object):
             group__name='demo group').filter(
             Q(project__regions=region) |
             Q(project__regionsets__regions=region)).exists()
+
+    def check_scenario_permission(self, scenario, permission):
+        """Check whether user has the given permission in any of the
+        scenario's projects."""
+        return any(self.check_project_permission(project, permission)
+                   for project in scenario.project_set.all())
 
 
 class UserPermissionManager(object):
@@ -368,3 +378,10 @@ class UserPermissionManager(object):
             permission=permission, group__user=self.user).filter(
             Q(project__regions=region) |
             Q(project__regionsets__regions=region)).exists()
+
+    def check_scenario_permission(self, scenario, permission):
+        """Check whether user has the given permission in any of the
+        scenario's projects."""
+        return any(
+            self.check_project_permission(project, permission)
+            for project in scenario.projects.all())

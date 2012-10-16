@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 PRESENTATIONTYPE_MAX_WATERDEPTH = 11
 
+
 class BreachInfoView(classbased.BaseView):
     required_permission = models.UserPermission.PERMISSION_SCENARIO_VIEW
     template_name = 'flooding/breachinfo.html'

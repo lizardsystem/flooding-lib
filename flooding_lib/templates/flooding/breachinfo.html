@@ -31,6 +31,7 @@ Flooding: {% trans 'Breach information' %}
       <td>Slachtoffers</td>
       <td>Oppervlak o.g.</td>
       <td>Inundatievolume</td>
+      <td>Resultaten zipfile</td>
       </tr>
     </thead>
     <tbody>
@@ -58,6 +59,9 @@ Flooding: {% trans 'Breach information' %}
         {% if scenario.inundation_volume.value|is_not_None %}
         {{ scenario.inundation_volume.value|readable }} {{ scenario.inundation_volume.unit }}
         {% endif %}
+      </td>
+      <td>
+        <a href="{% url flooding_results_zipped scenario_id=scenario.id %}">download</a>
       </td>
     </tr>
     {% endfor %}
