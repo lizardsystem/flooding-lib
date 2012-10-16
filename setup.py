@@ -15,7 +15,7 @@ install_requires = [
     'Django',
     'django-staticfiles',
     'flooding-base >= 1.24',
-    'flooding-worker',
+    'lizard-worker',
     'django-treebeard',
     'django-extensions',
     'django-nose',
