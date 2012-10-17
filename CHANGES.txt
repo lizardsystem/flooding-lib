@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.21 (unreleased)
+2.21 (2012-10-17)
 -----------------
 
 Adds a view that returns a zipfile containing all the result files of a
