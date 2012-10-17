@@ -17,10 +17,11 @@ TASK_HISSSM_PNG_GENERATION_180 = 180
 TASK_SOBEK_PRESENTATION_GENERATION_155 = 155
 TASK_HISSSM_PRESENTATION_GENERATION_185 = 185
 TASK_CALCULATE_STATISTICS = 190
+TASK_GENERATE_EXPORT = 200
 
 
 def perform_task(
-    scenario_id, tasktype_id, worker_nr, broker_logging_handler=None):
+    body, tasktype_id, worker_nr, broker_logging_handler=None):
     """
     execute specific task
     scenario_id  = id of scenario
@@ -29,6 +30,8 @@ def perform_task(
     directory and sobek project.
     broker_logging_handler = sends loggings to broker
     """
+    scenario_id = body['scenario_id']
+
     #logging handler
     if broker_logging_handler is not None:
         log.addHandler(broker_logging_handler)
@@ -154,7 +157,9 @@ def perform_task(
             from flooding_lib.tasks import calculate_scenario_statistics
             calculate_scenario_statistics.calculate_statistics(scenario_id)
             success_code = True  # In case of problems, an exception is raised
-
+        
+        elif tasktype_id == TASK_GENERATE_EXPORT:
+            pass
         else:
             log.warning("selected a '%d' task but don't know what it is" %
                         tasktype_id)
