@@ -65,7 +65,7 @@ class BreachInfoView(classbased.BaseView):
     def _get_water_depth_extent(self, scenario):
         pl = scenario.presentationlayer.filter(
             presentationtype__id=PRESENTATIONTYPE_MAX_WATERDEPTH)[0]
-        pgn = pl.presentationgrid.png_default_legend.file_location
-        pgn = external_file_location(pgn)
+        png = pl.presentationgrid.png_default_legend.file_location
+        png = external_file_location(png)
 
-        return json.dumps(geo.GeoImage(pgn).extent())
+        return json.dumps(geo.GeoImage(png).extent())
