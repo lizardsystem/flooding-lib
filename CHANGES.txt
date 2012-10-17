@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.22 (unreleased)
+2.22 (2012-10-17)
 -----------------
 
 Replaced the parameter 'scenario_id' with 'body' in perform_task function of
