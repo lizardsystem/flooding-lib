@@ -6,6 +6,8 @@ import shutil
 import tempfile
 import zipfile
 
+from django.conf import settings
+
 """Utilities for working with files in general."""
 
 
@@ -31,7 +33,9 @@ class temporarily_unzipped(object):
 
     def __enter__(self):
         # Create a temp directory
-        self.tmpdir = tempfile.mkdtemp()
+        self.tmpdir = tempfile.mkdtemp(
+            prefix="flooding_lib_temporarily_unzipped",
+            dir=settings.TMP_DIR)
 
         # Unzip everything to it
         # Pass a file descriptor, much faster because otherwise the file
@@ -94,7 +98,16 @@ def all_files_in(path, extensions=None, enter_zipfiles=False, verbose=False,
     Using enter_zipfiles without extensions has no effect; .zip files
     will be returned as normal.
     """
-    for directory, dirnames, filenames in os.walk(path):
+
+    # Os.walk only works with directories. We want to be able to call
+    # this function on a single file.
+    if os.path.isdir(path):
+        walk = os.walk(path)
+    elif os.path.isfile(path):
+        # Fake a walk representing a single file
+        walk = [(os.path.dirname(path), (), (os.path.basename(path),))]
+
+    for directory, dirnames, filenames in walk:
         for filename in filenames:
             full_path = os.path.join(directory, filename)
 
@@ -145,16 +158,22 @@ def remove_from_start(path, data):
     open(path, 'w').write(all_data)
 
 
-def remove_comments_from_asc_files(path, verbose=False):
+def remove_comments_from_asc_files(
+    path,
+    verbose=False,
+    max_uncompressed_zip_size=1000000000):  # 1G
     """In all .asc files under path, including those inside zip files,
-    if the first line starts with '/*', remove that line."""
+    if the first line starts with '/*', remove that line.
+
+    Skips files over 1G uncompressed size by default. The limit can be
+    changed, or set to 'None' to go without size limit."""
 
     for filename in all_files_in(
         path,
         extensions=('.asc', '.inc'),
         enter_zipfiles=True,
         verbose=verbose,
-        max_uncompressed_zip_size=1000000000):  # 1G
+        max_uncompressed_zip_size=max_uncompressed_zip_size):
         line = first_line(filename)
         if line.startswith('/*'):
             if verbose:
