@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.23 (unreleased)
+2.23 (2012-10-19)
 -----------------
 
 Adapt comment line removing functions so that they can also be called
