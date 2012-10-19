@@ -1524,3 +1524,34 @@ def excel_download(request, permission_manager, project_id):
         dirname=directory,
         filename=filename,
         nginx_dirname='/download_excel')
+
+
+@receives_permission_manager
+def preload_scenario_redirect(
+    request, permission_manager, project_id, scenario_id):
+    """View for going to the front page with a particular scenario opened. This finds the
+    necessary ids and puts them in the session, then redirects to the front page."""
+    project_id = int(project_id)
+    scenario_id = int(scenario_id)
+
+    scenario = Scenario.objects.get(pk=scenario_id)
+    project = Project.objects.get(pk=project_id)
+
+    if (not permission_manager.check_project_permission(
+            project, UserPermission.PERMISSION_SCENARIO_VIEW) or
+        not permission_manager.check_scenario_permission(
+            scenario, UserPermission.PERMISSION_SCENARIO_VIEW)):
+        raise PermissionDenied()
+
+    breach = scenario.breaches.all()[0]
+
+    preload_scenario = {
+        "scenario_id": scenario_id,
+        "project_id": project_id,
+        "breach_id": breach.id,
+        "region_id": breach.region.id
+        }
+
+    request.session['preload_scenario'] = preload_scenario
+
+    return HttpResponseRedirect('/')

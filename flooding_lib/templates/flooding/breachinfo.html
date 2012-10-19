@@ -39,7 +39,7 @@ Flooding: {% trans 'Breach information' %}
     <tr>
       <td><input type="checkbox" class="checkbox-scenario" data-scenario-id="{{ scenario.id }}" checked="checked"/></td>
       <td>{{ scenario.id }}</td>
-      <td>{{ scenario }}</td>
+      <td><a href="{% url preload_scenario_redirect scenario.main_project.id scenario.id %}">{{ scenario }}</a></td>
       <td>{{ scenario.main_project }}</td>
       <td>{{ scenario.frequency }}</td>
       <td>

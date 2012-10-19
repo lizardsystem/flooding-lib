@@ -11,6 +11,10 @@ webserver anymore.
 Change the zipfile creation functions so that they don't try to do
 everything in memory.
 
+Add a link (/flooding/preload/<project_id>/</scenario_id>/) that puts
+relevant information in the session and then redirects to the front
+page. Code in flooding-base 1.32 then causes the right scenario to
+open.
 
 2.22 (2012-10-17)
 -----------------

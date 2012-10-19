@@ -195,6 +195,10 @@ urlpatterns = patterns(
     url(r'^scenario/(?P<scenario_id>\d+)/results/',
         'flooding_lib.views.zipped.scenario_results_zipfile',
         name='flooding_results_zipped'),
+
+    url(r'^preload/(?P<project_id>\d+)/(?P<scenario_id>\d+)/',
+        'flooding_lib.views.views.preload_scenario_redirect',
+        name="preload_scenario_redirect"),
 )
 
 
