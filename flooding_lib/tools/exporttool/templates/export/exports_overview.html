@@ -1,19 +1,19 @@
 {% extends "lizard/base.html" %}
 {% load i18n %}
-{% block title %}Lizard export tool{% endblock %}		
-{% block stylesheets %}	
+{% block title %}Lizard export tool{% endblock %}
+{% block stylesheets %}
 		<link rel="shortcut icon" href="{{ url_favicon }}">
 		<link href="{% url root_url %}static_media/style/style.css" media="screen" type="text/css" rel="stylesheet">
 		<link href="{% url root_url %}static_media/style/forms.css" media="screen" type="text/css" rel="stylesheet">
 		<link href="{% url root_url %}static_media/Isomorphic_NenS_skin/skin_styles.css" media="screen" type="text/css" rel="stylesheet">
 {% endblock stylesheets %}
-	
+
 {% block bodyarguments %} class="scrollable" {% endblock %}
 {% block content %}
 		<h1>
 		{% trans "Export run overview" %}
 		</h1>
-		
+
 		<table class="timeseriesWrapper"><tr><td>
 			<table class="timeseries" summary="timeseries">
 				<thead class="headerTitle">
@@ -25,31 +25,32 @@
 				</thead>
 				<tbody>
 				{% if  export_run_list %}
-			 		{% for export_run in export_run_list %}	        
+			 		{% for export_run in export_run_list %}
+                    {# 0: name, 1: creation_date, 2: description, 3: path, 4: detail_url, 5: state #}
 					    <tr class="{% cycle 'cellDark' 'cell'%}">
-				    		<td> 
+				    		<td>
 				    			<a href="{{export_run.4}}">{{export_run.0}}</a>
 				    		</td>
-				    		<td>{{export_run.1|date:"d-m-Y"}}</td>				    		
+				    		<td>{{export_run.1|date:"d-m-Y"}}</td>
 				    		<td>{{export_run.2}}</td>
 				    		<td>{{export_run.5}}</td>
 				    		<td>
 				    			{% if export_run.3 %}
-				    				<a href="{% url flooding_tools_export_index %}?action=get_attachment&path={{export_run.3}}">{% trans "Result file" %}</a>				    				
+				    				<a href="{% url flooding_tools_export_index %}?action=get_attachment&path={{export_run.3}}">{% trans "Result file" %}</a>
 				    			{% else %}
 				    				-
 				    			{% endif %}
-				    		</td>				    		
-				    	</tr>	     
+				    		</td>
+				    	</tr>
 			    	{% endfor %}
 			    {% else %}
 			       <tr class='cellDark'><td COLSPAN=5> - </td></tr>
-			    {% endif %} 
-			    </tbody>   
+			    {% endif %}
+			    </tbody>
 			</table>
 		</table>
 		<BR>
 		{% if has_create_rights %}
-			<a href="{%url flooding_tools_export_new_export_index %}" >{% trans "New export run" %}</a>	
+			<a href="{%url flooding_tools_export_new_export_index %}" >{% trans "New export run" %}</a>
 		{% endif %}
 {% endblock %}

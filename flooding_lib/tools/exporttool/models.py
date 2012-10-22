@@ -65,7 +65,10 @@ class ExportRun(models.Model):
         default=EXPORT_STATE_WAITING)
 
     def get_main_result(self):
-        results = self.result_set.filter(area=Result.RESULT_AREA_COUNTRY)
+        # Why RESULT_AREA_COUNTRY only?
+        # results = self.result_set.filter(area=Result.RESULT_AREA_COUNTRY)
+        results = self.result_set.all()
+        # print self.id, results
         if results:
             return results[0]
         else:

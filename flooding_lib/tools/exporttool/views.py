@@ -16,20 +16,20 @@ from lizard_worker.executor import start_workflow
 from lizard_worker.models import WorkflowTemplate
 
 
-def get_result_path_location(result):
-    result_folder = Setting.objects.get(
-        key='MAXIMAL_WATERDEPTH_RESULTS_FOLDER').value
-    begin_index = (result.file_location.find(result_folder) +
-                   len(result_folder))
-    path = result.file_location[begin_index:].replace('\\', '/')
-    return path
+# def get_result_path_location(result):
+#     result_folder = Setting.objects.get(
+#         key='MAXIMAL_WATERDEPTH_RESULTS_FOLDER').value
+#     begin_index = (result.file_basename.find(result_folder) +
+#                    len(result_folder))
+#     path = result.file_basename[begin_index:].replace('\\', '/')
+#     return path
 
 
 def index(request):
     """
     Renders Lizard-flooding page with an overview of all exports
 
-    Optionally provide "?action=get_attachment&3090850/zipfiles/totaal.zip"
+    Optionally provide "?action=get_attachment&path=3090850/zipfiles/totaal.zip"
     """
     if request.method == 'GET':
         action = request.GET.get('action', '')
@@ -49,17 +49,18 @@ def index(request):
     export_run_list = list()
     for export_run in ExportRun.objects.all():
         main_result = export_run.get_main_result()
-        path = get_result_path_location(main_result) if main_result else None
+        path = main_result.file_basename if main_result else None
         detail_url = reverse(
             'flooding_tools_export_detail', args=[export_run.id])
-
-        export_run_list.append((export_run.name,
-                    export_run.creation_date,
-                    export_run.description,
-                    path,
-                    detail_url,
-                    export_run.get_state_display())
-                    )
+        print path
+        export_run_list.append(
+            (export_run.name,
+             export_run.creation_date,
+             export_run.description,
+             path,
+             detail_url,
+             export_run.get_state_display())
+            )
 
     breadcrumbs = [
         {'name': _('Export tool')}]
