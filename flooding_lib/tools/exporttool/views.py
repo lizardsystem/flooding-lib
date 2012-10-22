@@ -8,8 +8,12 @@ from django.utils import simplejson
 from django.utils.translation import ugettext as _
 
 from flooding_lib.models import Scenario
+from flooding_lib.models import ResultType
 from flooding_lib.tools.exporttool.forms import ExportRunForm
 from flooding_lib.tools.exporttool.models import ExportRun, Setting
+
+from lizard_worker.executor import start_workflow
+from lizard_worker.models import WorkflowTemplate
 
 
 def get_result_path_location(result):
@@ -24,6 +28,8 @@ def get_result_path_location(result):
 def index(request):
     """
     Renders Lizard-flooding page with an overview of all exports
+
+    Optionally provide "?action=get_attachment&3090850/zipfiles/totaal.zip"
     """
     if request.method == 'GET':
         action = request.GET.get('action', '')
@@ -189,9 +195,14 @@ def new_export(request):
             new_export_run.scenarios = Scenario.objects.filter(
                 pk__in=scenario_ids)
 
+            # This part is obsolete, soon to be removed if the task is finished.
             if (new_export_run.export_type ==
                 ExportRun.EXPORT_TYPE_WATER_DEPTH_MAP):
-                export_result_type = 1
+
+                # Choices here are gridmaxwaterdepth and gridmaxflowvelocity
+                export_result_type = ResultType.objects.get(name='gridmaxwaterdepth').id
+                #export_result_type = 1  # TODO: get the id from ResultType table.
+
                 # Get the EXPORT_FOLDER settings (from the settings of
                 # the export-tool)
                 export_folder = Setting.objects.get(key='EXPORT_FOLDER').value
@@ -203,6 +214,14 @@ def new_export(request):
                     export_result_type, csv_file_location)
                 new_export_run.create_general_file_for_gis_operation(
                     text_file_location)
+
+            # Make a workflow for the export and run it
+            workflow_template = WorkflowTemplate.objects.get(code='3')
+            result = start_workflow(
+                new_export_run.id,
+                workflow_template.id, log_level='DEBUG',
+                scenario_type='flooding_exportrun')
+            print 'ActionWorkflowExportRun: %r' % result
 
             return HttpResponse(
                 'redirect_in_js_to_' + reverse('flooding_tools_export_index'))

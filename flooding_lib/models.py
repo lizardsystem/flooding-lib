@@ -1551,7 +1551,6 @@ class Result(models.Model):
     better name is RawResult
 
     - belongs to a single scenario
-    todo: types
 
     """
     scenario = models.ForeignKey(Scenario)
@@ -1574,6 +1573,9 @@ class Result(models.Model):
         verbose_name = _('Result')
         verbose_name_plural = _('Results')
         db_table = 'flooding_result'
+
+    def __unicode__(self):
+        return 'Result for %s' % self.scenario
 
 
 class CutoffLocationSobekModelSetting(models.Model):

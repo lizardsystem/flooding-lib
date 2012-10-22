@@ -30,6 +30,7 @@ def perform_task(
     directory and sobek project.
     broker_logging_handler = sends loggings to broker
     """
+    scenario_type = body['scenario_type']
     scenario_id = body['scenario_id']
 
     #logging handler
@@ -157,9 +158,20 @@ def perform_task(
             from flooding_lib.tasks import calculate_scenario_statistics
             calculate_scenario_statistics.calculate_statistics(scenario_id)
             success_code = True  # In case of problems, an exception is raised
-        
+
         elif tasktype_id == TASK_GENERATE_EXPORT:
-            pass
+            #exportrun_id = body['exportrun_id']
+            log.debug("execute TASK_GENERATE_EXPORT_200 %s=%r" % (scenario_type, scenario_id))
+            if scenario_type == 'flooding_exportrun':
+                from flooding_lib.tasks import calculate_export_maps
+                # Here scenario_id is an exportrun_id
+                calculate_export_maps.calculate_export_maps(scenario_id)
+                success_code = True  # In case of problems, an exception is raised
+            else:
+                log.error(
+                    'Task not performed, because scenario_type is "%s" (and not "flooding_exportrun")' %
+                    scenario_type)
+                success_code = False
         else:
             log.warning("selected a '%d' task but don't know what it is" %
                         tasktype_id)

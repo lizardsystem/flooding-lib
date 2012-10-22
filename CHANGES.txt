@@ -4,7 +4,9 @@ Changelog of flooding-lib
 2.24 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Added test management task test_task_200.
+
+- Added task 200.
 
 
 2.23 (2012-10-19)

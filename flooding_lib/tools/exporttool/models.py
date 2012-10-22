@@ -6,6 +6,10 @@ import os.path
 from flooding_lib.models import Region, Scenario
 from flooding_base.models import Setting as BaseSetting
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class ExportRun(models.Model):
     """
@@ -44,7 +48,12 @@ class ExportRun(models.Model):
     description = models.TextField(blank=True)
     export_type = models.IntegerField(
         choices=EXPORT_TYPE_CHOICES,
-        default=EXPORT_TYPE_WATER_DEPTH_MAP)
+        default=EXPORT_TYPE_WATER_DEPTH_MAP)  # Obsolete: replaced with export_* below
+
+    export_max_waterdepth = models.BooleanField(default=True)
+    export_max_flowvelocity = models.BooleanField(default=False)
+    export_possibly_flooded = models.BooleanField(default=False)
+
     owner = models.ForeignKey(User)
     creation_date = models.DateTimeField(blank=True, null=True)
     run_date = models.DateTimeField(blank=True, null=True)
@@ -68,6 +77,8 @@ class ExportRun(models.Model):
     def create_csv_file_for_gis_operation(
         self, export_result_type, csv_file_location):
         """
+        Obsolete, replaced with input_files
+
         Returns a csv file containing the:
         * the region ids
 
@@ -99,6 +110,42 @@ class ExportRun(models.Model):
         writer = csv.writer(open(csv_file_location, "wb"))
         writer.writerow(['dijkring', 'bestandslocatie'])
         writer.writerows(information)
+
+    def input_files(
+        self, export_result_type):
+        """
+        Returns a csv file containing the:
+        * the region ids
+
+        * the result files (e.g. ASCII) related to the scenario(s) for
+          the region with that region id
+
+        Inputparameter:
+
+        * export_result_type (integer): the type of the result of the
+          scenario (e.g. max. water depth (=1))
+
+        * csv_file_location: the file_location to store the csv file
+
+        The information is gathered by:
+        1) looping over the scenarios,
+        2) the regions of that scenario,
+        3) the results with the specifief result_type of that scenario
+        """
+        dest_dir = BaseSetting.objects.get(key='destination_dir').value
+
+        result = []
+        for s in self.scenarios.all():
+            for r in Region.objects.filter(breach__scenario__id=s.id).all():
+                for rs in s.result_set.filter(resulttype=export_result_type):
+                    result.append({
+                            'scenario': s,
+                            'dijkringnr': r.dijkringnr,
+                            'filename': os.path.join(dest_dir, rs.resultloc)
+                            })
+
+        return result
+
 
     def create_general_file_for_gis_operation(self, file_location):
         """" Create a file with general information
@@ -140,6 +187,17 @@ class Result(models.Model):
     file_location = models.CharField(max_length=100)
     area = models.IntegerField(choices=RESULT_AREA_CHOICES)
     export_run = models.ForeignKey(ExportRun)
+
+    def __unicode__(self):
+        return self.name
+
+    # def delete(self, *args, **kwargs):
+    #     logger.info('Deleting Result object')
+    #     try:
+    #         os.remove(self.file_location + 'asdf')
+    #     except:
+    #         logger.error('Could not delete %s while deleting Result object' % self.file_location)
+    #     return super(Result, self).delete(*args, **kwargs)
 
 
 class Setting(models.Model):
