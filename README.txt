@@ -22,8 +22,9 @@ Update
 Task 200
 ========
 
-- copy dijkringen directory to a place and point Exporttool.Setting
-  DIJKRING_SHAPES_FOLDER to it.
+- copy dijkringen directory (flooding share ->
+  filedatabase/task_200_dijkringen) to a place and point
+  Exporttool.Setting DIJKRING_SHAPES_FOLDER to it.
 
 - set MAXIMAL_WATERDEPTH_RESULTS_FOLDER and EXPORT_FOLDER (maybe the
   settings can be merged later)
