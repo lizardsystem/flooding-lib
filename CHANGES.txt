@@ -11,6 +11,8 @@ Changelog of flooding-lib
 
 - Added task 200.
 
+- Fix bug in breachinfo page -- link must use the project id of the
+  current page, not the scenario's main project id
 
 2.23 (2012-10-19)
 -----------------

@@ -1529,8 +1529,9 @@ def excel_download(request, permission_manager, project_id):
 @receives_permission_manager
 def preload_scenario_redirect(
     request, permission_manager, project_id, scenario_id):
-    """View for going to the front page with a particular scenario opened. This finds the
-    necessary ids and puts them in the session, then redirects to the front page."""
+    """View for going to the front page with a particular scenario
+    opened. This finds the necessary ids and puts them in the session,
+    then redirects to the front page."""
     project_id = int(project_id)
     scenario_id = int(scenario_id)
 
