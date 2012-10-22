@@ -5,16 +5,20 @@ import os
 
 
 class ResultAdmin(admin.ModelAdmin):
-    list_display = ('name', 'file_location_linux', 'file_location_windows')
+    list_display = ('name', 'file_basename')
     actions = ['result_delete_with_file']
 
     def result_delete_with_file(self, request, queryset):
+        try:
+            export_folder = Setting.objects.get(key='EXPORT_FOLDER').value
+        except:
+            self.message_user(request, 'Er is iets mis met de Exporttool.Setting EXPORT_FOLDER. Niks gedaan.')
         messages = ['Resultaat objecten verwijderd (inclusief bestanden).']
         for result in queryset:
             try:
-                os.remove(result.file_location_linux)
+                os.remove(os.path.join(export_folder, result.file_basename))
             except OSError:
-                messages.append('Bestand %s niet verwijderd.' % result.file_location_linux)
+                messages.append('Bestand %s niet verwijderd.' % result.file_basename)
             result.delete()
         self.message_user(request, ' '.join(messages))
     result_delete_with_file.short_description = "Verwijder geselecteerde Resultaten inclusief resultaatbestand"

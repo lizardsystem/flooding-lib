@@ -209,16 +209,12 @@ def calculate_export_maps(exportrun_id):
     is a zip file (in Settings -> EXPORT_FOLDER) containing these
     files and a Result object associated to it. Old Result objects are
     deleted (and associated files are not deleted).
+
+    Note: only the basename is saved. You have to calculate the full
+    path yourself by prepending the name with Setting.EXPORT_FOLDER.
     """
     export_run = ExportRun.objects.get(id=exportrun_id)
     export_folder = Setting.objects.get(key='EXPORT_FOLDER').value
-    export_folder_windows = export_folder  # Default
-    try:
-        export_folder_windows = Setting.objects.get(key='EXPORT_FOLDER_WINDOWS').value
-    except:
-        print 'Warning: Something is wrong with Exporttool.Setting with key EXPORT_FOLDER_WINDOWS'
-    if export_folder_windows[-1] != '\\':
-        export_folder_windows += '\\'
     result_files = []
 
     tmp_zip_filename = mktemp()
@@ -257,13 +253,11 @@ def calculate_export_maps(exportrun_id):
                 tmp_zip_filename,
                 [{'filename': ascii_filename, 'arcname': arc_name, 'delete_after': True}])
 
-    #os.remove(tmp_result_filename)
     # Move file to destination.
     print tmp_zip_filename
 
     dst_basename = 'export_run_%d.zip' % export_run.id
     dst_filename = os.path.join(export_folder, dst_basename)
-    dst_filename_windows = export_folder_windows + dst_basename
 
     print 'Moving file from %s to %s...' % (tmp_zip_filename, dst_filename)
     shutil.move(tmp_zip_filename, dst_filename)
@@ -276,8 +270,7 @@ def calculate_export_maps(exportrun_id):
     print 'Making Result object with link to file...'
     result = Result(
         name=export_run.name,
-        file_location_windows=dst_filename_windows,
-        file_location_linux=dst_filename,
+        file_basename=dst_basename,
         area=Result.RESULT_AREA_DIKED_AREA, export_run=export_run)
     result.save()
 
