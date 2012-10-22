@@ -105,8 +105,14 @@ def get_dijkring_mask(dijkringnr, geo_projection, geo_transform, size_x, size_y)
         # Get the driver
         driver = ogr.GetDriverByName('ESRI Shapefile')
         # Open a shapefile
-        DIJKRING_SHAPES_FOLDER = '/home/jack/git/sites/flooding/dijkringen_todo_move_somewhere'
-        shapefile_name = os.path.join(DIJKRING_SHAPES_FOLDER, 'dr__%d.shp' % dijkringnr)
+        #DIJKRING_SHAPES_FOLDER = '/home/jack/git/sites/flooding/dijkringen_todo_move_somewhere'
+        dijkring_shapes_folder = '/srv/test.flooding.lizard.net/dijkringen'  # Default
+        try:
+            dijkring_shapes_folder = Setting.objects.get(key='DIJKRING_SHAPES_FOLDER').value
+        except:
+            print 'Check Exporttool.Setting DIJKRING_SHAPES_FOLDER, taking %s' % dijkring_shapes_folder
+
+        shapefile_name = os.path.join(dijkring_shapes_folder, 'dr__%d.shp' % dijkringnr)
         dataset = driver.Open(shapefile_name, 0)
 
         dijkring_layer = dataset.GetLayer()

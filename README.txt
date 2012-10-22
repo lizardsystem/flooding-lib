@@ -8,6 +8,29 @@ Usage, etc.
 More details in src/lizard_flooding/USAGE.txt .
 
 
+Install production / staging server
+-----------------------------------
+
+Linux task machine (i.e. task 200). The task server checks out the
+master trunk of flooding. Run these commands from "flooding".
+
+Init
+    $ bin/fab staging_taskserver init
+Update
+    $ bin/fab staging_taskserver update_task
+
+Task 200
+========
+
+- copy dijkringen directory to a place and point Exporttool.Setting
+  DIJKRING_SHAPES_FOLDER to it.
+
+- set MAXIMAL_WATERDEPTH_RESULTS_FOLDER and EXPORT_FOLDER (maybe the
+  settings can be merged later)
+
+- the export folders is likely a network share, configure it in /etc/fstab.
+
+
 Development installation
 ------------------------
 
