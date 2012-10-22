@@ -4,6 +4,9 @@ Changelog of flooding-lib
 2.24 (unreleased)
 -----------------
 
+- Updated Exporttool.Result to contain windows and linux folder names,
+  in case you want to access the same object from different OSes.
+
 - Added test management task test_task_200.
 
 - Added task 200.

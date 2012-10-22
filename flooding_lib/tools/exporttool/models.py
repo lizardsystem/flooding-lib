@@ -184,7 +184,8 @@ class Result(models.Model):
         )
 
     name = models.CharField(max_length=200)
-    file_location = models.CharField(max_length=100)
+    file_location_windows = models.TextField()
+    file_location_linux = models.TextField()
     area = models.IntegerField(choices=RESULT_AREA_CHOICES)
     export_run = models.ForeignKey(ExportRun)
 

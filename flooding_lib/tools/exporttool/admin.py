@@ -5,16 +5,16 @@ import os
 
 
 class ResultAdmin(admin.ModelAdmin):
-    list_display = ('name', 'file_location')
+    list_display = ('name', 'file_location_linux', 'file_location_windows')
     actions = ['result_delete_with_file']
 
     def result_delete_with_file(self, request, queryset):
         messages = ['Resultaat objecten verwijderd (inclusief bestanden).']
         for result in queryset:
             try:
-                os.remove(result.file_location)
+                os.remove(result.file_location_linux)
             except OSError:
-                messages.append('Bestand %s niet verwijderd.' % result.file_location)
+                messages.append('Bestand %s niet verwijderd.' % result.file_location_linux)
             result.delete()
         self.message_user(request, ' '.join(messages))
     result_delete_with_file.short_description = "Verwijder geselecteerde Resultaten inclusief resultaatbestand"
