@@ -4,7 +4,8 @@ Changelog of flooding-lib
 2.25 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Updating export_run state after finishing calculate_export_maps
+  (task 200).
 
 
 2.24 (2012-10-22)

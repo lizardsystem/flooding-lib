@@ -1,4 +1,6 @@
 # Run under linux
+# Task 200 (sorry that I didn't put that in the filename)
+
 import tempfile
 import os
 
@@ -279,5 +281,9 @@ def calculate_export_maps(exportrun_id):
         file_basename=dst_basename,
         area=Result.RESULT_AREA_DIKED_AREA, export_run=export_run)
     result.save()
+
+    print 'Updating state of export_run...'
+    export_run.state = ExportRun.EXPORT_STATE_DONE
+    export_run.save()
 
     print 'Finished.'

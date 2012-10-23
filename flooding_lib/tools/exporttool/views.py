@@ -222,7 +222,7 @@ def new_export(request):
                 new_export_run.id,
                 workflow_template.id, log_level='DEBUG',
                 scenario_type='flooding_exportrun')
-            print 'ActionWorkflowExportRun: %r' % result
+            #print 'ActionWorkflowExportRun: %r' % result
 
             return HttpResponse(
                 'redirect_in_js_to_' + reverse('flooding_tools_export_index'))
