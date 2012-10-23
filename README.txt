@@ -29,7 +29,19 @@ Task 200
 - set MAXIMAL_WATERDEPTH_RESULTS_FOLDER and EXPORT_FOLDER (maybe the
   settings can be merged later)
 
-- the export folders is likely a network share, configure it in /etc/fstab.
+- the export folders is likely a network share, configure it in
+  /etc/fstab.
+
+- make a workflow template with code 3. At the time of writing this
+  workflow template only contains task 200. The front end will try to
+  find workflow template with code 3.
+
+- set the broker and supervisor settings (see flooding:
+  staging-task-200.cfg)
+
+- for testing you can run:
+
+    $ bin/django lw_task_worker --task_code 200 --log_level DEBUG --workernr 1
 
 
 Development installation
