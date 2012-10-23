@@ -27,6 +27,7 @@ install_requires = [
     'xlrd',
     'xlwt',
     'lizard_ui',
+    'threedilib',
 #    'pyproj', # We do need it, but requiring it doesn't work well
     ],
 
