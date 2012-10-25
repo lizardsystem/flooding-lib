@@ -10,6 +10,7 @@ from flooding_lib.models import (Attachment, Breach, BreachSobekModel,
                     ScenarioCutoffLocation,
                     Scenario_PresentationLayer,  SobekModel, SobekVersion,
                     Task, TaskType,
+                    ThreediCalculation, ThreediModel,
                     UserPermission, Waterlevel, WaterlevelSet, ExternalWater,
                     ExtraInfoField, ExtraScenarioInfo)
 
@@ -108,6 +109,8 @@ admin.site.register(SobekModel)
 admin.site.register(SobekVersion)
 admin.site.register(Task, TaskAdmin)
 admin.site.register(TaskType)
+admin.site.register(ThreediCalculation)
+admin.site.register(ThreediModel)
 admin.site.register(UserPermission)
 admin.site.register(Waterlevel, WaterlevelAdmin)
 admin.site.register(WaterlevelSet)

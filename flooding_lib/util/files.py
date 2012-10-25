@@ -76,6 +76,12 @@ class temporarily_unzipped(object):
         shutil.rmtree(self.tmpdir)
 
 
+class unzipped(temporarily_unzipped):
+    """Context manager that unzips a zip file."""
+    def __exit__(self, exc_type, exc_value, traceback):
+        pass
+
+
 def filename_matches(filename, extensions):
     return any(filename.lower().endswith(extension.lower())
                for extension in extensions)
@@ -179,3 +185,33 @@ def remove_comments_from_asc_files(
             if verbose:
                 print("Removing first line of {0}.".format(filename))
             remove_from_start(filename, line)
+
+
+def add_to_zip(output_zipfile, zip_result):
+    """
+    Zip all files listed in zip_result
+
+    zip_result is a list with keys:
+    - filename: filename on disc
+    - arcname: target filename in archive
+    - delete_after: set this to remove file from file system after zipping
+    """
+    #print 'zipping result into %s' % output_zipfile
+    with zipfile.ZipFile(output_zipfile, 'a', zipfile.ZIP_DEFLATED) as myzip:
+        for file_in_zip in zip_result:
+            #print 'zipping %s...' % file_in_zip['arcname']
+            myzip.write(file_in_zip['filename'], file_in_zip['arcname'])
+            if file_in_zip.get('delete_after', False):
+                #print 'removing %r (%s in arc)' % (file_in_zip['filename'], file_in_zip['arcname'])
+                os.remove(file_in_zip['filename'])
+
+
+def mktemp(prefix='task_'):
+    """Make a temp file
+
+    You are responsible for deleting it.
+    """
+    f = tempfile.NamedTemporaryFile(delete=False, prefix=prefix)
+    pathname = f.name
+    f.close()
+    return pathname

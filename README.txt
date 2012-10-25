@@ -44,6 +44,23 @@ Task 200
     $ bin/django lw_task_worker --task_code 200 --log_level DEBUG --workernr 1
 
 
+Task 210/220 threedi
+====================
+
+- Install subgridf90, see:
+  http://publicwiki.deltares.nl/display/3Diusers/3Di-Subgrid+building+on+Linux
+
+- Make sure the folders in the flooding_base.Settings SOURCE_DIR,
+  DESTINATION_DIR are accessible.
+
+- TODO: the location of subgridf90 is now static (in threedilib)
+
+- Add workflow 4 with at least 210 -> 220 -> 185 (?)
+
+- To test you can run: $ bin/django test_task_210 1 where 1 is the id
+  of ThreediCalculation.
+
+
 Development installation
 ------------------------
 
