@@ -38,7 +38,7 @@ def process_threedi_nc(some_id, some_type):
         scenario_id = some_id
         scenario = Scenario.objects.get(pk=scenario_id)
         if scenario.threedicalculation_set.count() == 0:
-            print 'No ThreediCalculation for scenario %d, skipping' % scenario_id
+            print 'No ThreediCalculation for scenario %s, skipping' % scenario_id
             return
         threedi_calculation = scenario.threedicalculation_set.all()[0]  # Only 1 possible, right?
 
@@ -54,7 +54,7 @@ def process_threedi_nc(some_id, some_type):
     except OSError:
         print 'warning: error creating folder %s, does it already exist?' % result_folder
 
-    dst_basefilename = os.path.join(result_folder, 'waterlevel_%04d.png')
+    dst_basefilename = os.path.join(result_folder, 'waterlevel_%04d')
 
     print 'input: %s' % full_path_zip
     print 'output: %s' % dst_basefilename

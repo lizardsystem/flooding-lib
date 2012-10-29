@@ -27,7 +27,7 @@ def run_threedi_task(some_id, some_type):
         scenario_id = some_id
         scenario = Scenario.objects.get(pk=scenario_id)
         if scenario.threedicalculation_set.count() == 0:
-            print 'No ThreediCalculation for scenario %d, skipping' % scenario_id
+            print 'No ThreediCalculation for scenario %s, skipping' % scenario_id
             return
         threedi_calculation = scenario.threedicalculation_set.all()[0]  # Only 1 possible, right?
 
