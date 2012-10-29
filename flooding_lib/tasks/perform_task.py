@@ -18,6 +18,8 @@ TASK_SOBEK_PRESENTATION_GENERATION_155 = 155
 TASK_HISSSM_PRESENTATION_GENERATION_185 = 185
 TASK_CALCULATE_STATISTICS = 190
 TASK_GENERATE_EXPORT = 200
+TASK_PERFORM_3DI_SIMULATION_210 = 210
+TASK_3DI_PNG_GENERATION_220 = 220
 
 
 def perform_task(
@@ -172,6 +174,16 @@ def perform_task(
                     'Task not performed, because scenario_type is "%s" (and not "flooding_exportrun")' %
                     scenario_type)
                 success_code = False
+        elif tasktype_id == TASK_PERFORM_3DI_SIMULATION_210:
+            log.debug("execute TASK_PERFORM_3DI_SIMULATION_210 %s=%r" % (scenario_type, scenario_id))
+            from flooding_lib.tasks.threedi_210 import run_threedi_task
+            run_threedi_task(scenario_id, scenario_type)
+            success_code = True  # In case of problems, an exception is raised
+        elif tasktype_id == TASK_3DI_PNG_GENERATION_220:
+            log.debug("execute TASK_3DI_PNG_GENERATION_220 %s=%r" % (scenario_type, scenario_id))
+            from flooding_lib.tasks.threedi_nc_220 import process_threedi_nc
+            process_threedi_nc(scenario_id, scenario_type)
+            success_code = True  # In case of problems, an exception is raised
         else:
             log.warning("selected a '%d' task but don't know what it is" %
                         tasktype_id)

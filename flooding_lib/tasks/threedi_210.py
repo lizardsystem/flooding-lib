@@ -3,6 +3,7 @@
 # This will produce a .nc file.
 from threedilib.threedi import setup_and_run_3di
 from flooding_lib.models import ThreediCalculation
+from flooding_lib.models import Scenario
 
 from flooding_lib.util import files
 import os
@@ -25,9 +26,13 @@ def run_threedi_task(some_id, some_type):
     else:
         scenario_id = some_id
         scenario = Scenario.objects.get(pk=scenario_id)
+        if scenario.threedicalculation_set.count() == 0:
+            print 'No ThreediCalculation for scenario %d, skipping' % scenario_id
+            return
         threedi_calculation = scenario.threedicalculation_set.all()[0]  # Only 1 possible, right?
 
-    print 'Working on 3Di calculation: %s' % threedi_calculation
+    print 'Working on 3Di calculation: %s (belonging to scenario %d)' % (
+        threedi_calculation, threedi_calculation.scenario.id)
 
     print 'Unzipping...'
     with files.unzipped(threedi_calculation.full_model_path) as files_in_zip:
@@ -46,12 +51,24 @@ def run_threedi_task(some_id, some_type):
         except OSError:
             print 'warning: error creating folder %s, does it already exist?' % result_folder
 
-        # move .nc to result folder
+        # make subgrid_map.zip from subgrid_map.nc
+        tmp_nc_zip = files.mktemp()
+        files.add_to_zip(
+            tmp_nc_zip,
+            [{'filename': nc_filename, 'arcname': 'subgrid_map.nc'}])
         try:
-            print 'moving nc file...'
-            shutil.move(nc_filename, result_folder)
+            print 'copying nc zip file...'
+            shutil.copy(tmp_nc_zip, os.path.join(result_folder, 'subgrid_map.zip'))
+            os.remove(tmp_nc_zip)
         except:
-            print 'problem moving nc file %s to %s' % (nc_filename, result_folder)
+            print 'problem copying nc zip file %s to %s' % (tmp_nc_zip, result_folder)
+
+        # # move .nc to result folder
+        # try:
+        #     print 'moving nc file...'
+        #     shutil.move(nc_filename, result_folder)
+        # except:
+        #     print 'problem moving nc file %s to %s' % (nc_filename, result_folder)
 
         # zip the other files to result folder
         tmp_zipfile = files.mktemp()
@@ -65,5 +82,6 @@ def run_threedi_task(some_id, some_type):
         #print tmp_zipfile
         shutil.copy(tmp_zipfile, os.path.join(result_folder, 'scenario.zip'))
         os.remove(tmp_zipfile)
+
 
     print 'Finished.'

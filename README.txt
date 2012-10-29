@@ -41,7 +41,7 @@ Task 200
 
 - for testing you can run:
 
-    $ bin/django lw_task_worker --task_code 200 --log_level DEBUG --workernr 1
+    $ bin/django lw_task_worker --task_code 200 --log_level DEBUG --worker_nr 1
 
 
 Task 210/220 threedi
@@ -55,7 +55,8 @@ Task 210/220 threedi
 
 - TODO: the location of subgridf90 is now static (in threedilib)
 
-- Add workflow 4 with at least 210 -> 220 -> 185 (?)
+- Add task 210, 220 to workflow 1 or 2. (old: Add workflow 4 with at
+  least 210 -> 220 -> 185 (?))
 
 - To test you can run: $ bin/django test_task_210 1 where 1 is the id
   of ThreediCalculation.

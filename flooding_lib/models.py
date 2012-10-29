@@ -214,9 +214,14 @@ class ThreediCalculation(models.Model):
             return model_path
 
     @property
+    def full_base_path(self):
+        """This path contains all kinds of files depending on scenario"""
+        return self.scenario.get_abs_destdir().replace('\\', '/')
+
+    @property
     def full_result_path(self):
         """This path will contain "scenario.zip" and "subgrid_map.nc" after step 3 """
-        return os.path.join(self.scenario.get_abs_destdir().replace('\\', '/'), 'threedi')
+        return os.path.join(self.full_base_path, 'threedi')
 
     # def setup(self, remove_old_if_existing=False):
     #     """step 1)
