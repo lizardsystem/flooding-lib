@@ -790,7 +790,7 @@ def register_task_processing(scenario, tasktype, is_successful):
     """
     Update the scenario's status.
     """
-    from lizard_worker.perform_task import (
+    from lizard_lib.perform_task import (
         TASK_SOBEK_PRESENTATION_GENERATION_155,
         TASK_HISSSM_PRESENTATION_GENERATION_185,)
     if tasktype == TASK_SOBEK_PRESENTATION_GENERATION_155:
