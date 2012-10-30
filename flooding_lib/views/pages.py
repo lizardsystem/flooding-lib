@@ -1,13 +1,14 @@
 """Views for standalone pages."""
 
-import logging
-
 import json
+import logging
+import os
 
 from django.core.urlresolvers import reverse
 
 from flooding_presentation.views import external_file_location
 
+from flooding_base import models as basemodels
 from flooding_lib import models
 from flooding_lib.views import classbased
 from flooding_lib.util import geo
@@ -15,6 +16,7 @@ from flooding_lib.util import geo
 logger = logging.getLogger(__name__)
 
 PRESENTATIONTYPE_MAX_WATERDEPTH = 11
+INUNDATION_PER_HOUR_RESULT_TYPE = 32
 
 
 class BreachInfoView(classbased.BaseView):
@@ -50,6 +52,8 @@ class BreachInfoView(classbased.BaseView):
                     scenario)
                 scenario.max_waterdepth_extent = self._get_water_depth_extent(
                     scenario)
+                scenario.inundation_statistics_url = (
+                    self._get_inundation_statistics_url(scenario))
             except Exception as e:
                 logger.debug(e)
 
@@ -69,3 +73,49 @@ class BreachInfoView(classbased.BaseView):
         png = external_file_location(png)
 
         return json.dumps(geo.GeoImage(png).extent())
+
+    def _get_inundation_statistics_url(self, scenario):
+        # 1. Find out whether this scenario has a statistics JSON
+        #    file.  if not, return None.
+        try:
+            scenario.result_set.get(
+                resulttype__id=INUNDATION_PER_HOUR_RESULT_TYPE)
+        except models.Result.DoesNotExist:
+            return None
+
+        # 2. Otherwise, return an URL to a page that shows the data.
+        return reverse(
+            'flooding_inundationstats_page',
+            kwargs={'scenario_id': scenario.id})
+
+
+class InundationStatsView(classbased.BaseView):
+    template_name = 'flooding/inundationstats.html'
+
+    @property
+    def scenario(self):
+        return models.Scenario.objects.get(pk=self.scenario_id)
+
+    def inundation_stats(self):
+        try:
+            result = self.scenario.result_set.get(
+                resulttype__id=INUNDATION_PER_HOUR_RESULT_TYPE)
+        except models.Result.DoesNotExist:
+            return []
+
+        jsonfile = os.path.join(
+            basemodels.Setting.objects.get(
+                key='DESTINATION_DIR').value.replace('\\', '/'),
+            result.resultloc)
+
+        if not os.path.exists(jsonfile):
+            return []
+
+        jsonstring = file(jsonfile).read()
+        stats = json.loads(jsonstring)
+
+        # Make the timestamps ints
+        for hour in stats:
+            hour['timestamp'] = int(hour['timestamp'])
+
+        return stats

@@ -25,9 +25,24 @@
 
 __revision__ = "$Rev$"[6:-2]
 
+import itertools
+import os
+import re
+import stat
 import sys
+import zipfile
+
+from django import db
+
+import nens.asc
+
+from flooding_base.models import Setting
+from flooding_lib.models import Scenario
+
+
 if sys.version_info < (2, 4):
-    print "I think I need version python2.4 and I was called from %d.%d" % sys.version_info[:2]
+    print("I think I need version python2.4 and I was called from %d.%d" %
+          sys.version_info[:2])
 
 import logging
 
@@ -53,11 +68,6 @@ if __name__ == '__main__':
     import lizard.settings
     setup_environ(lizard.settings)
 
-from django import db
-import os, stat
-from flooding_lib.models import Scenario
-from flooding_base.models import Setting
-
 
 def common_generation(scenario_id, tmp_dir, source_programs):
     """invokes compute_png_files for all grids
@@ -67,15 +77,15 @@ def common_generation(scenario_id, tmp_dir, source_programs):
     mapping, convert to png, set in the results record the
     resultpngloc field.
     """
-    import zipfile, nens.asc
 
     scenario = Scenario.objects.get(pk=scenario_id)
     destination_dir = Setting.objects.get(key='DESTINATION_DIR').value
     source_dir = Setting.objects.get(key='SOURCE_DIR').value
 
     log.debug("select results relative to scenario %s" % scenario_id)
-    results = scenario.result_set.filter(resulttype__program__in=source_programs,
-                                         resulttype__color_mapping_name__isnull=False)
+    results = scenario.result_set.filter(
+        resulttype__program__in=source_programs,
+        resulttype__color_mapping_name__isnull=False)
     results = results.exclude(resulttype__color_mapping_name="")
 
     log.debug("selected results for scenario: %s" % str(results))
@@ -86,18 +96,24 @@ def common_generation(scenario_id, tmp_dir, source_programs):
     rel_output_dir_name = os.path.join(scenario.get_rel_destdir())
     abs_output_dir_name = os.path.join(destination_dir, rel_output_dir_name)
 
-    log.debug("0g: retrieve dm1maxd0 from gridmaxwaterdepth as to have a default shape.")
+    log.debug(
+        "0g: retrieve dm1maxd0 from gridmaxwaterdepth as to have "
+        "a default shape.")
     def_grid = None
     def_container = 'gridmaxwaterdepth.zip'
     def_name = 'dm1maxd0.asc'
-    log.debug("use %s as default grid (default shape) from %s" % (def_name, def_container))
+    log.debug(
+        "use %s as default grid (default shape) from %s"
+        % (def_name, def_container))
 
     try:
         ref_result = scenario.result_set.filter(resulttype__id=1)[0].resultloc
-        if os.stat(os.path.join(destination_dir, ref_result))[stat.ST_SIZE] == 0:
+        if os.stat(
+            os.path.join(destination_dir, ref_result))[stat.ST_SIZE] == 0:
             log.warning("input file '%s' is empty" % ref_result)
         else:
-            input_file = zipfile.ZipFile(os.path.join(destination_dir, ref_result))
+            input_file = zipfile.ZipFile(
+                os.path.join(destination_dir, ref_result))
             def_grid = nens.asc.AscGrid(data=input_file, name=def_name)
     except Scenario.DoesNotExist:
         log.warning("Reference grid does not exist")
@@ -106,27 +122,36 @@ def common_generation(scenario_id, tmp_dir, source_programs):
     for result in results:
         log.debug("examining results record: '%s'" % str(result))
 
-        if os.stat(os.path.join(destination_dir, result.resultloc))[stat.ST_SIZE] == 0:
+        if os.stat(
+            os.path.join(
+                destination_dir, result.resultloc))[stat.ST_SIZE] == 0:
             log.warning("input file '%s' is empty" % result.resultloc)
             continue
 
         log.debug("make sure destination directory exists")
-        if not os.path.isdir(os.path.join(abs_output_dir_name, result.resulttype.name)):
-            os.makedirs(os.path.join(abs_output_dir_name, result.resulttype.name))
+        if not os.path.isdir(
+            os.path.join(abs_output_dir_name, result.resulttype.name)):
+            os.makedirs(
+                os.path.join(abs_output_dir_name, result.resulttype.name))
 
         cm_location = os.path.join(source_dir, "colormappings")
 
-        if result.resulttype.id == 0 and scenario.main_project.color_mapping_name not in [None, ""]:
+        if (result.resulttype.id == 0 and
+            scenario.main_project.color_mapping_name not in [None, ""]):
             color_mapping_name = scenario.main_project.color_mapping_name
         else:
             color_mapping_name = result.resulttype.color_mapping_name
 
-        log.info("copy colormappings from source '%s' into destination '%s' directory" % (
-                cm_location, os.path.join(abs_output_dir_name, result.resulttype.name)))
+        log.info(
+            ("copy colormappings from source '%s' into "
+             "destination '%s' directory")
+            % (cm_location,
+               os.path.join(abs_output_dir_name, result.resulttype.name)))
 
         cm_content = file(os.path.join(cm_location, color_mapping_name)).read()
 
-        colormapping_abs = os.path.join(abs_output_dir_name, result.resulttype.name, 'colormapping.csv')
+        colormapping_abs = os.path.join(
+            abs_output_dir_name, result.resulttype.name, 'colormapping.csv')
         output = file(colormapping_abs, 'w')
         output.write(cm_content)
         output.close()
@@ -135,49 +160,67 @@ def common_generation(scenario_id, tmp_dir, source_programs):
         if not os.path.isdir(os.path.join(tmp_dir, result.resulttype.name)):
             os.makedirs(os.path.join(tmp_dir, result.resulttype.name))
         else:
-            [os.unlink(os.path.join(tmp_dir, result.resulttype.name, name))
-             for name in os.listdir(os.path.join(tmp_dir, result.resulttype.name))
-             if os.path.isfile(os.path.join(tmp_dir, result.resulttype.name, name))]
+            for name in os.listdir(
+                os.path.join(tmp_dir, result.resulttype.name)):
+                if os.path.isfile(
+                    os.path.join(tmp_dir, result.resulttype.name, name)):
+                    os.unlink(
+                        os.path.join(tmp_dir, result.resulttype.name, name))
 
-        log.debug("unpack all files into the temporary directory from file %s." % result.resultloc)
+        log.debug(
+            "unpack all files into the temporary directory from file %s."
+            % result.resultloc)
         if result.resultloc[-3:] == 'zip':
-            log.debug("open zipfile %s" % (os.path.join(destination_dir, result.resultloc)))
-            input_file = zipfile.ZipFile(os.path.join(destination_dir, result.resultloc))
+            log.debug(
+                "open zipfile %s"
+                % (os.path.join(destination_dir, result.resultloc)))
+            input_file = zipfile.ZipFile(
+                os.path.join(destination_dir, result.resultloc))
             for name in input_file.namelist():
                 content = input_file.read(name)
-                temp = file(os.path.join(tmp_dir, result.resulttype.name, name), "wb")
+                temp = file(
+                    os.path.join(tmp_dir, result.resulttype.name, name), "wb")
                 temp.write(content)
                 temp.close()
         else:
             log.warning("source file is not a zipfile.")
             input_file = file(os.path.join(destination_dir, result.resultloc))
-            temp = file(os.path.join(tmp_dir, result.resulttype.name, 'test.asc'), "wb")
+            temp = file(
+                os.path.join(tmp_dir, result.resulttype.name, 'test.asc'),
+                "wb")
             temp.write(input_file.read())
             temp.close()
             input_file.close()
 
         # invoke part that will generate the png(s) based on the asc/inc files.
-        infile_asc = compute_png_files(result, abs_output_dir_name, os.path.join(tmp_dir, result.resulttype.name + '/'),
-                                       def_grid, colormapping_abs)
+        infile_asc = compute_png_files(
+            result, abs_output_dir_name,
+            os.path.join(tmp_dir, result.resulttype.name + '/'),
+            def_grid, colormapping_abs)
 
         log.debug("empty temporary directory")
-        [os.unlink(os.path.join(tmp_dir, result.resulttype.name,  name))
-         for name in os.listdir(os.path.join(tmp_dir, result.resulttype.name))
-         if os.path.isfile(os.path.join(tmp_dir, result.resulttype.name, name))]
+        for name in os.listdir(os.path.join(tmp_dir, result.resulttype.name)):
+            if os.path.isfile(
+                os.path.join(tmp_dir, result.resulttype.name, name)):
+                os.unlink(os.path.join(tmp_dir, result.resulttype.name,  name))
         log.debug("remove temporary directory")
         os.rmdir(os.path.join(tmp_dir, result.resulttype.name))
 
         log.debug("Set pngloc to result:")
-        log.debug("rel_output_dir_name: {0}, result.resulttype.name: {1}, infile_asc: {2}.".format(
-                rel_output_dir_name, result.resulttype.name, infile_asc))
-        result.resultpngloc = os.path.join(rel_output_dir_name, result.resulttype.name, infile_asc + ".png")
+        log.debug(
+            ("rel_output_dir_name: {0}, result.resulttype.name: {1},"
+             " infile_asc: {2}.")
+            .format(rel_output_dir_name, result.resulttype.name, infile_asc))
+        result.resultpngloc = os.path.join(
+            rel_output_dir_name, result.resulttype.name, infile_asc + ".png")
 
         result.save()
 
     return True
 
 
-def compute_png_files(result, abs_output_dir_name, tmp_dir, def_grid, colormapping_abs):
+def compute_png_files(
+    result, abs_output_dir_name, tmp_dir, def_grid, colormapping_abs):
     """subroutine isolating the png computing logic.
 
     it assumes all data is in place.
@@ -190,13 +233,15 @@ def compute_png_files(result, abs_output_dir_name, tmp_dir, def_grid, colormappi
     returns the common part of the name of the images produced.
     """
 
-    import re, os, nens.asc
-    log.info("will produce png files out of %s, using '%s' color mapping." % (result.resulttype.content_names_re, colormapping_abs))
+    log.info(
+        "will produce png files out of %s, using '%s' color mapping."
+        % (result.resulttype.content_names_re, colormapping_abs))
     log.debug("temporary directory: %s" % tmp_dir)
     candidates = os.listdir(tmp_dir)
     log.debug("content of temporary directory: %s" % candidates)
 
-    log.debug('look for files which match "%s"' % result.resulttype.content_names_re)
+    log.debug(
+        'look for files which match "%s"' % result.resulttype.content_names_re)
     accepted_files_re = re.compile(result.resulttype.content_names_re)
 
     log.debug('files (candidates for match) are: %s' % str(candidates))
@@ -224,20 +269,27 @@ def compute_png_files(result, abs_output_dir_name, tmp_dir, def_grid, colormappi
     input_files.sort()
     log.info("produce images from %s." % input_files)
 
-    log.debug("there are %s input files, basename for output files is '%s'" % (len(input_files), basename))
+    log.debug(
+        "there are %s input files, basename for output files is '%s'"
+        % (len(input_files), basename))
 
     log.debug("create the list of AscGrid objects.")
     only_one_grid = len(input_files) == 1 and input_files[0].endswith('.asc')
-    import itertools
+
     grids = itertools.chain()
 
     for item in input_files:
-        grids = itertools.chain(grids, (grid for hour, grid in nens.asc.AscGrid.xlistFromStream(tmp_dir + item, oneperhour=True, default_grid=def_grid)))
+        grids = itertools.chain(
+            grids,
+            (grid for hour, grid in
+             nens.asc.AscGrid.xlistFromStream(
+                    tmp_dir + item, oneperhour=True, default_grid=def_grid)))
 
     log.debug("open the ColorMapping %s." % (colormapping_abs))
     colors = nens.asc.ColorMapping(file(colormapping_abs))
 
-    log.debug("get the geometry properties from the first grid to build the pgw file")
+    log.debug(
+       "get the geometry properties from the first grid to build the pgw file")
     pgw_data = {}
     pgw_content_format = """\
 %(cellsize_x)s
@@ -260,21 +312,31 @@ def compute_png_files(result, abs_output_dir_name, tmp_dir, def_grid, colormappi
             pgw_data['cellsize_x'] = item.cellsize
             pgw_data['cellsize_y'] = item.cellsize
             pgw_data['upper_left_corner_x'] = item.xllcorner
-            pgw_data['upper_left_corner_y'] = item.yllcorner + item.nrows * item.cellsize
+            pgw_data['upper_left_corner_y'] = (
+                item.yllcorner + item.nrows * item.cellsize)
             log.debug("pgw_data: %s" % pgw_data)
             pgw_file = file(full_name_no_extension + '.pgw', 'w')
             pgw_file.write(pgw_content_format % pgw_data)
             pgw_file.close()
 
         if only_one_grid:
-            save_png_and_pgw(grids.next(), os.path.join(abs_output_dir_name, result.resulttype.name, basename))
+            save_png_and_pgw(
+                grids.next(),
+                os.path.join(
+                    abs_output_dir_name,
+                    result.resulttype.name, basename))
             log.debug("saved just one file.")
         else:
             resulttype_name = result.resulttype.name
             log.debug("close db connection to avoid an idle process.")
             db.close_connection()
             for i, item in enumerate(grids):
-                save_png_and_pgw(item, os.path.join(abs_output_dir_name, resulttype_name, basename + '%04d' % i))
+                save_png_and_pgw(
+                    item,
+                    os.path.join(
+                        abs_output_dir_name,
+                        resulttype_name,
+                        basename + '%04d' % i))
             result.firstnr = 0
             result.lastnr = i
             log.debug("saved %d files." % (i + 1))

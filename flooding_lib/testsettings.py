@@ -1,5 +1,6 @@
 DEBUG = True
 TEMPLATE_DEBUG = True
+TMP_DIR = '/tmp/'
 
 DATABASES = {
     'default': {

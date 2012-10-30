@@ -4,7 +4,14 @@ Changelog of flooding-lib
 2.26 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Added a util/flshinc module to work with fls_h.inc files
+
+- Adapt calculate_scenario_statistics task so that it also calculates
+  the inundations stats per hour, based on fls_h.inc, and saves the
+  results as JSON
+
+- Added a view to show these results, which is linked from the breach
+  info page.
 
 
 2.25 (2012-10-30)

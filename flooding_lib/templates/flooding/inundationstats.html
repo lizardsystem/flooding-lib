@@ -1,0 +1,35 @@
+{% extends "lizard/base.html" %}
+{% load i18n %}
+{% load human %}
+
+{% block title %}
+Flooding: {% trans 'Inundation statistics' %}
+{% endblock %}
+
+{% block content %}
+<h1>Scenario {{ view.scenario_id }}: {{ view.scenario }}</h1>
+
+<div style="overflow:auto; max-width: 640px">
+<p>Deze statistieken zijn gegenereerd uit de 'fls_h.inc' import. De
+getallen in deze files zijn bedoeld voor animatie, en zijn grof
+ingedeeld in klassen. De statistieken die hieruit gegenereerd worden
+kunnen dus alleen maar een indicatie zijn.</p>
+
+  <table>
+    <thead>
+      <tr>
+        <td>Uur</td>
+        <td>Overstroomd gebied (m2)</td>
+        <td>Inundatievolume (m3)</td>
+      </tr>
+    </thead>
+    {% for hour in view.inundation_stats %}
+    <tr>
+      <td>{{ hour.timestamp }}</td>
+      <td>{{ hour.inundated_area|readable }}</td>
+      <td>{{ hour.inundation_volume|readable }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}
