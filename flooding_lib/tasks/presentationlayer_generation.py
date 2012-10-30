@@ -693,11 +693,14 @@ def get_or_create_pngserie_with_defaultlegend_from_old_results(scenario, pt):
         try:
             log.info(result.resultpngloc)
             dest_dir = Setting.objects.get(key='DESTINATION_DIR').value
+            # Make sure every directory separator is consistent
+            dest_dir = dest_dir.replace('\\', os.sep).replace('/', os.sep)
             presentation_dir = Setting.objects.get(
                 key='PRESENTATION_DIR').value
+            presentation_dir = presentation_dir.replace('\\', os.sep).replace('/', os.sep)
             if result.resultpngloc is not None:
                 log.debug('read grid information from pgw en png file!')
-                resultpngloc = result.resultpngloc.replace('\\', '/')
+                resultpngloc = result.resultpngloc.replace('\\', os.sep)
                 png_name = os.path.join(dest_dir, resultpngloc)
 
                 if result.resulttype.overlaytype == 'ANIMATEDMAPOVERLAY':
@@ -706,6 +709,8 @@ def get_or_create_pngserie_with_defaultlegend_from_old_results(scenario, pt):
                     png_name = png_name.replace('####', numberstring)
 
                 pgw_name = png_name.replace(".png", ".pgw")
+                print 'png name: %s' % png_name
+
                 pgwfile = open(pgw_name, 'r')
                 pgwfields = pgwfile.readlines()
                 pgwfile.close()
@@ -790,7 +795,7 @@ def register_task_processing(scenario, tasktype, is_successful):
     """
     Update the scenario's status.
     """
-    from lizard_worker.perform_task import (
+    from flooding_lib.tasks.perform_task import (
         TASK_SOBEK_PRESENTATION_GENERATION_155,
         TASK_HISSSM_PRESENTATION_GENERATION_185,)
     if tasktype == TASK_SOBEK_PRESENTATION_GENERATION_155:
@@ -814,7 +819,9 @@ def perform_presentation_generation(scenario_id, tasktype_id):
         active=True, custom_indicator__name='flooding_result').exclude(
         code='damage_embankments')
 
+    print '*** presentation types flooding_result'
     for pt in presentation_types:
+        print 'pt: %s' % str(pt)
         if pt.geo_type == PresentationType.GEO_TYPE_GRID:
             log.debug('type grid')
             get_or_create_pngserie_with_defaultlegend_from_old_results(

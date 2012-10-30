@@ -5,6 +5,7 @@ import datetime
 import logging
 import operator
 import os
+import shutil
 
 from treebeard.al_tree import AL_Node  # Adjacent list implementation
 
@@ -16,6 +17,7 @@ from django.contrib.gis.db import models
 from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext as _
 
+from flooding_base.models import Setting
 from flooding_presentation.models import PresentationLayer, PresentationType
 from flooding_lib.tools.approvaltool.models import ApprovalObject
 from flooding_lib.tools.approvaltool.models import ApprovalObjectType
@@ -153,6 +155,91 @@ class SobekModel(models.Model):
         summary += (u'* %s: %s' %
                     (_('version'), self.model_version))
         return summary
+
+
+class ThreediModel(models.Model):
+    """
+    A 3Di model.
+
+    It is essentially a folder with *.asc, optionally *.rgb, *.dat
+    files. All referenced from the mdu file.
+    """
+    name = models.CharField(max_length=80)
+    scenario_zip_filename = models.TextField(
+        help_text='full path start with / or folder from Settings.SOURCE_DIR, must contain mdu file')
+    mdu_filename = models.TextField(help_text='base filename of mdu file')
+
+    def __unicode__(self):
+        return self.name
+
+
+class ThreediCalculation(models.Model):
+    """
+    An instance of a ThreediModel with own environment and variables.
+
+    The 3Di calculation task gets a ThreediCalculation id as input.
+
+    0) Create this model
+    1) On local machine, copy ThreediModel zip
+    2) Unpack zip into temp dir
+    3) (TODO) alter .mdu and/or other files
+    4) Do the math.
+    """
+    STATUS_CREATED = 1
+    STATUS_NETCDF_CREATED = 2  # Task 210
+    STATUS_IMAGES_CREATED = 3  # Task 220
+
+    STATUS_CHOICES = (
+        (STATUS_CREATED, 'created'),
+        (STATUS_NETCDF_CREATED, 'netcdf created'),
+        (STATUS_IMAGES_CREATED, 'images created, finished.'),
+        )
+
+    threedi_model = models.ForeignKey('ThreediModel')
+    scenario = models.ForeignKey('Scenario')
+    status = models.IntegerField(choices=STATUS_CHOICES, default=STATUS_CREATED)
+
+    def __unicode__(self):
+        return '%s - %s' % (self.threedi_model, self.scenario)
+
+    @property
+    def full_model_path(self):
+        #/p-flod-fs-00-d1.external-nens.local/flod-share/Flooding/filedatabase/
+        if self.threedi_model.scenario_zip_filename[0] == '/':
+            return self.threedi_model.scenario_zip_filename  # = full path
+        else:
+            path = Setting.objects.get(key='SOURCE_DIR').value
+            path = path.replace('\\', '/')  # Unix path
+            model_path = os.path.join(path, self.threedi_model.scenario_zip_filename)
+            return model_path
+
+    @property
+    def full_base_path(self):
+        """This path contains all kinds of files depending on scenario"""
+        return self.scenario.get_abs_destdir().replace('\\', '/')
+
+    @property
+    def full_result_path(self):
+        """This path will contain "scenario.zip" and "subgrid_map.nc" after step 3 """
+        return os.path.join(self.full_base_path, 'threedi')
+
+    # def setup(self, remove_old_if_existing=False):
+    #     """step 1)
+    #     can delete destination if it exists, so use with caution
+    #     """
+    #     src = self.threedi_model.root_folder
+    #     dst = self.model_path
+    #     print 'Setup 3Di models: %s -> %s' % (src, dst)
+    #     if os.path.exists(dst) and remove_old_if_existing:
+    #         print 'Warning: removing old dir before creating new'
+    #         os.removedirs(dst)
+    #     print 'copying...'
+    #     shutil.copytree(src, dst)
+
+    # @property
+    # def mdu_full_path(self):
+    #     """Run setup first, then this file should be available"""
+    #     return os.path.join(self.model_path, self.threedi_model.mdu_filename)
 
 
 class CutoffLocation(models.Model):
@@ -1347,6 +1434,32 @@ class Scenario(models.Model):
             return Result.objects.get(scenario=self, resulttype=resulttype)
         except Result.DoesNotExist:
             return Result(scenario=self, resulttype=resulttype)
+
+    def get_abs_destdir(self):
+        """
+        The results destination dir.
+
+        Used by 3Di stuff, task 210, 220.
+
+        Destilled from presentationlayer_generation.py /
+        calculaterisespeed_132.py
+        """
+        # Something like
+        # \\servername\flod-share\Flooding\resultaten-staging
+        dst_dir = Setting.objects.get(key='DESTINATION_DIR').value
+        dst_dir.replace('\\', '/')  # Semi convert windows share name to unix name.
+        # Plus something like "Dijkring xx/1234"
+        output_dir_name = os.path.join(dst_dir, self.get_rel_destdir())
+        return output_dir_name
+
+    # def get_abs_srcdir(self):
+    #     """
+    #     The source dir.
+    #     Used by 3Di stuff, task 210, 220.
+    #     """
+    #     # Something like
+    #     # \\servername\flod-share\Flooding\filedatabase
+    #     return Setting.objects.get(key='SOURCE_DIR').value
 
 
 class ScenarioProject(models.Model):
