@@ -56,7 +56,7 @@ Instructions to install task machine and set up environment:
   DESTINATION_DIR are accessible.
 
 - In the django settings, set THREEDI_DEFAULT_FILES_PATH
-  (point to /../flooding-lib/flooding_lib/threedi)
+  (point to /../threedilib/threedi)
 
 - In the django settings, set THREEDI_BIN_PATH
   (point to /home/buildout/3di-grid/bin/subgridf90)
