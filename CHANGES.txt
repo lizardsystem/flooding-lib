@@ -1,8 +1,8 @@
 Changelog of flooding-lib
 ===================================================
 
-2.24.3 (unreleased)
--------------------
+2.25 (2012-10-30)
+-----------------
 
 - Added 3Di tasks 210 and 220. Task 210 runs a 3Di scenario and
   produces a .nc file. Task 220 takes the .nc file and generates
