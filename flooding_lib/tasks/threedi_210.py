@@ -10,6 +10,8 @@ from flooding_lib.util import files
 import os
 import shutil
 
+log = logging.getLogger(__name__)
+
 
 def run_threedi_task(some_id, some_type):
     """
@@ -48,6 +50,7 @@ def run_threedi_task(some_id, some_type):
         threedi_calculation, threedi_calculation.scenario.id)
 
     print 'Unzipping...'
+    log.info('unzipping...')
     with files.unzipped(threedi_calculation.full_model_path) as files_in_zip:
         tmp_path = os.path.dirname(files_in_zip[0])  # Assume no subdirs or whatsoever
         mdu_full_path = os.path.join(tmp_path, threedi_calculation.threedi_model.mdu_filename)
