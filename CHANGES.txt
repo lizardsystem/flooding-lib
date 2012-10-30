@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.26 (unreleased)
+2.26 (2012-10-30)
 -----------------
 
 - Added a util/flshinc module to work with fls_h.inc files
