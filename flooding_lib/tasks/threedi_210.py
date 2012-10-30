@@ -4,6 +4,7 @@
 from threedilib.threedi import setup_and_run_3di
 from flooding_lib.models import ThreediCalculation
 from flooding_lib.models import Scenario
+from django.conf import settings
 
 from flooding_lib.util import files
 import os
@@ -19,6 +20,18 @@ def run_threedi_task(some_id, some_type):
     if some_type = 'threedi_calculation_id', then some_id is the
     threedi_calculation_id, otherwise it is the scenario_id.
     """
+
+    if hasattr(settings, 'THREEDI_DEFAULT_FILES_PATH'):
+        default_source_files_path = settings.THREEDI_DEFAULT_FILES_PATH
+    else:
+        default_source_files_path = "/home/jack/3di-subgrid/bin"
+        print 'No THREEDI_DEFAULT_FILES_PATH in django settings. Taking default %s' % default_source_files_path
+
+    if hasattr(settings, 'THREEDI_BIN_PATH'):
+        subgrid_exe_path = settings.THREEDI_BIN_PATH
+    else:
+        subgrid_exe_path = "/home/jack/3di-subgrid/bin/subgridf90"
+        print 'No THREEDI_BIN_PATH in django settings. Taking default %s' % subgrid_exe_path
 
     if some_type == 'threedi_calculation_id':
         threedi_calculation_id = some_id
@@ -40,7 +53,11 @@ def run_threedi_task(some_id, some_type):
         mdu_full_path = os.path.join(tmp_path, threedi_calculation.threedi_model.mdu_filename)
         #print files_in_zip
         #nc_filename = setup_and_run_3di(mdu_full_path, skip_if_results_available=False)
-        nc_filename = setup_and_run_3di(mdu_full_path)
+        nc_filename = setup_and_run_3di(
+            mdu_full_path,
+            skip_if_results_available=True,
+            source_files_dir=default_source_files_path,
+            subgrid_exe=subgrid_exe_path)
 
         result_folder = threedi_calculation.full_result_path
         #print result_folder

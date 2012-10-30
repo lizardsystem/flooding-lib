@@ -47,19 +47,35 @@ Task 200
 Task 210/220 threedi
 ====================
 
+Instructions to install task machine and set up environment:
+
 - Install subgridf90, see:
   http://publicwiki.deltares.nl/display/3Diusers/3Di-Subgrid+building+on+Linux
 
 - Make sure the folders in the flooding_base.Settings SOURCE_DIR,
   DESTINATION_DIR are accessible.
 
+- In the django settings, set THREEDI_DEFAULT_FILES_PATH
+  (point to /../flooding-lib/flooding_lib/threedi)
+
+- In the django settings, set THREEDI_BIN_PATH
+  (point to /home/buildout/3di-grid/bin/subgridf90)
+
 - TODO: the location of subgridf90 is now static (in threedilib)
 
-- Add task 210, 220 to workflow 1 or 2. (old: Add workflow 4 with at
-  least 210 -> 220 -> 185 (?))
+- Add workflow 4 with at least 210 -> 220 -> 185
 
-- To test you can run: $ bin/django test_task_210 1 where 1 is the id
-  of ThreediCalculation.
+- Add queues 210 and 220 to broker.
+
+- To test you can run:
+
+  $ bin/django test_task_210 1
+
+where 1 is the id of ThreediCalculation.
+
+  $ bin/django test_workflow_4 10973
+
+Start workflow 4 for scenario 10973.
 
 
 Development installation
