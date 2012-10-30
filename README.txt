@@ -43,6 +43,10 @@ Task 200
 
     $ bin/django lw_task_worker --task_code 200 --log_level DEBUG --worker_nr 1
 
+- Problems can arise when installing netcdf4. Try:
+
+    $ sudo apt-get install libhdf5-serial-dev libnetcdf-dev
+
 
 Task 210/220 threedi
 ====================
