@@ -31,13 +31,11 @@ WATERDEPTH_ANIM_SOBEK_RESULT_ID = 15
 
 
 def result_zip(scenario, resulttype_id):
-    print(scenario.get_rel_destdir())
     destination_dir = basemodels.Setting.objects.get(
         key='DESTINATION_DIR').value
     destination_dir = destination_dir.replace('\\', '/')
     result = scenario.result_set.get(resulttype__id=resulttype_id)
     resultloc = result.resultloc
-    print(result.id)
     result_zip = os.path.join(destination_dir, resultloc)
 
     return result_zip
@@ -160,7 +158,6 @@ def process_flsh(flsh_path):
             })
 
     return json.dumps(calculated_inundations)
-        'inundation_statistics.json'
 
 
 def save_inundation_json(scenario, j):
@@ -190,4 +187,4 @@ def save_inundation_json(scenario, j):
 
     result.resultloc = resultloc
     result.save()
-    print(result.id)
+
