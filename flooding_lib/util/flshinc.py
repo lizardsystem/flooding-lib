@@ -175,7 +175,7 @@ class Flsh(object):
                         return
 
                 # Start of a new timestamp
-                timestamp, _, class_column = line
+                timestamp, _, class_column = line[:3]
                 current_timestamp = float(timestamp)
                 class_column = int(class_column) - 1
                 yield_this_grid = (

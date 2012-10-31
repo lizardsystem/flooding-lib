@@ -35,7 +35,7 @@ def result_zip(scenario, resulttype_id):
         key='DESTINATION_DIR').value
     destination_dir = destination_dir.replace('\\', '/')
     result = scenario.result_set.get(resulttype__id=resulttype_id)
-    resultloc = result.resultloc
+    resultloc = result.resultloc.replace('\\', '/')
     result_zip = os.path.join(destination_dir, resultloc)
 
     return result_zip
