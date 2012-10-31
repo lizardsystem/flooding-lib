@@ -52,8 +52,8 @@ def floats(f):
 
 
 def check(line, expected):
-    if line != expected:
-        raise ValueError("line {0} was expected to be {1}".
+    if line[:len(expected)] != expected:
+        raise ValueError("line {0} was expected to start with {1}".
                          format(line, expected))
 
 
@@ -95,19 +95,44 @@ class Flsh(object):
         self.f = self._open_path()
 
         # 1: dimensions
-        check(splitline(self.f), ['MAIN', 'DIMENSIONS', 'MMAX', 'NMAX'])
+        while True:
+            try:
+                check(
+                    splitline(self.f),
+                    ['MAIN', 'DIMENSIONS', 'MMAX', 'NMAX'])
+                break
+            except ValueError:
+                pass
+
         ncols, nrows = ints(self.f)
 #        logger.debug("ncols={0} nrows={1}".format(ncols, nrows))
 
         # 2: grid
-        check(splitline(self.f), ['GRID', 'DX', 'X0', 'Y0'])
-        dx, x0, y0 = floats(self.f)
+        while True:
+            try:
+                spl = splitline(self.f)
+                check(spl, ['GRID'])
+                break
+            except ValueError:
+                pass
+
+        grid = floats(self.f)
+        spl = spl[1:]
+        dx = grid[spl.index('DX')]
+        x0 = grid[spl.index('X0')]
+        y0 = grid[spl.index('Y0')]
+
 #        logger.debug("dx={0} x0={1} y0={2}".format(dx, x0, y0))
 
         # 3: classes
-        check(
-            splitline(self.f),
-            ['CLASSES', 'OF', 'INCREMENTAL', 'FILE', 'H', 'C', 'Z', 'U', 'V'])
+        while True:
+            try:
+                check(
+                    splitline(self.f),
+                    ['CLASSES', 'OF', 'INCREMENTAL', 'FILE'])
+                break
+            except ValueError:
+                pass
         classes = []
         line = splitline(self.f)
         while line != ['ENDCLASSES']:
@@ -225,12 +250,10 @@ def save_grid_to_image(grid, path, classes, colormap, geo_transform=None):
     scipy.misc.imsave(path, colorgrid)
 
     if path.endswith('.png') and geo_transform is not None:
-        pgw = path[:-4]+'.pgw'
+        pgw = path[:-4] + '.pgw'
         f = file(pgw, 'w')
         for gt in geo_transform:
             f.write("{0}\n".format(gt))
         f.close()
 
     print("{0} saved.".format(path))
-
-

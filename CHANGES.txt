@@ -4,7 +4,8 @@ Changelog of flooding-lib
 2.28 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Fix problems with util/flshinc. Apparently there is more variety in
+  the exact format of FLS files than I thought.
 
 
 2.27 (2012-10-31)

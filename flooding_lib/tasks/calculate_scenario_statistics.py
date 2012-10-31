@@ -156,6 +156,8 @@ def process_flsh(flsh_path):
             'inundation_volume': total_inundation_volume,
             'inundated_area': total_inundated_area
             })
+    flsh.f.close()
+    del flsh
 
     return json.dumps(calculated_inundations)
 
