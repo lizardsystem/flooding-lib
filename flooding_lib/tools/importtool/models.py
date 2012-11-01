@@ -832,6 +832,9 @@ class InputField(models.Model):
             except ValueError:
                 pass
 
+        if self.type == InputField.TYPE_BOOLEAN and for_viewing_only:
+            return "Ja" if value else "Nee"
+
         return unicode(value)
 
     def to_excel(self, value):
