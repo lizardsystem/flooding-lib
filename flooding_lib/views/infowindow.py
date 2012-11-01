@@ -157,10 +157,17 @@ def infowindow_information(scenario):
         # Only keep fields with a value
         header['fields'] = [f for f in header['fields'] if f.value_str]
 
-    # Add in scenario id under the 'scenario' header
+    # Hack in some extra fields that aren't in the importtool but
+    # belong to "the old way of doing things"
     for header in grouped_input_fields:
-        header['fields'] += extra_infowindow_information_fields(
+        extra_fields = extra_infowindow_information_fields(
             header['title'], scenario)
+        # Scenario fields (well, the scenario id) are added at the
+        # front, others at the end...
+        if header['title'] in ('Scenario', ugettext('Scenario')):
+            header['fields'][0:0] = extra_fields
+        else:
+            header['fields'] += extra_fields
 
     # Only keep headers with fields
     grouped_input_fields = [h for h in grouped_input_fields if h['fields']]
