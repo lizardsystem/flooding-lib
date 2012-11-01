@@ -4,7 +4,10 @@ Changelog of flooding-lib
 2.29 (unreleased)
 -----------------
 
-- Nothing changed yet.
+Fix three small issues in the scenario info window:
+- Ja/Nee instead of True/False
+- 'Extern Water' translates to 'Buitenwater'
+- List the scenarioid at the top of the fields under Scenario
 
 
 2.28 (2012-10-31)
