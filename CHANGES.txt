@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.29 (unreleased)
+2.29 (2012-11-01)
 -----------------
 
 Fix three small issues in the scenario info window:
