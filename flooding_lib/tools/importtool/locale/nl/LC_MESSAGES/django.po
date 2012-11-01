@@ -148,7 +148,7 @@ msgstr "Bres"
 
 #: models.py:627
 msgid "External Water"
-msgstr "Extern Water"
+msgstr "Buitenwater"
 
 #: models.py:628
 msgid "Model"
