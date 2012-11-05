@@ -4,7 +4,7 @@ Changelog of flooding-lib
 2.30 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Moved javascript code from export_new_index.html to screen_exports.js. 
 
 
 2.29 (2012-11-01)
