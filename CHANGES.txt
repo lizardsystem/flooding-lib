@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.30 (unreleased)
+2.30 (2012-11-12)
 -----------------
 
 - Added detailed map for task 220.
