@@ -1,6 +1,7 @@
 # Task 220: read netcdf (.nc) 3Di result file, output in .png files.
 
 from threedilib.threedi import post_process_3di
+from threedilib.threedi import post_process_detailed_3di
 from flooding_lib.models import ThreediCalculation
 from flooding_lib.models import Result
 from flooding_lib.models import ResultType
@@ -11,7 +12,7 @@ import tempfile
 import os
 
 
-def process_threedi_nc(some_id, some_type):
+def process_threedi_nc(some_id, some_type, detailed=True):
     """
     Read netcdf (.nc) 3Di result file, output in .png files.
 
@@ -61,7 +62,11 @@ def process_threedi_nc(some_id, some_type):
     with files.unzipped(full_path_zip) as files_in_zip:
         for filename in files_in_zip:
             if filename.endswith('subgrid_map.nc'):
-                num_steps = post_process_3di(filename, dst_basefilename)
+                print 'yup, subgrid_map.nc found, proceeding'
+                if detailed:
+                    num_steps = post_process_detailed_3di(filename, dst_basefilename)
+                else:
+                    num_steps = post_process_3di(filename, dst_basefilename)
             else:
                 print 'ignored file %s' % filename
 

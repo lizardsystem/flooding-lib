@@ -43,10 +43,6 @@ Task 200
 
     $ bin/django lw_task_worker --task_code 200 --log_level DEBUG --worker_nr 1
 
-- Problems can arise when installing netcdf4. Try:
-
-    $ sudo apt-get install libhdf5-serial-dev libnetcdf-dev
-
 
 Task 210/220 threedi
 ====================
@@ -80,6 +76,13 @@ where 1 is the id of ThreediCalculation.
   $ bin/django test_workflow_4 10973
 
 Start workflow 4 for scenario 10973.
+
+- Problems can arise when installing netcdf4. Try:
+
+    $ sudo apt-get install libhdf5-serial-dev libnetcdf-dev
+
+- Add ResultType 'threediwaterlevel_t' and PresentationType '1f)
+  anim. waterdiepte (3Di)' to the database.
 
 
 Development installation
