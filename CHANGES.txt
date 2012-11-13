@@ -20,9 +20,9 @@ Changelog of flooding-lib
 
 - Moved javascript code from export_new_index.html to screen_exports.js.
 
-- Added functionality to filter scenarios.
+- Added functionality to filter scenarios in exporttool.
 
-- Added extra fields to listgrids. 
+- Added extra fields to listgrids in exporttool. 
 
 
 2.29 (2012-11-01)
