@@ -73,8 +73,7 @@ isc.DataSource.create({
 });
 
 isc.ResultSet.create({
-    dataSource : "dsScenariosExport",
-    fetchMode : 'local'
+    dataSource : "dsScenariosExport"
 });
 
 var LoadScenariosForProject = function(projectId){
