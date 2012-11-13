@@ -35,6 +35,7 @@ from flooding_lib.views import get_externalwater_graph_session
 from flooding_lib.views import service_compose_scenario
 from flooding_lib.views import service_save_new_scenario
 from flooding_lib.views import service_select_strategy
+from flooding_lib.tools.importtool.models import InputField
 
 SPHERICAL_MERCATOR = (
     '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 ' +
@@ -364,6 +365,32 @@ def service_get_cutofflocations_from_scenario(
 
 @never_cache
 @receives_permission_manager
+def service_get_project_regions(
+    request, permission_manager, project_id,
+    permission=UserPermission.PERMISSION_SCENARIO_VIEW):
+    """Get all regions for a given project_id and given permission."""
+    project = Project.objects.filter(id=project_id)
+    regions = []
+    if project.exists():        
+        regionsets = project[0].regionsets.all()
+    
+        for regionset in regionsets:
+            if (permission_manager.check_regionset_permission(
+                    regionset, permission)):
+                regions.extend([r for r in regionset.get_all_regions()])
+                 
+        result_list = [{'id': r.id, 'name': str(r.name)} for r in regions]
+    else:
+        result_list = []
+    return HttpResponse(
+        simplejson.dumps(
+            {'identifier': 'id',
+             'label': 'name',
+             'items': result_list}), mimetype="application/json")
+
+
+@never_cache
+@receives_permission_manager
 def service_get_regions(
     request, permission_manager, regionset_id,
     permission=UserPermission.PERMISSION_SCENARIO_VIEW):
@@ -460,7 +487,9 @@ def service_get_scenarios_export_list(
     for displaying in the drag and drop window for the export tool.
     """
     project = get_object_or_404(Project, pk=project_id)
-
+    inputfield_calcmethod = InputField.objects.get(pk=45)
+    inputfield_statesecurity = InputField.objects.get(pk=34)
+    inputfield_shelflife = InputField.objects.get(pk=27)
     if not(permission_manager.check_project_permission(project, permission)):
         raise Http404
     scenarios_export_list = [
@@ -471,10 +500,16 @@ def service_get_scenarios_export_list(
             'breach_names': [br.name for br in s.breaches.all()],
             'region_ids': [br.region.id for br in s.breaches.all()],
             'region_names': [br.region.name for br in s.breaches.all()],
+            'extwname': [br.externalwater.name for br in s.breaches.all()],
+            'extwtype': [br.externalwater.get_type_display() for br in s.breaches.all()],
             'project_id': project.id,
             'project_name': project.name,
             'owner_id': s.owner.id,
-            'owner_name': s.owner.username}
+            'owner_name': s.owner.username,
+            'calcmethod': s.string_value_for_inputfield(inputfield_calcmethod),
+            'statesecurity': s.string_value_for_inputfield(inputfield_statesecurity),
+            'shelflife': s.string_value_for_inputfield(inputfield_shelflife),
+            'extwrepeattime': [sbr.extwrepeattime for sbr in s.scenariobreach_set.all()]}
         for s in project.all_scenarios()]
     return HttpResponse(
         simplejson.dumps(scenarios_export_list), mimetype="application/json")
@@ -1416,6 +1451,10 @@ def service(request):
             regionset_id = query.get('regionset_id')
             return service_get_regions(
                 request, regionset_id, permission=permission)
+        elif action_name == 'get_project_regions':
+            project_id = query.get('project_id')
+            return service_get_project_regions(
+                request, project_id, permission=permission)
         elif action_name == 'get_region_maps':
             region_id = query.get('region_id', None)
             return service_get_region_maps(request, region_id)

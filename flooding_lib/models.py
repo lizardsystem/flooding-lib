@@ -1344,6 +1344,18 @@ class Scenario(models.Model):
             return find_imported_value(
                 inputfield, self.gather_data_objects())
 
+    def string_value_for_inputfield(self, inputfield):
+        """Retrieve a value for inputfield from ExtraScenarioInfo model,
+        if the value is an integer retrieve the value from InputField.
+        """
+        value = self.value_for_inputfield(inputfield)
+        if isinstance(value, int):
+            try:
+                return inputfield.parsed_options[value]
+            except:
+                return value
+        return value
+
     def set_value_for_inputfield(self, inputfield, value_object):
         """Given an inputfield and a value object, actually set that
         value on this scenario and save it."""

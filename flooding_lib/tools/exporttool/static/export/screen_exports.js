@@ -41,16 +41,18 @@ isc.DataSource.create({
     dataFormat: "json",
     dataURL: locationFloodingData,
     transformRequest: function (dsRequest) {
+	alert("transform grid");
 	if (dsRequest.operationType == "fetch") {
 	    var params = {action : 'get_scenarios_export_list'};
 	    // combine paging parameters with criteria
 	    return isc.addProperties({}, dsRequest.data, params);
 	}
     },
-    autoFetchData:false,
+    autoFetchData:true,
     autoDraw:false,
+    //clientOnly: false,
     fields:[
-	{name:"scenario_id", primaryKey:true, hidden:true, type:"int"},
+	{name:"scenario_id", primaryKey:true, hidden:false, type:"int"},
 	{name:"scenario_name", hidden: false, type:"text"},
 	{name:"breach_ids", hidden: false, type:"text"},
 	{name:"breach_names", hidden: false, type:"text"},
@@ -59,23 +61,38 @@ isc.DataSource.create({
 	{name:"project_id", hidden: false, type:"int"},
 	{name:"project_name", hidden: false, type:"text"},
 	{name:"owner_id", hidden: false, type:"int"},
-	{name:"owner_name", hidden: false, type:"text"}
+	{name:"owner_name", hidden: false, type:"text"},
+	{name:"extwrepeattime", type:"text"},
+	{name:"extwname", type:"text"},
+	{name:"extwtype", type:"text"},
+	{name:"calcmethod", type:"text"},
+	{name: "statesecurity", type: "text"},
+        {name: "shelflife", type: "text"},
+	{name: "_visible", hidden: true, type: "text"}
     ]
 });
 
-LoadScenariosForProject = function(projectId){
+isc.ResultSet.create({
+    dataSource : "dsScenariosExport",
+    fetchMode : 'local'
+});
+
+var LoadScenariosForProject = function(projectId){
     dsScenariosExport.transformRequest= function (dsRequest) {
-	if (dsRequest.operationType == "fetch") {
-	    var params = {action : 'get_scenarios_export_list', project_id: projectId};
-	    // combine paging parameters with criteria
-	    return isc.addProperties({}, dsRequest.data, params);
-	}
+    	if (dsRequest.operationType == "fetch") {
+    	    var params = {action : 'get_scenarios_export_list', project_id: projectId};
+    	    // combine paging parameters with criteria
+    	    return isc.addProperties({}, dsRequest.data, params);
+    	}
     };
 
-    dsScenariosExport.fetchData(null, function(response, data, request){
-	scenariosAllListGrid.setData(data);
+    dsScenariosExport.fetchData({}, function(response, data, request){
+	// call fetchData on list grid to 
+	// prepare the local store for filtering
+    	scenariosAllListGrid.setData(data);	
+    	scenariosAllListGrid.fetchData();
     });
-}
+};
 
 /***
 Callback function for form.
@@ -134,7 +151,8 @@ isc.defineClass("ScenariosListGrid", "ListGrid").addProperties({
     showHeader:true,
     leaveScrollbarGap:false,
     dataproperties: {
-	useClientFiltering: true
+    	useClientFiltering: true,
+    	//useClientSorting: true
     }
 });
 
@@ -144,27 +162,17 @@ isc.DynamicForm.create({
     height: 48,
     width: 250,
     overflow:"visible",
-    fields: [
-	{name: "projectField",
+    fields: [{
+	name: "projectField",
 	optionDataSource: dsProjects,
 	type: "select",
 	emptyDisplayValue: "Selecteer project",
 	valueField:"id",
 	title: "Project",
 	showTitle: false,
-	change: "LoadScenariosForProject(value)",
-	displayField:"name"},
-    ],
-    autodraw: false
-});
-
-dsProjects.fetchData(null, function(response, data, request){
-    if (data.length == 0){
-	alert("Er zijn geen projecten waar u rechten voor hebt om ze te zien.");
-    }
-    else {
-	projectSelector.setValueMap(data);
-    }
+	change: "LoadScenariosForProject(value);",
+	displayField:"name"}],
+    autodraw: true
 });
 
 /*** Create UI elements***/
@@ -184,24 +192,75 @@ isc.ScenariosListGrid.create({
     canReorderRecords: true,
     dragDataAction: "move",
     overflow:"visible",
+    dataSource: dsScenariosExport,
+    useClientFiltering: true,
+    useClientSorting: true,
+    showFilterEditor:true,
+    autoFetchData: false,
     fields:[
-	    {name: "scenario_name", title: "Scenario naam", type: "text"},
-	    {name: "region_names", title: "Regio's", type: "text"},
-	    {name: "breach_names", title: "Doorbraak locaties", type: "text"}
-	    ],
+	{name: "scenario_id", title:"ID", type:"int"},
+	{name: "scenario_name", title: "Scenario naam", type: "text"},
+	{name: "extwrepeattime", title: "Overschrijdings frequentie", type: "text"},
+	{name:"extwname", title: "Naam buitenwater", type:"text"},
+	{name:"extwtype", title: "Buitenwater type", type:"text"},
+	{name: "region_names", title: "Regio's", type: "text"},
+	{name: "breach_names", title: "Doorbraak locaties", type: "text"},
+	{name: "calcmethod", title: "Berekenigns methode", type: "text"},
+	{name: "statesecurity", title: "Standzekerheid kerineng", type: "text"},
+        {name: "shelflife", title: "Houdbaarheid scenario", type: "text"},
+	{name: "_visible", title: "_Visible", type: "text", enabled: false, showIf: "false"}
+    ],
     emptyMessage:"<br><br>Geen scenario's beschikbaar voor dit project."
 });
+
+var copyToExportGrid = function(){
+    //Copy selected record to export listgrid
+    //set the records to not-visible state.
+    var gridData = scenariosAllListGrid.data.allRows;
+    for (var i = 0; i < gridData.length; i++){
+	if (gridData[i]._visible != "false"){
+	    gridData[i]._visible = "true";
+	}
+    }
+    var selectedRows = scenariosAllListGrid.getSelection();
+    for (var i = 0; i < selectedRows.length; i++){
+    	selectedRows[i]._visible = "false";
+	scenariosToExportListGrid.data.add(selectedRows[i]);
+    }
+    scenariosAllListGrid.filterData({_visible: ""});
+    scenariosAllListGrid.filterData({_visible: "true"});
+}
+
+var copyToAllGrid = function() {
+    // Delete selected records from toexport listgrid
+    // set the records in 'all' listgrid to visible state
+    var gridData = scenariosAllListGrid.data.allRows;
+    var selectedRows = scenariosToExportListGrid.getSelection()
+    for (var i = 0; i < selectedRows.length; i++){
+	for (var j = 0; j < gridData.length; j++){
+	    if (gridData[j].scenario_id == selectedRows[i].scenario_id){
+		gridData[j]._visible = "true";
+	    }
+	}
+	scenariosToExportListGrid.data.remove(selectedRows[i]);
+    }
+    //refresh filter it removes all existing filters
+    scenariosAllListGrid.filterData({_visible: ""});
+    scenariosAllListGrid.filterData({_visible: "true"});
+}
 
 isc.Img.create({
     ID:"arrowRight",
     src: exporttool_config.root_url + "static_media/images/icons/arrow_right.png", width:32, height:32,overflow:"visible",
-    click:"scenariosToExportListGrid.transferSelectedData(scenariosAllListGrid)"
+    //click:"scenariosToExportListGrid.transferSelectedData(scenariosAllListGrid)"
+    click:"copyToExportGrid();"
 });
 
 isc.Img.create({
     ID:"arrowLeft",
     src: exporttool_config.root_url + "static_media/images/icons/arrow_left.png", width:32, height:32,overflow:"visible",
-    click:"scenariosAllListGrid.transferSelectedData(scenariosToExportListGrid)"
+    //click:"scenariosAllListGrid.transferSelectedData(scenariosToExportListGrid)"
+    click:"copyToAllGrid();"
 });
 
 isc.ScenariosListGrid.create({
@@ -211,10 +270,16 @@ isc.ScenariosListGrid.create({
     canReorderRecords: true,
     overflow:"visible",
     fields:[
-	{name: "project_name", title: "Project naam", type: "text"},
+	{name: "scenario_id", title:"ID", type:"int"},
 	{name: "scenario_name", title: "Scenario naam", type: "text"},
+	{name: "extwrepeattime", title: "Overschrijdings frequentie", type: "text"},
+	{name:"extwname", title: "Naam buitenwater", type:"text"},
+	{name:"extwtype", title: "Buitenwater type", type:"text"},
 	{name: "region_names", title: "Regio's", type: "text"},
-	{name: "breach_names", title: "Doorbraak locaties", type: "text"}
+	{name: "breach_names", title: "Doorbraak locaties", type: "text"},
+	{name: "calcmethod", title: "Berekenigns methode", type: "text"},
+	{name: "statesecurity", title: "Standzekerheid kerineng", type: "boolean"},
+        {name: "shelflife", title: "Houdbaarheid scenario", type: "text"}
     ],
     emptyMessage:"<br><br>Sleep scenario's hier heen voor export."
 });
