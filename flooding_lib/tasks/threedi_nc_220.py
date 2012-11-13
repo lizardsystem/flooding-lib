@@ -6,6 +6,7 @@ from flooding_lib.models import ThreediCalculation
 from flooding_lib.models import Result
 from flooding_lib.models import ResultType
 from flooding_lib.models import Scenario
+from flooding_lib.models import Region
 from flooding_lib.util import files
 
 import tempfile
@@ -32,16 +33,24 @@ def process_threedi_nc(some_id, some_type, detailed=True):
     folder.
     """
 
+    region = None
     if some_type == 'threedi_calculation_id':
+        # Basically only for testing
         threedi_calculation_id = some_id
         threedi_calculation = ThreediCalculation.objects.get(pk=threedi_calculation_id)
+        region = Region.objects.get(pk=120)
     else:
+        # Normal case
         scenario_id = some_id
         scenario = Scenario.objects.get(pk=scenario_id)
         if scenario.threedicalculation_set.count() == 0:
             print 'No ThreediCalculation for scenario %s, skipping' % scenario_id
             return
         threedi_calculation = scenario.threedicalculation_set.all()[0]  # Only 1 possible, right?
+        try:
+            region = scenario.breaches.all()[0].region
+        except:
+            print 'Something went wrong with getting region extent for scenario %s' % scenario
 
     #full_path = "/home/jack/git/sites/flooding/driedi/Vecht/subgrid_map.nc"
     full_path_zip = os.path.join(threedi_calculation.full_result_path, 'subgrid_map.zip')
@@ -55,16 +64,22 @@ def process_threedi_nc(some_id, some_type, detailed=True):
     except OSError:
         print 'warning: error creating folder %s, does it already exist?' % result_folder
 
-    dst_basefilename = os.path.join(result_folder, 'waterlevel_%04d')
+    dst_basefilename = os.path.join(result_folder, 'waterlevel_%04d_j')
+    dst_basefilename_detailed = os.path.join(result_folder, 'waterlevel_%04d')
 
     print 'input: %s' % full_path_zip
-    print 'output: %s' % dst_basefilename
+    if detailed:
+        print 'output (detailed): %s' % dst_basefilename_detailed
+    else:
+        print 'output: %s' % dst_basefilename
     with files.unzipped(full_path_zip) as files_in_zip:
         for filename in files_in_zip:
             if filename.endswith('subgrid_map.nc'):
                 print 'yup, subgrid_map.nc found, proceeding'
                 if detailed:
-                    num_steps = post_process_detailed_3di(filename, dst_basefilename)
+                    num_steps = post_process_detailed_3di(
+                        filename, dst_basefilename_detailed,
+                        region=region)
                 else:
                     num_steps = post_process_3di(filename, dst_basefilename)
             else:
