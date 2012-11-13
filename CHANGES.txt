@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.33 (unreleased)
+2.33 (2012-11-13)
 -----------------
 
 - Fixed filtering error on moving scenarios in exporttool.
