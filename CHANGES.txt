@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.35 (unreleased)
+2.35 (2012-11-21)
 -----------------
 
 Removed the special treatment of values '-999' and '999' in various
