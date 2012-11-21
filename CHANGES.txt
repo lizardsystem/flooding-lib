@@ -4,7 +4,8 @@ Changelog of flooding-lib
 2.34 (unreleased)
 -----------------
 
-- Nothing changed yet.
+In exporttool's ExportRun model, all three types of export should have
+default=True.
 
 
 2.33 (2012-11-13)
@@ -18,7 +19,7 @@ Changelog of flooding-lib
 
 - Added functionality to filter scenarios in exporttool.
 
-- Added extra fields to listgrids in exporttool. 
+- Added extra fields to listgrids in exporttool.
 
 
 2.31 (2012-11-13)

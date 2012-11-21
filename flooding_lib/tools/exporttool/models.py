@@ -48,11 +48,12 @@ class ExportRun(models.Model):
     description = models.TextField(blank=True)
     export_type = models.IntegerField(
         choices=EXPORT_TYPE_CHOICES,
-        default=EXPORT_TYPE_WATER_DEPTH_MAP)  # Obsolete: replaced with export_* below
+        default=EXPORT_TYPE_WATER_DEPTH_MAP)  # Obsolete: replaced
+                                              # with export_* below
 
     export_max_waterdepth = models.BooleanField(default=True)
-    export_max_flowvelocity = models.BooleanField(default=False)
-    export_possibly_flooded = models.BooleanField(default=False)
+    export_max_flowvelocity = models.BooleanField(default=True)
+    export_possibly_flooded = models.BooleanField(default=True)
 
     owner = models.ForeignKey(User)
     creation_date = models.DateTimeField(blank=True, null=True)

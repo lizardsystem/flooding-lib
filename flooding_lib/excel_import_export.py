@@ -640,6 +640,11 @@ def import_scenario_row(header, rownr, row, allowed_scenario_ids):
             value_object = inputfield.build_value_object(cell.value)
             scenario.set_value_for_inputfield(inputfield, value_object)
         except ValueError as ve:
+            if "{0}".format(ve) == "1.0":
+                logger.debug("Regel {0}: {1}.".format(rownr, ve))
+                logger.debug("Cell value: {0}".format(cell.value))
+                logger.debug("Inputfield: {0}".format(inputfield))
+                logger.debug("Header: {0}".format(header))
             errors.append("Regel {0}: {1}.".format(rownr, ve))
 
     return errors
