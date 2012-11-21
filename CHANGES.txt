@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.34 (unreleased)
+2.34 (2012-11-21)
 -----------------
 
 In exporttool's ExportRun model, all three types of export should have
