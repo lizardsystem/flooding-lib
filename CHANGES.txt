@@ -4,7 +4,8 @@ Changelog of flooding-lib
 2.35 (unreleased)
 -----------------
 
-- Nothing changed yet.
+Removed the special treatment of values '-999' and '999' in various
+database tables (mostly ExtraScenarioInfo) used for scenario metadata.
 
 
 2.34 (2012-11-21)

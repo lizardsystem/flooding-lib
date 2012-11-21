@@ -877,9 +877,6 @@ def find_imported_value(fieldobject, data_objects):
     - Fields that store in 'Result' are ignored because we do them
       elsewhere.
 
-    - A value of '-999' is interpreted as 'not present', and changed
-      to None. So is '999'.
-
     The result is returned.
     """
 
@@ -938,9 +935,6 @@ def find_imported_value(fieldobject, data_objects):
     else:
         # Unknown table, show it
         value = '{0}/{1}'.format(table, field)
-
-    if value in (u'-999', -999, -999.0, 999.0, 999, u'999'):
-        value = None
 
     return value
 

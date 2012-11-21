@@ -1201,6 +1201,9 @@ class TestFindImportedValue(TestCase):
         self.assertEquals(retvalue, 3)
 
     def test_999(self):
+        # It used to be that values like -999 were treated separately
+        # (as if they were None), but that is disabled now so this is
+        # just a pretty random test.
         scenario = ScenarioF.create()
         fieldname = 'test'
         value = '-999'
@@ -1218,7 +1221,7 @@ class TestFindImportedValue(TestCase):
 
         retvalue = models.find_imported_value(
             inputfield, {'scenario': scenario})
-        self.assertEquals(retvalue, None)
+        self.assertEquals(retvalue, u'-999')
 
     def test_xy(self):
         WGS_X = 10
