@@ -4,7 +4,11 @@ Changelog of flooding-lib
 2.36 (unreleased)
 -----------------
 
-- Nothing changed yet.
+On the breachinfo page:
+- Removed the inundation volume statistic (wasn't used according to
+  Kymo)
+- Added an Excel download link, which results in the same data as an
+  Excel file
 
 
 2.35 (2012-11-21)
