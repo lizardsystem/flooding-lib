@@ -30,7 +30,6 @@ Flooding: {% trans 'Breach information' %}
       <td>Schade o.g.</td>
       <td>Slachtoffers</td>
       <td>Oppervlak o.g.</td>
-      <td>Inundatievolume</td>
       <td>Inundatie per uur</td>
       <td>Resultaten zipfile</td>
       </tr>
@@ -54,11 +53,6 @@ Flooding: {% trans 'Breach information' %}
       <td>
         {% if scenario.inundated_area.value|is_not_None %}
         {{ scenario.inundated_area.value|readable }} {{ scenario.inundated_area.unit }}
-        {% endif %}
-      </td>
-      <td>
-        {% if scenario.inundation_volume.value|is_not_None %}
-        {{ scenario.inundation_volume.value|readable }} {{ scenario.inundation_volume.unit }}
         {% endif %}
       </td>
       <td>
