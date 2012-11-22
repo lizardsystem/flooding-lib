@@ -69,6 +69,7 @@ Flooding: {% trans 'Breach information' %}
   </table>
 </div>
 
+<p><a href="{% url flooding_breachinfo_page_excel view.project_id view.breach_id %}">Download deze tabel als Excel file</a></p>
 {% for scenario in view.scenarios %}
 {% if scenario.max_waterdepth_image and scenario.max_waterdepth_extent %}
 <div id="mapcontainer-{{scenario.id}}" style="float: left; width: 410px;">

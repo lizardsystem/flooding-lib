@@ -188,6 +188,10 @@ urlpatterns = patterns(
 
     (r'^shared/', include(flooding_lib.sharedproject.urls)),
 
+    url(r'^breachinfo/(?P<project_id>\d+)/(?P<breach_id>\d+)/excel/',
+        pages.breachinfo_excel,
+        name='flooding_breachinfo_page_excel'),
+
     url(r'^breachinfo/(?P<project_id>\d+)/(?P<breach_id>\d+)/$',
         pages.BreachInfoView.as_view(),
         name='flooding_breachinfo_page'),

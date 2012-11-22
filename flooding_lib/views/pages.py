@@ -1,5 +1,6 @@
 """Views for standalone pages."""
 
+import excel_response
 import json
 import logging
 import os
@@ -12,6 +13,8 @@ from flooding_base import models as basemodels
 from flooding_lib import models
 from flooding_lib.views import classbased
 from flooding_lib.util import geo
+from flooding_lib.permission_manager import receives_permission_manager
+from flooding_lib.templatetags.human import readable
 
 logger = logging.getLogger(__name__)
 
@@ -87,6 +90,35 @@ class BreachInfoView(classbased.BaseView):
         return reverse(
             'flooding_inundationstats_page',
             kwargs={'scenario_id': scenario.id})
+
+
+@receives_permission_manager
+def breachinfo_excel(request, permission_manager, project_id, breach_id):
+    # Reuse the class-based view...
+    view = BreachInfoView()
+    view.project_id = project_id
+    view.breach_id = breach_id
+    view.permission_manager = permission_manager
+
+    data = [
+        ["ID", "Scenario", "Orig. project", "Overschrijdingsfreq",
+         "Schade o.g.", "Slachtoffers", "Oppervlak o.g."],
+        ]
+
+    data += [
+        [scenario.id,
+         unicode(scenario).encode('utf8'),
+         unicode(scenario.main_project).encode('utf8'),
+         scenario.frequency,
+         readable(scenario.financial_damage() or ""),
+         scenario.casualties(),
+         readable(scenario.inundated_area.value or "")
+         ]
+        for scenario in view.scenarios()]
+
+    return excel_response.ExcelResponse(
+        data,
+        'bresinfo_project_{0}_bres_{1}'.format(project_id, breach_id))
 
 
 class InundationStatsView(classbased.BaseView):
