@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.37 (unreleased)
+2.37 (2012-11-23)
 -----------------
 
 - Fix problem by the starting a new sceanrio on import.
