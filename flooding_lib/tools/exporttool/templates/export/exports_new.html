@@ -2,19 +2,48 @@
 
 <form id="exportRunForm" action="javascript: window['exportRunCallbackFormFunction']();">	
 	{{form.errors}}	
-    <table>    
-        <tr>        	
-        	<th>{{form.name.label_tag}}</th>
-        	<td>{{form.name}}</td>
-        </tr>
-        <tr>
-        	<th>{{form.description.label_tag}}</th>
-        	<td>{{form.description}}</td>
-        </tr>
-        <tr>
-        	<th>{{form.gridsize.label_tag}}</th>
-        	<td>{{form.gridsize}}</td>
-        </tr>        
-        <tr><td><input type="submit" value="{% trans 'Submit' %}" /></td></tr>
+    <table style="float:left; width:100%;">
+      <tr width="100%">
+	<td width="50%">
+	  <table>
+            <tr>        	
+              <th>{{form.name.label_tag}}</th>
+              <td>{{form.name}}</td>
+            </tr>
+            <tr>
+              <th>{{form.description.label_tag}}</th>
+              <td>{{form.description}}</td>
+            </tr>
+            <tr>
+              <th>{{form.gridsize.label_tag}}</th>
+              <td>{{form.gridsize}}</td>
+            </tr>
+	  </table>
+	</td>
+	<td width="50%" valign="top">
+          {% trans 'Select export maps' %}:
+	  <hr>
+	  <ul style="list-style-type: none;">
+	    <li>
+	      {{form.export_max_waterdepth}}
+	      {{form.export_max_waterdepth.label_tag}}
+
+	    </li>
+	    <li>	      
+	      {{form.export_max_flowvelocity}}
+	      {{form.export_max_flowvelocity.label_tag}}
+	    </li>
+	    <li>
+	      {{form.export_possibly_flooded}}
+	      {{form.export_possibly_flooded.label_tag}}
+	    </li>
+	  </ul>
+	</td>
+      </tr>
+      <tr>
+	<td align="right">
+	  <input type="submit" value="{% trans 'Submit' %}" />
+	</td>
+	<td>&nbsp;</td></tr>
     </table>
 </form>

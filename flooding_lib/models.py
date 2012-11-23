@@ -1407,8 +1407,8 @@ class Scenario(models.Model):
         workflow_template = workermodels.WorkflowTemplate.objects.get(
             code=workermodels.WorkflowTemplate.IMPORTED_TEMPLATE_CODE)
         self.workflow_template = workflow_template
-        workerexecutor.start_workflow(self.id, self.workflow_template.id)
         self.save()
+        workerexecutor.start_workflow(self.id, self.workflow_template.id)
 
     def presentation_layer_of_type(self, type_id):
         pls = list(self.presentationlayer.filter(

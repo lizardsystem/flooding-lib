@@ -44,23 +44,26 @@ class ExportRun(models.Model):
          (EXPORT_STATE_DONE, _('Klaar')),
         )
 
-    name = models.CharField(max_length=200)
-    description = models.TextField(blank=True)
+    name = models.CharField(max_length=200, verbose_name=_('Name'))
+    description = models.TextField(blank=True, verbose_name=_('Description'))
     export_type = models.IntegerField(
         choices=EXPORT_TYPE_CHOICES,
         default=EXPORT_TYPE_WATER_DEPTH_MAP)  # Obsolete: replaced
                                               # with export_* below
 
-    export_max_waterdepth = models.BooleanField(default=True)
-    export_max_flowvelocity = models.BooleanField(default=True)
-    export_possibly_flooded = models.BooleanField(default=True)
+    export_max_waterdepth = models.BooleanField(
+        default=False, verbose_name=_('The maximal waterdepth'))
+    export_max_flowvelocity = models.BooleanField(
+        default=False, verbose_name=_('The maximal flowvelicity'))
+    export_possibly_flooded = models.BooleanField(
+        default=False, verbose_name=_('The flooded area'))
 
     owner = models.ForeignKey(User)
     creation_date = models.DateTimeField(blank=True, null=True)
     run_date = models.DateTimeField(blank=True, null=True)
     approved_date = models.DateTimeField(blank=True, null=True)
     scenarios = models.ManyToManyField(Scenario)
-    gridsize = models.PositiveIntegerField(default=50)
+    gridsize = models.PositiveIntegerField(default=50, verbose_name=_('Gridsize'))
     state = models.IntegerField(
         choices=EXPORT_STATE_CHOICES,
         default=EXPORT_STATE_WAITING)

@@ -106,6 +106,7 @@ window['exportRunCallbackFormFunction'] = function() {
     }
 
     sendingForm = document.forms["exportRunForm"];
+    debugger;
     // Create the post parameters
     var postParams = [];
     for (var n = 0; n < sendingForm.elements.length; n++){
@@ -177,7 +178,7 @@ isc.DynamicForm.create({
 /*** Create UI elements***/
 isc.HTMLPane.create({
     ID: "exportRunHTMLPane",
-    width:"350",
+    width:"100%",
     overflow:"visible",
     border: "0px",
     contentsURL: exporttool_config.root_url + "flooding/tools/export/newexport"

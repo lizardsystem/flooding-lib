@@ -190,7 +190,10 @@ def new_export(request):
                 name=form.cleaned_data['name'],
                 description=form.cleaned_data['description'],
                 owner=request.user,
-                creation_date=datetime.datetime.now()
+                creation_date=datetime.datetime.now(),
+                export_max_waterdepth=form.cleaned_data['export_max_waterdepth'],
+                export_max_flowvelocity=form.cleaned_data['export_max_flowvelocity'],
+                export_possibly_flooded=form.cleaned_data['export_possibly_flooded']
                 )
             new_export_run.save()
             new_export_run.scenarios = Scenario.objects.filter(
@@ -220,7 +223,7 @@ def new_export(request):
             workflow_template = WorkflowTemplate.objects.get(code='3')
             result = start_workflow(
                 new_export_run.id,
-                workflow_template.id, log_level='DEBUG',
+                workflow_template.id, log_level='INFO',
                 scenario_type='flooding_exportrun')
             #print 'ActionWorkflowExportRun: %r' % result
 
