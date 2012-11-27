@@ -1,5 +1,6 @@
 {% extends "lizard/base.html" %}
 {% load i18n %}
+{% load verbosenametag %}
 {% block title %}Lizard export detail{% endblock %}		
 {% block stylesheets %}		
 		<link rel="shortcut icon" href="{{ url_favicon }}">
@@ -19,36 +20,51 @@
 			<table class="timeseries" summary="timeseries">
 			  <tbody>
 				<tr class="cellDark">
-					<td width="150"><b>{% trans "Name" %}</b></td>
+					<td width="150"><b>{% get_verbose_name export_run "name" %}</b></td>
 					<td>{{ export_run.name }}</td>
 				</tr>
 				<tr class="cell">
-					<td width="50"><b>{% trans "Owner" %}</b></td>
+					<td width="50"><b>{% get_verbose_name export_run "owner" %}</b></td>
 					<td>{{ export_run.owner.username }}</td>
 				</tr>
 				<tr class="cellDark">
-					<td width="75"><b>{% trans "Creation date" %}</b></td>
+					<td width="75"><b>{% get_verbose_name export_run "creation_date" %}</b></td>
 					<td>{{ export_run.creation_date|date:"d-m-Y"}}</td>
 				</tr>
 				<tr class="cell">
-					<td width="75"><b>{% trans "Run date" %}</b></td>
+					<td width="75"><b>{% get_verbose_name export_run "run_date" %}</b></td>
 					<td>{{ export_run.run_date|date:"d-m-Y"}}</td>
 				</tr>						
 				<tr class="cellDark">
-					<td width="50"><b>{% trans "Approved date" %}</b></td>
+					<td width="50"><b>{% get_verbose_name export_run "approved_date" %}</b></td>
 					<td>{{ export_run.approved_date|date:"d-m-Y" }}</td>
 				</tr>			
 				<tr class="cell">
-					<td width="373"><b>{% trans "Description" %}</b></td>
+					<td width="373"><b>{% get_verbose_name export_run "description" %}</b></td>
 					<td>{{ export_run.description }}</td>
 				</tr>
 				<tr class="cellDark">
+					<td width="373"><b>{% trans "Selected maps" %}</b></td>
+					<td>{% if export_run.export_max_waterdepth %}
+					       {% get_verbose_name export_run "export_max_waterdepth" %}
+					       <br>
+					    {% endif %}
+					    {% if export_run.export_max_flowvelocity %}
+					       {% get_verbose_name export_run "export_max_flowvelocity" %}
+					       <br>
+					    {% endif %}
+					    {% if export_run.export_possibly_flooded %}
+					       {% get_verbose_name export_run "export_possibly_flooded" %}
+					    {% endif %}
+					</td>
+				</tr>
+				<tr class="cell">
 					<td width="50"><b>{% trans "Used scenarios and projects (x out of y)" %}</b></td>
 					<td>
 						<a href="{% url flooding_tools_export_detail_scenarios export_run_id=export_run.id %}">{{ num_scenarios }} {% trans "out of" %} {{num_projects}}</a> 
 					</td>
 				</tr>				
-				<tr class="cell">
+				<tr class="cellDark">
 					<td width="50"><b>{% trans "Result file" %}</b></td>					
 					<td>
 						{% if export_run_main_result_file_url %}

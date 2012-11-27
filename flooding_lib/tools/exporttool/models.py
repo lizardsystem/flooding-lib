@@ -58,10 +58,13 @@ class ExportRun(models.Model):
     export_possibly_flooded = models.BooleanField(
         default=True, verbose_name=_('The flooded area'))
 
-    owner = models.ForeignKey(User)
-    creation_date = models.DateTimeField(blank=True, null=True)
-    run_date = models.DateTimeField(blank=True, null=True)
-    approved_date = models.DateTimeField(blank=True, null=True)
+    owner = models.ForeignKey(User, verbose_name=_('Owner'))
+    creation_date = models.DateTimeField(
+        blank=True, null=True, verbose_name=_('Creation date'))
+    run_date = models.DateTimeField(
+        blank=True, null=True, verbose_name=_('Run date'))
+    approved_date = models.DateTimeField(
+        blank=True, null=True, verbose_name=_('Approved date'))
     scenarios = models.ManyToManyField(Scenario)
     gridsize = models.PositiveIntegerField(default=50, verbose_name=_('Gridsize'))
     state = models.IntegerField(
