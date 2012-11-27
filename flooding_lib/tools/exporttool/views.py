@@ -175,7 +175,6 @@ def new_export(request):
 
     if request.method == 'POST':
         form = ExportRunForm(request.POST)
-
         # necessary to call 'is_valid()' before adding custom errors
         valid = form.is_valid()
         scenario_ids = simplejson.loads(request.REQUEST.get('scenarioIds'))

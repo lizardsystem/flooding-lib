@@ -106,14 +106,17 @@ window['exportRunCallbackFormFunction'] = function() {
     }
 
     sendingForm = document.forms["exportRunForm"];
-    debugger;
+
     // Create the post parameters
     var postParams = [];
     for (var n = 0; n < sendingForm.elements.length; n++){
 	//NOTE: !! use '.name' to get it working with 'out-of-the-box' django validation !!
-	postParams[sendingForm.elements[n].name] = sendingForm.elements[n].value;
+	if (sendingForm.elements[n].type === "checkbox") {
+	    postParams[sendingForm.elements[n].name] = sendingForm.elements[n].checked;
+	} else {
+	    postParams[sendingForm.elements[n].name] = sendingForm.elements[n].value;
+	}
     }
-
     postParams['scenarioIds'] = JSON.stringify(scenarioIds);
     RPCManager.sendRequest({
 	actionURL: exporttool_config.url_export_tool,

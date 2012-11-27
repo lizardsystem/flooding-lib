@@ -52,11 +52,11 @@ class ExportRun(models.Model):
                                               # with export_* below
 
     export_max_waterdepth = models.BooleanField(
-        default=False, verbose_name=_('The maximal waterdepth'))
+        default=True, verbose_name=_('The maximal waterdepth'))
     export_max_flowvelocity = models.BooleanField(
-        default=False, verbose_name=_('The maximal flowvelicity'))
+        default=True, verbose_name=_('The maximal flowvelicity'))
     export_possibly_flooded = models.BooleanField(
-        default=False, verbose_name=_('The flooded area'))
+        default=True, verbose_name=_('The flooded area'))
 
     owner = models.ForeignKey(User)
     creation_date = models.DateTimeField(blank=True, null=True)
