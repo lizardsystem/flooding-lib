@@ -4,4 +4,8 @@ from flooding_lib.tasks.threedi_nc_220 import process_threedi_nc
 
 class Command(BaseCommand):
     def handle(self, *args, **kwargs):
-        process_threedi_nc(args[0], 'threedi_calculation_id', detailed=True)
+        # Gridsize: 1000 and 1250 must be dividable by gridsize, minimum is 0.5
+        # gridsize_divider: auto choose size depending on native size. value of 2 is good.
+        process_threedi_nc(
+            args[0], 'threedi_calculation_id',
+            detailed=True, with_region=False, gridsize=0.5)

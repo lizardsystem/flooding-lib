@@ -13,7 +13,11 @@ import tempfile
 import os
 
 
-def process_threedi_nc(some_id, some_type, detailed=True):
+def process_threedi_nc(
+    some_id, some_type,
+    detailed=True, with_region=True,
+    gridsize=None,
+    gridsize_divider=2):
     """
     Read netcdf (.nc) 3Di result file, output in .png files.
 
@@ -38,7 +42,8 @@ def process_threedi_nc(some_id, some_type, detailed=True):
         # Basically only for testing
         threedi_calculation_id = some_id
         threedi_calculation = ThreediCalculation.objects.get(pk=threedi_calculation_id)
-        region = Region.objects.get(pk=120)
+        if with_region:
+            region = Region.objects.get(pk=120)
     else:
         # Normal case
         scenario_id = some_id
@@ -48,7 +53,8 @@ def process_threedi_nc(some_id, some_type, detailed=True):
             return
         threedi_calculation = scenario.threedicalculation_set.all()[0]  # Only 1 possible, right?
         try:
-            region = scenario.breaches.all()[0].region
+            if with_region:
+                region = scenario.breaches.all()[0].region
         except:
             print 'Something went wrong with getting region extent for scenario %s' % scenario
 
@@ -79,7 +85,8 @@ def process_threedi_nc(some_id, some_type, detailed=True):
                 if detailed:
                     num_steps = post_process_detailed_3di(
                         filename, dst_basefilename_detailed,
-                        region=region)
+                        region=region, gridsize_divider=gridsize_divider,
+                        gridsize=gridsize)
                 else:
                     num_steps = post_process_3di(filename, dst_basefilename)
             else:

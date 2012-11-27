@@ -20,6 +20,7 @@ TASK_CALCULATE_STATISTICS = 190
 TASK_GENERATE_EXPORT = 200
 TASK_PERFORM_3DI_SIMULATION_210 = 210
 TASK_3DI_PNG_GENERATION_220 = 220
+TASK_3DI_PNG_GENERATION_221 = 221
 
 
 def perform_task(
@@ -183,6 +184,11 @@ def perform_task(
             log.debug("execute TASK_3DI_PNG_GENERATION_220 %s=%r" % (scenario_type, scenario_id))
             from flooding_lib.tasks.threedi_nc_220 import process_threedi_nc
             process_threedi_nc(scenario_id, scenario_type)
+            success_code = True  # In case of problems, an exception is raised
+        elif tasktype_id == TASK_3DI_PNG_GENERATION_221:
+            log.debug("execute TASK_3DI_PNG_GENERATION_221 (detailed) %s=%r" % (scenario_type, scenario_id))
+            from flooding_lib.tasks.threedi_nc_220 import process_threedi_nc
+            process_threedi_nc(scenario_id, scenario_type, detailed=True, gridsize=0.5)
             success_code = True  # In case of problems, an exception is raised
         else:
             log.warning("selected a '%d' task but don't know what it is" %
