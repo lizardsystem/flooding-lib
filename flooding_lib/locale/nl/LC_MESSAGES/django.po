@@ -837,7 +837,7 @@ msgstr "Eigenaar"
 #: tools/exporttool/templates/export/exports_overview.html:21
 #: tools/importtool/templates/import/imports_overview.html:23
 msgid "Creation date"
-msgstr "Aanmaakt op"
+msgstr "Aangemaakt op"
 
 #: tools/exporttool/models.py:65
 msgid "Run date"
@@ -920,7 +920,7 @@ msgstr ""
 
 #: tools/exporttool/templates/export/exports_run_detail.html:47
 msgid "Selected maps"
-msgstr "Geselecteerd kaarten"
+msgstr "Geselecteerde kaarten"
 
 #: tools/exporttool/templates/export/exports_run_detail.html:62
 msgid "Used scenarios and projects (x out of y)"
