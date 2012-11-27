@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.38 (unreleased)
+2.38 (2012-11-27)
 -----------------
 
 - Fix checkboxfields to select maps for export.
