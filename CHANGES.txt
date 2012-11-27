@@ -4,7 +4,8 @@ Changelog of flooding-lib
 2.39 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Added 3Di task 221, which is task 220 except for some different
+  options: it makes more detailed maps. Use only for small areas.
 
 
 2.38 (2012-11-27)
