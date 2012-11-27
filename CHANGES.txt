@@ -4,7 +4,9 @@ Changelog of flooding-lib
 2.40 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Added selected export maps to export details template.
+
+- Added the translation.
 
 
 2.39 (2012-11-27)
