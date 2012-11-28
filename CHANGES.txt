@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.42 (unreleased)
+2.42 (2012-11-28)
 -----------------
 
 - Set translation to lazy.
