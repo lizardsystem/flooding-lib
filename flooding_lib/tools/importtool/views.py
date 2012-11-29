@@ -160,6 +160,7 @@ def approve_import(request, import_scenario_id):
                 return import_scenario_into_flooding(request, importscenario)
         else:
             for field in request.POST:
+                logger.debug("FIELD: {0}".format(field))
                 #to do: first cehck if not edremark. or edstatus.
                 field_ref = InputField.objects.filter(name=field)
                 if field_ref.count() == 1:

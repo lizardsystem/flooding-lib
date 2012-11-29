@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.43 (unreleased)
+2.43 (2012-11-29)
 -----------------
 
 Approval of an import scenario tried to save the state of approval
