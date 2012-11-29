@@ -4,7 +4,10 @@ Changelog of flooding-lib
 2.43 (unreleased)
 -----------------
 
-- Nothing changed yet.
+Approval of an import scenario tried to save the state of approval
+checkboxes for each individual inputfield, but those don't exist
+anymore. This led to an error. Changed the function so that in this
+scenario a value of "True" for the approval is saved.
 
 
 2.42 (2012-11-28)

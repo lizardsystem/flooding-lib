@@ -2,6 +2,7 @@ from cStringIO import StringIO
 from zipfile import ZipFile, ZIP_DEFLATED, BadZipfile
 import datetime
 import functools
+import logging
 import operator
 import os
 import re
@@ -30,6 +31,8 @@ from flooding_lib.tools.importtool.models import ImportScenario
 from flooding_lib.tools.importtool.models import ImportScenarioInputField
 from flooding_lib.tools.importtool.models import InputField
 from flooding_lib.util.files import remove_comments_from_asc_files
+
+logger = logging.getLogger(__name__)
 
 
 def checks_permission(permission, message):
@@ -167,9 +170,9 @@ def approve_import(request, import_scenario_id):
                             inputfield=field_ref))
                     importscenariovalues.setValue(request.POST[field])
                     importscenariovalues.validation_remarks = request.POST.get(
-                        'edremark.' + field)
+                        'edremark.' + field, '')
                     importscenariovalues.state = request.POST.get(
-                        'edstate.' + field)
+                        'edstate.' + field, True)
                     importscenariovalues.save()
         importscenario.update_scenario_name()
         importscenario.save()
