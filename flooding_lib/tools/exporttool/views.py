@@ -16,13 +16,13 @@ from lizard_worker.executor import start_workflow
 from lizard_worker.models import WorkflowTemplate
 
 
-# def get_result_path_location(result):
-#     result_folder = Setting.objects.get(
-#         key='MAXIMAL_WATERDEPTH_RESULTS_FOLDER').value
-#     begin_index = (result.file_basename.find(result_folder) +
-#                    len(result_folder))
-#     path = result.file_basename[begin_index:].replace('\\', '/')
-#     return path
+def get_result_path_location(result):
+    result_folder = Setting.objects.get(
+        key='MAXIMAL_WATERDEPTH_RESULTS_FOLDER').value
+    begin_index = (result.file_basename.find(result_folder) +
+                   len(result_folder))
+    path = result.file_basename[begin_index:].replace('\\', '/')
+    return path
 
 
 def index(request):
