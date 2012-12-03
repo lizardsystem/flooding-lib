@@ -790,23 +790,6 @@ def get_or_create_pngserie_with_defaultlegend_from_old_results(scenario, pt):
                 pl.delete()
 
 
-def register_task_processing(scenario, tasktype, is_successful):
-    """
-    Update the scenario's status.
-    """
-    from flooding_lib.tasks.perform_task import (
-        TASK_SOBEK_PRESENTATION_GENERATION_155,
-        TASK_HISSSM_PRESENTATION_GENERATION_185,)
-    if tasktype == TASK_SOBEK_PRESENTATION_GENERATION_155:
-        scenario.has_sobek_presentaition = is_successful
-        scenario.update_status()
-    elif tasktype == TASK_HISSSM_PRESENTATION_GENERATION_185:
-        scenario.has_hisssm_presentation = is_successful
-        scenario.update_status()
-    else:
-        log.warning("Tasktype {} is not registred.".format(tasktype))
-
-
 def perform_presentation_generation(scenario_id, tasktype_id):
     """main routine
 
@@ -851,7 +834,6 @@ def perform_presentation_generation(scenario_id, tasktype_id):
             pass
 
     is_successful = True
-    register_task_processing(scenario, tasktype_id, is_successful)
     log.debug("Finish task.")
     log.debug("close db connection to avoid an idle process.")
     db.close_connection()

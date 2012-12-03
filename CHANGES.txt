@@ -4,7 +4,7 @@ Changelog of flooding-lib
 2.45 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Update status_cache after task 155 (TASK_SOBEK_PRESENTATION_GENERATION).
 
 
 2.44 (2012-12-03)

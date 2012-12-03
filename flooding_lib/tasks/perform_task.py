@@ -1,6 +1,8 @@
 import os
 import logging  # , threading, time, datetime, random, math
 
+from flooding_lib.models import Scenario
+
 from django.conf import settings
 
 log = logging.getLogger('flooding-lib.perform_task')
@@ -21,6 +23,16 @@ TASK_GENERATE_EXPORT = 200
 TASK_PERFORM_3DI_SIMULATION_210 = 210
 TASK_3DI_PNG_GENERATION_220 = 220
 TASK_3DI_PNG_GENERATION_221 = 221
+
+
+def update_scenario_status_cache(scenario_id):
+    """
+    Update the scenario's status_cache to CALCULATED.
+    """
+    scenario = Scenario.objects.get(pk=scenario_id)
+    scenario.has_sobek_presentation = True
+    scenario.save()
+    scenario.update_status()
 
 
 def perform_task(
@@ -117,6 +129,8 @@ def perform_task(
             success_code = (
                 presentationlayer_generation.perform_presentation_generation(
                     scenario_id, tasktype_id))
+            if success_code:
+                update_scenario_status_cache(scenario_id)
 
         elif tasktype_id == TASK_HISSSM_SIMULATION_160:
             log.debug("execute TASK_HISSSM_SIMULATION_160")

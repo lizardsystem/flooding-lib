@@ -46,3 +46,8 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     # {{ STATIC_URL }}myapp/my.css in your templates.
     'staticfiles.context_processors.static_url',
     )
+
+try:
+    from flooding_lib.localsettings import *
+except ImportError:
+    pass

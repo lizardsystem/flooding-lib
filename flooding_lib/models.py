@@ -1021,8 +1021,6 @@ class Scenario(models.Model):
 
     # Set by 'task 155' in the new flooding-worker tasks.
     has_sobek_presentation = models.NullBooleanField()
-    # Set by 'task 185' in the new flooding-worker tasks.
-    has_hisssm_presentation = models.NullBooleanField()
 
     class Meta:
         ordering = ('name', 'owner', )
@@ -1168,7 +1166,7 @@ class Scenario(models.Model):
                 return self.STATUS_DISAPPROVED
 
             # Flooding-worker tasks set this
-            elif self.has_sobek_presentation or self.has_hisssm_presentation:
+            elif self.has_sobek_presentation:
                 return self.STATUS_CALCULATED
 
             elif ((task.is_type(TaskType.TYPE_SOBEK_PNG_CALCULATION) or

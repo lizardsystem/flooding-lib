@@ -13,3 +13,4 @@ ignore
 .coverage
 htmlcov
 src
+localsettings.py
