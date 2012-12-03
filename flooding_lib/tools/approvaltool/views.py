@@ -30,6 +30,7 @@ def approvaltable(request, approvalobject_id, ignore_post=False):
 
     if request.method == 'POST' and not ignore_post:
         update = False
+        answer = {}
         for rule_id, datajson in request.POST.items():
             rule = ApprovalRule.objects.get(pk=rule_id)
             data = simplejson.loads(datajson)
