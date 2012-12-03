@@ -5,6 +5,7 @@ Changelog of flooding-lib
 -----------------
 
 - Update status_cache after task 155 (TASK_SOBEK_PRESENTATION_GENERATION).
+- Remove "has_hsssm_presentation" field from Scenario model.
 
 
 2.44 (2012-12-03)
