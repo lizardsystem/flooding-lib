@@ -4,7 +4,13 @@ Changelog of flooding-lib
 2.46 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Removed dependencies on ThreediModel and ThreediCalculation, everything is
+  in Scenario, SobekModel now. Updated task 210, 220.
+- Pinnend to lizard-worker >= 0.10, flooding-base >= 1.34
+
+- Added datamigration schema to create a new workflowtemplates for 3di en export maps.
+
+- Added functionality to create a 3di scenario.
 
 
 2.45 (2012-12-03)

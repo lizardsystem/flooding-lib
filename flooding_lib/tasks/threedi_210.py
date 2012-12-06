@@ -2,13 +2,26 @@
 # Run this under windows.
 # This will produce a .nc file.
 from threedilib.threedi import setup_and_run_3di
-from flooding_lib.models import ThreediCalculation
+#from flooding_lib.models import ThreediCalculation
 from flooding_lib.models import Scenario
+from flooding_base.models import Setting
 from django.conf import settings
 
 from flooding_lib.util import files
 import os
 import shutil
+
+
+def full_model_path(rel_path):
+    #/p-flod-fs-00-d1.external-nens.local/flod-share/Flooding/filedatabase/
+    if rel_path == '/':
+        # Apparently the path is absolute
+        return rel_path  # = full path
+    else:
+        path = Setting.objects.get(key='SOURCE_DIR').value
+        path = path.replace('\\', '/')  # Unix path
+        model_path = os.path.join(path, rel_path)
+        return model_path
 
 
 def run_threedi_task(some_id, some_type):
@@ -19,6 +32,10 @@ def run_threedi_task(some_id, some_type):
 
     if some_type = 'threedi_calculation_id', then some_id is the
     threedi_calculation_id, otherwise it is the scenario_id.
+
+    SobekModel can also be a 3di model:
+    - project_fileloc contains the .zip filename
+    - model_varname contains the .mdu filename
     """
 
     if hasattr(settings, 'THREEDI_DEFAULT_FILES_PATH'):
@@ -33,37 +50,36 @@ def run_threedi_task(some_id, some_type):
         subgrid_exe_path = "/home/jack/3di-subgrid/bin/subgridf90"
         print 'No THREEDI_BIN_PATH in django settings. Taking default %s' % subgrid_exe_path
 
-    if some_type == 'threedi_calculation_id':
-        threedi_calculation_id = some_id
-        threedi_calculation = ThreediCalculation.objects.get(pk=threedi_calculation_id)
-    else:
-        scenario_id = some_id
-        scenario = Scenario.objects.get(pk=scenario_id)
-        if scenario.threedicalculation_set.count() == 0:
-            print 'No ThreediCalculation for scenario %s, skipping' % scenario_id
-            return
-        threedi_calculation = scenario.threedicalculation_set.all()[0]  # Only 1 possible, right?
+    scenario_id = some_id
+    scenario = Scenario.objects.get(pk=scenario_id)
 
-    print 'Working on 3Di calculation: %s (belonging to scenario %d)' % (
-        threedi_calculation, threedi_calculation.scenario.id)
+    print 'Working on 3Di calculation: %s (id %d)' % (scenario, scenario.id)
+    if str(scenario.sobekmodel_inundation.sobekversion) != '3di':
+        print 'Warning: "sobekversion" is not "3di", but "%s". Is "%s" a 3di model?' % (
+            scenario.sobekmodel_inundation.sobekversion, scenario.sobekmodel_inundation)
 
-    print 'Unzipping...'
-    with files.unzipped(threedi_calculation.full_model_path) as files_in_zip:
+    full_path = full_model_path(
+            scenario.sobekmodel_inundation.project_fileloc)
+    print 'Unzipping %s...' % full_path
+    with files.unzipped(full_path) as files_in_zip:
         tmp_path = os.path.dirname(files_in_zip[0])  # Assume no subdirs or whatsoever
-        mdu_full_path = os.path.join(tmp_path, threedi_calculation.threedi_model.mdu_filename)
+        mdu_full_path = os.path.join(tmp_path, scenario.sobekmodel_inundation.model_varname)
         #print files_in_zip
         #nc_filename = setup_and_run_3di(mdu_full_path, skip_if_results_available=False)
+
+        print "running..."
         nc_filename = setup_and_run_3di(
             mdu_full_path,
             skip_if_results_available=True,
             source_files_dir=default_source_files_path,
             subgrid_exe=subgrid_exe_path)
 
-        result_folder = threedi_calculation.full_result_path
+        result_folder = os.path.join(scenario.get_abs_destdir().replace('\\', '/'), 'threedi')
+        #threedi_calculation.full_result_path
         #print result_folder
 
         try:
-            print 'creating result folder...'
+            print 'creating result folder %s...' % result_folder
             os.makedirs(result_folder)
         except OSError:
             print 'warning: error creating folder %s, does it already exist?' % result_folder

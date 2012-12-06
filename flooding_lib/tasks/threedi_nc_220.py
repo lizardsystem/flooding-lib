@@ -2,7 +2,7 @@
 
 from threedilib.threedi import post_process_3di
 from threedilib.threedi import post_process_detailed_3di
-from flooding_lib.models import ThreediCalculation
+#from flooding_lib.models import ThreediCalculation
 from flooding_lib.models import Result
 from flooding_lib.models import ResultType
 from flooding_lib.models import Scenario
@@ -23,13 +23,8 @@ def process_threedi_nc(
 
     Input:
 
-    if some_type is 'threedi_calculation_id', take corresponding
-    ThreediCalculation object. There must be a "subgrid_map.nc" (and a
-    scenario.zip) at threedi_calculation.full_result_path.
-
-    if some_type is something else, a flooding scenario is
-    assumed. Then Scenario.threedicalculation_set.all() returns the
-    (one and only) calcuation object.
+    There must be a "subgrid_map.zip" (and a
+    scenario.zip) at (scenario.get_abs_destdir())/threedi.
 
     Output:
 
@@ -38,30 +33,22 @@ def process_threedi_nc(
     """
 
     region = None
-    if some_type == 'threedi_calculation_id':
-        # Basically only for testing
-        threedi_calculation_id = some_id
-        threedi_calculation = ThreediCalculation.objects.get(pk=threedi_calculation_id)
+
+    scenario_id = some_id
+    scenario = Scenario.objects.get(pk=scenario_id)
+    try:
         if with_region:
-            region = Region.objects.get(pk=120)
-    else:
-        # Normal case
-        scenario_id = some_id
-        scenario = Scenario.objects.get(pk=scenario_id)
-        if scenario.threedicalculation_set.count() == 0:
-            print 'No ThreediCalculation for scenario %s, skipping' % scenario_id
-            return
-        threedi_calculation = scenario.threedicalculation_set.all()[0]  # Only 1 possible, right?
-        try:
-            if with_region:
-                region = scenario.breaches.all()[0].region
-        except:
-            print 'Something went wrong with getting region extent for scenario %s' % scenario
+            region = scenario.breaches.all()[0].region
+    except:
+        print 'Something went wrong with getting region extent for scenario %s' % scenario
 
     #full_path = "/home/jack/git/sites/flooding/driedi/Vecht/subgrid_map.nc"
-    full_path_zip = os.path.join(threedi_calculation.full_result_path, 'subgrid_map.zip')
+    
+    full_base_path = scenario.get_abs_destdir().replace('\\', '/')
+    full_path_zip = os.path.join(
+        full_base_path, 'threedi', 'subgrid_map.zip')
 
-    result_folder = os.path.join(threedi_calculation.full_base_path, 'threedi_waterlevel_png')
+    result_folder = os.path.join(full_base_path, 'threedi_waterlevel_png')
     #print result_folder
 
     try:
@@ -97,18 +84,18 @@ def process_threedi_nc(
 
     print 'creating corresponding Result object...'
     src_rel_path = os.path.join(
-        threedi_calculation.scenario.get_rel_destdir(),
+        scenario.get_rel_destdir(),
         'threedi',
         'subgrid_map.zip')
     dst_rel_path = os.path.join(
-        threedi_calculation.scenario.get_rel_destdir(),
+        scenario.get_rel_destdir(),
         'threedi_waterlevel_png',
         'waterlevel_####.png')
 
     result_type = ResultType.objects.get(name='threediwaterlevel_t')
     result, created = Result.objects.get_or_create(
         resulttype=result_type,
-        scenario=threedi_calculation.scenario,
+        scenario=scenario,
         defaults={
             'resultloc': src_rel_path,
             'resultpngloc': dst_rel_path,

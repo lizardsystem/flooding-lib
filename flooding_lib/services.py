@@ -33,7 +33,9 @@ from flooding_lib.views import get_externalwater_graph
 from flooding_lib.views import get_externalwater_graph_infowindow
 from flooding_lib.views import get_externalwater_graph_session
 from flooding_lib.views import service_compose_scenario
+from flooding_lib.views import service_compose_3di_scenario
 from flooding_lib.views import service_save_new_scenario
+from flooding_lib.views import service_save_new_3di_scenario
 from flooding_lib.views import service_select_strategy
 from flooding_lib.tools.importtool.models import InputField
 
@@ -536,7 +538,6 @@ def service_get_inundationmodels(
     * in gebruik bij flooding new, stap 2
     """
     region = get_object_or_404(Region, pk=region_id)
-
     if only_active:
         models = region.sobekmodels.filter(active=True)
     else:
@@ -544,9 +545,9 @@ def service_get_inundationmodels(
 
     resp = [{
             'id':obj.id,
-            'name': str(obj.model_version) + ', ' + str(obj.model_varname)
+            'name': str(obj.model_version) + ', ' + str(obj.model_varname),
+            'is_3di': obj.is_3di()
             } for obj in models]
-
     return HttpResponse(simplejson.dumps(resp), mimetype='application/json')
 
 
@@ -1501,8 +1502,11 @@ def service(request):
         elif action_name == 'compose_scenario':
             breach_id = query.get('breach_id', None)
             return service_compose_scenario(request,
-                                               breach_id=breach_id)
-
+                                            breach_id=breach_id)
+        elif action_name == 'compose_3di_scenario':
+            breach_id = query.get('breach_id', None)
+            return service_compose_3di_scenario(request,
+                                                breach_id=breach_id)
         elif action_name == 'select_strategy':
             region_id = query.get('region_id', None)
             return service_select_strategy(request,
@@ -1649,6 +1653,8 @@ def service(request):
 
         if action_name == 'post_newscenario':
             return service_save_new_scenario(request)
+        elif action_name == 'post_new3discenario':
+            return service_save_new_3di_scenario(request)
         elif action_name == 'save_drawn_embankment':
             geometry = query.get('geometry')
             strategy_id = query.get('strategy_id', -1)
