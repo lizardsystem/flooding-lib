@@ -1,7 +1,7 @@
 from setuptools import setup
 import os.path
 
-version = '2.45dev'
+version = '2.47dev'
 
 long_description = '\n\n'.join([
     open('README.txt').read(),
@@ -14,8 +14,8 @@ long_description = '\n\n'.join([
 install_requires = [
     'Django',
     'django-staticfiles',
-    'flooding-base >= 1.32',
-    'lizard-worker >= 0.3',
+    'flooding-base >= 1.34',
+    'lizard-worker >= 0.10',
     'django-treebeard',
     'django-extensions',
     'django-nose',

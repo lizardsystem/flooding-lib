@@ -8,6 +8,7 @@ from flooding_lib.models import Scenario_PresentationLayer
 from flooding_lib.models import ResultType_PresentationType
 from django.contrib import admin
 from django.contrib.gis.admin import OSMGeoAdmin
+#from django.contrib.gis.admin import GeoModelAdmin as OSMGeoAdmin  # temp hack
 
 
 class FieldInline(admin.TabularInline):

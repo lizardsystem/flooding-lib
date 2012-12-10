@@ -44,6 +44,20 @@ Task 200
     $ bin/django lw_task_worker --task_code 200 --log_level DEBUG --worker_nr 1
 
 
+Upgrade to 3Di support
+======================
+
+- Make a SobekModel object, with version "3di".
+
+- Make a 3Di specific region and add a breach. Add the newly created
+  SobekModel to the region.
+
+- Make the region part of a region set.
+
+- Make workflow with code 8. This workflow consists of tasks: 210 -> 220 ->
+  185.
+
+
 Task 210/220 threedi
 ====================
 

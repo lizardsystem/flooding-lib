@@ -91,7 +91,12 @@ class SobekVersion(models.Model):
 
 
 class SobekModel(models.Model):
-    """sobekmodel properties:
+    """
+    It is actual a Sobek Model, OR a 3Di model.
+
+    3Di models have version '3di'
+
+    sobekmodel properties:
 
     - has a sobekversion
     - has a sobekmodeltype
@@ -116,12 +121,16 @@ class SobekModel(models.Model):
     sobekmodeltype = models.IntegerField(choices=SOBEKMODELTYPE_CHOICES)
 
     active = models.BooleanField(default=True)
-    project_fileloc = models.CharField(max_length=200)
+    project_fileloc = models.CharField(
+        max_length=200, 
+        help_text='In case of 3Di, point to model zipfile.')
     model_case = models.IntegerField()
     model_version = models.CharField(max_length=20)
     model_srid = models.IntegerField()
 
-    model_varname = models.CharField(max_length=40, null=True, blank=True)
+    model_varname = models.CharField(
+        max_length=40, null=True, blank=True,
+        help_text='In case of 3Di, .mdu filename in zip.')
     model_vardescription = models.CharField(
         max_length=200, null=True, blank=True)
     remarks = models.TextField(null=True)
@@ -131,12 +140,17 @@ class SobekModel(models.Model):
         max_length=200, null=True, blank=True)
 
     code = models.CharField(max_length=15, null=True, blank=True)
-
+    
     class Meta:
         verbose_name = _('Sobek model')
         verbose_name_plural = _('Sobek models')
         db_table = 'flooding_sobekmodel'
 
+    def is_3di(self):
+        """Return True if this models is 3di."""
+        return (
+            self.sobekversion.name == "3di")
+        
     def __unicode__(self):
         return ('type: %s case: %d version: %s' %
                 (self.TYPE_DICT[self.sobekmodeltype],
@@ -1021,9 +1035,11 @@ class Scenario(models.Model):
 
     # Set by 'task 155' in the new flooding-worker tasks.
     has_sobek_presentation = models.NullBooleanField()
-    # Set by 'task 185' in the new flooding-worker tasks.
-    has_hisssm_presentation = models.NullBooleanField()
 
+    # This field for 3di a setting
+    config_3di = models.CharField(
+        max_length=50, blank=True, null=True)
+    
     class Meta:
         ordering = ('name', 'owner', )
         verbose_name = _('Scenario')
@@ -1168,7 +1184,7 @@ class Scenario(models.Model):
                 return self.STATUS_DISAPPROVED
 
             # Flooding-worker tasks set this
-            elif self.has_sobek_presentation or self.has_hisssm_presentation:
+            elif self.has_sobek_presentation:
                 return self.STATUS_CALCULATED
 
             elif ((task.is_type(TaskType.TYPE_SOBEK_PNG_CALCULATION) or
@@ -1388,8 +1404,12 @@ class Scenario(models.Model):
             creatorlog=user.get_full_name(),
             tstart=datetime.datetime.now())
 
-        workflow_template = workermodels.WorkflowTemplate.objects.get(
-            code=workermodels.WorkflowTemplate.DEFAULT_TEMPLATE_CODE)
+        if self.is_3di():
+            workflow_template = workermodels.WorkflowTemplate.objects.get(
+                code=workermodels.WorkflowTemplate.THREEDI_TEMPLATE_CODE)
+        else:
+            workflow_template = workermodels.WorkflowTemplate.objects.get(
+                code=workermodels.WorkflowTemplate.DEFAULT_TEMPLATE_CODE)
         self.workflow_template = workflow_template
         self.save()
         workerexecutor.start_workflow(self.id, self.workflow_template.id)
@@ -1457,6 +1477,11 @@ class Scenario(models.Model):
         # Plus something like "Dijkring xx/1234"
         output_dir_name = os.path.join(dst_dir, self.get_rel_destdir())
         return output_dir_name
+
+    def is_3di(self):
+        """Return True if this scenario uses 3di."""
+        return (
+            self.sobekmodel_inundation.sobekversion.name == "3di")
 
     # def get_abs_srcdir(self):
     #     """

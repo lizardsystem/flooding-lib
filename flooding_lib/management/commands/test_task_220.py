@@ -7,5 +7,8 @@ class Command(BaseCommand):
         # Gridsize: 1000 and 1250 must be dividable by gridsize, minimum is 0.5
         # gridsize_divider: auto choose size depending on native size. value of 2 is good.
         process_threedi_nc(
-            args[0], 'threedi_calculation_id',
-            detailed=True, with_region=False, gridsize=0.5)
+            args[0], 'scenario_id',
+            detailed=True, with_region=False, gridsize_divider=2)
+        # process_threedi_nc(
+        #     args[0], 'scenario_id',
+        #     detailed=True, with_region=False, gridsize=0.5)

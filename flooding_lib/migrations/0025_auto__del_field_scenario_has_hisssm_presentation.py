@@ -1,23 +1,21 @@
 # encoding: utf-8
 import datetime
 from south.db import db
-from south.v2 import DataMigration
+from south.v2 import SchemaMigration
 from django.db import models
 
-from lizard_worker import models as workermodels
-
-class Migration(DataMigration):
+class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        "Write your forwards methods here."
+        
+        # Deleting field 'Scenario.has_hisssm_presentation'
+        db.delete_column('flooding_scenario', 'has_hisssm_presentation')
 
-        workermodels.WorkflowTemplate.objects.get_or_create(
-            code=workermodels.WorkflowTemplate.DEFAULT_TEMPLATE_CODE)
-        workermodels.WorkflowTemplate.objects.get_or_create(
-            code=workermodels.WorkflowTemplate.IMPORTED_TEMPLATE_CODE)
 
     def backwards(self, orm):
-        "Write your backwards methods here."
+        
+        # Adding field 'Scenario.has_hisssm_presentation'
+        db.add_column('flooding_scenario', 'has_hisssm_presentation', self.gf('django.db.models.fields.NullBooleanField')(null=True, blank=True), keep_default=False)
 
 
     models = {
@@ -228,7 +226,7 @@ class Migration(DataMigration):
         },
         'flooding_lib.project': {
             'Meta': {'ordering': "('friendlyname', 'name', 'owner')", 'object_name': 'Project', 'db_table': "'flooding_project'"},
-            'approval_object_type': ('django.db.models.fields.related.ForeignKey', [], {'default': 'None', 'to': "orm['approvaltool.ApprovalObjectType']", 'null': 'True'}),
+            'approval_object_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['approvaltool.ApprovalObjectType']", 'null': 'True'}),
             'code': ('django.db.models.fields.CharField', [], {'max_length': '20', 'null': 'True'}),
             'color_mapping_name': ('django.db.models.fields.CharField', [], {'max_length': '256', 'null': 'True', 'blank': 'True'}),
             'friendlyname': ('django.db.models.fields.CharField', [], {'max_length': '200'}),
@@ -307,6 +305,7 @@ class Migration(DataMigration):
             'calcpriority': ('django.db.models.fields.IntegerField', [], {'default': '20'}),
             'code': ('django.db.models.fields.CharField', [], {'max_length': '15', 'null': 'True'}),
             'cutofflocations': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['flooding_lib.CutoffLocation']", 'symmetrical': 'False', 'through': "orm['flooding_lib.ScenarioCutoffLocation']", 'blank': 'True'}),
+            'has_sobek_presentation': ('django.db.models.fields.NullBooleanField', [], {'null': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'migrated': ('django.db.models.fields.NullBooleanField', [], {'null': 'True', 'blank': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '200'}),
@@ -366,6 +365,7 @@ class Migration(DataMigration):
         'flooding_lib.scenarioproject': {
             'Meta': {'object_name': 'ScenarioProject'},
             'approvalobject': ('django.db.models.fields.related.ForeignKey', [], {'default': 'None', 'to': "orm['approvaltool.ApprovalObject']", 'null': 'True', 'blank': 'True'}),
+            'approved': ('django.db.models.fields.NullBooleanField', [], {'null': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'is_main_project': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'project': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['flooding_lib.Project']"}),
@@ -436,6 +436,20 @@ class Migration(DataMigration):
             'Meta': {'object_name': 'TaskType', 'db_table': "'flooding_tasktype'"},
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '200'})
+        },
+        'flooding_lib.threedicalculation': {
+            'Meta': {'object_name': 'ThreediCalculation'},
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'scenario': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['flooding_lib.Scenario']"}),
+            'status': ('django.db.models.fields.IntegerField', [], {'default': '1'}),
+            'threedi_model': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['flooding_lib.ThreediModel']"})
+        },
+        'flooding_lib.threedimodel': {
+            'Meta': {'object_name': 'ThreediModel'},
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'mdu_filename': ('django.db.models.fields.TextField', [], {}),
+            'name': ('django.db.models.fields.CharField', [], {'max_length': '80'}),
+            'scenario_zip_filename': ('django.db.models.fields.TextField', [], {})
         },
         'flooding_lib.userpermission': {
             'Meta': {'unique_together': "(('user', 'permission'),)", 'object_name': 'UserPermission', 'db_table': "'flooding_userpermission'"},

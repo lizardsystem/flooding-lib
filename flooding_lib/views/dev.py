@@ -355,3 +355,93 @@ def service_compose_scenario(request, permission_manager, breach_id):
          'bottomlevelbreach': bottomlevelbreach,
          'breach': breach
          })
+
+
+def service_save_new_3di_scenario(request):
+    """  """
+
+    def to_intervalfloat(value):
+        if value == None:
+            return None
+        else:
+            return float(value) / (24 * 60 * 60 * 1000)
+
+    query = request.POST
+    scenario = Scenario.objects.create(
+        name=query.get('name'),
+        owner=request.user,
+        remarks=query.get('remarks'),
+        sobekmodel_inundation=SobekModel.objects.get(
+            pk=query.get('inundationmodel')),
+        tsim=to_intervalfloat(query.get('tsim_ms')),
+        calcpriority=query.get('calcpriority'),
+        config_3di=query.get('config_3di'))
+    scenario.set_project(Project.objects.get(pk=query.get('project_fk')))
+
+    scenario.code = '2s_c_%i' % scenario.id
+    scenario.save()
+
+    task = scenario.setup_initial_task(request.user)
+
+    task.tfinished = datetime.datetime.now()
+    task.successful = True
+    task.save()
+
+    scenario.update_status()
+    answer = {
+        'successful': True,
+        'save_log': 'opgeslagen. scenario id is: %i' % scenario.id}
+
+    return HttpResponse(simplejson.dumps(answer), mimetype="application/json")
+
+
+@receives_permission_manager
+def service_compose_3di_scenario(request, permission_manager, breach_id):
+    """  """
+    breach = Breach.objects.get(pk=breach_id)
+    bottomlevelbreach = {}
+    pitdepth = {}
+    if not breach.groundlevel == None:
+        if not breach.canalbottomlevel == None:
+            bottomlevelbreach['defaultvalue'] = max(
+                breach.groundlevel, breach.canalbottomlevel) + 0.01
+            pitdepth['defaultvalue'] = breach.groundlevel - 0.01
+            bottomlevelbreach['min'] = breach.canalbottomlevel
+        else:
+            bottomlevelbreach['defaultvalue'] = breach.groundlevel
+            pitdepth['defaultvalue'] = breach.groundlevel - 0.01
+            bottomlevelbreach['min'] = -10
+
+        pitdepth['max'] = breach.groundlevel
+
+    projects_queryset = permission_manager.get_projects(
+        UserPermission.PERMISSION_SCENARIO_ADD)
+    projects = projects_queryset.filter(
+        regions__breach=breach).distinct().values_list('id', flat=True)
+    projects2 = projects_queryset.filter(
+        regionsets__regions__breach=breach
+        ).distinct().values_list('id', flat=True)
+
+    projects = Project.objects.filter(
+        Q(id__in=projects) |
+        Q(id__in=projects2)).distinct().order_by('name')
+
+    sealake = (breach.externalwater.type == ExternalWater.TYPE_SEA or
+               breach.externalwater.type == ExternalWater.TYPE_LAKE)
+    lake = breach.externalwater.type == ExternalWater.TYPE_LAKE
+    sea = breach.externalwater.type == ExternalWater.TYPE_SEA
+    loctide = WaterlevelSet.objects.filter(
+        type=WaterlevelSet.WATERLEVELSETTYPE_TIDE).order_by('name')
+
+    return render_to_response(
+        'flooding/compose_3di_scenario.html',
+        {
+         'projects': projects,
+         'sealake': None,
+         'lake': None,
+         'sea': None,
+         'loctide': loctide,
+         'pitdepth': pitdepth,
+         'bottomlevelbreach': bottomlevelbreach,
+         'breach': breach
+         })

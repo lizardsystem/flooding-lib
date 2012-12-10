@@ -924,6 +924,16 @@ class TestScenario(TestCase):
 
         self.assertTrue(scenario.visible_in_project(pm, project))
 
+    def test_is_3di(self):
+        # If the sobekmodel is 3di then the scenario is
+        sobekversion = SobekVersionF.create(
+            name="3di", fileloc_startfile="")
+        sobekmodel = SobekModelF.create(
+            sobekversion=sobekversion)
+        scenario = ScenarioF.create(sobekmodel_inundation=sobekmodel)
+
+        self.assertTrue(scenario.is_3di())
+
 
 class TestScenarioProject(TestCase):
     def test_approved(self):

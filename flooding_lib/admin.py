@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.contrib.gis.admin import OSMGeoAdmin
+#from django.contrib.gis.admin import GeoModelAdmin as OSMGeoAdmin  # temp hack
 
 from flooding_lib.models import (Attachment, Breach, BreachSobekModel,
                     CutoffLocation, CutoffLocationSet,
