@@ -41,6 +41,18 @@ class UnicodeTester(object):
 ## Model factories
 
 
+class UserF(factory.Factory):
+    FACTORY_FOR = User
+
+    username = factory.Sequence(lambda n: 'testuser{0}'.format(n))
+
+
+class GroupF(factory.Factory):
+    FACTORY_FOR = Group
+
+    name = 'some group'
+
+
 class ContentTypeF(factory.Factory):
     FACTORY_FOR = ContentType
 
@@ -48,7 +60,7 @@ class ContentTypeF(factory.Factory):
 class AttachmentF(factory.Factory):
     FACTORY_FOR = models.Attachment
 
-    content_type = ContentTypeF.create()
+    content_type = factory.SubFactory(ContentTypeF)
     object_id = 1
 
 
@@ -59,7 +71,7 @@ class SobekVersionF(factory.Factory):
 class SobekModelF(factory.Factory):
     FACTORY_FOR = models.SobekModel
 
-    sobekversion = SobekVersionF.create()
+    sobekversion = factory.SubFactory(SobekVersionF)
     sobekmodeltype = 1
     model_case = 0
     model_srid = 28992
@@ -91,38 +103,39 @@ class ExtraInfoFieldF(factory.Factory):
 class ScenarioF(factory.Factory):
     FACTORY_FOR = models.Scenario
 
-    owner = User.objects.get_or_create(username='remco')[0]
+    owner = factory.SubFactory(UserF)
     tsim = 0.0
 
 
 class ExtraScenarioInfoF(factory.Factory):
     FACTORY_FOR = models.ExtraScenarioInfo
 
-    extrainfofield = ExtraInfoFieldF(name='forextrascenarioinfo')
-    scenario = ScenarioF.build()
+    extrainfofield = factory.SubFactory(
+        ExtraInfoFieldF, name='forextrascenarioinfo')
+    scenario = factory.SubFactory(ScenarioF)
     value = None
-
-
-class ScenarioProjectF(factory.Factory):
-    FACTORY_FOR = models.ScenarioProject
-
-    scenario = factory.LazyAttribute(lambda obj: ScenarioF.create())
-    project = factory.LazyAttribute(lambda obj: ProjectF.create())
-    is_main_project = True
 
 
 class ProjectF(factory.Factory):
     FACTORY_FOR = models.Project
 
-    owner = User.objects.get_or_create(username='remco')[0]
+    owner = factory.SubFactory(UserF)
     friendlyname = "friendly name of ProjectF"
+
+
+class ScenarioProjectF(factory.Factory):
+    FACTORY_FOR = models.ScenarioProject
+
+    scenario = factory.SubFactory(ScenarioF)
+    project = factory.SubFactory(ProjectF)
+    is_main_project = True
 
 
 class UserPermissionF(factory.Factory):
     """Factory for UserPermission."""
     FACTORY_FOR = models.UserPermission
 
-    user = User.objects.get_or_create(username='remco')[0]
+    user = factory.SubFactory(UserF)
     permission = models.UserPermission.PERMISSION_SCENARIO_VIEW
 
 
@@ -130,8 +143,8 @@ class ProjectGroupPermissionF(factory.Factory):
     """Factory for ProjectGroupPermission."""
     FACTORY_FOR = models.ProjectGroupPermission
 
-    group = Group.objects.get_or_create(name="some group")[0]
-    project = ProjectF.build()
+    group = factory.SubFactory(GroupF, name="some group")
+    project = factory.SubFactory(ProjectF)
 
     permission = models.UserPermission.PERMISSION_SCENARIO_VIEW
 
@@ -165,15 +178,21 @@ class DikeF(factory.Factory):
     name = "Een dijk"
 
 
+class WaterlevelSetF(factory.Factory):
+    FACTORY_FOR = models.WaterlevelSet
+
+    type = models.WaterlevelSet.WATERLEVELSETTYPE_UNDEFINED
+
+
 class BreachF(factory.Factory):
     FACTORY_FOR = models.Breach
 
     name = 'testname'
 
-    externalwater = factory.LazyAttribute(lambda obj: ExternalWaterF.create())
-    region = factory.LazyAttribute(lambda obj: RegionF.create())
-    dike = factory.LazyAttribute(lambda obj: DikeF.create())
-    defaulttide = factory.LazyAttribute(lambda obj: WaterlevelSetF.create())
+    externalwater = factory.SubFactory(ExternalWaterF)
+    region = factory.SubFactory(RegionF)
+    dike = factory.SubFactory(DikeF)
+    defaulttide = factory.SubFactory(WaterlevelSetF)
 
     levelnormfrequency = 1
     groundlevel = 1
@@ -198,18 +217,12 @@ class CutoffLocationSetF(factory.Factory):
     name = "some cutofflocationset"
 
 
-class WaterlevelSetF(factory.Factory):
-    FACTORY_FOR = models.WaterlevelSet
-
-    type = models.WaterlevelSet.WATERLEVELSETTYPE_UNDEFINED
-
-
 class ScenarioBreachF(factory.Factory):
     FACTORY_FOR = models.ScenarioBreach
 
-    scenario = factory.LazyAttribute(lambda obj: ScenarioF.create())
-    breach = factory.LazyAttribute(lambda obj: BreachF.create())
-    waterlevelset = factory.LazyAttribute(lambda obj: WaterlevelSetF.create())
+    scenario = factory.SubFactory(ScenarioF)
+    breach = factory.SubFactory(BreachF)
+    waterlevelset = factory.SubFactory(WaterlevelSetF)
 
     widthbrinit = 1
     methstartbreach = 1
@@ -229,9 +242,8 @@ class ScenarioCutoffLocationF(factory.Factory):
     """Factory for ScenarioCutoffLocation."""
     FACTORY_FOR = models.ScenarioCutoffLocation
 
-    scenario = factory.LazyAttribute(lambda obj: ScenarioF.create())
-    cutofflocation = factory.LazyAttribute(
-        lambda obj: CutoffLocationF.create())
+    scenario = factory.SubFactory(ScenarioF)
+    cutofflocation = factory.SubFactory(CutoffLocationF)
 
 
 class ProgramF(factory.Factory):
@@ -252,10 +264,8 @@ class CutoffLocationSobekModelSettingF(factory.Factory):
     """Factory for CutoffLocationSobekModelSetting."""
     FACTORY_FOR = models.CutoffLocationSobekModelSetting
 
-    cutofflocation = factory.LazyAttribute(
-        lambda obj: CutoffLocationF.create())
-    sobekmodel = factory.LazyAttribute(
-        lambda obj: SobekModelF.create())
+    cutofflocation = factory.SubFactory(CutoffLocationF)
+    sobekmodel = factory.SubFactory(SobekModelF)
 
     sobekid = "some sobekid"
 
@@ -272,9 +282,9 @@ class TaskF(factory.Factory):
     """Factory for Task."""
     FACTORY_FOR = models.Task
 
-    scenario = factory.LazyAttribute(lambda obj: ScenarioF.create())
+    scenario = factory.SubFactory(ScenarioF)
     remarks = ''
-    tasktype = factory.LazyAttribute(lambda obj: TaskTypeF.create())
+    tasktype = factory.SubFactory(TaskTypeF)
 
     creatorlog = "test"
 
@@ -937,7 +947,7 @@ class TestScenario(TestCase):
 
 class TestScenarioProject(TestCase):
     def test_approved(self):
-        sp = ScenarioProjectF.build()
+        sp = ScenarioProjectF.create()
         self.assertTrue(sp.approved is None)
 
         ao = mock.MagicMock()
@@ -947,7 +957,7 @@ class TestScenarioProject(TestCase):
         self.assertTrue(sp.approved)
 
     def test_disapproved(self):
-        sp = ScenarioProjectF.build()
+        sp = ScenarioProjectF.create()
         self.assertTrue(sp.approved is None)
 
         ao = mock.MagicMock()
@@ -958,7 +968,7 @@ class TestScenarioProject(TestCase):
         self.assertTrue(sp.approved is False)
 
     def test_neither(self):
-        sp = ScenarioProjectF.build()
+        sp = ScenarioProjectF.create()
         self.assertTrue(sp.approved is None)
 
         ao = mock.MagicMock()

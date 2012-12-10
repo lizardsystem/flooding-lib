@@ -205,7 +205,8 @@ def get_header_style_for(rownr, colnr, header):
 
 
 def write_domeinlijst(worksheet, column, header):
-    if not header['fieldtype'] == 'Select':
+    if 'inputfield' not in header or header['inputfield'].type != 80:
+        logger.debug("Not a select.")
         return False
 
     try:

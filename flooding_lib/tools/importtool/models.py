@@ -269,18 +269,16 @@ class ImportScenario(models.Model):
                 os.makedirs(dest_path)
 
             result.resultloc = dest_file_rel
-            result.save()
 
-            # Replace \ by / so that it works on both Linux and Windows
-
-            # The directory
-            # /p-flod-fs-00-d1.external-nens.local/flod-share/ was
-            # created on both flooding webservers to make a path like
-            # that work on both sides.
             filepath = filepath.replace('\\', '/')
             dest_file = dest_file.replace('\\', '/')
 
-            copyfile(filepath, dest_file)
+            if os.path.exists(filepath):
+                # Apparently it somehow happens that the files don't exist.
+                # Then we must skip saving the result too.
+                result.save()
+
+                copyfile(filepath, dest_file)
 
     def import_into_flooding(self, username):
         """Import all fields into the correct fields in flooding.
