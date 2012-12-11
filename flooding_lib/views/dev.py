@@ -367,6 +367,9 @@ def service_save_new_3di_scenario(request):
             return float(value) / (24 * 60 * 60 * 1000)
 
     query = request.POST
+    breach = Breach.objects.get(pk=query.get('breach_id'))
+
+    result_base_path = breach.region.path
     scenario = Scenario.objects.create(
         name=query.get('name'),
         owner=request.user,
@@ -375,7 +378,8 @@ def service_save_new_3di_scenario(request):
             pk=query.get('inundationmodel')),
         tsim=to_intervalfloat(query.get('tsim_ms')),
         calcpriority=query.get('calcpriority'),
-        config_3di=query.get('config_3di'))
+        config_3di=query.get('config_3di'),
+        result_base_path=result_base_path)
     scenario.set_project(Project.objects.get(pk=query.get('project_fk')))
 
     scenario.code = '2s_c_%i' % scenario.id

@@ -152,10 +152,15 @@ class SobekModel(models.Model):
             self.sobekversion.name == "3di")
         
     def __unicode__(self):
-        return ('type: %s case: %d version: %s' %
-                (self.TYPE_DICT[self.sobekmodeltype],
-                 self.model_case,
-                 self.model_version))
+        """More descriptive view for 3di models"""
+        if self.is_3di():
+            return ('3di model: %s %s' % (self.project_fileloc.split('/')[-1], self.model_varname))
+        else:
+            return ('type: %s case: %d version: %s' %
+                    (self.TYPE_DICT[self.sobekmodeltype],
+                     self.model_case,
+                     self.model_version))
+
 
     def get_summary_str(self):
         """Return object summary in unicode, with markdown layout
@@ -1036,6 +1041,11 @@ class Scenario(models.Model):
     # Set by 'task 155' in the new flooding-worker tasks.
     has_sobek_presentation = models.NullBooleanField()
 
+    # 
+    result_base_path = models.TextField(
+        null=True, blank=True, 
+        help_text='If left blank, the path is retrieved through scenario.breaches[0].region.path'
+        )
     # This field for 3di a setting
     config_3di = models.CharField(
         max_length=50, blank=True, null=True)
@@ -1159,8 +1169,14 @@ class Scenario(models.Model):
         return datetime.datetime(self.tsim)
 
     def get_rel_destdir(self):
-        leading_breach = self.breaches.all()[0]
-        return os.path.join(leading_breach.region.path, str(self.id))
+        if self.result_base_path:
+            # 3Di way
+            result_base_path = self.result_base_path
+        else:
+            # Traditional way
+            leading_breach = self.breaches.all()[0]
+            result_base_path = leading_breach.region.path
+        return os.path.join(result_base_path, str(self.id))
 
     def get_status(self):
         """Get status of scenario by looking at tasks

@@ -24,6 +24,18 @@ def full_model_path(rel_path):
         return model_path
 
 
+def configure_3di(mdu_full_path, scenario):
+    """
+    modify mdu file at mdu_full_path.
+
+    scenario.config_3di
+
+    this is the line we wanna change:
+    FloodWaterLevel              = 1.                  # Flood fill water level (m)
+    """
+    pass
+
+
 def run_threedi_task(some_id, some_type):
     """
     3Di task
@@ -66,6 +78,9 @@ def run_threedi_task(some_id, some_type):
         mdu_full_path = os.path.join(tmp_path, scenario.sobekmodel_inundation.model_varname)
         #print files_in_zip
         #nc_filename = setup_and_run_3di(mdu_full_path, skip_if_results_available=False)
+
+        print "configuring mdu file (put config_3di in it)..."
+        configure_3di(mdu_full_path, scenario)
 
         print "running..."
         nc_filename = setup_and_run_3di(
