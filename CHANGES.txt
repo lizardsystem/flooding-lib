@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.47 (unreleased)
+2.47 (2012-12-12)
 -----------------
 
 - Fixed task 210; added field Scenario.result_base_path for 3Di. Traditionally
