@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.48 (unreleased)
+2.48 (2012-12-17)
 -----------------
 
 - Added creating ScenarioBreach when creating 3Di scenario. This
