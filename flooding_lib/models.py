@@ -1403,9 +1403,10 @@ class Scenario(models.Model):
             scenariobreach.save()
 
         elif table == 'extrascenarioinfo':
-            esi = ExtraScenarioInfo.get(
-                scenario=self, fieldname=field)
-            if esi is None:
+            try:
+                esi = ExtraScenarioInfo.objects.get(
+                    scenario=self, extrainfofield__name=field)
+            except ExtraScenarioInfo.DoesNotExist:
                 eif = ExtraInfoField.objects.get(name=field)
                 esi = ExtraScenarioInfo(
                     scenario=self,

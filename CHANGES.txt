@@ -7,6 +7,8 @@ Changelog of flooding-lib
 - Added creating ScenarioBreach when creating 3Di scenario. This
   ScenarioBreach is dummy, but it is needed by various flooding components.
 
+- Using objects.get() instead of get() in Scenario.set_value_for_inputfield;
+  prevents an error in some cases with uploading Excel sheets.
 
 2.47 (2012-12-12)
 -----------------
