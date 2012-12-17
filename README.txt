@@ -75,8 +75,8 @@ Upgrade to 3Di support
 
 - Make the region part of a region set.
 
-- Make workflow with code 8. This workflow consists of tasks: 210 -> 220 ->
-  185.
+- Make workflow with code 8. This workflow consists of tasks: 210 ->
+  220/221/222 -> 155.
 
 
 Task 210/220 threedi
