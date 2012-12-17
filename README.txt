@@ -44,6 +44,27 @@ Task 200
     $ bin/django lw_task_worker --task_code 200 --log_level DEBUG --worker_nr 1
 
 
+Task 210
+========
+
+Do a 3Di calculation on a scenario and place the result netcdf back in a zip
+subgrid_map.zip.
+
+
+Task 220/221/222
+================
+
+Convert the netcdf in zip to a bunch of geo referenced png images.
+
+- 220: Mask of region, automatic resolution setting. This is the preferred
+  task.
+
+- 221: Mask of region, take gridsize 0.5 (finest detail). Use only for small
+  areas.
+
+- 222: No mask of region, automatic resolution setting.
+
+
 Upgrade to 3Di support
 ======================
 
