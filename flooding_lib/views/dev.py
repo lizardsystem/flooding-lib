@@ -385,6 +385,16 @@ def service_save_new_3di_scenario(request):
     scenario.code = '2s_c_%i' % scenario.id
     scenario.save()
 
+    # Save breach: needed for visualization parts
+    sb = ScenarioBreach.objects.create(
+        scenario=scenario,
+        breach=breach,
+        waterlevelset=WaterlevelSet.objects.all()[0],  # some random
+        widthbrinit=0, methstartbreach=1, tstartbreach=0,
+        hstartbreach=0, brdischcoef=0, brf1=0, brf2=0, bottomlevelbreach=0,
+        ucritical=0, pitdepth=0, tmaxdepth=0, extwmaxlevel=0
+        )
+
     task = scenario.setup_initial_task(request.user)
 
     task.tfinished = datetime.datetime.now()
