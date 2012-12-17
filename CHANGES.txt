@@ -4,7 +4,7 @@ Changelog of flooding-lib
 2.49 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Re-release after actually doing git pull. Silly me.
 
 
 2.48 (2012-12-17)
