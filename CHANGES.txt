@@ -4,7 +4,8 @@ Changelog of flooding-lib
 2.49 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Export runs can now have different sized rasters as input. Removed masking
+  dijkring, because in the testcase everything was masked away.
 
 
 2.48.1 (2012-12-17)
@@ -21,6 +22,7 @@ Changelog of flooding-lib
 
 - Using objects.get() instead of get() in Scenario.set_value_for_inputfield;
   prevents an error in some cases with uploading Excel sheets.
+
 
 2.47 (2012-12-12)
 -----------------

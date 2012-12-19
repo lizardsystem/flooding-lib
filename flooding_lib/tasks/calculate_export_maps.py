@@ -115,6 +115,7 @@ def get_dijkring_mask(dijkringnr, geo_projection, geo_transform, size_x, size_y)
             print 'Check Exporttool.Setting DIJKRING_SHAPES_FOLDER, taking %s' % dijkring_shapes_folder
 
         shapefile_name = os.path.join(dijkring_shapes_folder, 'dr__%d.shp' % dijkringnr)
+        print 'Reading shapefile %s...' % (shapefile_name)
         dataset = driver.Open(shapefile_name, 0)
 
         dijkring_layer = dataset.GetLayer()
@@ -149,7 +150,7 @@ def get_dijkring_mask(dijkringnr, geo_projection, geo_transform, size_x, size_y)
         return ds_result.GetRasterBand(1).ReadAsArray()
 
 
-def dijkring_arrays_to_zip(input_files, tmp_zip_filename, gridtype='output'):
+def dijkring_arrays_to_zip(input_files, tmp_zip_filename, gridtype='output', gridsize=50):
     """
     Return arrays in a dict with key 'dijkringnr'.
     Value is a list of 2-tuples (masked_array, geo_transform)
@@ -161,6 +162,42 @@ def dijkring_arrays_to_zip(input_files, tmp_zip_filename, gridtype='output'):
     dijkring_arrays = {}  # key is dijkringnr
     result = {}
 
+    x_min = None
+    x_max = None
+    y_max = None
+    y_min = None
+    
+    for input_file in input_files:
+        print '  - checking bbox of %s...' % input_file['scenario']
+        #print input_file
+        linux_filename = linuxify_pathname(input_file['filename'])
+        dijkringnr = input_file['dijkringnr']
+        with files.temporarily_unzipped(linux_filename) as files_in_zip:
+            for filename_in_zip in files_in_zip:
+                print filename_in_zip
+                dataset = gdal.Open(filename_in_zip)
+                dataset.RasterXSize, dataset.RasterYSize
+                geo_transform = dataset.GetGeoTransform()
+                # something like (183050.0, 25.0, 0.0, 521505.0, 0.0, -25.0)
+                this_x_min, this_y_max = geo_transform[0], geo_transform[3]
+                this_x_max = this_x_min + dataset.RasterXSize * geo_transform[1]
+                this_y_min = this_y_max + dataset.RasterYSize * geo_transform[5]
+
+                if x_min is None or this_x_min < x_min:
+                    x_min = this_x_min
+                if x_max is None or this_x_max > x_max:
+                    x_max = this_x_max
+                if y_min is None or this_y_min < y_min:
+                    y_min = this_y_min
+                if y_max is None or this_y_max > y_max:
+                    y_max = this_y_max
+                del dataset
+   
+    size_x = int(abs((x_max - x_min) / gridsize))
+    size_y = int(abs((y_max - y_min) / gridsize))
+    print 'resulting image: %f %f %f %f size: %f %f' % (
+        x_min, y_min, x_max, y_max, size_x, size_y)
+
     for input_file in input_files:
         print '  - processing result for scenario %s...' % input_file['scenario']
         #print input_file
@@ -169,19 +206,43 @@ def dijkring_arrays_to_zip(input_files, tmp_zip_filename, gridtype='output'):
         dijkringnr = input_file['dijkringnr']
         with files.temporarily_unzipped(linux_filename) as files_in_zip:
             for filename_in_zip in files_in_zip:
-                print filename_in_zip
+                #print filename_in_zip
                 dataset = gdal.Open(filename_in_zip)
+                #reprojected_dataset = dataset
+                reprojected_dataset = gdal.GetDriverByName('mem').Create(
+                    'dummyname', size_x, size_y, 1, gdal.gdalconst.GDT_Float64)
+                reprojected_dataset.SetGeoTransform((x_min, gridsize, 0, y_max, 0, -gridsize))
+
+                band = reprojected_dataset.GetRasterBand(1)
+                #print dir(band)
+                NO_DATA_VALUE = -999
+                band.SetNoDataValue(NO_DATA_VALUE)
+                band.Fill(NO_DATA_VALUE)
+                gdal.ReprojectImage(dataset, reprojected_dataset)
+
+                # testing
+                #gdal.GetDriverByName('aaigrid').CreateCopy('test.asc', reprojected_dataset)
+
+                # (183050.0, 25.0, 0.0, 521505.0, 0.0, -25.0) 
+                #print dataset.GetGeoTransform(), dataset.GetProjection()
                 # Read the data into a masked array
-                arr = dataset.ReadAsArray()
-                ndv = dataset.GetRasterBand(1).GetNoDataValue()
-                masked_array = np.ma.array(arr, mask=(arr == ndv))
+                arr = reprojected_dataset.ReadAsArray()
+                ndv = reprojected_dataset.GetRasterBand(1).GetNoDataValue()
+                # Commented this out, because everything was masked away in the test case.
+                #masked_array = np.ma.array(arr, mask=(arr == ndv))
+                masked_array = np.ma.array(arr)
                 if dijkringnr not in dijkring_arrays:
                     dijkring_arrays[dijkringnr] = []
-                geo_transform = dataset.GetGeoTransform()
-                geo_projection = dataset.GetProjection()
+                #print masked_array.max()
+                geo_transform = reprojected_dataset.GetGeoTransform()
+                geo_projection = reprojected_dataset.GetProjection()  # why empty? does it matter?
                 dijkring_arrays[dijkringnr].append((masked_array, geo_transform, geo_projection))
+                #print masked_array.max()
                 del dataset  # This closes the file, so that the
                              # directory can be deleted in Windows
+
+    #print dijkring_arrays[9][0][0].max(), dijkring_arrays[9][1][0].max()
+    #print np.maximum(dijkring_arrays[9][0][0], dijkring_arrays[9][1][0]).max()
 
     for dijkringnr, arrays in dijkring_arrays.items():
         # for each dijkringnr, calculate max(arrays)
@@ -191,12 +252,13 @@ def dijkring_arrays_to_zip(input_files, tmp_zip_filename, gridtype='output'):
         geo_transform = arrays[0][1]
         geo_projection = arrays[0][2]
 
-        # Apply dijkring mask
-        mask = get_dijkring_mask(
-            dijkringnr, geo_projection, geo_transform,
-            max_array.shape[1], max_array.shape[0])
-        # Everything is masked: a) if it was masked already OR b) it's in the dijkring_mask
-        max_array.mask = np.maximum(mask, max_array.mask)
+        # Commented this out, because everything was masked away in the test case.
+        # # Apply dijkring mask
+        # mask = get_dijkring_mask(
+        #     dijkringnr, geo_projection, geo_transform,
+        #     max_array.shape[1], max_array.shape[0])
+        # # Everything is masked: a) if it was masked already OR b) it's in the dijkring_mask
+        # max_array.mask = np.maximum(mask, max_array.mask)
 
         result[dijkringnr] = (max_array, geo_transform)
 
@@ -234,7 +296,9 @@ def calculate_export_maps(exportrun_id):
         export_result_type = ResultType.objects.get(name=gridtype).id
         # Find out input files for this type
         input_files = export_run.input_files(export_result_type)
-        max_waterdepths = dijkring_arrays_to_zip(input_files, tmp_zip_filename, gridtype)
+        max_waterdepths = dijkring_arrays_to_zip(
+            input_files, tmp_zip_filename, gridtype,
+            gridsize=export_run.gridsize)
 
     if export_run.export_max_flowvelocity:
         # Calc max flow velocity
@@ -244,7 +308,9 @@ def calculate_export_maps(exportrun_id):
         export_result_type = ResultType.objects.get(name=gridtype).id
         # Find out input files for this type
         input_files = export_run.input_files(export_result_type)
-        max_flowvelocities = dijkring_arrays_to_zip(input_files, tmp_zip_filename, gridtype)
+        max_flowvelocities = dijkring_arrays_to_zip(
+            input_files, tmp_zip_filename, gridtype,
+            gridsize=export_run.gridsize)
 
     if export_run.export_possibly_flooded:
         # Calculate the possible flooded area
