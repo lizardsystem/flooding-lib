@@ -219,7 +219,7 @@ def new_export(request):
                     text_file_location)
 
             # Make a workflow for the export and run it
-            workflow_template = WorkflowTemplate.objects.get(code='3')
+            workflow_template = WorkflowTemplate.objects.get(code='4')
             result = start_workflow(
                 new_export_run.id,
                 workflow_template.id, log_level='INFO',

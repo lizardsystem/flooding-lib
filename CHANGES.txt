@@ -4,7 +4,7 @@ Changelog of flooding-lib
 2.50 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Export run now starts workflow template with code 4 (instead of 3).
 
 
 2.49 (2012-12-19)
