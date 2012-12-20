@@ -4,7 +4,7 @@ Changelog of flooding-lib
 2.51 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Added error handling in task 200 to make it work on production task server.
 
 
 2.50 (2012-12-19)

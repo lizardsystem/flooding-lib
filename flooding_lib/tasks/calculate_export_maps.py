@@ -175,7 +175,7 @@ def dijkring_arrays_to_zip(input_files, tmp_zip_filename, gridtype='output', gri
         with files.temporarily_unzipped(linux_filename) as files_in_zip:
             for filename_in_zip in files_in_zip:
                 print filename_in_zip
-                dataset = gdal.Open(filename_in_zip)
+                dataset = gdal.Open(str(filename_in_zip))
                 dataset.RasterXSize, dataset.RasterYSize
                 geo_transform = dataset.GetGeoTransform()
                 # something like (183050.0, 25.0, 0.0, 521505.0, 0.0, -25.0)
@@ -207,7 +207,7 @@ def dijkring_arrays_to_zip(input_files, tmp_zip_filename, gridtype='output', gri
         with files.temporarily_unzipped(linux_filename) as files_in_zip:
             for filename_in_zip in files_in_zip:
                 #print filename_in_zip
-                dataset = gdal.Open(filename_in_zip)
+                dataset = gdal.Open(str(filename_in_zip))
                 #reprojected_dataset = dataset
                 reprojected_dataset = gdal.GetDriverByName('mem').Create(
                     'dummyname', size_x, size_y, 1, gdal.gdalconst.GDT_Float64)
@@ -264,6 +264,8 @@ def dijkring_arrays_to_zip(input_files, tmp_zip_filename, gridtype='output', gri
 
         ascii_filename = mktemp()
         write_masked_array_as_ascii(ascii_filename, max_array, geo_transform)
+	if dijkringnr is None:
+            dijkringnr = 0
         arc_name = '%s_%d.asc' % (gridtype, dijkringnr)
         add_to_zip(tmp_zip_filename,
                    [{'filename': ascii_filename, 'arcname': arc_name, 'delete_after': True}])
@@ -320,6 +322,8 @@ def calculate_export_maps(exportrun_id):
             flooded_array = np.ma.where(array[0] < 0.02, 0, 1)
             #possibly_flooded[dijkringnr] = flooded_array
             ascii_filename = mktemp()
+            if dijkringnr is None:
+                dijkringnr = 0
             arc_name = 'possibly_flooded_%d.asc' % (dijkringnr)
             geo_transform = array[1]
             write_masked_array_as_ascii(ascii_filename, flooded_array, geo_transform)
