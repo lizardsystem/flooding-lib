@@ -83,14 +83,8 @@ def export_detail(request, export_run_id):
     export_run = get_object_or_404(ExportRun, pk=export_run_id)
 
     main_result = export_run.get_main_result()
-    main_result_file_url = (
-        get_result_path_location(main_result) if main_result else None)
-    main_result_name = main_result.name if main_result else None
-
-    results_list = []
-    for result in export_run.result_set.order_by('area'):
-        path = get_result_path_location(result)
-        results_list += [[result.get_area_display(), result.name, path]]
+    
+    path = main_result.file_basename if main_result else None
 
     num_scenarios = len(export_run.scenarios.all())
     num_projects = len(
@@ -100,13 +94,10 @@ def export_detail(request, export_run_id):
         {'name': _('Export tool'),
          'url': reverse('flooding_tools_export_index')},
         {'name': _('Export detail')}]
-
     return render_to_response(
         'export/exports_run_detail.html',
         {'export_run': export_run,
-         'export_run_main_result_file_url': main_result_file_url,
-         'export_run_main_result_name': main_result_name,
-         'results_list': results_list,
+         'path': path,
          'num_scenarios': num_scenarios,
          'num_projects': num_projects,
          'breadcrumbs': breadcrumbs})

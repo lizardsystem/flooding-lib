@@ -20,31 +20,23 @@
 			<table class="timeseries" summary="timeseries">
 			  <tbody>
 				<tr class="cellDark">
-					<td width="150"><b>{% get_verbose_name export_run "name" %}</b></td>
+					<td><b>{% get_verbose_name export_run "name" %}</b></td>
 					<td>{{ export_run.name }}</td>
 				</tr>
 				<tr class="cell">
-					<td width="50"><b>{% get_verbose_name export_run "owner" %}</b></td>
+					<td><b>{% get_verbose_name export_run "owner" %}</b></td>
 					<td>{{ export_run.owner.username }}</td>
 				</tr>
 				<tr class="cellDark">
-					<td width="75"><b>{% get_verbose_name export_run "creation_date" %}</b></td>
+					<td><b>{% get_verbose_name export_run "creation_date" %}</b></td>
 					<td>{{ export_run.creation_date|date:"d-m-Y"}}</td>
-				</tr>
-				<tr class="cell">
-					<td width="75"><b>{% get_verbose_name export_run "run_date" %}</b></td>
-					<td>{{ export_run.run_date|date:"d-m-Y"}}</td>
-				</tr>						
-				<tr class="cellDark">
-					<td width="50"><b>{% get_verbose_name export_run "approved_date" %}</b></td>
-					<td>{{ export_run.approved_date|date:"d-m-Y" }}</td>
 				</tr>			
 				<tr class="cell">
-					<td width="373"><b>{% get_verbose_name export_run "description" %}</b></td>
+					<td><b>{% get_verbose_name export_run "description" %}</b></td>
 					<td>{{ export_run.description }}</td>
 				</tr>
 				<tr class="cellDark">
-					<td width="373"><b>{% trans "Selected maps" %}</b></td>
+					<td><b>{% trans "Selected maps" %}</b></td>
 					<td>{% if export_run.export_max_waterdepth %}
 					       {% get_verbose_name export_run "export_max_waterdepth" %}
 					       <br>
@@ -59,43 +51,22 @@
 					</td>
 				</tr>
 				<tr class="cell">
-					<td width="50"><b>{% trans "Used scenarios and projects (x out of y)" %}</b></td>
+					<td><b>{% trans "Used scenarios and projects (x out of y)" %}</b></td>
 					<td>
 						<a href="{% url flooding_tools_export_detail_scenarios export_run_id=export_run.id %}">{{ num_scenarios }} {% trans "out of" %} {{num_projects}}</a> 
 					</td>
 				</tr>				
 				<tr class="cellDark">
-					<td width="50"><b>{% trans "Result file" %}</b></td>					
+					<td><b>{% trans "Result file" %}</b></td>					
 					<td>
-						{% if export_run_main_result_file_url %}
-							<a href="{% url flooding_tools_export_index %}?action=get_attachment&path={{export_run_main_result_file_url}}">{{export_run_main_result_name}}</a>
+						{% if path %}
+							<a href="{% url flooding_tools_export_index %}?action=get_attachment&path={{path}}">{% trans "Result file" %}</a>
 						{% else %}
 							-
 						{% endif %}
 					</td>
 				</tr>	
 				</tbody>
-			</table>
-		</table>
-		
-		<table class="timeseriesWrapper"><tr><td>
-			<table class="timeseries" summary="timeseries">
-				<thead class="headerTitle">
-					<td width="50"><b>{% trans "Area" %}</b></td>					
-					<td width="50"><b>{% trans "Result file" %}</b></td>
-				</thead>
-				<tbody>
-				{% if  results_list %}
-			 		{% for result in results_list %}			 		   	        
-					    <tr class="{% cycle 'cellDark' 'cell'%}">					    		
-				    		<td>{{result.0}}</td>
-				    		<td><a href="{% url flooding_tools_export_index %}?action=get_attachment&path={{result.2}}">{{result.1}}</a></td>			    			    		
-				    	</tr>	     					   
-			    	{% endfor %}
-			    {% else %}
-			       <tr class='cellDark'><td COLSPAN=2> - </td></tr>
-			    {% endif %} 
-			    </tbody>   
 			</table>
 		</table>
 </div>
