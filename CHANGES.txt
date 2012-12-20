@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.52 (unreleased)
+2.52 (2012-12-20)
 -----------------
 
 - Fix 'Export run details' view.
