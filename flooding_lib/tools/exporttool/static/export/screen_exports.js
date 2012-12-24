@@ -77,6 +77,7 @@ isc.ResultSet.create({
 });
 
 var LoadScenariosForProject = function(projectId){
+    msg.animateShow();
     dsScenariosExport.transformRequest= function (dsRequest) {
     	if (dsRequest.operationType == "fetch") {
     	    var params = {action : 'get_scenarios_export_list', project_id: projectId};
@@ -88,9 +89,10 @@ var LoadScenariosForProject = function(projectId){
     dsScenariosExport.fetchData({}, function(response, data, request){
 	// call fetchData on list grid to 
 	// prepare the local store for filtering
-    	scenariosAllListGrid.setData(data);	
+	scenariosAllListGrid.setData(data);	
     	scenariosAllListGrid.fetchData();
-    });
+	msg.animateHide();
+    });  
 };
 
 /***
@@ -266,6 +268,12 @@ isc.Img.create({
     click:"copyToAllGrid();"
 });
 
+isc.Label.create({
+    ID:"msg",
+    wrap:false,
+    contents:"Data aan het laden ..."
+})
+
 isc.ScenariosListGrid.create({
     ID:"scenariosToExportListGrid",
     canDragRecordsOut: true,
@@ -289,14 +297,18 @@ isc.ScenariosListGrid.create({
 
 /*** Arrange UI elements ***/
 isc.VLayout.create({
-    overflow: "auto",
     width: "100%",
     height: "100%",
     autoDraw: true,
     membersMargin: 10,
     members: [
 	breadcrumbs,
-	projectSelector,
+	isc.HStack.create({
+	    membersMargin: 0,
+	    overflow: "visible",
+	    members:[projectSelector,
+		     msg]
+	}),
 	isc.HStack.create({
 	    membersMargin: 10,
 	    height: 160,
@@ -314,3 +326,4 @@ isc.VLayout.create({
 	exportRunHTMLPane
     ]
 });
+msg.hide();
