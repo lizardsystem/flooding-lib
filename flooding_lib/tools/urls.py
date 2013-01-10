@@ -13,6 +13,9 @@ urlpatterns = patterns(
     url(r'^import/',
         include('flooding_lib.tools.importtool.urls')),
 
+    url(r'^workflow/',
+        include('flooding_lib.tools.workflowtool.urls')),
+
     url(r'^approval/',
         include('flooding_lib.tools.approvaltool.urls')),
 
