@@ -185,14 +185,14 @@ class ImportScenario(models.Model):
             scenario = self.scenario
         else:
             scenario = Scenario.objects.create(
-                name=str(scenario_values.get("name", "-")),
+                name=unicode(scenario_values.get("name", u"-")),
                 owner=self.owner,
-                remarks=str(scenario_values.get("remarks", "")),
+                remarks=unicode(scenario_values.get("remarks", u"")),
                 sobekmodel_inundation=SobekModel.objects.get(
                     pk=1),  # only link to dummy is possible
                 tsim=float(scenario_values.get("tsim", 0)),
                 # calcpriority
-                code="2impsc_" + str(self.id))
+                code=(u"2impsc_{0}".format(self.id)))
             scenario.set_project(self.project)
             scenario.set_approval_object(self.project, self.approvalobject)
             self.scenario = scenario
