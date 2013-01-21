@@ -2,6 +2,7 @@ from __future__ import unicode_literals, division
 from __future__ import print_function, absolute_import
 
 import os
+import scipy
 import shutil
 import tempfile
 import zipfile
@@ -215,3 +216,24 @@ def mktemp(prefix='task_'):
     pathname = f.name
     f.close()
     return pathname
+
+
+def save_geopng(path, colorgrid, geo_transform=None):
+    """Save colored grid data to an image.
+
+    Colorgrid is a (4 x n x m) grid that should be saved as an
+    image. The 4 planes are red, green, blue and opacity.
+
+    If the path ends in '.png' and a geo_transform is given, a '.pgw'
+    file containing this data is also created, so that the image
+    functions as a "geopng".
+    """
+
+    scipy.misc.imsave(path, colorgrid)
+
+    if path.endswith('.png') and geo_transform is not None:
+        pgw = path[:-4] + '.pgw'
+        f = file(pgw, 'w')
+        for gt in geo_transform:
+            f.write("{0}\n".format(gt))
+        f.close()

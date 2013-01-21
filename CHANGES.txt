@@ -4,7 +4,8 @@ Changelog of flooding-lib
 2.55 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Rewrite png_generation script to use numpy and gdal instead of the
+  nens.asc libraries.
 
 
 2.54 (2013-01-14)

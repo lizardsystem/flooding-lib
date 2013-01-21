@@ -33,8 +33,10 @@ from __future__ import absolute_import, division
 import logging
 import numpy
 import numpy.ma
-import scipy
 import zipfile
+
+from flooding_lib.util import files
+
 
 logger = logging.getLogger(__name__)
 
@@ -187,48 +189,34 @@ class Flsh(object):
                 if classvalue == 0:
                     value = 0.0
                 else:
-#                    logger.debug(
-#                        "classvalue={0} class_column={1}"
-#                        .format(classvalue, class_column))
                     value = header['classes'][classvalue - 1][class_column]
-#                logger.debug(
-#                    "row={0} col={1} value={2}".format(row, col, value))
                 the_array[-col][row - 1] = value
 
 
 def save_grid_to_image(grid, path, classes, colormap, geo_transform=None):
-    """Assumes that all values in the grid are values that come from
+    """Save this grid as an image.
+
+    Assumes that all values in the grid are values that come from
     one of the classes. Translates the values in the classes to colors
     from the colormap, then finds all the places in the grid that are
     equal to that class and sets all those to the right color.
 
-    The value 0.0 is translated to 'transparent'.
+    Because of the above (classes) this save functions is not exactly
+    the same as the ColorMap.apply_to_grid() and files.save_geopng()
+    functions.
 
     The type of image is decided by the path, but I only test with
-    PNG.
-
-    If path ends with .png, and geo_transform is not None, save a .pgw along
-    with the .png based on the geo_transform."""
-#    print(classes)
-
-    colormap = colormap[::-1]
-#    print(colormap)
+    PNG."""
 
     classvalues = set()
     for classline in classes:
         for value in classline:
             classvalues.add(value)
 
-#    print(classvalues)
-
     class_to_color = dict()
     for classvalue in classvalues:
-        for value, color in colormap:
-            if classvalue > value:
-                class_to_color[classvalue] = color
-                break
-        else:
-            class_to_color[classvalue] = (0, 0, 0, 0)
+        class_to_color[classvalue] = (
+            colormap.value_to_color(classvalue) or (0, 0, 0, 0))
 
     n, m = grid.shape
     colorgrid = numpy.zeros((4, n, m), dtype=numpy.uint8)
@@ -247,13 +235,9 @@ def save_grid_to_image(grid, path, classes, colormap, geo_transform=None):
     colorgrid[1] = greengrid
     colorgrid[2] = bluegrid
 
-    scipy.misc.imsave(path, colorgrid)
+    # Colored pixels get opacity 255, non-colored pixels opacity 0
+    # (transparent)
+    colorgrid[3] = (
+        ((redgrid > 0) | (greengrid > 0) | (bluegrid > 0)) * 255)
 
-    if path.endswith('.png') and geo_transform is not None:
-        pgw = path[:-4] + '.pgw'
-        f = file(pgw, 'w')
-        for gt in geo_transform:
-            f.write("{0}\n".format(gt))
-        f.close()
-
-    print("{0} saved.".format(path))
+    files.save_geopng(path, colorgrid, geo_transform)

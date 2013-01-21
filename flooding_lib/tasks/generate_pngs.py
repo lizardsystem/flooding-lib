@@ -9,18 +9,14 @@ from __future__ import print_function, unicode_literals
 from __future__ import absolute_import, division
 
 from osgeo import gdal
-import json
 import logging
 import numpy
 import numpy.ma as ma
 import os
-import nens.asc
-import scipy
 
 from flooding_base import models as basemodels
 from flooding_lib import models
 from flooding_lib.util import files
-from flooding_lib.util import flshinc
 
 logger = logging.getLogger(__name__)
 
@@ -107,49 +103,3 @@ def calculate_statistics(scenario_id):
         result.resultloc = 'dm1maxd0.asc'
         result.unit = resulttype.unit
         result.save()
-
-
-def to_color_tuple(colorcode):
-    return (
-        int(colorcode[0:2], 16),
-        int(colorcode[2:4], 16),
-        int(colorcode[4:6], 16),
-        0
-        )
-
-
-def get_color_mapping():
-    source_dir = basemodels.Setting.objects.get(key='SOURCE_DIR').value
-    cm_location = os.path.join(source_dir, "colormappings")
-    color_mapping_name = 'mapping_d.csv'
-
-    cm_path = '/home/remcogerlich/src/git/flooding/mapping_d.csv'
-
-    mapping = []
-    for line in file(cm_path):
-        if line.startswith('leftbound'):
-            continue
-        leftbound, colorcode = line.strip().split(',')
-        leftbound = float(leftbound)
-        color_tuple = to_color_tuple(colorcode)
-        mapping.append((leftbound, color_tuple))
-
-    return mapping
-
-
-def test_new_flshinc():
-    flsh_path = (
-        ('/p-flod-fs-00-d1.external-nens.local/flod-share/Flooding/'
-         'resultaten/Dijkring 09 - Vollenhove/13042/fls_h.inc.zip')
-        .encode('utf8'))
-
-    flsh = flshinc.Flsh(flsh_path, one_per_hour=True)
-    geo_transform = flsh.geo_transform()
-
-    for i, (timestamp, grid) in enumerate(flsh):
-        flshinc.save_grid_to_image(
-            grid,
-            'tmp/flsh%04d.png' % int(i),
-            flsh.get_classes(),
-            get_color_mapping(),
-            geo_transform)

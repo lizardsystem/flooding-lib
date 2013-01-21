@@ -122,7 +122,7 @@ class SobekModel(models.Model):
 
     active = models.BooleanField(default=True)
     project_fileloc = models.CharField(
-        max_length=200, 
+        max_length=200,
         help_text='In case of 3Di, point to model zipfile.')
     model_case = models.IntegerField()
     model_version = models.CharField(max_length=20)
@@ -140,7 +140,7 @@ class SobekModel(models.Model):
         max_length=200, null=True, blank=True)
 
     code = models.CharField(max_length=15, null=True, blank=True)
-    
+
     class Meta:
         verbose_name = _('Sobek model')
         verbose_name_plural = _('Sobek models')
@@ -150,7 +150,7 @@ class SobekModel(models.Model):
         """Return True if this models is 3di."""
         return (
             self.sobekversion.name == "3di")
-        
+
     def __unicode__(self):
         """More descriptive view for 3di models"""
         if self.is_3di():
@@ -1041,15 +1041,15 @@ class Scenario(models.Model):
     # Set by 'task 155' in the new flooding-worker tasks.
     has_sobek_presentation = models.NullBooleanField()
 
-    # 
+    #
     result_base_path = models.TextField(
-        null=True, blank=True, 
+        null=True, blank=True,
         help_text='If left blank, the path is retrieved through scenario.breaches[0].region.path'
         )
     # This field for 3di a setting
     config_3di = models.CharField(
         max_length=50, blank=True, null=True)
-    
+
     class Meta:
         ordering = ('name', 'owner', )
         verbose_name = _('Scenario')
@@ -1499,15 +1499,6 @@ class Scenario(models.Model):
         """Return True if this scenario uses 3di."""
         return (
             self.sobekmodel_inundation.sobekversion.name == "3di")
-
-    # def get_abs_srcdir(self):
-    #     """
-    #     The source dir.
-    #     Used by 3Di stuff, task 210, 220.
-    #     """
-    #     # Something like
-    #     # \\servername\flod-share\Flooding\filedatabase
-    #     return Setting.objects.get(key='SOURCE_DIR').value
 
 
 class ScenarioProject(models.Model):
