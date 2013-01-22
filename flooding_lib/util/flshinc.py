@@ -192,6 +192,9 @@ class Flsh(object):
                     value = header['classes'][classvalue - 1][class_column]
                 the_array[-col][row - 1] = value
 
+        self.f.close()  # When the file is closed, it can be deleted
+                        # on Windows
+
 
 def save_grid_to_image(grid, path, classes, colormap, geo_transform=None):
     """Save this grid as an image.

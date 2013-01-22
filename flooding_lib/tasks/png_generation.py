@@ -215,6 +215,8 @@ def compute_png_files(
                 dataset.ReadAsArray())
             files.save_geopng(
                 real_filename, colored_grid, dataset.GetGeoTransform())
+            del dataset  # Closes the file object so that it can be
+                         # deleted on Windows
             i += 1
             if i_in_filename:
                 real_filename = output_file % i

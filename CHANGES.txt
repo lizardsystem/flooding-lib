@@ -12,6 +12,9 @@ Changelog of flooding-lib
 - Change 'temporarily_unzipped' so that it can use alternative temp
   directories, and optionally not rezip any changed files.
 
+- Fix issues for running the png_generation under Windows.
+
+
 2.54 (2013-01-14)
 -----------------
 
