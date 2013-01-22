@@ -209,14 +209,16 @@ def compute_png_files(
             real_filename = output_file
 
         if filename.endswith('.asc'):
-            dataset = gdal.Open(str(filename))
-            colormapobject = colormap.ColorMap(colormapping)
-            colored_grid = colormapobject.apply_to_grid(
-                dataset.ReadAsArray())
-            files.save_geopng(
-                real_filename, colored_grid, dataset.GetGeoTransform())
-            del dataset  # Closes the file object so that it can be
-                         # deleted on Windows
+            try:
+                dataset = gdal.Open(str(filename))
+                colormapobject = colormap.ColorMap(colormapping)
+                colored_grid = colormapobject.apply_to_grid(
+                    dataset.ReadAsArray())
+                files.save_geopng(
+                    real_filename, colored_grid, dataset.GetGeoTransform())
+            finally:
+                del dataset  # Closes the file object so that it can
+                             # be deleted on Windows
             i += 1
             if i_in_filename:
                 real_filename = output_file % i
