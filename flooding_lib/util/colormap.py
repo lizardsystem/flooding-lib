@@ -32,7 +32,11 @@ class ColorMap(object):
         self.leftbounds = []
         self.colors = []
 
+        # We skip all erroneous lines.
         for line in open(self.filename):
+            if "," not in line:
+                continue
+
             leftbound, color = line.strip().split(',')
 
             try:
@@ -41,8 +45,13 @@ class ColorMap(object):
                 # Probably the header line
                 continue
 
+            try:
+                color_tuple = to_color_tuple(color)
+            except ValueError:
+                continue
+
             self.leftbounds += [leftbound]
-            self.colors += [to_color_tuple(color)]
+            self.colors += [color_tuple]
 
     def value_to_color(self, value):
         """Return a (r, g, b) tuple for the color this value maps to.
@@ -50,7 +59,7 @@ class ColorMap(object):
         Return None if no color was found."""
 
         for leftbound, color in reversed(zip(self.leftbounds, self.colors)):
-            if leftbound < value:
+            if leftbound <= value:
                 return color
 
     def apply_to_grid(self, grid, opacity_value=255):
@@ -68,20 +77,21 @@ class ColorMap(object):
         for i, leftbound in enumerate(self.leftbounds):
             if i + i >= len(self.leftbounds):
                 # Last leftbound
-                mask = (grid > leftbound)
+                mask = (grid >= leftbound)
             else:
-                mask = (leftbound < grid) & (self.leftbounds[i + 1] >= grid)
+                mask = (leftbound <= grid) & (self.leftbounds[i + 1] > grid)
 
             red, green, blue = self.colors[i]
 
             colorgrid[0] |= mask * red
             colorgrid[1] |= mask * green
             colorgrid[2] |= mask * blue
-            colorgrid[3] |= mask
 
-        # Colorgrid is now a mask grid, that is 1 wherever there are
-        # values, and 0 where there are None. Multiply it by the
-        # opacity value to get the right opacity grid.
-        colorgrid[3] *= opacity_value
+        # The opacity should be equal to 'opacity_value' wherever
+        # there is a color, and 0 elsewhere. There is a color defined
+        # for all values greater than or equal to the lowest
+        # leftbound.
+        if self.leftbounds:
+            colorgrid[3] = (min(self.leftbounds) <= grid) * opacity_value
 
         return colorgrid

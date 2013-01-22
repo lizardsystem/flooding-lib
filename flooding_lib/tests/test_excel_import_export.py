@@ -13,8 +13,8 @@ from django.utils.translation import activate, deactivate
 
 from flooding_lib import excel_import_export as eie
 
-from flooding_lib.test_models import ProjectF
-from flooding_lib.test_models import ScenarioF
+from flooding_lib.tests.test_models import ProjectF
+from flooding_lib.tests.test_models import ScenarioF
 from flooding_lib.tools.importtool.models import InputField
 from flooding_lib.tools.importtool.models import IntegerValue
 from flooding_lib.tools.importtool.test_models import InputFieldF

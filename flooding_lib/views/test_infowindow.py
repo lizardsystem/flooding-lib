@@ -4,12 +4,12 @@ from django.test import TestCase
 from django.utils.safestring import SafeString
 from django.utils.translation import ugettext as _
 
-from flooding_lib.test_models import BreachF
-from flooding_lib.test_models import ExternalWaterF
-from flooding_lib.test_models import ScenarioF
-from flooding_lib.test_models import ScenarioBreachF
-from flooding_lib.test_models import WaterlevelF
-from flooding_lib.test_models import WaterlevelSetF
+from flooding_lib.tests.test_models import BreachF
+from flooding_lib.tests.test_models import ExternalWaterF
+from flooding_lib.tests.test_models import ScenarioF
+from flooding_lib.tests.test_models import ScenarioBreachF
+from flooding_lib.tests.test_models import WaterlevelF
+from flooding_lib.tests.test_models import WaterlevelSetF
 from flooding_lib import models
 
 from flooding_lib.views.infowindow import extra_infowindow_information_fields

@@ -6,7 +6,7 @@ import factory
 import mock
 
 from django.test import TestCase
-from flooding_lib.test_models import ScenarioF, ProjectF
+from flooding_lib.tests.test_models import ScenarioF, ProjectF
 from flooding_lib.tools.approvaltool import models
 
 

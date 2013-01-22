@@ -9,7 +9,7 @@ from django.utils import simplejson
 
 from flooding_lib import services
 from flooding_lib import models
-from flooding_lib import test_models
+from flooding_lib.tests import test_models
 
 
 class TestService(TestCase):

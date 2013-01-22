@@ -12,8 +12,8 @@ from flooding_lib.models import UserPermission
 from flooding_lib.models import ProjectGroupPermission
 from flooding_lib.models import Scenario
 from flooding_lib.models import ScenarioProject
-from flooding_lib.test_models import ScenarioF
-from flooding_lib.test_models import ProjectF
+from flooding_lib.tests.test_models import ScenarioF
+from flooding_lib.tests.test_models import ProjectF
 
 from flooding_lib.tools.approvaltool.models import ApprovalObjectType
 
