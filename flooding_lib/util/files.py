@@ -20,15 +20,29 @@ class temporarily_unzipped(object):
     """Context manager that unzips a zip file, allowing code to change
     the files in it, and eventually zips the files back again."""
 
-    def __init__(self, path, rezip_on_exceptions=False, max_size=None):
-        """path is a path leading to a zipfile.
+    def __init__(
+        self, path, rezip=True,
+        rezip_on_exceptions=False, max_size=None,
+        tmp_dir=getattr(settings, 'TMP_DIR')):
+        """Temporarily unzip a zipfile and return the files in it,
+        rezip afterwards.
+
+        path is a path leading to a zipfile.
+
+        If rezip is False, the files aren't put back into the zipfile
+        afterwards.
+
+        tmp_dir is the location of the temp directory. By default,
+        this uses the TMP_DIR setting in the main Django settings.py.
 
         By default, if an exception is raised inside the context
         manager, the changed files will NOT be added back into the
         zipfile, because there's probably something wrong with
         them. To change that behaviour, set rezip_on_exceptions=True."""
 
+        self.tmp_dir_path = tmp_dir
         self.path = path
+        self.rezip = rezip
         self.rezip_on_exceptions = rezip_on_exceptions
         self.max_size = max_size
 
@@ -36,7 +50,7 @@ class temporarily_unzipped(object):
         # Create a temp directory
         self.tmpdir = tempfile.mkdtemp(
             prefix="flooding_lib_temporarily_unzipped",
-            dir=settings.TMP_DIR)
+            dir=self.tmp_dir_path)
 
         # Unzip everything to it
         # Pass a file descriptor, much faster because otherwise the file
@@ -62,7 +76,8 @@ class temporarily_unzipped(object):
                 for name in self.namelist]
 
     def __exit__(self, exc_type, exc_value, traceback):
-        if exc_type is None or self.rezip_on_exceptions:
+        if (self.rezip and
+            (exc_type is None or self.rezip_on_exceptions)):
             # Rewrite zipfile
             zipf = zipfile.ZipFile(
                 self.path, 'w', compression=zipfile.ZIP_DEFLATED)

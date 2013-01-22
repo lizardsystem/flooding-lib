@@ -9,6 +9,9 @@ Changelog of flooding-lib
 
 - Reorganize tests.
 
+- Change 'temporarily_unzipped' so that it can use alternative temp
+  directories, and optionally not rezip any changed files.
+
 2.54 (2013-01-14)
 -----------------
 

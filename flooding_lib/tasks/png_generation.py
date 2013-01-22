@@ -23,6 +23,8 @@
 #* initial date       :  20080909
 #**********************************************************************
 
+__revision__ = "$Rev$"[6:-2]
+
 import gdal
 import os
 import stat
@@ -67,7 +69,7 @@ if __name__ == '__main__':
     setup_environ(lizard.settings)
 
 
-def common_generation(scenario_id, source_programs):
+def common_generation(scenario_id, source_programs, tmp_dir):
     """invokes compute_png_files for all grids
 
     loop on all results computed for the given scenario_id, unpack
@@ -126,7 +128,8 @@ def common_generation(scenario_id, source_programs):
 
         if result_location.endswith('.zip'):
             # Unpack zip file
-            with files.temporarily_unzipped(result_location) as unzipped:
+            with files.temporarily_unzipped(
+                result_location, rezip=False, tmp_dir=tmp_dir) as unzipped:
                 infile_asc = compute_png_files(
                     result, result_output_dir,
                     unzipped,
@@ -238,9 +241,9 @@ def compute_png_files(
     return (basename + "####")[:8]
 
 
-def sobek(scenario_id):
+def sobek(scenario_id, tmp_dir):
     success = common_generation(
-        scenario_id, [SOBEK_PROGRAM_ID, IMPORT_PROGRAM_ID])
+        scenario_id, [SOBEK_PROGRAM_ID, IMPORT_PROGRAM_ID], tmp_dir)
     logger.debug("Finish task.")
     logger.debug("close db connection to avoid an idle process.")
     db.close_connection()
@@ -248,7 +251,7 @@ def sobek(scenario_id):
 
 
 def his_ssm(scenario_id, tmp_dir):
-    success = common_generation(scenario_id, [HISSSM_PROGRAM_ID])
+    success = common_generation(scenario_id, [HISSSM_PROGRAM_ID], tmp_dir)
     logger.debug("Finish task.")
     logger.debug("close db connection to avoid an idle process.")
     db.close_connection()

@@ -95,7 +95,7 @@ def perform_task(
             png_generation.set_broker_logging_handler(broker_logging_handler)
             remarks = ('png_generation-' + png_generation.__revision__ +
                        ' uitvoerder: %02d/' % worker_nr)
-            success_code = png_generation.sobek(scenario_id)
+            success_code = png_generation.sobek(scenario_id, tmp_directory)
 
         elif tasktype_id == TASK_COMPUTE_RISE_SPEED_132:
             log.debug("execute TASK_COMPUTE_RISE_SPEED_132")
@@ -158,7 +158,7 @@ def perform_task(
             png_generation.set_broker_logging_handler(broker_logging_handler)
             remarks = ('png_generation-' + png_generation.__revision__ +
                        ' uitvoerder: %02d/' % worker_nr)
-            success_code = png_generation.his_ssm(scenario_id)
+            success_code = png_generation.his_ssm(scenario_id, tmp_directory)
 
         elif tasktype_id == TASK_HISSSM_PRESENTATION_GENERATION_185:
             log.debug("execute TASK_HISSSM_PRESENTATION_GENERATION_185")
