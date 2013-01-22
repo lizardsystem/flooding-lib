@@ -247,8 +247,9 @@ def save_geopng(path, colorgrid, geo_transform=None):
     scipy.misc.imsave(path, colorgrid)
 
     if path.endswith('.png') and geo_transform is not None:
+        x0, dxx, dxy, y0, dyx, dyy = geo_transform
         pgw = path[:-4] + '.pgw'
         f = file(pgw, 'w')
-        for gt in geo_transform:
+        for gt in dxx, dxy, dyx, dyy, x0, y0:
             f.write("{0}\n".format(gt))
         f.close()
