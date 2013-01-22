@@ -2,7 +2,7 @@ from __future__ import unicode_literals, division
 from __future__ import print_function, absolute_import
 
 import os
-import scipy
+import scipy.misc
 import shutil
 import tempfile
 import zipfile
