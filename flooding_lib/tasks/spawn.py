@@ -47,6 +47,7 @@ log = logging.getLogger('nens')
 
 from flooding_lib.models import Scenario, ResultType
 from flooding_base.models import Setting
+from flooding_lib.util.files import remove_comments_from_asc_files
 
 from django import db
 
@@ -289,6 +290,7 @@ def perform_sobek_simulation(scenario_id,
 
     # check the result of the execution
     saved = 0
+    remove_comments_from_asc_files(work_dir)
     for filename in os.listdir(work_dir):
         log.debug("checking what to do with output file '%s'" % filename)
         for type_id, matcher, dest, _ in matcher_destination:
