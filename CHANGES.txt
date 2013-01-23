@@ -4,7 +4,7 @@ Changelog of flooding-lib
 2.56 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Remove comment line in .asc files of sobek.
 
 
 2.55 (2013-01-23)
