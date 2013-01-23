@@ -1,7 +1,13 @@
 Changelog of flooding-lib
 ===================================================
 
-2.55 (unreleased)
+2.56 (unreleased)
+-----------------
+
+- Nothing changed yet.
+
+
+2.55 (2013-01-23)
 -----------------
 
 - Rewrite png_generation script to use numpy and gdal instead of the
