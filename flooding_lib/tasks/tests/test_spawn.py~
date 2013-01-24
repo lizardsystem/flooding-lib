@@ -1,0 +1,11 @@
+from django.test import TestCase
+
+from flooding_lib.tests import test_models
+
+class TestSpawn(TestCase):
+
+    def test_find_resulttype(self):
+        filename = "test.asc"
+        resulttypes = [
+            test_models.ResultTypeF.build(content_names_re='test.asc')]
+                

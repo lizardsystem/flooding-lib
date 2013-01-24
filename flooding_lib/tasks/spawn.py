@@ -58,7 +58,7 @@ default_sobek_locations = {
     'v2.10': 'sobek210/',
     'v2.11': 'sobek211/',
     'v2.12': 'sobek212/',
-    }
+}
 
 
 def kill(pid):
@@ -85,7 +85,8 @@ computation was successful.  here we are only interested in
 terminating the subprocess when the computation is completed.
     """
 
-    log.debug('inside watchdog cmtwork_dir %s, %s' % (type(cmtwork_dir), cmtwork_dir))
+    log.debug('inside watchdog cmtwork_dir %s, %s' % (type(cmtwork_dir),
+                                                      cmtwork_dir))
     # keep ignoring code 51 while warming up.  warming up ends as soon
     # as a different code appears or after 20 seconds.
     warming_up = 20
@@ -182,6 +183,74 @@ def set_broker_logging_handler(broker_handler=None):
         log.warning("Broker logging handler does not set.")
 
 
+def find_resulttype(filename, resulttypes):
+    log.debug("checking what to do with output file '%s'" % filename)
+    for resulttype in resulttypes:
+        r = re.compile(resulttype.content_names_re, re.I)
+        if r.match(filename):
+            return resulttype
+
+
+def save_output_files_to_dest(output_dir_name, work_dir, resulttypes):
+    """Save sobek's output to distination location"""
+
+    log.debug("open all destination zip files.")
+    max_file_nr = {}
+    min_file_nr = {}
+
+    # Open one zipfile for each resulttype
+    zipfiles = {}
+    for resulttype in resulttypes:
+        zipfiles[resulttype.name] = ZipFile(
+            os.path.join(output_dir_name, resulttype.name + '.zip'),
+            mode="w", compression=ZIP_DEFLATED)
+
+    # check the result of the execution
+    saved = 0
+    for filename in os.listdir(work_dir):
+        resulttype = find_resulttype(filename, resulttypes)
+        if resulttype is None:
+            continue
+
+        dest = zipfiles[resulttype.name]
+
+        log.debug("saving %s to %s" % (filename, dest.filename))
+        dest.write(os.path.join(work_dir, filename))
+
+        saved += 1
+        try:
+            nr = int(''.join([i for i in filename[4:] if i.isdigit()]))
+        except ValueError:
+            log.error("Invalid value in {0}.".format(filename))
+            continue
+
+        if nr > max_file_nr.setdefault(resulttype.id, 0):
+            max_file_nr[resulttype.id] = nr
+        if nr < min_file_nr.setdefault(resulttype.id, 999):
+            min_file_nr[resulttype.id] = nr
+
+    log.debug("close all destination zip files")
+    for zipf in zipfiles.values():
+        zipf.close()
+
+    log.info("saved %d files" % saved)
+    return max_file_nr, min_file_nr
+
+
+def save_results_to_db(resulttypes, max_file_nr, min_file_nr, scenario):
+    """Save results file info to db."""
+    log.debug("adding to the database what results have been computed...")
+    for resulttype in resulttypes:
+        # table results
+        result, new = scenario.result_set.get_or_create(
+            resulttype=resulttype)
+        result.resultloc = os.path.join(
+            scenario.get_rel_destdir(), resulttype.name + '.zip')
+        result.firstnr = min_file_nr.get(resulttype.id)
+        result.lastnr = max_file_nr.get(resulttype.id)
+        result.save()
+
+
 def perform_sobek_simulation(scenario_id,
                              sobek_project_directory,
                              sobek_program_root,
@@ -195,10 +264,10 @@ def perform_sobek_simulation(scenario_id,
     log.debug("sobek_program_root: %s" % sobek_program_root)
 
     scenario = Scenario.objects.get(pk=scenario_id)
-
+    sobek_version = scenario.sobekmodel_inundation.sobekversion.name[:5]
     sobek_location = os.path.join(
         sobek_program_root,
-        default_sobek_locations[scenario.sobekmodel_inundation.sobekversion.name[:5]])
+        default_sobek_locations[sobek_version])
     #sobek_location = [d for d in sobek_location.split('/') if d]
     log.debug("sobek_location: %s" % sobek_location)
     destination_dir = Setting.objects.get(key='DESTINATION_DIR').value
@@ -276,55 +345,15 @@ def perform_sobek_simulation(scenario_id,
     child.wait()
 
     log.debug('child returned')
+    log.debug('save results to {0}'.format(output_dir_name))
 
-    log.debug("open all destination zip files.")
-    max_file_nr = {}
-    min_file_nr = {}
     resulttypes = ResultType.objects.filter(program=1)
+    max_file_nr, min_file_nr = save_output_files_to_dest(
+        output_dir_name, work_dir, resulttypes)
+    save_results_to_db(resulttypes, max_file_nr, min_file_nr, scenario)
 
-    matcher_destination = [(r.id, re.compile(r.content_names_re, re.I),
-                            ZipFile(os.path.join(output_dir_name, r.name + '.zip'),
-                                    mode="w", compression=ZIP_DEFLATED),
-                            r.name)
-                           for r in resulttypes if r.content_names_re is not None]
-
-    # check the result of the execution
-    saved = 0
-    remove_comments_from_asc_files(work_dir)
-    for filename in os.listdir(work_dir):
-        log.debug("checking what to do with output file '%s'" % filename)
-        for type_id, matcher, dest, _ in matcher_destination:
-            if matcher.match(filename):
-                log.debug("saving %s to %s" % (filename, dest.filename))
-                content = file(os.path.join(work_dir, filename), 'rb').read()
-                dest.writestr(filename, content)
-                saved += 1
-                try:
-                    nr = int(''.join([i for i in filename[4:] if i.isdigit()]))
-                    if nr > max_file_nr.setdefault(type_id, 0):
-                        max_file_nr[type_id] = nr
-                    if nr < min_file_nr.setdefault(type_id, 999):
-                        min_file_nr[type_id] = nr
-                except:
-                    pass
-                break
-
-    log.debug("close all destination zip files")
-    for _, _, dest, _ in matcher_destination:
-        dest.close()
-
-    log.debug("adding to the database what results have been computed...")
-    for resulttype_id, _, _, name in matcher_destination:
-        # table results
-        result, new = scenario.result_set.get_or_create(
-            resulttype=ResultType.objects.get(pk=resulttype_id))
-        result.resultloc = os.path.join(
-            scenario.get_rel_destdir(), name + '.zip')
-        result.firstnr = min_file_nr.get(resulttype_id)
-        result.lastnr = max_file_nr.get(resulttype_id)
-        result.save()
-
-    log.info("saved %d files" % saved)
+    # remove commentline from asc-files, inc-files
+    remove_comments_from_asc_files(output_dir_name)
 
     log.debug("check return code and return False if not ok")
     try:
