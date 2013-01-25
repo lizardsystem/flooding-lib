@@ -215,7 +215,7 @@ def save_output_files_to_dest(output_dir_name, work_dir, resulttypes):
         dest = zipfiles[resulttype.name]
 
         log.debug("saving %s to %s" % (filename, dest.filename))
-        dest.write(os.path.join(work_dir, filename))
+        dest.write(os.path.join(work_dir, filename), filename)
 
         saved += 1
         try:
