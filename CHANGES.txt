@@ -4,7 +4,11 @@ Changelog of flooding-lib
 2.56 (unreleased)
 -----------------
 
-- Remove comment line in .asc files of sobek.
+- Remove comment line in .asc files for task spawn (130).
+
+- Review script spawn.py.
+
+- Add tests for spawn.py.
 
 
 2.55 (2013-01-23)
