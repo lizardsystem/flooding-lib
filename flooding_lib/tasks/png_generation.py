@@ -113,7 +113,7 @@ def common_generation(scenario_id, source_programs, tmp_dir):
             os.makedirs(result_output_dir)
 
         # Figure out the color mapping name
-        if (result.resulttype.id == 0 and
+        if (result.resulttype.id == 0 or
             scenario.main_project.color_mapping_name):
             color_mapping_name = scenario.main_project.color_mapping_name
         else:
