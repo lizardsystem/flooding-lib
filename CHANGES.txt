@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.57 (unreleased)
+2.57 (2013-02-12)
 -----------------
 
 - Colormap leftbounds should be exclusive.
