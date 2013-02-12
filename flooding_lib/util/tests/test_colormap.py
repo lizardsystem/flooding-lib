@@ -48,8 +48,8 @@ class TestColorMap(TestCase):
     def test_value_to_color_works(self):
         self.assertEquals(self.cm.value_to_color(0.5), (17, 17, 17))
 
-    def test_value_to_color_leftbound_is_inclusive(self):
-        self.assertEquals(self.cm.value_to_color(0.0), (17, 17, 17))
+    def test_value_to_color_leftbound_is_exclusive(self):
+        self.assertEquals(self.cm.value_to_color(0.0), None)
 
     def test_value_to_color_below_is_none(self):
         self.assertEquals(self.cm.value_to_color(-1.0), None)

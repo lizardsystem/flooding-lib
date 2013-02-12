@@ -59,7 +59,7 @@ class ColorMap(object):
         Return None if no color was found."""
 
         for leftbound, color in reversed(zip(self.leftbounds, self.colors)):
-            if leftbound <= value:
+            if leftbound < value:
                 return color
 
     def apply_to_grid(self, grid, opacity_value=255):
