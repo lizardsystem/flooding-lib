@@ -8,322 +8,393 @@ console.log('loading screaan_exports ..');
 
 isc.Canvas.create({
     ID:'breadcrumbs',
-    height:"15",
-    contents: exporttool_config.breadcrumbs,
+    height:"24",
+    contents: wConfig.breadcrumbs,
     autodraw:false
 });
 
-/*** DATASOURCES ***/
-isc.DataSource.create({
-    ID: "dsProjects",
-    showPrompt: false,
-    dataFormat: "json",
-    dataURL: locationFloodingData,
-    transformRequest: function (dsRequest) {
-	if (dsRequest.operationType == "fetch") {
-	    var params = {action : 'get_projects'};
-	    // combine paging parameters with criteria
-	    return isc.addProperties({}, dsRequest.data, params);
+var createPagingButton = function(idButton, titleButton, widthButton, isDisabled) {
+    return isc.Button.create({
+	ID: idButton,
+	//autoFit: true,
+	autoDraw: false,
+	align: "center",
+	disabled: isDisabled,
+	width: widthButton,
+	title: titleButton,
+	click : function () {
+        // have buttons exchange their titles
+            var title1 = but1.getTitle();
+            but1.setTitle(but2.getTitle());
+            but2.setTitle(title1);
 	}
-    },
-    recordXPath:"items",
-    //autoFetchData:true,
-    autoDraw:false,
-    fields:[
-	{name:"id", primaryKey:true, hidden:true, type:"int"},
-	{name:"name", hidden: false, type:"text"}
-    ]
+    });
+};
+
+isc.ImgButton.create({
+    ID: "butStart",
+    size: 24,
+    prompt: "Start geselecteerde scenario(s)",
+    vAlign: "center",
+    src: wConfig.icons_url + "workflow_start.png",
+    click: function() {
+	var selectedRows = workflowScenariosListGrid.getSelection();
+	var postParams = [];
+	var scenarios = [];
+	for (var i = 0; i < selectedRows.length; i++){
+    	    scenarios[i] = {"scenario_id": selectedRows[i].scenario_id,
+			    "template_id": selectedRows[i].template_id}
+	}
+	postParams['scenarios'] = JSON.stringify(scenarios);
+	RPCManager.sendRequest({
+	    actionURL: wConfig.startscenarios_url,
+	    useSimpleHttp: true,
+	    httpMethod: "POST",
+	    params: postParams,
+	    callback: function(response, data, request){
+		if (response.httpResponseCode == 200) {
+		    console.log("Data ophalen gelukt, tonen op scherm.");
+		} else {
+		    console.log("Fout bij het ophalen van gegevens.");
+		}
+	    }
+	});
+    }
 });
 
+isc.ImgButton.create({
+    ID: "butRefresh",
+    size: 24,
+    prompt: "Reload",
+    vAlign: "center",
+    showRollOver: false,
+    showFocused: false,
+    src: wConfig.icons_url + "workflow_refresh.png",
+    click: function() {
+	workflowScenariosListGrid.destroy();
+	ScenarioVLayout.addMember(createWorkflowScenariosListGrid(),1);
+    }
+});
+
+var createPagingStack = function() {
+    var pagingStack = []
+    pagingStack[0] = createPagingButton("butPrev", "<", 20, true);
+    for (var i = 1; i < 10; i++) {
+	pagingStack[i] = createPagingButton("but" + i, i, 20, false);
+    }
+    pagingStack[11] = createPagingButton("butNext", ">", 20, false);
+    pagingStack[12] = createPagingButton("butInfo", "..", 80, true);
+    return pagingStack;
+};
+
+/*** DATASOURCES ***/
+  
 isc.DataSource.create({
-    ID: "dsScenariosExport",
+    ID: "dsScenario",
     showPrompt: false,
     dataFormat: "json",
-    dataURL: locationFloodingData,
-    transformRequest: function (dsRequest) {
-	alert("transform grid");
+    dataURL: wConfig.scenarios_processing_url,
+    transformRequest: function (dsRequest) {	
 	if (dsRequest.operationType == "fetch") {
-	    var params = {action : 'get_scenarios_export_list'};
-	    // combine paging parameters with criteria
+	    var params = {};
+	    for (var n = 0; n < toolsForm.items.length; n++){
+		params[toolsForm.items[n].name] = toolsForm.items[n].getValue();
+	    }
 	    return isc.addProperties({}, dsRequest.data, params);
 	}
     },
-    autoFetchData:true,
-    autoDraw:false,
-    //clientOnly: false,
     fields:[
+	{name:"execute_url", hidden:false, type:"text"},
 	{name:"scenario_id", primaryKey:true, hidden:false, type:"int"},
 	{name:"scenario_name", hidden: false, type:"text"},
-	{name:"breach_ids", hidden: false, type:"text"},
-	{name:"breach_names", hidden: false, type:"text"},
-	{name:"region_ids", hidden: false, type:"text"},
-	{name:"region_names", hidden: false, type:"text"},
-	{name:"project_id", hidden: false, type:"int"},
+	{name:"template_id", hidden: true, type:"int"},
+	{name:"template_code", hidden: false, type:"text"},
+	{name:"workflow_status", hidden: false, type:"text"},
+	{name:"breach", hidden: false, type:"text"},
+	{name:"region", hidden: false, type:"text"},
+	{name:"project_id", hidden: true, type:"int"},
 	{name:"project_name", hidden: false, type:"text"},
-	{name:"owner_id", hidden: false, type:"int"},
-	{name:"owner_name", hidden: false, type:"text"},
-	{name:"extwrepeattime", type:"text"},
-	{name:"extwname", type:"text"},
-	{name:"extwtype", type:"text"},
-	{name:"calcmethod", type:"text"},
-	{name: "statesecurity", type: "text"},
-        {name: "shelflife", type: "text"},
-	{name: "_visible", hidden: true, type: "text"}
+	{name:"workflows_count", hidden: false, type:"int"},
+	{name:"workflow_created", hidden: false, type:"text"},
+	{name:"workflow_tfinished", hidden: false, type:"text"}
     ]
 });
 
 isc.ResultSet.create({
-    dataSource : "dsScenariosExport"
+    dataSource : "dsScenario"
 });
 
-var LoadScenariosForProject = function(projectId){
-    msg.animateShow();
-    dsScenariosExport.transformRequest= function (dsRequest) {
+isc.DataSource.create({
+    ID: "dsWorkflowTask",
+    showPrompt: false,
+    dataFormat: "json",
+    dataURL: wConfig.workflow_task_url,
+    recordXPath:"results",
+    transformRequest: function (dsRequest) {	
+	if (dsRequest.operationType == "fetch") {
+	    var params = {};
+	    // for (var n = 0; n < toolsForm.items.length; n++){
+	    // 	params[toolsForm.items[n].name] = toolsForm.items[n].getValue();
+	    // }
+	    return isc.addProperties({}, dsRequest.data, params);
+	}
+    },
+    fields:[
+	{name:"execute_url", hidden:false, type:"text"},
+	{name:"workflow", primaryKey:true, hidden:false, type:"int"},
+	{name:"code", hidden: false, type:"text"},
+	{name:"tcreated", hidden: false, type:"text"},
+	{name:"tqueued", hidden: false, type:"text"},
+	{name:"tstart", hidden: false, type:"text"},
+	{name:"tfinish", hidden: true, type:"int"},
+	{name:"status", hidden: false, type:"text"}
+    ]
+});
+
+isc.ResultSet.create({
+    dataSource : "dsWorkflowTask"
+});
+
+isc.DataSource.create({
+    ID: "dsWorkflowContext",
+    dataFormat: "json",
+    dataURL: wConfig.last_pagenumber_url,
+    fields:[
+	{name:"last_pagenumber", type:"int"}
+    ]
+});
+
+// isc.ResultSet.create({
+//     dataSource : "dsWorkflowContext"
+// });
+
+
+var LoadLastPageNumber = function(){
+    dsWorkflowContext.transformRequest= function (dsRequest) {
     	if (dsRequest.operationType == "fetch") {
-    	    var params = {action : 'get_scenarios_export_list', project_id: projectId};
-    	    // combine paging parameters with criteria
+    	    var params = {};
     	    return isc.addProperties({}, dsRequest.data, params);
     	}
     };
 
-    dsScenariosExport.fetchData({}, function(response, data, request){
-	// call fetchData on list grid to 
-	// prepare the local store for filtering
-	scenariosAllListGrid.setData(data);	
-    	scenariosAllListGrid.fetchData();
-	msg.animateHide();
+    dsWorkflowContext.fetchData({}, function(response, data, request){
+	if (data.length > 0) {
+	    wConfig.last_pagenumber = data[0].last_pagenumber;
+	    butPrev.setVisibility(false);
+	    butInfo.setTitle("Page 1 of " + data[0].last_pagenumber);
+	}
     });  
 };
 
-/***
-Callback function for form.
-Defined in this file, since javascript execeution in the exports_new templates
-does block showing of the HTML for some reason.
-***/
-window['exportRunCallbackFormFunction'] = function() {
-    var length =  scenariosToExportListGrid.data.getLength();
-    var scenarioIds = [];
-    for (var i = 0;  i < length; i++){
-	scenarioIds[i] = scenariosToExportListGrid.data[i].scenario_id;
-    }
-
-    sendingForm = document.forms["exportRunForm"];
-
-    // Create the post parameters
-    var postParams = [];
-    for (var n = 0; n < sendingForm.elements.length; n++){
-	//NOTE: !! use '.name' to get it working with 'out-of-the-box' django validation !!
-	if (sendingForm.elements[n].type === "checkbox") {
-	    postParams[sendingForm.elements[n].name] = sendingForm.elements[n].checked;
-	} else {
-	    postParams[sendingForm.elements[n].name] = sendingForm.elements[n].value;
-	}
-    }
-    postParams['scenarioIds'] = JSON.stringify(scenarioIds);
-    RPCManager.sendRequest({
-	actionURL: exporttool_config.url_export_tool,
-	useSimpleHttp: true,
-	httpMethod: "POST",
-	params: postParams,
-	callback: function(response, data, request){
-	    if (response.httpResponseCode == 200) {
-		console.log("Data ophalen gelukt, tonen op scherm.");
-		// check if we have to open it in the pane or in the complete window
-		if(data.match('redirect_in_js_to_')){
-		    url = data.replace('redirect_in_js_to_/', '');
-		    window.location= '/' + url;
-		}
-		else {
-		    exportRunHTMLPane.setContents(data);
-		}
-	    } else {
-		console.log("Fout bij het ophalen van gegevens.");
-	    }
-	}
-    });
-}
-
 /*** SPECIAL SCENARIO LISTGRID CLASS ***/
 isc.defineClass("ScenariosListGrid", "ListGrid").addProperties({
-    width: "45%",
-    height: 450,
+    width: "100%",
+    height: "80%",
     cellHeight:24,
-    imageSize:16,
+    //imageSize:16,
     border:"1px solid gray",
-    bodyStyleName:"normal",
+    //bodyStyleName:"normal",
     loadingDataMessage: "Data aan het laden...",
-    alternateRecordStyles:true,
+    //alternateRecordStyles:true,
     showHeader:true,
-    leaveScrollbarGap:false,
-    dataproperties: {
-    	useClientFiltering: true,
-    	//useClientSorting: true
-    }
+    leaveScrollbarGap:false
+});
+
+var createWorkflowScenariosListGrid = function() {
+
+    var g = isc.ScenariosListGrid.create({
+	ID:"workflowScenariosListGrid",
+	alternateRecordStyles:true,
+	baseStyle: "myBoxedGridCell",
+	autoDraw:false,
+	canReorderRecords: true,
+	overflow:"visible",
+	dataSource: dsScenario,
+	useClientFiltering: false,
+	useClientSorting: false,
+	showFilterEditor:true,
+	autoFetchData: true,
+	fields:[
+	    {name:"execute_url", title:"Start", width:50, 
+	     type:"link", align:"center", canFilter:false, canSort:false,
+	     linkText:isc.Canvas.imgHTML(wConfig.images_url + "navPlay.png",20,20)},
+	    {name:"scenario_id", title:"ID", type:"int", width:40},
+	    {name:"scenario_name", title: "Scenario", type: "text", formatCellValue: function (value, record) {
+		    if (value) {
+			return "<a target='_new' title='Open scenario' href='" + wConfig.scenario_url + record.project_id + "/" + record.scenario_id + "/'>" +
+			    value + "</a>";
+		    }
+		}
+	    },
+	    {name:"template_id", "showIf": "false", type:"int"},
+	    {name:"template_code",title:"Template", type:"text", width: 55, align: "center"},
+	    {name:"workflow_status", title:"Status", type:"text", width: 60, formatCellValue:"isc.Format.toUSString(value)"},
+	    {name:"breach", title:"Bres", type:"text"},
+	    {name:"region", title:"Regio", type:"text"},
+	    {name:"project_id", title:"Project id", showIf: "false", type:"int"},
+	    {name:"project_name", title:"Project", type:"text"},
+	    {name:"workflows_count", title:"Uitvoeringen", type:"int", width: 55, align: "center"},
+	    {name:"workflow_created", title:"Aangemaakt op", type:"text", width: 120},
+	    {name:"workflow_tfinished", title:"Finished op", type:"text", width: 120}
+	],
+	emptyMessage:"<br><br>Geen scenario's.",
+	getCellCSSText: function (record, rowNum, colNum) {
+	    if (this.getFieldName(colNum) == "workflow_status") {
+		if (record.workflow_status == 'SUCCESS') {
+		    return "font-weight:bold; color:green;";
+		} else if (record.workflow_status == 'FAILED') {
+		    return "font-weight:bold; color:red;";
+		}
+	    }
+	}
+	// formatCellValue: function (value, record, rowNum, colNum) {
+	// 	debugger;
+	// 	var field = this.getField(colNum);
+	//     if (!field.hasLink) {
+	// 	    return value;
+	// 	}
+	//     return "<a href='javascript:void(0)' onclick='doLink(\"" + this.ID + "\"," + rowNum + "," + colNum + ")'>" + value + "</a>";
+	// }
+    });
+
+    return g;
+};
+
+var createWorkflowsTaskListGrid = function() {
+
+    var g = isc.ScenariosListGrid.create({
+	ID:"workflowTasksListGrid",
+	alternateRecordStyles:true,
+	baseStyle: "myBoxedGridCell",
+	autoDraw:false,
+	canReorderRecords: true,
+	overflow:"visible",
+	dataSource: dsWorkflowTask,
+	useClientFiltering: false,
+	useClientSorting: false,
+	showFilterEditor:true,
+	autoFetchData: true,
+	fields:[
+	    {name:"execute_url", title:"Start", width:50, type:"link", 
+	     align:"center", canFilter:false, canSort:false,
+	     linkText:isc.Canvas.imgHTML(wConfig.images_url + "navPlay.png",20,20)},
+	    {name:"workflow", title:"Workflow ID", type:"int", width:40,
+	    getGroupTitle: function (groupValue, groupNode, field, fieldName, grid) {
+		baseTitle = groupValue + "<a>Start workflow</a>";
+		return baseTitle;
+	    }
+	    },
+	    {name:"code",title:"Code", type:"text", width: 55, align: "center"},
+	    {name:"tcreated", title:"created", type:"text"},
+	    {name:"tqueued", title:"queued", type:"text", showIf: "false"},
+	    {name:"tstart", title:"started", type:"text", showIf: "false"},
+	    {name:"tfinish", title:"finished", type:"text"},
+	    {name:"status", title:"Status", type:"int", width: 55,
+	     align: "center", formatCellValue:"isc.Format.toUSString(value)"}
+	],	
+	groupStartOpen:"first",
+	groupByField: 'workflow',
+	emptyMessage:"<br><br>Geen scenario's.",
+	getCellCSSText: function (record, rowNum, colNum) {
+	    if (this.getFieldName(colNum) == "status") {
+		if (record.status == 'SUCCESS') {
+		    return "font-weight:bold; color:green;";
+		} else if (record.status == 'FAILED') {
+		    return "font-weight:bold; color:red;";
+		}
+	    }
+	}
+	// formatCellValue: function (value, record, rowNum, colNum) {
+	// 	debugger;
+	// 	var field = this.getField(colNum);
+	//     if (!field.hasLink) {
+	// 	    return value;
+	// 	}
+	//     return "<a href='javascript:void(0)' onclick='doLink(\"" + this.ID + "\"," + rowNum + "," + colNum + ")'>" + value + "</a>";
+	// }
+    });
+
+    return g;
+};
+
+
+isc.DataSource.create({
+    ID: "dsRowsToLoad",
+    showPrompt: false,
+    dataFormat: "json",
+    dataURL: wConfig.rowstoload_url,
+    transformRequest: function (dsRequest) {
+	if (dsRequest.operationType == "fetch") {
+	    var params = {};
+	    return isc.addProperties({}, dsRequest.data, params);
+	}
+    },
+    fields:[
+	{name:"name", hidden:true, type:"text"},
+	{name:"val", hidden: false, type:"int"}
+    ]
 });
 
 isc.DynamicForm.create({
-    ID:"projectSelector",
-    layoutAlign: "left",
-    height: 48,
-    width: 250,
-    overflow:"visible",
-    fields: [{
-	name: "projectField",
-	optionDataSource: dsProjects,
-	type: "select",
-	emptyDisplayValue: "Selecteer project",
-	valueField:"id",
-	title: "Project",
-	showTitle: false,
-	change: "LoadScenariosForProject(value);",
-	displayField:"name"}],
-    autodraw: true
+    ID:"toolsForm",
+    height: 18,
+    fields: [{ name: "rowstoload",
+	       width: 100,
+	       optionDataSource: dsRowsToLoad,
+	       type: "select",
+	       emptyDisplayValue: "Rows to load",
+	       defaultValue: 25,
+	       showTitle: false,
+	       valueField:"val",
+	       displayField:"name"},
+	     {name: "scenario_id",
+	      prompt:'Filter op ID (scenario_id), b.v. 200,100-120,13333',
+	      width: 150,
+	      type: "int",
+	      emptyDisplayValue: "Scenario ID",
+	      showTitle: false}
+	   ]
 });
 
-/*** Create UI elements***/
-isc.HTMLPane.create({
-    ID: "exportRunHTMLPane",
-    width:"100%",
-    overflow:"visible",
-    border: "0px",
-    contentsURL: exporttool_config.root_url + "flooding/tools/export/newexport"
+
+LoadLastPageNumber();
+
+isc.ToolStrip.create({
+    ID: "ToolBox",
+    members: [butStart, butRefresh, toolsForm]
 });
 
-isc.ScenariosListGrid.create({
-    ID:"scenariosAllListGrid",
-    autodraw:false,
-    canDragRecordsOut: true,
-    canAcceptDroppedRecords: true,
-    canReorderRecords: true,
-    dragDataAction: "move",
-    overflow:"visible",
-    dataSource: dsScenariosExport,
-    useClientFiltering: true,
-    useClientSorting: true,
-    showFilterEditor:true,
-    autoFetchData: false,
-    fields:[
-	{name: "scenario_id", title:"ID", type:"int"},
-	{name: "scenario_name", title: "Scenario naam", type: "text"},
-	{name: "extwrepeattime", title: "Overschrijdings frequentie", type: "text"},
-	{name:"extwname", title: "Naam buitenwater", type:"text"},
-	{name:"extwtype", title: "Buitenwater type", type:"text"},
-	{name: "region_names", title: "Regio's", type: "text"},
-	{name: "breach_names", title: "Doorbraak locaties", type: "text"},
-	{name: "calcmethod", title: "Berekenigns methode", type: "text"},
-	{name: "statesecurity", title: "Standzekerheid kerineng", type: "text"},
-        {name: "shelflife", title: "Houdbaarheid scenario", type: "text"},
-	{name: "_visible", title: "_Visible", type: "text", enabled: false, showIf: "false"}
-    ],
-    emptyMessage:"<br><br>Geen scenario's beschikbaar voor dit project."
-});
-
-var copyToExportGrid = function(){
-    //Copy selected record to export listgrid
-    //set the records to not-visible state.
-    var gridData = scenariosAllListGrid.data.allRows;
-    for (var i = 0; i < gridData.length; i++){
-	if (gridData[i]._visible != "false"){
-	    gridData[i]._visible = "true";
-	}
-    }
-    var selectedRows = scenariosAllListGrid.getSelection();
-    for (var i = 0; i < selectedRows.length; i++){
-    	selectedRows[i]._visible = "false";
-	scenariosToExportListGrid.data.add(selectedRows[i]);
-    }
-    scenariosAllListGrid.filterData({_visible: ""});
-    scenariosAllListGrid.filterData({_visible: "true"});
-}
-
-var copyToAllGrid = function() {
-    // Delete selected records from toexport listgrid
-    // set the records in 'all' listgrid to visible state
-    var gridData = scenariosAllListGrid.data.allRows;
-    var selectedRows = scenariosToExportListGrid.getSelection()
-    for (var i = 0; i < selectedRows.length; i++){
-	for (var j = 0; j < gridData.length; j++){
-	    if (gridData[j].scenario_id == selectedRows[i].scenario_id){
-		gridData[j]._visible = "true";
-	    }
-	}
-	scenariosToExportListGrid.data.remove(selectedRows[i]);
-    }
-    //refresh filter it removes all existing filters
-    scenariosAllListGrid.filterData({_visible: ""});
-    scenariosAllListGrid.filterData({_visible: "true"});
-}
-
-isc.Img.create({
-    ID:"arrowRight",
-    src: exporttool_config.root_url + "static_media/images/icons/arrow_right.png", width:32, height:32,overflow:"visible",
-    //click:"scenariosToExportListGrid.transferSelectedData(scenariosAllListGrid)"
-    click:"copyToExportGrid();"
-});
-
-isc.Img.create({
-    ID:"arrowLeft",
-    src: exporttool_config.root_url + "static_media/images/icons/arrow_left.png", width:32, height:32,overflow:"visible",
-    //click:"scenariosAllListGrid.transferSelectedData(scenariosToExportListGrid)"
-    click:"copyToAllGrid();"
-});
-
-isc.Label.create({
-    ID:"msg",
-    wrap:false,
-    contents:"Data aan het laden ..."
-})
-
-isc.ScenariosListGrid.create({
-    ID:"scenariosToExportListGrid",
-    canDragRecordsOut: true,
-    canAcceptDroppedRecords: true,
-    canReorderRecords: true,
-    overflow:"visible",
-    fields:[
-	{name: "scenario_id", title:"ID", type:"int"},
-	{name: "scenario_name", title: "Scenario naam", type: "text"},
-	{name: "extwrepeattime", title: "Overschrijdings frequentie", type: "text"},
-	{name:"extwname", title: "Naam buitenwater", type:"text"},
-	{name:"extwtype", title: "Buitenwater type", type:"text"},
-	{name: "region_names", title: "Regio's", type: "text"},
-	{name: "breach_names", title: "Doorbraak locaties", type: "text"},
-	{name: "calcmethod", title: "Berekenigns methode", type: "text"},
-	{name: "statesecurity", title: "Standzekerheid kerineng", type: "boolean"},
-        {name: "shelflife", title: "Houdbaarheid scenario", type: "text"}
-    ],
-    emptyMessage:"<br><br>Sleep scenario's hier heen voor export."
-});
 
 /*** Arrange UI elements ***/
 isc.VLayout.create({
+    ID: "ScenarioVLayout",
     width: "100%",
     height: "100%",
     autoDraw: true,
-    membersMargin: 10,
+    membersMargin: 0,
     members: [
-	breadcrumbs,
 	isc.HStack.create({
-	    membersMargin: 0,
-	    overflow: "visible",
-	    members:[projectSelector,
-		     msg]
-	}),
-	isc.HStack.create({
+	    ID: "toolStack",
+	    //align: "right",
+	    width: "100%",
+	    height: 18,
 	    membersMargin: 10,
-	    height: 160,
+	    backgroundColor:"lightGrey",
+	    border: "1px solid grey",
+	    members: [butStart, butRefresh, toolsForm]
+	}),
+	// toolBox,
+	createWorkflowScenariosListGrid(),
+	//createWorkflowsTaskListGrid(),
+	isc.HStack.create({
+	    ID: "pagingStack",
 	    overflow: "visible",
-	    members:[
-		scenariosAllListGrid,
-		isc.VStack.create({
-		    width: 32,
-		    height: 74,
-		    layoutAlign: "center",
-		    membersMargin: 10,
-		    members: [arrowRight,arrowLeft]}),
-		scenariosToExportListGrid
-	    ]}),
-	exportRunHTMLPane
+	    width: 150,
+	    //membersMargin: 20,
+	    height: 24,
+	    layoutAlign: "center",
+	    border: "1px solid blue",
+	    members: createPagingStack()
+	})
     ]
 });
-msg.hide();

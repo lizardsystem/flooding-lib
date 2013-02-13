@@ -1,56 +1,42 @@
-{% extends "lizard/base.html" %}
 {% load i18n %}
-{% block title %}Workflow tool{% endblock %}
-{% block stylesheets %}
-		<link rel="shortcut icon" href="{{ url_favicon }}">
-		<link href="{% url root_url %}static_media/style/style.css" media="screen" type="text/css" rel="stylesheet">
-		<link href="{% url root_url %}static_media/style/forms.css" media="screen" type="text/css" rel="stylesheet">
-		<link href="{% url root_url %}static_media/Isomorphic_NenS_skin/skin_styles.css" media="screen" type="text/css" rel="stylesheet">
-{% endblock stylesheets %}
-
-{% block bodyarguments %} class="scrollable" {% endblock %}
-{% block content %}
-		<h1>
-		{% trans "Workflow run overview" %}
-		</h1>
-
-		<!-- <table class="timeseriesWrapper"><tr><td> -->
-		<!-- 	<table class="timeseries" summary="timeseries"> -->
-		<!-- 		<thead class="headerTitle"> -->
-		<!-- 			<td width="150"><b>{% trans "Name" %}</b></td> -->
-		<!-- 			<td width="75"><b>{% trans "Creation date" %}</b></td> -->
-		<!-- 			<td width="373"><b>{% trans "Description" %}</b></td> -->
-		<!-- 			<td width="75"><b>{% trans "State"%}</b></td> -->
-		<!-- 			<td width="50"><b>{% trans "Result file" %}</b></td> -->
-		<!-- 		</thead> -->
-		<!-- 		<tbody> -->
-		<!-- 		{% if  export_run_list %} -->
-		<!-- 	 		{% for export_run in export_run_list %} -->
-                <!--     {# 0: name, 1: creation_date, 2: description, 3: path, 4: detail_url, 5: state #} -->
-		<!-- 			    <tr class="{% cycle 'cellDark' 'cell'%}"> -->
-		<!-- 		    		<td> -->
-		<!-- 		    			<a href="{{export_run.4}}">{{export_run.0}}</a> -->
-		<!-- 		    		</td> -->
-		<!-- 		    		<td>{{export_run.1|date:"d-m-Y"}}</td> -->
-		<!-- 		    		<td>{{export_run.2}}</td> -->
-		<!-- 		    		<td>{{export_run.5}}</td> -->
-		<!-- 		    		<td> -->
-		<!-- 		    			{% if export_run.3 %} -->
-		<!-- 		    				<a href="{% url flooding_tools_export_index %}?action=get_attachment&path={{export_run.3}}">{% trans "Result file" %}</a> -->
-		<!-- 		    			{% else %} -->
-		<!-- 		    				- -->
-		<!-- 		    			{% endif %} -->
-		<!-- 		    		</td> -->
-		<!-- 		    	</tr> -->
-		<!-- 	    	{% endfor %} -->
-		<!-- 	    {% else %} -->
-		<!-- 	       <tr class='cellDark'><td COLSPAN=5> - </td></tr> -->
-		<!-- 	    {% endif %} -->
-		<!-- 	    </tbody> -->
-		<!-- 	</table> -->
-		<!-- </table> -->
-		<!-- <BR> -->
-		<!-- {% if has_create_rights %} -->
-		<!-- 	<a href="{%url flooding_tools_export_new_export_index %}" >{% trans "New export run" %}</a> -->
-		<!-- {% endif %} -->
-{% endblock %}
+<!DOCTYPE html "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7">
+    <title>Workflow tool</title>
+    <link href="{% url root_url %}static_media/style/workflow.css" type="text/css" rel="stylesheet">
+    
+    <script> 
+      var isomorphicDir = "{% url root_url %}static_media/weblib/isomorphic/";
+      var wConfig = {};
+      wConfig.root_url = "{% url root_url %}";
+      wConfig.scenario_url = "/flooding/preload/";
+      wConfig.images_url = wConfig.root_url + "static_media/images/";
+      wConfig.icons_url = wConfig.root_url + "static_media/images/icons/";
+      wConfig.workflow_task_url = "{% url worker_workflow_task %}"
+      wConfig.breadcrumbs = "";
+      wConfig.scenarios_processing_url = "{% url workflow_scenarios_processing %}";
+      wConfig.last_pagenumber_url = "{% url workflow_last_pagenumber %}";
+      wConfig.rowstoload_url = "{% url workflow_tools_rowstoload %}";
+      wConfig.startscenarios_url = "{% url workflow_start_scenarios %}";
+      
+      
+    </script>
+    <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/weblib/isomorphic/system/modules/ISC_Core.js"></SCRIPT>
+    <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/weblib/isomorphic/system/modules/ISC_Foundation.js"></SCRIPT>
+    <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/weblib/isomorphic/system/modules/ISC_Containers.js"></SCRIPT>
+    <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/weblib/isomorphic/system/modules/ISC_Grids.js"></SCRIPT>
+    <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/weblib/isomorphic/system/modules/ISC_Forms.js"></SCRIPT>
+    <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/weblib/isomorphic/system/modules/ISC_DataBinding.js"></SCRIPT>
+    <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/Isomorphic_NenS_skin/load_skin.js"></SCRIPT>
+    <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/weblib/SCpatch.js"></SCRIPT>
+    <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/scripts/shared/lib/NGeneral.js"></SCRIPT>	
+    <SCRIPT type="text/javascript" SRC="{% url root_url %}get_config.js"></SCRIPT>
+    <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/scripts/shared/JSONparser.js"></SCRIPT>
+  </head>
+  <body>
+    <script type="text/javascript" src="{% url root_url %}static_media/workflow/screen_workflow.js" type="text/javascript"> </script>
+  </body>
+</html>
