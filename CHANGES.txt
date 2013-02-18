@@ -4,7 +4,7 @@ Changelog of flooding-lib
 2.58 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Added 'liztype' field to 'ExternalWater' model
 
 
 2.57 (2013-02-12)

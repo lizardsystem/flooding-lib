@@ -351,12 +351,26 @@ class ExternalWater(models.Model):
     TYPE_UNKNOWN = 7
     TYPE_LOWER_RIVER = 8
 
+    LIZ_TYPE_CHOICES = (
+        (1, _('sea')),
+        (2, 'estuarium'),
+        (3, 'groot meer (incl. afgesloten zeearm)'),
+        (4, 'grote rivier'),
+        (5, 'scheepvaartkanaal'),
+        (6, 'binnenmeer'),
+        (7, 'regionale beek'),
+        (8, 'regionale revier'),
+        (9, 'boezemwater'),
+        (10, 'polderwater'))
+
     name = models.CharField(max_length=200)
 
     sobekmodels = models.ManyToManyField(SobekModel, blank=True)
     cutofflocations = models.ManyToManyField(CutoffLocation, blank=True)
 
     type = models.IntegerField(choices=TYPE_CHOICES)
+    liztype = models.IntegerField(choices=LIZ_TYPE_CHOICES,
+                                  null=True, blank=True)
     area = models.IntegerField(blank=True, null=True)
 
     deftstorm = models.FloatField(blank=True, null=True)  # deltatime
