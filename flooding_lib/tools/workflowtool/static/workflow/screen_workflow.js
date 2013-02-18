@@ -72,7 +72,44 @@ isc.ImgButton.create({
     src: wConfig.icons_url + "workflow_refresh.png",
     click: function() {
 	workflowScenariosListGrid.destroy();
+	if (typeof(workflowTasksListGrid) != 'undefined') {
+	    workflowTasksListGrid.destroy();
+	}
 	ScenarioVLayout.addMember(createWorkflowScenariosListGrid(),1);
+    }
+});
+
+isc.Button.create({
+    ID: "butWorkflow",
+    autoFit: true,
+    autoDraw: false,
+    align: "center",
+    disabled: false,
+    title: "Workflow",
+    click : function () {
+	if (this.title == "Workflow"){
+	    ScenarioVLayout.removeMember(workflowScenariosListGrid);
+	    //workflowScenariosListGrid.setVisibility(false);
+	    this.title = "Scenario";
+	    this.prompt = "Terug naar scenario's overzicht.";
+	    this.redraw();
+	    if ((typeof(workflowTasksListGrid) == 'undefined') || 
+		(workflowTasksListGrid == null)){
+		ScenarioVLayout.addMember(createWorkflowTasksListGrid(),1);
+	    }
+	    ScenarioVLayout.addMember(workflowTasksListGrid,1);
+	} else {
+	    if (typeof(workflowTasksListGrid) != 'undefined') {
+		workflowTasksListGrid.destroy()
+	    }
+	    this.title = "Workflow";
+	    this.prompt = "Open workflows van geselecteerde scenario";
+	    this.redraw();
+	    if (typeof(workflowScenariosListGrid) == 'undefined') {
+		ScenarioVLayout.addMember(createWorkflowScenariosListGrid(),1);
+	    }
+	    ScenarioVLayout.addMember(workflowScenariosListGrid,1);
+	}
     }
 });
 
@@ -104,7 +141,6 @@ isc.DataSource.create({
 	}
     },
     fields:[
-	{name:"execute_url", hidden:false, type:"text"},
 	{name:"scenario_id", primaryKey:true, hidden:false, type:"int"},
 	{name:"scenario_name", hidden: false, type:"text"},
 	{name:"template_id", hidden: true, type:"int"},
@@ -129,10 +165,14 @@ isc.DataSource.create({
     showPrompt: false,
     dataFormat: "json",
     dataURL: wConfig.workflow_task_url,
-    recordXPath:"results",
+    //recordXPath:"results",
     transformRequest: function (dsRequest) {	
 	if (dsRequest.operationType == "fetch") {
 	    var params = {};
+	    var selectedRec = workflowScenariosListGrid.getSelectedRecord();
+	    if (typeof(selectedRec) != 'undefined') {
+		params["scenario_id"] = selectedRec.scenario_id;
+	    }
 	    // for (var n = 0; n < toolsForm.items.length; n++){
 	    // 	params[toolsForm.items[n].name] = toolsForm.items[n].getValue();
 	    // }
@@ -140,9 +180,9 @@ isc.DataSource.create({
 	}
     },
     fields:[
-	{name:"execute_url", hidden:false, type:"text"},
 	{name:"workflow", primaryKey:true, hidden:false, type:"int"},
 	{name:"code", hidden: false, type:"text"},
+	{name:"scenario", hidden: false, type: "text"},
 	{name:"tcreated", hidden: false, type:"text"},
 	{name:"tqueued", hidden: false, type:"text"},
 	{name:"tstart", hidden: false, type:"text"},
@@ -214,10 +254,7 @@ var createWorkflowScenariosListGrid = function() {
 	useClientSorting: false,
 	showFilterEditor:true,
 	autoFetchData: true,
-	fields:[
-	    {name:"execute_url", title:"Start", width:50, 
-	     type:"link", align:"center", canFilter:false, canSort:false,
-	     linkText:isc.Canvas.imgHTML(wConfig.images_url + "navPlay.png",20,20)},
+	fields:[ 
 	    {name:"scenario_id", title:"ID", type:"int", width:40},
 	    {name:"scenario_name", title: "Scenario", type: "text", formatCellValue: function (value, record) {
 		    if (value) {
@@ -256,11 +293,12 @@ var createWorkflowScenariosListGrid = function() {
 	//     return "<a href='javascript:void(0)' onclick='doLink(\"" + this.ID + "\"," + rowNum + "," + colNum + ")'>" + value + "</a>";
 	// }
     });
+    
 
     return g;
 };
 
-var createWorkflowsTaskListGrid = function() {
+var createWorkflowTasksListGrid = function() {
 
     var g = isc.ScenariosListGrid.create({
 	ID:"workflowTasksListGrid",
@@ -275,16 +313,17 @@ var createWorkflowsTaskListGrid = function() {
 	showFilterEditor:true,
 	autoFetchData: true,
 	fields:[
-	    {name:"execute_url", title:"Start", width:50, type:"link", 
-	     align:"center", canFilter:false, canSort:false,
-	     linkText:isc.Canvas.imgHTML(wConfig.images_url + "navPlay.png",20,20)},
 	    {name:"workflow", title:"Workflow ID", type:"int", width:40,
-	    getGroupTitle: function (groupValue, groupNode, field, fieldName, grid) {
-		baseTitle = groupValue + "<a>Start workflow</a>";
-		return baseTitle;
-	    }
+	    // getGroupTitle: function (groupValue, groupNode, field, fieldName, grid) {
+	    // 	baseTitle = groupValue;
+	    // 	return baseTitle;
+	    // },
+	     getGroupValue : function (val, rec, field, fieldName, grid) {
+                 return "<b>Workflow ID: " + val + " Scenario ID: " + rec.scenario + "</b>";
+            }
 	    },
 	    {name:"code",title:"Code", type:"text", width: 55, align: "center"},
+	    {name:"scenario",title:"Scenario id", type:"text", showIf:"false", width: 55},
 	    {name:"tcreated", title:"created", type:"text"},
 	    {name:"tqueued", title:"queued", type:"text", showIf: "false"},
 	    {name:"tstart", title:"started", type:"text", showIf: "false"},
@@ -381,7 +420,7 @@ isc.VLayout.create({
 	    membersMargin: 10,
 	    backgroundColor:"lightGrey",
 	    border: "1px solid grey",
-	    members: [butStart, butRefresh, toolsForm]
+	    members: [butStart, butRefresh, toolsForm, butWorkflow]
 	}),
 	// toolBox,
 	createWorkflowScenariosListGrid(),

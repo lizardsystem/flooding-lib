@@ -89,14 +89,11 @@ class ScenarioWorkflowView(View):
             
             template_code = ""
             template_id = ""
-            execute_url = ""
             if scenario.workflow_template is not None:
                 template_code = scenario.workflow_template.code
                 template_id = scenario.workflow_template.id
-                execute_url = self.create_execution_url(scenario.id, template_id, request.get_host())
             
             scenario_workflow = {
-                "execute_url": execute_url,
                 'scenario_id': scenario.id,
                 'scenario_name': scenario.name,
                 'template_id': template_id,
