@@ -4,7 +4,8 @@ Changelog of flooding-lib
 2.59 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Hopefully fix a UTF8 error where the code didn't expect non-ASCII in
+  users' full names.
 
 
 2.58 (2013-02-18)

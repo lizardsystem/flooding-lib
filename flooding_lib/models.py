@@ -1333,13 +1333,15 @@ class Scenario(models.Model):
             scenario=self,
             task_type=TaskType.TYPE_SCENARIO_CREATE_AUTO,
             remarks="import scenario",
-            creatorlog="uploaded by {0}".format(self.owner.get_full_name()))
+            # Unicode, because get_full_name may contain non-ASCII!
+            # And on general principle, of course
+            creatorlog=u"uploaded by {0}".format(self.owner.get_full_name()))
 
         Task.create_fake(
             scenario=self,
             task_type=TaskType.TYPE_SOBEK_CALCULATION,
             remarks="import scenario",
-            creatorlog="imported by {0}.".format(username))
+            creatorlog=u"imported by {0}.".format(username))
 
         self.update_status()
 
