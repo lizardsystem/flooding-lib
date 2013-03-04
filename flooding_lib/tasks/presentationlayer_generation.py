@@ -37,6 +37,8 @@ __revision__ = "$Rev: 8118 $"[6:-2]
 import sys
 import logging
 
+from __futures__ import unicode.literals
+
 from django import db
 from django.contrib.gis.geos import MultiPolygon, Point, Polygon
 
@@ -61,6 +63,7 @@ import datetime
 
 log = logging.getLogger('nens.web.flooding.presentationlayer_generation')
 
+ecoding_stgr = 'utf8'
 
 def set_broker_logging_handler(broker_handler=None):
     """
@@ -96,29 +99,29 @@ def get_or_create_model_shapefile_def(model_loc, output_dir, generate, srid,
     log.debug('!!!get_or_create_model_shapefile_def')
 
     #check source
-    if not os.path.isfile(str(model_loc)) and not os.path.isdir(
-        str(model_loc)):
+    if not os.path.isfile(model_loc) and not os.path.isdir(
+        model_loc.ecode('utf8')):
         log.warning('source file is missing. ' + model_loc)
         return (False, None, None, )
 
     if model_loc[-3:].lower() == 'zip':
-        log.debug('read model from zipfile: ' + str(model_loc))
+        log.debug('read model from zipfile: {0}'.format(model_loc))
         zip_file = ZipFile(model_loc, "r")
         sobek_gr = Stream(zip_file.read('network.gr').replace('\r\n', '\n'))
         sobek_struc = Stream(zip_file.read('network.st'))
         source_file_last_modified = datetime.datetime.fromtimestamp(
-            os.stat(str(model_loc))[8])
+            os.stat(model_loc.encode('utf8'))[8])
         zip_file.close()
     else:
-        log.debug('read model from directory: ' + str(model_loc))
+        log.debug('read model from directory: {0}'.format(model_loc))
         sobek_gr = open(os.path.join(model_loc, 'network.gr'))
         sobek_struc = open(os.path.join(model_loc, 'network.st'))
         source_file_last_modified = datetime.datetime.fromtimestamp(
-            os.stat(os.path.join(str(model_loc), 'network.gr'))[8])
+            os.stat(os.path.join(model_loc.encode('utf8')), 'network.gr'))[8])
 
     source_up_to_date = False
-    log.debug('in db origin date is ' + str(check_source_file_last_modified))
-    log.debug('file date is ' + str(source_file_last_modified))
+    log.debug('in db origin date is {0}'.format(check_source_file_last_modified))
+    log.debug('file date is {0}'.format(source_file_last_modified))
     if (check_source_file_last_modified and (
             check_source_file_last_modified >= source_file_last_modified)):
         log.info('source file is still up to date')
@@ -227,7 +230,7 @@ def get_or_create_model_shapefile_def(model_loc, output_dir, generate, srid,
 
                 fid = fid + 1
 
-            log.debug('nr of nodes ' + str(fid))
+            log.debug('nr of nodes {0}'.format(fid))
             layer.SyncToDisk()
             # Clean up
             ds.Destroy()
@@ -264,7 +267,7 @@ def get_or_create_model_shapefile_def(model_loc, output_dir, generate, srid,
                 layerb.CreateFeature(feat)
                 fid = fid + 1
 
-            log.debug('nr of branches ' + str(fid))
+            log.debug('nr of branches {0}'.format(fid))
             layerb.SyncToDisk()
             # Clean up
             dsb.Destroy()
@@ -298,7 +301,7 @@ def get_or_create_model_shapefile_def(model_loc, output_dir, generate, srid,
                     break
 
             if location_found == False:
-                log.warning('structure location not found for ' + str(struc))
+                log.warning('structure location not found for {0}'.format(struc))
                 struc['x'] = 0
                 struc['y'] = 0
 
@@ -339,7 +342,7 @@ def get_or_create_model_shapefile_def(model_loc, output_dir, generate, srid,
             feat.Destroy()
             fid = fid + 1
 
-        log.debug('nr of structures ' + str(fid))
+        log.debug('nr of structures {0}'.format(fid))
         layer.SyncToDisk()
         # Clean up
         ds.Destroy()
@@ -530,7 +533,7 @@ def get_or_create_value_presentation_source(
             log.debug('check timestamps')
             if os.path.isfile(source_file_name):
                 source_file_last_modified = datetime.datetime.fromtimestamp(
-                    os.stat(str(source_file_name))[8])
+                    os.stat(source_file_name.encode('utf8'))[8])
                 #adding timestamps where this was not filled before
                 if source.t_origin == None or source.t_source == None:
                     source.t_origin = source_file_last_modified
@@ -554,14 +557,14 @@ def get_or_create_value_presentation_source(
 
             destination_file_name = os.path.join(
                 presentation_dir, output_file_name)
-            log.debug('source file is ' + str(source_file_name))
-            log.debug('destination is ' + str(destination_file_name))
+            log.debug('source file is {0}'.format(source_file_name))
+            log.debug('destination is {0}'.format(destination_file_name))
 
             try:
                 if filename[-3:].lower() == 'zip':
                     copyfile(source_file_name, destination_file_name)
                 else:
-                    dest = ZipFile(str(destination_file_name)[:-3] + '.zip',
+                    dest = ZipFile(destination_file_name.encode('utf8'))[:-3] + '.zip',
                                    mode="w", compression=ZIP_DEFLATED)
                     dest.writestr(
                         filename, file(source_file_name, 'rb').read())
@@ -569,7 +572,7 @@ def get_or_create_value_presentation_source(
 
                 source.file_location = output_file_name
                 source.t_original = datetime.datetime.fromtimestamp(
-                    os.stat(str(source_file_name))[8])
+                    os.stat(source_file_name.encode('utf8'))[8])
                 source.t_source = datetime.datetime.now()
                 source.save()
                 get_animation_info = True
@@ -621,7 +624,7 @@ def get_or_create_shape_layer(scenario, pt, only_geom):
                     scenario, pt, get_animation_info, not ps_new))
 
             if not animation == None and not animation == {}:
-                log.debug('save animation ' + str(animation))
+                log.debug('save animation {0}'.format(animation))
                 #animation['presentationlayer'] = pl
                 anim, new = Animation.objects.get_or_create(
                     presentationlayer=pl, defaults=animation)
@@ -734,8 +737,8 @@ def get_or_create_pngserie_with_defaultlegend_from_old_results(scenario, pt):
                                    # output_dir_name, presentation_dir
                                    # + output_dir_name + '_old')
 
-                log.debug('source dir is ' + str(s_dir))
-                log.debug('destination dir is ' + str(d_dir))
+                log.debug('source dir is {0}'.format(s_dir))
+                log.debug('destination dir is {0}'.format(d_dir))
                 copytree(s_dir, d_dir)
 
                 if result.resulttype.overlaytype == 'ANIMATEDMAPOVERLAY':
