@@ -98,7 +98,7 @@ def get_or_create_model_shapefile_def(model_loc, output_dir, generate, srid,
 
     #check source
     if not os.path.isfile(model_loc) and not os.path.isdir(
-        model_loc.ecode('utf8')):
+        model_loc.encode('utf8')):
         log.warning('source file is missing. ' + model_loc)
         return (False, None, None, )
 
