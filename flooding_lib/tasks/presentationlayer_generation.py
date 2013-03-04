@@ -37,7 +37,7 @@ __revision__ = "$Rev: 8118 $"[6:-2]
 import sys
 import logging
 
-from __futures__ import unicode.literals
+from __future__ import unicode.literals
 
 from django import db
 from django.contrib.gis.geos import MultiPolygon, Point, Polygon
