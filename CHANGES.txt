@@ -4,7 +4,7 @@ Changelog of flooding-lib
 2.60 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Fix formating error in filenames.
 
 
 2.59 (2013-02-26)
