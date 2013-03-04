@@ -31,18 +31,17 @@ To do:
 nog wat mee doen:
 * file_content = file_content.replace('\r\n', '\n')
 '''
+from __future__ import unicode_literals
 
 __revision__ = "$Rev: 8118 $"[6:-2]
 
 import sys
 import logging
 
-from __future__ import unicode_literals
-
 from django import db
 from django.contrib.gis.geos import MultiPolygon, Point, Polygon
 
-from flooding_lib.models import  Scenario, \
+from flooding_lib.models import Scenario, \
     ScenarioBreach, Result, \
     Scenario_PresentationLayer
 from flooding_presentation.models import SourceLinkType, SourceLink, \
@@ -63,7 +62,6 @@ import datetime
 
 log = logging.getLogger('nens.web.flooding.presentationlayer_generation')
 
-ecoding_stgr = 'utf8'
 
 def set_broker_logging_handler(broker_handler=None):
     """
@@ -117,7 +115,7 @@ def get_or_create_model_shapefile_def(model_loc, output_dir, generate, srid,
         sobek_gr = open(os.path.join(model_loc, 'network.gr'))
         sobek_struc = open(os.path.join(model_loc, 'network.st'))
         source_file_last_modified = datetime.datetime.fromtimestamp(
-            os.stat(os.path.join(model_loc.encode('utf8')), 'network.gr'))[8])
+            os.stat(os.path.join(model_loc.encode('utf8'), 'network.gr'))[8])
 
     source_up_to_date = False
     log.debug('in db origin date is {0}'.format(check_source_file_last_modified))
@@ -564,7 +562,7 @@ def get_or_create_value_presentation_source(
                 if filename[-3:].lower() == 'zip':
                     copyfile(source_file_name, destination_file_name)
                 else:
-                    dest = ZipFile(destination_file_name.encode('utf8'))[:-3] + '.zip',
+                    dest = ZipFile(destination_file_name.encode('utf8')[:-3] + '.zip',
                                    mode="w", compression=ZIP_DEFLATED)
                     dest.writestr(
                         filename, file(source_file_name, 'rb').read())
