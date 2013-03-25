@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.61 (unreleased)
+2.61 (2013-03-25)
 -----------------
 
 - Fix error on crreating export ROR maps.
