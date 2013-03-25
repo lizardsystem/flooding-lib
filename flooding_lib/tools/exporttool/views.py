@@ -181,6 +181,7 @@ def new_export(request):
                 description=form.cleaned_data['description'],
                 owner=request.user,
                 creation_date=datetime.datetime.now(),
+                gridsize=form.cleaned_data['gridsize'],
                 export_max_waterdepth=form.cleaned_data['export_max_waterdepth'],
                 export_max_flowvelocity=form.cleaned_data['export_max_flowvelocity'],
                 export_possibly_flooded=form.cleaned_data['export_possibly_flooded']

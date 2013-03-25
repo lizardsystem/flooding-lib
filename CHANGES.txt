@@ -4,7 +4,9 @@ Changelog of flooding-lib
 2.61 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Fix error on crreating export ROR maps.
+
+- Add meta data to export zipfile for ROR
 
 
 2.60 (2013-03-04)

@@ -3,6 +3,8 @@
 
 import tempfile
 import os
+import simplejson as json
+from StringIO import StringIO
 
 from flooding_lib.models import ResultType
 from flooding_lib.tools.exporttool.models import ExportRun
@@ -17,6 +19,9 @@ import shutil
 from osgeo import gdal
 from osgeo import ogr
 from osgeo import osr
+
+import logging
+log = logging.getLogger(__name__)
 
 
 def mktemp():
@@ -43,6 +48,23 @@ def linuxify_pathname(pathname):
     return pathname.replace('\\', '/')
 
 
+def create_json_meta_file(tmp_zip_filename, export_run):
+    """Create meta file."""
+    export_meta = {
+        "export_name": export_run.name,
+        "owner": export_run.owner.username}
+    io = StringIO()
+    json.dump(export_meta, io, indent=4)
+    meta_filename = mktemp()
+    meta_file = open(meta_filename, 'wb')
+    meta_file.write(io.getvalue())
+    meta_file.close()
+    add_to_zip(tmp_zip_filename, 
+               [{'filename': meta_filename, 'arcname': "meta.json", 'delete_after': True}])
+    if not io.closed:
+        io.close()
+    
+    
 def np_max(list_of_arrays):
     """
     Max of a list of arrays
@@ -112,10 +134,10 @@ def get_dijkring_mask(dijkringnr, geo_projection, geo_transform, size_x, size_y)
         try:
             dijkring_shapes_folder = Setting.objects.get(key='DIJKRING_SHAPES_FOLDER').value
         except:
-            print 'Check Exporttool.Setting DIJKRING_SHAPES_FOLDER, taking %s' % dijkring_shapes_folder
+            log.warn('Check Exporttool.Setting DIJKRING_SHAPES_FOLDER, taking %s' % dijkring_shapes_folder)
 
         shapefile_name = os.path.join(dijkring_shapes_folder, 'dr__%d.shp' % dijkringnr)
-        print 'Reading shapefile %s...' % (shapefile_name)
+        log.debug('Reading shapefile %s...' % (shapefile_name))
         dataset = driver.Open(shapefile_name, 0)
 
         dijkring_layer = dataset.GetLayer()
@@ -168,13 +190,13 @@ def dijkring_arrays_to_zip(input_files, tmp_zip_filename, gridtype='output', gri
     y_min = None
     
     for input_file in input_files:
-        print '  - checking bbox of %s...' % input_file['scenario']
+        log.debug('  - checking bbox of %s...' % input_file['scenario'])
         #print input_file
         linux_filename = linuxify_pathname(input_file['filename'])
         dijkringnr = input_file['dijkringnr']
         with files.temporarily_unzipped(linux_filename) as files_in_zip:
             for filename_in_zip in files_in_zip:
-                print filename_in_zip
+                log.debug(filename_in_zip)
                 dataset = gdal.Open(str(filename_in_zip))
                 dataset.RasterXSize, dataset.RasterYSize
                 geo_transform = dataset.GetGeoTransform()
@@ -195,14 +217,15 @@ def dijkring_arrays_to_zip(input_files, tmp_zip_filename, gridtype='output', gri
    
     size_x = int(abs((x_max - x_min) / gridsize))
     size_y = int(abs((y_max - y_min) / gridsize))
-    print 'resulting image: %f %f %f %f size: %f %f' % (
-        x_min, y_min, x_max, y_max, size_x, size_y)
+    log.debug('resulting image: %f %f %f %f size: %f %f' % (
+        x_min, y_min, x_max, y_max, size_x, size_y))
 
     for input_file in input_files:
-        print '  - processing result for scenario %s...' % input_file['scenario']
+        log.debug(
+            '  - processing result for scenario %s...' % input_file['scenario'])
         #print input_file
         linux_filename = linuxify_pathname(input_file['filename'])
-        print linux_filename
+        log.debug(linux_filename)
         dijkringnr = input_file['dijkringnr']
         with files.temporarily_unzipped(linux_filename) as files_in_zip:
             for filename_in_zip in files_in_zip:
@@ -273,6 +296,58 @@ def dijkring_arrays_to_zip(input_files, tmp_zip_filename, gridtype='output', gri
     return result
 
 
+def calc_max_waterdepths(tmp_zip_filename, export_run):
+    log.debug('export_max_waterdepth')
+    gridtype = 'gridmaxwaterdepth'
+    # Calc max waterdepth
+    export_result_type = ResultType.objects.get(name=gridtype).id
+    # Find out input files for this type
+    input_files = export_run.input_files(export_result_type)
+    if len(input_files) <= 0:
+        log.warn("No file to calc max watedepths.")
+        return {}
+    max_waterdepths = dijkring_arrays_to_zip(
+        input_files, tmp_zip_filename, gridtype,
+        gridsize=export_run.gridsize)
+    return max_waterdepths
+
+
+def calc_max_flowvelocity(tmp_zip_filename, export_run):
+    # Calc max flow velocity
+    log.debug('export_max_flowvelocity')
+    gridtype = 'gridmaxflowvelocity'
+    export_result_type = ResultType.objects.get(name=gridtype).id
+    # Find out input files for this type
+    input_files = export_run.input_files(export_result_type)
+    if len(input_files) <= 0:
+        log.warn("No file to calc max flowvelocity.")
+        return {}
+    max_flowvelocities = dijkring_arrays_to_zip(
+        input_files, tmp_zip_filename, gridtype,
+        gridsize=export_run.gridsize)
+    return max_flowvelocities
+
+
+def calc_possible_flooded_area(tmp_zip_filename, max_waterdepths):
+    # Calculate the possible flooded area
+    log.debug('export_possibly_flooded')
+    for dijkringnr, array in max_waterdepths.items():
+        flooded_array = np.ma.where(array[0] < 0.02, 0, 1)
+        #possibly_flooded[dijkringnr] = flooded_array
+        ascii_filename = mktemp()
+        if dijkringnr is None:
+            dijkringnr = 0
+        arc_name = 'possibly_flooded_%d.asc' % (dijkringnr)
+        geo_transform = array[1]
+        write_masked_array_as_ascii(
+            ascii_filename, flooded_array, geo_transform)
+        add_to_zip(
+            tmp_zip_filename,
+            [{'filename': ascii_filename,
+              'arcname': arc_name,
+              'delete_after': True}])
+
+
 def calculate_export_maps(exportrun_id):
     """
     Execute an ExportRun that creates different maps.
@@ -288,51 +363,29 @@ def calculate_export_maps(exportrun_id):
     export_run = ExportRun.objects.get(id=exportrun_id)
     export_folder = Setting.objects.get(key='EXPORT_FOLDER').value
     result_files = []
+    max_waterdepths = {}
 
     tmp_zip_filename = mktemp()
-
+    
     if export_run.export_max_waterdepth or export_run.export_possibly_flooded:
-        print 'export_max_waterdepth'
-        gridtype = 'gridmaxwaterdepth'
-        # Calc max waterdepth
-        export_result_type = ResultType.objects.get(name=gridtype).id
-        # Find out input files for this type
-        input_files = export_run.input_files(export_result_type)
-        max_waterdepths = dijkring_arrays_to_zip(
-            input_files, tmp_zip_filename, gridtype,
-            gridsize=export_run.gridsize)
+        max_waterdepths = calc_max_waterdepths(
+            tmp_zip_filename, export_run)
 
     if export_run.export_max_flowvelocity:
-        # Calc max flow velocity
-        print 'export_max_flowvelocity'
-        gridtype = 'gridmaxflowvelocity'
-        # Calc max waterdepth
-        export_result_type = ResultType.objects.get(name=gridtype).id
-        # Find out input files for this type
-        input_files = export_run.input_files(export_result_type)
-        max_flowvelocities = dijkring_arrays_to_zip(
-            input_files, tmp_zip_filename, gridtype,
-            gridsize=export_run.gridsize)
+        max_flowvelocities = calc_max_flowvelocity(
+            tmp_zip_filename, export_run)
 
     if export_run.export_possibly_flooded:
         # Calculate the possible flooded area
-        print 'export_possibly_flooded'
-        #possibly_flooded = {}
-        for dijkringnr, array in max_waterdepths.items():
-            flooded_array = np.ma.where(array[0] < 0.02, 0, 1)
-            #possibly_flooded[dijkringnr] = flooded_array
-            ascii_filename = mktemp()
-            if dijkringnr is None:
-                dijkringnr = 0
-            arc_name = 'possibly_flooded_%d.asc' % (dijkringnr)
-            geo_transform = array[1]
-            write_masked_array_as_ascii(ascii_filename, flooded_array, geo_transform)
-            add_to_zip(
-                tmp_zip_filename,
-                [{'filename': ascii_filename, 'arcname': arc_name, 'delete_after': True}])
+        log.debug('export_possibly_flooded')
+        calc_possible_flooded_area(tmp_zip_filename,
+                                   max_waterdepths)
 
     # Move file to destination.
     print tmp_zip_filename
+
+    log.debug("create meta")
+    create_json_meta_file(tmp_zip_filename, export_run)
 
     dst_basename = 'export_run_%d.zip' % export_run.id
     dst_filename = os.path.join(export_folder, dst_basename)
