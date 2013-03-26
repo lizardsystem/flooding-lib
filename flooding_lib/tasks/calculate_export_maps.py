@@ -65,6 +65,19 @@ def is_valid_zipfile(linux_filename):
     return True
 
 
+def generate_export_meta(export_run):
+    """Generate a dict with meta data for 
+    passed export."""
+    scenarios = export_run.scenarios.all()
+    export_meta = {
+        "name": export_run.name,
+        "owner": export_run.owner.username,
+        "creationdate": export_run.creation_date,
+        "description": export_run.description,
+        "selectedmaps": export_run.get_selected_maps,
+        "scenarios": ""}
+        
+
 def create_json_meta_file(tmp_zip_filename, export_run):
     """Create meta file."""
     export_meta = {
@@ -242,9 +255,10 @@ def dijkring_arrays_to_zip(input_files, tmp_zip_filename, gridtype='output', gri
     log.debug('resulting image: %f %f %f %f size: %f %f' % (
         x_min, y_min, x_max, y_max, size_x, size_y))
 
-    for input_file in input_files:
+    len_input_files = len(input_files)
+    for index, input_file in enumerate(input_files):
         log.debug(
-            '  - processing result for scenario %s...' % input_file['scenario'])
+            '  - processing result (%d/%d) for scenario %s...' % (index+1, len_input_files, input_file['scenario']))
         #print input_file
         linux_filename = linuxify_pathname(input_file['filename'])
         if not is_valid_zipfile(linux_filename):
@@ -277,13 +291,17 @@ def dijkring_arrays_to_zip(input_files, tmp_zip_filename, gridtype='output', gri
                 ndv = reprojected_dataset.GetRasterBand(1).GetNoDataValue()
                 # Commented this out, because everything was masked away in the test case.
                 #masked_array = np.ma.array(arr, mask=(arr == ndv))
+
                 masked_array = np.ma.array(arr)
-                if dijkringnr not in dijkring_arrays:
-                    dijkring_arrays[dijkringnr] = []
                 #print masked_array.max()
                 geo_transform = reprojected_dataset.GetGeoTransform()
                 geo_projection = reprojected_dataset.GetProjection()  # why empty? does it matter?
-                dijkring_arrays[dijkringnr].append((masked_array, geo_transform, geo_projection))
+                if dijkringnr not in dijkring_arrays:
+                    dijkring_arrays[dijkringnr] = (masked_array, geo_transform, geo_projection)
+                else:
+                    old_max = dijkring_arrays[dijkringnr][0]
+                    dijkring_arrays[dijkringnr] = (np.maximum(masked_array, old_max), geo_transform, geo_projection)
+                    #.append((masked_array, geo_transform, geo_projection))
                 #print masked_array.max()
                 del dataset  # This closes the file, so that the
                              # directory can be deleted in Windows
@@ -291,13 +309,14 @@ def dijkring_arrays_to_zip(input_files, tmp_zip_filename, gridtype='output', gri
     #print dijkring_arrays[9][0][0].max(), dijkring_arrays[9][1][0].max()
     #print np.maximum(dijkring_arrays[9][0][0], dijkring_arrays[9][1][0]).max()
 
-    for dijkringnr, arrays in dijkring_arrays.items():
+    for dijkringnr, array in dijkring_arrays.items():
         # for each dijkringnr, calculate max(arrays)
         #print 'dijkringnr %d' % dijkringnr
         # 0 is masked_array, 1 is geo_transform
-        max_array = np_max([array[0] for array in arrays])
-        geo_transform = arrays[0][1]
-        geo_projection = arrays[0][2]
+        #max_array = np_max([array[0] for array in arrays])
+        max_array = array[0]
+        geo_transform = array[1]
+        geo_projection = array[2]
 
         # Commented this out, because everything was masked away in the test case.
         # # Apply dijkring mask

@@ -70,6 +70,21 @@ class ExportRun(models.Model):
     state = models.IntegerField(
         choices=EXPORT_STATE_CHOICES,
         default=EXPORT_STATE_WAITING)
+    
+    @property
+    def get_selected_maps(cls):
+        """Return list with verbose_names of selected maps."""
+        maps = []
+        map1_field = ExportRun._meta.get_field_by_name("export_max_waterdepth")[0]
+        map2_field = ExportRun._meta.get_field_by_name("export_max_flowvelocity")[0]
+        map3_field = ExportRun._meta.get_field_by_name("export_possibly_flooded")[0]
+        if cls.export_max_waterdepth:
+            maps.append(map1_field.verbose_name.capitalize())
+        if cls.export_max_flowvelocity:
+            maps.append(map2_filed.verbose_name.capitalize())
+        if cls.export_possibly_flooded:
+            maps.append(map3_field.verbose_name.capitalize())
+        return maps
 
     def get_main_result(self):
         # Why RESULT_AREA_COUNTRY only?

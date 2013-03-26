@@ -17,15 +17,17 @@
 		<table class="timeseriesWrapper"><tr><td>
 			<table class="timeseries" summary="timeseries">
 				<thead class="headerTitle">
-					<td width="350"><b>{% trans "Scenario" %}</b></td>					
-					<td width="350"><b>{% trans "Project" %}</b></td>
+				  <td width="100"><b>{% trans "Scenario ID" %}</b></td>
+				  <td width="350"><b>{% trans "Scenario" %}</b></td>					
+				  <td width="350"><b>{% trans "Project" %}</b></td>
 			  	</thead>
 			  	<tbody>
 					{% if  scenario_list %}
 				 		{% for scenario in scenario_list %}				 		   	        
 							<tr class="{% cycle 'cellDark' 'cell'%}">
-						    	<td>{{scenario.name}}</td>
-						    	<td>{{scenario.project.name}}</td>				    			    		
+							  <td>{{scenario.id}}</td>
+						    	  <td>{{scenario.name}}</td>
+						    	  <td>{{scenario.main_project}}</td>				    			    		
 						    </tr>						   
 				    	{% endfor %}
 			    	{% else %}
