@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.62 (unreleased)
+2.62 (2013-03-26)
 -----------------
 
 - Fix error by missed zipfile.
