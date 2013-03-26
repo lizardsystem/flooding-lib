@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.63 (unreleased)
+2.63 (2013-03-26)
 -----------------
 
 - Extend meta file for ROR exporttool.
