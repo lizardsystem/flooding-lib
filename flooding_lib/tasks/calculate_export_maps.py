@@ -48,6 +48,23 @@ def linuxify_pathname(pathname):
     return pathname.replace('\\', '/')
 
 
+def is_valid_zipfile(linux_filename):
+    """Check if the passed file is a valid zipfile."""
+    if not os.path.isfile(linux_filename):
+        return False
+    try:
+        zipf = zipfile.ZipFile(open(linux_filename, 'rb'))
+        test = zipf.testzip()
+        if test is not None:
+            log.warn("Corrupted zipfile {0}".format(linux_filename))
+            return False
+    except:
+        log.error("File is not valid: {0}".format(linux_filename))
+        return False
+
+    return True
+
+
 def create_json_meta_file(tmp_zip_filename, export_run):
     """Create meta file."""
     export_meta = {
@@ -188,12 +205,17 @@ def dijkring_arrays_to_zip(input_files, tmp_zip_filename, gridtype='output', gri
     x_max = None
     y_max = None
     y_min = None
-    
+
     for input_file in input_files:
         log.debug('  - checking bbox of %s...' % input_file['scenario'])
         #print input_file
         linux_filename = linuxify_pathname(input_file['filename'])
         dijkringnr = input_file['dijkringnr']
+        log.debug("Input_filename {0}".format(input_file['filename']))
+        log.debug("Linux-filename {0}".format(linux_filename))
+        
+        if not is_valid_zipfile(linux_filename):
+            continue
         with files.temporarily_unzipped(linux_filename) as files_in_zip:
             for filename_in_zip in files_in_zip:
                 log.debug(filename_in_zip)
@@ -225,7 +247,9 @@ def dijkring_arrays_to_zip(input_files, tmp_zip_filename, gridtype='output', gri
             '  - processing result for scenario %s...' % input_file['scenario'])
         #print input_file
         linux_filename = linuxify_pathname(input_file['filename'])
-        log.debug(linux_filename)
+        if not is_valid_zipfile(linux_filename):
+            continue
+        log.debug("Linuxified filepath: {0}".format(linux_filename))
         dijkringnr = input_file['dijkringnr']
         with files.temporarily_unzipped(linux_filename) as files_in_zip:
             for filename_in_zip in files_in_zip:
