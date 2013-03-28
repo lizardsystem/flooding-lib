@@ -479,6 +479,21 @@ def service_get_projects(
         {'project_list': project_list})
 
 
+def get_breaches_info(scenario):
+    info = {}
+    breaches = scenario.breaches.all()
+    breaches_values= breaches.values(
+        "name", "id", "region__id", "region__name", "externalwater__name",
+        "externalwater__type")
+    info["names"] = [v.get("name") for v in breaches_values]
+    info["ids"] = [v.get("id") for v in breaches_values]
+    info["region_names"] = [v.get("region__name") for v in breaches_values]
+    info["region_ids"] = [v.get("region__id") for v in breaches_values]
+    info["externalwater_name"] = [v.get("externalwater__name") for v in breaches_values]
+    info["externalwater_type"] = [v.get("externalwater__type") for v in breaches_values]
+    return info
+        
+
 @never_cache
 @receives_permission_manager
 def service_get_scenarios_export_list(
@@ -494,25 +509,49 @@ def service_get_scenarios_export_list(
     inputfield_shelflife = InputField.objects.get(pk=27)
     if not(permission_manager.check_project_permission(project, permission)):
         raise Http404
-    scenarios_export_list = [
-        {
-            'scenario_id': s.id,
-            'scenario_name': s.name,
-            'breach_ids': [br.id for br in s.breaches.all()],
-            'breach_names': [br.name for br in s.breaches.all()],
-            'region_ids': [br.region.id for br in s.breaches.all()],
-            'region_names': [br.region.name for br in s.breaches.all()],
-            'extwname': [br.externalwater.name for br in s.breaches.all()],
-            'extwtype': [br.externalwater.get_type_display() for br in s.breaches.all()],
-            'project_id': project.id,
-            'project_name': project.name,
-            'owner_id': s.owner.id,
-            'owner_name': s.owner.username,
-            'calcmethod': s.string_value_for_inputfield(inputfield_calcmethod),
-            'statesecurity': s.string_value_for_inputfield(inputfield_statesecurity),
-            'shelflife': s.string_value_for_inputfield(inputfield_shelflife),
-            'extwrepeattime': [sbr.extwrepeattime for sbr in s.scenariobreach_set.all()]}
-        for s in project.all_scenarios()]
+    scenarios_export_list = []
+    for s in project.all_scenarios():
+        breaches_values = get_breaches_info(s)
+        scenarios_export_list.append(
+            {
+                'scenario_id': s.id,
+                'scenario_name': s.name,
+                'breach_ids': breaches_values.get("ids"),
+                'breach_names': breaches_values.get("names"),
+                'region_ids': breaches_values.get("region_ids"),
+                'region_names': breaches_values.get("region_names"),
+                'extwname': breaches_values.get("externalwater_name"),
+                'extwtype': breaches_values.get("externalwater_type"),
+                'project_id': project.id,
+                'project_name': project.name,
+                'project_id': project.id,
+                'project_name': project.name,
+                'owner_id': s.owner.id,
+                'owner_name': s.owner.username,
+                'extwrepeattime': [sbr.extwrepeattime for sbr in s.scenariobreach_set.all()]
+            })
+    ## Bij ROR project neem te veel tijd, request wordt gekilld
+    ## Niet verwijderen totdat er een definitief oplossing komt.
+
+    # scenarios_export_list = [
+    #     {
+    #         'scenario_id': s.id,
+    #         'scenario_name': s.name,
+    #         'breach_ids': [br.id for br in s.breaches.all()],
+    #         'breach_names': [br.name for br in s.breaches.all()],
+    #         'region_ids': [br.region.id for br in s.breaches.all()],
+    #         'region_names': [br.region.name for br in s.breaches.all()],
+    #         'extwname': [br.externalwater.name for br in s.breaches.all()],
+    #         'extwtype': [br.externalwater.get_type_display() for br in s.breaches.all()],
+    #         'project_id': project.id,
+    #         'project_name': project.name,
+    #         'owner_id': s.owner.id,
+    #         'owner_name': s.owner.username,
+    #         'calcmethod': s.string_value_for_inputfield(inputfield_calcmethod),
+    #         'statesecurity': s.string_value_for_inputfield(inputfield_statesecurity),
+    #         'shelflife': s.string_value_for_inputfield(inputfield_shelflife),
+    #         'extwrepeattime': [sbr.extwrepeattime for sbr in s.scenariobreach_set.all()]}
+    #     for s in project.all_scenarios()]
     return HttpResponse(
         simplejson.dumps(scenarios_export_list), mimetype="application/json")
 

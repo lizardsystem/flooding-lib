@@ -1390,7 +1390,9 @@ class Scenario(models.Model):
         """Retrieve a value for inputfield from ExtraScenarioInfo model,
         if the value is an integer retrieve the value from InputField.
         """
+        
         value = self.value_for_inputfield(inputfield)
+        
         if isinstance(value, int):
             try:
                 return inputfield.parsed_options[value]

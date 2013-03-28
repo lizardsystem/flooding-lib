@@ -65,24 +65,61 @@ def is_valid_zipfile(linux_filename):
     return True
 
 
-def generate_export_meta(export_run):
+def add_zero_before_number(number):
+    """Add 0 before a number less then 10,
+    format it to string."""
+    if number < 10: number = "{0}{1}".format(0, number)
+    return number
+
+
+def generate_dst_filename(export_run):
+    """Create filename like
+    [export name]_ddmmyyyy_hhMM.zip.
+
+    Replace all ' ' with '_' in export name
+    Cat export name to 20 chars."""
+    max_length = 20
+    export_name = ""
+    if export_run.name is not None:
+        export_name = export_run.name[:max_length]
+        export_name = export_name.strip()
+        export_name = export_name.replace(' ', '_')
+
+    c_date = export_run.creation_date
+
+    day = add_zero_before_number(c_date.day)
+    month = add_zero_before_number(c_date.month)
+    hour = add_zero_before_number(c_date.hour)
+    minute = add_zero_before_number(c_date.minute)
+        
+    dst_basename = "{0}_{1}{2}{3}_{4}{5}.zip".format(
+        export_name, day, month, c_date.year, hour, minute)
+
+    return dst_basename
+    
+
+
+def generate_export_meta(export_run, dst_filename):
     """Generate a dict with meta data for 
     passed export."""
     scenarios = export_run.scenarios.all()
     export_meta = {
         "name": export_run.name,
         "owner": export_run.owner.username,
-        "creationdate": export_run.creation_date,
+        "creationdate": export_run.creation_date.isoformat(),
         "description": export_run.description,
-        "selectedmaps": export_run.get_selected_maps,
-        "scenarios": ""}
+        "selectedmaps": export_run.selected_maps,
+        "scenarios": export_run.meta_scenarios,
+        "filelocation": dst_filename}
+    return export_meta
         
 
-def create_json_meta_file(tmp_zip_filename, export_run):
+def create_json_meta_file(tmp_zip_filename, export_run, dst_filename):
     """Create meta file."""
-    export_meta = {
-        "export_name": export_run.name,
-        "owner": export_run.owner.username}
+    # export_meta = {
+    #     "export_name": export_run.name,
+    #     "owner": export_run.owner.username}
+    export_meta = generate_export_meta(export_run, dst_filename)
     io = StringIO()
     json.dump(export_meta, io, indent=4)
     meta_filename = mktemp()
@@ -229,6 +266,7 @@ def dijkring_arrays_to_zip(input_files, tmp_zip_filename, gridtype='output', gri
         
         if not is_valid_zipfile(linux_filename):
             continue
+
         with files.temporarily_unzipped(linux_filename) as files_in_zip:
             for filename_in_zip in files_in_zip:
                 log.debug(filename_in_zip)
@@ -424,31 +462,28 @@ def calculate_export_maps(exportrun_id):
         calc_possible_flooded_area(tmp_zip_filename,
                                    max_waterdepths)
 
-    # Move file to destination.
-    print tmp_zip_filename
-
-    log.debug("create meta")
-    create_json_meta_file(tmp_zip_filename, export_run)
-
-    dst_basename = 'export_run_%d.zip' % export_run.id
+    dst_basename = generate_dst_filename(export_run)
     dst_filename = os.path.join(export_folder, dst_basename)
 
-    print 'Moving file from %s to %s...' % (tmp_zip_filename, dst_filename)
+    log.debug("create meta")
+    create_json_meta_file(tmp_zip_filename, export_run, dst_filename)
+
+    log.debug('Moving file from %s to %s...' % (tmp_zip_filename, dst_filename))
     shutil.move(tmp_zip_filename, dst_filename)
 
     result_count = Result.objects.filter(export_run=export_run).count()
     if result_count > 0:
-        print 'Warning: deleting old Result objects for this export run...'
+        log.warn('Warning: deleting old Result objects for this export run...')
         Result.objects.filter(export_run=export_run).delete()
 
-    print 'Making Result object with link to file...'
+    log.debug('Making Result object with link to file...')
     result = Result(
         name=export_run.name,
         file_basename=dst_basename,
         area=Result.RESULT_AREA_DIKED_AREA, export_run=export_run)
     result.save()
 
-    print 'Updating state of export_run...'
+    log.debug('Updating state of export_run...')
     export_run.state = ExportRun.EXPORT_STATE_DONE
     export_run.save()
 

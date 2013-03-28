@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 import factory
 import mock
+import datetime
 
 from django.contrib.auth.models import User, Group
 from django.contrib.contenttypes.models import ContentType
@@ -15,6 +16,7 @@ from flooding_lib.tools.approvaltool.models import ApprovalObjectType
 from flooding_lib.tools.approvaltool.models import ApprovalRule
 from flooding_lib.tools.approvaltool.models import ApprovalObjectState
 from flooding_lib.tools.importtool import models as importmodels
+from flooding_lib.tools.exporttool import models as exportmodels
 
 from flooding_lib.tools.importtool.test_models import InputFieldF
 
@@ -55,6 +57,14 @@ class GroupF(factory.Factory):
 
 class ContentTypeF(factory.Factory):
     FACTORY_FOR = ContentType
+
+
+class ExportRunF(factory.Factory):
+    FACTORY_FOR = exportmodels.ExportRun
+
+    name = "test export"
+    owner = factory.SubFactory(UserF)
+    creation_date = datetime.datetime.today()
 
 
 class AttachmentF(factory.Factory):
@@ -1317,6 +1327,16 @@ class TestEmbankmentUnit(TestCase):
         embankment_unit = EmbankmentUnitF.build()
 
         uni = embankment_unit.__unicode__()
+
+        self.assertTrue(uni)
+        self.assertTrue(isinstance(uni, unicode))
+
+
+class TestExportRun(TestCase):
+    def test_has_unicode(self):
+        export_run = ExportRunF.build()
+
+        uni = export_run.__unicode__()
 
         self.assertTrue(uni)
         self.assertTrue(isinstance(uni, unicode))

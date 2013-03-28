@@ -72,7 +72,7 @@ class ExportRun(models.Model):
         default=EXPORT_STATE_WAITING)
     
     @property
-    def get_selected_maps(cls):
+    def selected_maps(cls):
         """Return list with verbose_names of selected maps."""
         maps = []
         map1_field = ExportRun._meta.get_field_by_name("export_max_waterdepth")[0]
@@ -81,10 +81,22 @@ class ExportRun(models.Model):
         if cls.export_max_waterdepth:
             maps.append(map1_field.verbose_name.capitalize())
         if cls.export_max_flowvelocity:
-            maps.append(map2_filed.verbose_name.capitalize())
+            maps.append(map2_field.verbose_name.capitalize())
         if cls.export_possibly_flooded:
             maps.append(map3_field.verbose_name.capitalize())
         return maps
+
+    @property
+    def meta_scenarios(self):
+        """Return a list with id, name, projectname of
+        selected scenarios."""
+        scenarios_meta = []
+        for scenario in self.scenarios.all():
+            scenarios_meta.append({
+                    'id': scenario.id,
+                    'name': scenario.name,
+                    'project': scenario.main_project.name})
+        return scenarios_meta
 
     def get_main_result(self):
         # Why RESULT_AREA_COUNTRY only?

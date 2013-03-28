@@ -4,7 +4,15 @@ Changelog of flooding-lib
 2.64 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Reduce loding export scenarios.
+
+- Format datetime string in eexport_run overview.
+
+- Set new filename for export zip.
+
+- Add scenarios list to meta.json for ROR export.
+
+- Add export filepath to meta.json for ROR export.
 
 
 2.63 (2013-03-26)

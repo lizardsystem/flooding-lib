@@ -65,9 +65,9 @@ isc.DataSource.create({
 	{name:"extwrepeattime", type:"text"},
 	{name:"extwname", type:"text"},
 	{name:"extwtype", type:"text"},
-	{name:"calcmethod", type:"text"},
-	{name: "statesecurity", type: "text"},
-        {name: "shelflife", type: "text"},
+	//{name:"calcmethod", type:"text"},
+	//{name: "statesecurity", type: "text"},
+        //{name: "shelflife", type: "text"},
 	{name: "_visible", hidden: true, type: "text"}
     ]
 });
@@ -210,9 +210,9 @@ isc.ScenariosListGrid.create({
 	{name:"extwtype", title: "Buitenwater type", type:"text"},
 	{name: "region_names", title: "Regio's", type: "text"},
 	{name: "breach_names", title: "Doorbraak locaties", type: "text"},
-	{name: "calcmethod", title: "Berekenigns methode", type: "text"},
-	{name: "statesecurity", title: "Standzekerheid kerineng", type: "text"},
-        {name: "shelflife", title: "Houdbaarheid scenario", type: "text"},
+	//{name: "calcmethod", title: "Berekenigns methode", type: "text"},
+	//{name: "statesecurity", title: "Standzekerheid kerineng", type: "text"},
+        //{name: "shelflife", title: "Houdbaarheid scenario", type: "text"},
 	{name: "_visible", title: "_Visible", type: "text", enabled: false, showIf: "false"}
     ],
     emptyMessage:"<br><br>Geen scenario's beschikbaar voor dit project."
@@ -287,10 +287,10 @@ isc.ScenariosListGrid.create({
 	{name:"extwname", title: "Naam buitenwater", type:"text"},
 	{name:"extwtype", title: "Buitenwater type", type:"text"},
 	{name: "region_names", title: "Regio's", type: "text"},
-	{name: "breach_names", title: "Doorbraak locaties", type: "text"},
-	{name: "calcmethod", title: "Berekenigns methode", type: "text"},
-	{name: "statesecurity", title: "Standzekerheid kerineng", type: "boolean"},
-        {name: "shelflife", title: "Houdbaarheid scenario", type: "text"}
+	{name: "breach_names", title: "Doorbraak locaties", type: "text"}
+	//{name: "calcmethod", title: "Berekenigns methode", type: "text"},
+	//{name: "statesecurity", title: "Standzekerheid kerineng", type: "boolean"},
+        //{name: "shelflife", title: "Houdbaarheid scenario", type: "text"}
     ],
     emptyMessage:"<br><br>Sleep scenario's hier heen voor export."
 });
