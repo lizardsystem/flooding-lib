@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.64 (unreleased)
+2.64 (2013-03-28)
 -----------------
 
 - Reduce loding export scenarios.
