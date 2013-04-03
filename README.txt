@@ -43,6 +43,19 @@ Task 200
 
     $ bin/django lw_task_worker --task_code 200 --log_level DEBUG --worker_nr 1
 
+- filename's format of export-zip is [name export]_ddmmyyyy_hhMM.zip
+
+- export-zip contains meta.json file within:
+  - name export
+  - owner
+  - filelocation (as mounted on task server)
+  - list of scenarios
+  - selected maps
+  - creration datetime
+  - selected maps
+
+- export-zip contains .asc files per selected map per 'dijkring'
+
 
 Task 210
 ========
