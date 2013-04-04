@@ -34,8 +34,12 @@ class GeoImage(object):
 
         startx, dxx, dyx, starty, dxy, dyy = data.GetGeoTransform()
 
-        endx = startx + (pixelsx - 1) * dxx
-        endy = starty - (pixelsy - 1) * dyy
+        # FIX -- dyy should basically always be negative, but
+        # in some of our old files it accidentally isn't
+        dyy = - abs(dyy)
+
+        endx = startx + pixelsx * dxx
+        endy = starty + pixelsy * dyy
 
         startx, starty = transform(
             RD_PROJECTION, GOOGLE_PROJECTION, startx, starty)
