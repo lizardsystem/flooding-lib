@@ -154,8 +154,8 @@ def write_masked_array_as_ascii(filename, masked_array, geo_transform):
     filled = masked_array.filled()
     size_y, size_x = filled.shape
     num_bands = 1
-    ds = gdal.GetDriverByName(b'mem').Create(
-        filename, size_x, size_y, num_bands, gdal.gdalconst.GDT_Float64)
+    driver = gdal.GetDriverByName(b'mem')
+    ds = driver.Create(b'{0}'.format(filename), size_x, size_y, num_bands, gdal.gdalconst.GDT_Float64)
     band = ds.GetRasterBand(1)
     band.WriteArray(filled)
     band.SetNoDataValue(NO_DATA_VALUE)
@@ -165,8 +165,7 @@ def write_masked_array_as_ascii(filename, masked_array, geo_transform):
     ds.SetGeoTransform(geo_transform)
 
     # Now it gets written to the disk
-    gdal.GetDriverByName(b'aaigrid').CreateCopy(filename, ds)
-    #print 'output file %s written' % filename
+    gdal.GetDriverByName(b'aaigrid').CreateCopy(b'{0}'.format(filename), ds)
 
 
 def add_to_zip(output_zipfile, zip_result):
