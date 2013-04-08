@@ -230,7 +230,7 @@ def get_dijkring_mask(dijkringnr, geo_projection, geo_transform, size_x, size_y)
 
         # Prepare in-memory copy of ds_gdal
         ds_result = gdal.GetDriverByName(b'mem').Create(
-            '', size_x, size_y, 1, gdal.gdalconst.GDT_Byte,
+            b'', size_x, size_y, 1, gdal.gdalconst.GDT_Byte,
         )
         ds_result.SetProjection(geo_projection)
         ds_result.SetGeoTransform(geo_transform)
@@ -308,16 +308,10 @@ def dijkring_arrays_to_zip(input_files, tmp_zip_filename, gridtype='output', gri
         dijkringnr = input_file['dijkringnr']
         with files.temporarily_unzipped(linux_filename) as files_in_zip:
             for filename_in_zip in files_in_zip:
-                #print filename_in_zip
-                #import pdb; pdb.set_trace()
                 dataset = gdal.Open(str(filename_in_zip))
-                #reprojected_dataset = dataset
                 driver = gdal.GetDriverByName(b'mem')
-                reprojected_dataset = driver.Create('dummyname', size_x, size_y, 1, gdal.gdalconst.GDT_Float64)
-                #reprojected_dataset = gdal.GetDriverByName('mem').Create(
-                #    'dummyname', size_x, size_y, 1, gdal.gdalconst.GDT_Float64)
+                reprojected_dataset = driver.Create(b'dummyname', size_x, size_y, 1, gdal.gdalconst.GDT_Float64)
                 reprojected_dataset.SetGeoTransform((x_min, gridsize, 0, y_max, 0, -gridsize))
-
                 band = reprojected_dataset.GetRasterBand(1)
                 #print dir(band)
                 NO_DATA_VALUE = -999
