@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.67 (unreleased)
+2.67 (2013-04-08)
 -----------------
 
 - Fix problem by ror-export for on creating mem driver.
