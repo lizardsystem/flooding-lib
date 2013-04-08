@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.66 (unreleased)
+2.66 (2013-04-08)
 -----------------
 
 - Fix problem with empty gridmaxwaterdepth.zip #1.
