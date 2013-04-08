@@ -1,6 +1,9 @@
 # Run under linux
 # Task 200 (sorry that I didn't put that in the filename)
 
+from __future__ import unicode_literals
+from __future__ import print_function
+
 import tempfile
 import os
 import simplejson as json
@@ -151,7 +154,7 @@ def write_masked_array_as_ascii(filename, masked_array, geo_transform):
     filled = masked_array.filled()
     size_y, size_x = filled.shape
     num_bands = 1
-    ds = gdal.GetDriverByName('mem').Create(
+    ds = gdal.GetDriverByName(b'mem').Create(
         filename, size_x, size_y, num_bands, gdal.gdalconst.GDT_Float64)
     band = ds.GetRasterBand(1)
     band.WriteArray(filled)
@@ -162,7 +165,7 @@ def write_masked_array_as_ascii(filename, masked_array, geo_transform):
     ds.SetGeoTransform(geo_transform)
 
     # Now it gets written to the disk
-    gdal.GetDriverByName('aaigrid').CreateCopy(filename, ds)
+    gdal.GetDriverByName(b'aaigrid').CreateCopy(filename, ds)
     #print 'output file %s written' % filename
 
 
@@ -194,7 +197,7 @@ def get_dijkring_mask(dijkringnr, geo_projection, geo_transform, size_x, size_y)
         # geo_transform = ds.GetGeoTransform()
 
         # Get the driver
-        driver = ogr.GetDriverByName('ESRI Shapefile')
+        driver = ogr.GetDriverByName(b'ESRI Shapefile')
         # Open a shapefile
         #DIJKRING_SHAPES_FOLDER = '/home/jack/git/sites/flooding/dijkringen_todo_move_somewhere'
         dijkring_shapes_folder = '/srv/test.flooding.lizard.net/dijkringen'  # Default
@@ -306,10 +309,13 @@ def dijkring_arrays_to_zip(input_files, tmp_zip_filename, gridtype='output', gri
         with files.temporarily_unzipped(linux_filename) as files_in_zip:
             for filename_in_zip in files_in_zip:
                 #print filename_in_zip
+                #import pdb; pdb.set_trace()
                 dataset = gdal.Open(str(filename_in_zip))
                 #reprojected_dataset = dataset
-                reprojected_dataset = gdal.GetDriverByName('mem').Create(
-                    'dummyname', size_x, size_y, 1, gdal.gdalconst.GDT_Float64)
+                driver = gdal.GetDriverByName(b'mem')
+                reprojected_dataset = driver.Create('dummyname', size_x, size_y, 1, gdal.gdalconst.GDT_Float64)
+                #reprojected_dataset = gdal.GetDriverByName('mem').Create(
+                #    'dummyname', size_x, size_y, 1, gdal.gdalconst.GDT_Float64)
                 reprojected_dataset.SetGeoTransform((x_min, gridsize, 0, y_max, 0, -gridsize))
 
                 band = reprojected_dataset.GetRasterBand(1)
@@ -487,4 +493,4 @@ def calculate_export_maps(exportrun_id):
     export_run.state = ExportRun.EXPORT_STATE_DONE
     export_run.save()
 
-    print 'Finished.'
+    log.debug('Finished.')
