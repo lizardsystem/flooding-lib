@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.69 (unreleased)
+2.69 (2013-04-08)
 -----------------
 
 - More encoding fixes in export-tool.
