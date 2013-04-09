@@ -166,6 +166,8 @@ def write_masked_array_as_ascii(filename, masked_array, geo_transform):
 
     # Now it gets written to the disk
     gdal.GetDriverByName(b'aaigrid').CreateCopy(b'{0}'.format(filename), ds)
+    ds = None
+    del ds
 
 
 def add_to_zip(output_zipfile, zip_result):
@@ -238,7 +240,11 @@ def get_dijkring_mask(dijkringnr, geo_projection, geo_transform, size_x, size_y)
 
         # Rasterize and return
         gdal.RasterizeLayer(ds_result, (1,), dijkring_layer, burn_values=(0,))  # Burn with 0's
-        return ds_result.GetRasterBand(1).ReadAsArray()
+        arr = ds_result.GetRasterBand(1).ReadAsArray()
+        dataset = None
+        ds_result = None
+        del dataset, ds_result
+        return arr
 
 
 def dijkring_arrays_to_zip(input_files, tmp_zip_filename, gridtype='output', gridsize=50):
@@ -288,6 +294,8 @@ def dijkring_arrays_to_zip(input_files, tmp_zip_filename, gridtype='output', gri
                     y_min = this_y_min
                 if y_max is None or this_y_max > y_max:
                     y_max = this_y_max
+
+                dataset = None
                 del dataset
    
     size_x = int(abs((x_max - x_min) / gridsize))
@@ -340,8 +348,11 @@ def dijkring_arrays_to_zip(input_files, tmp_zip_filename, gridtype='output', gri
                     dijkring_arrays[dijkringnr] = (np.maximum(masked_array, old_max), geo_transform, geo_projection)
                     #.append((masked_array, geo_transform, geo_projection))
                 #print masked_array.max()
-                del dataset  # This closes the file, so that the
+                #del dataset  # This closes the file, so that the
                              # directory can be deleted in Windows
+                dataset = None
+                reprojected_dataset = None
+                del dataset, reprojected_dataset 
 
     #print dijkring_arrays[9][0][0].max(), dijkring_arrays[9][1][0].max()
     #print np.maximum(dijkring_arrays[9][0][0], dijkring_arrays[9][1][0]).max()

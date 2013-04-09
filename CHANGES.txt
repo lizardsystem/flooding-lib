@@ -4,7 +4,7 @@ Changelog of flooding-lib
 2.70 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Close gdal's datasets to reduce memory usage.
 
 
 2.69 (2013-04-08)
