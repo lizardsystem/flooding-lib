@@ -4,7 +4,7 @@ Changelog of flooding-lib
 2.71 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Fix bug by seleting a colormap file in task png_generation.
 
 
 2.70 (2013-04-09)
