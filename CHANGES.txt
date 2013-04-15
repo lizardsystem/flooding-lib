@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.72 (unreleased)
+2.72 (2013-04-15)
 -----------------
 
 - Set max_uncompressed_zip_size to None for removing comment line
