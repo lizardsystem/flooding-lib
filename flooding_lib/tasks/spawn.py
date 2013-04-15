@@ -353,7 +353,8 @@ def perform_sobek_simulation(scenario_id,
     save_results_to_db(resulttypes, max_file_nr, min_file_nr, scenario)
 
     # remove commentline from asc-files, inc-files
-    remove_comments_from_asc_files(output_dir_name)
+    remove_comments_from_asc_files(output_dir_name,
+                                   max_uncompressed_zip_size=None)
 
     log.debug("check return code and return False if not ok")
     try:
