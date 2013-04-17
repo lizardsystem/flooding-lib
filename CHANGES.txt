@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.73 (unreleased)
+2.73 (2013-04-17)
 -----------------
 
 - Removed import unicode_literals from presentationlayer_generation.py
