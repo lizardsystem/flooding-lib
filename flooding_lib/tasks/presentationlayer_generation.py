@@ -31,7 +31,6 @@ To do:
 nog wat mee doen:
 * file_content = file_content.replace('\r\n', '\n')
 '''
-from __future__ import unicode_literals
 
 __revision__ = "$Rev: 8118 $"[6:-2]
 

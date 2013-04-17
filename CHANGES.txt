@@ -4,7 +4,7 @@ Changelog of flooding-lib
 2.73 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Removed import unicode_literals due problem with gdal.
 
 
 2.72 (2013-04-15)
