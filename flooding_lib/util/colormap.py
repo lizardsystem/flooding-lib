@@ -89,9 +89,8 @@ class ColorMap(object):
 
         # The opacity should be equal to 'opacity_value' wherever
         # there is a color, and 0 elsewhere. There is a color defined
-        # for all values greater than or equal to the lowest
-        # leftbound.
+        # for all values greater than the lowest leftbound.
         if self.leftbounds:
-            colorgrid[3] = (min(self.leftbounds) <= grid) * opacity_value
+            colorgrid[3] = (min(self.leftbounds) < grid) * opacity_value
 
         return colorgrid

@@ -4,7 +4,7 @@ Changelog of flooding-lib
 2.74 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Define transparency for all values that less then the lowest leftbound.
 
 
 2.73 (2013-04-17)
