@@ -6,7 +6,7 @@ from __future__ import print_function
 
 import tempfile
 import os
-import simplejson as json
+from django.utils import simplejson as json
 from StringIO import StringIO
 
 from flooding_lib.models import ResultType

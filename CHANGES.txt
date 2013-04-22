@@ -4,7 +4,7 @@ Changelog of flooding-lib
 2.75 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Import simplejson from django.utils.
 
 
 2.74 (2013-04-22)
