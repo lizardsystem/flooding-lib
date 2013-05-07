@@ -205,10 +205,10 @@ def new_export(request):
                     export_folder, str(new_export_run.id) + '.csv')
                 text_file_location = os.path.join(
                     export_folder, str(new_export_run.id) + '.txt')
-                new_export_run.create_csv_file_for_gis_operation(
-                    export_result_type, csv_file_location)
-                new_export_run.create_general_file_for_gis_operation(
-                    text_file_location)
+                #new_export_run.create_csv_file_for_gis_operation(
+                #    export_result_type, csv_file_location)
+                #new_export_run.create_general_file_for_gis_operation(
+                #    text_file_location)
 
             # Make a workflow for the export and run it
             workflow_template = WorkflowTemplate.objects.get(code='4')
