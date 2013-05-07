@@ -229,10 +229,17 @@ def get_dijkring_mask(dijkringnr, geo_projection, geo_transform, size_x, size_y)
         # feature.SetGeometry(ogr.CreateGeometryFromWkb(str(dijkring_wkb)))
         # layer.CreateFeature(feature)
 
-        # Prepare in-memory copy of ds_gdal
-        ds_result = gdal.GetDriverByName(b'mem').Create(
-            b'', size_x, size_y, 1, gdal.gdalconst.GDT_Byte,
-        )
+        # Prepare on disk a copy of ds_gdal
+        tmp_filepath = '/tmp/temp_export_mask.tif'
+        if os.path.isfile(tmp_filepath):
+            os.remove(tmp_filepath)
+        ds_result = gdal.GetDriverByName(tmp_filepath).Create(
+            b'', size_x, size_y, 1, gdal.gdalconst.GDT_Byte, ['COMPRESS=DEFLATE'])
+        
+        #ds_result = gdal.GetDriverByName(b'mem').Create(
+        #    b'', size_x, size_y, 1, gdal.gdalconst.GDT_Byte,
+        #)
+
         ds_result.SetProjection(geo_projection)
         ds_result.SetGeoTransform(geo_transform)
         band = ds_result.GetRasterBand(1)
@@ -317,7 +324,12 @@ def dijkring_arrays_to_zip(input_files, tmp_zip_filename, gridtype='output', gri
             for filename_in_zip in files_in_zip:
                 dataset = gdal.Open(str(filename_in_zip))
                 driver = gdal.GetDriverByName(b'mem')
-                reprojected_dataset = driver.Create(b'dummyname', size_x, size_y, 1, gdal.gdalconst.GDT_Float64)
+
+                tmp_filepath = '/tmp/temp_export_reprojected_dataset.tif'
+                if os.path.isfile(tmp_filepath):
+                    os.remove(tmp_filepath)
+
+                reprojected_dataset = driver.Create(tmp_filepath, size_x, size_y, 1, gdal.gdalconst.GDT_Float64,  ['COMPESS=DEFLATE'])
                 reprojected_dataset.SetGeoTransform((x_min, gridsize, 0, y_max, 0, -gridsize))
                 band = reprojected_dataset.GetRasterBand(1)
                 #print dir(band)
