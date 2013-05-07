@@ -329,7 +329,7 @@ def dijkring_arrays_to_zip(input_files, tmp_zip_filename, gridtype='output', gri
                 if os.path.isfile(tmp_filepath):
                     os.remove(tmp_filepath)
 
-                reprojected_dataset = driver.Create(tmp_filepath, size_x, size_y, 1, gdal.gdalconst.GDT_Float64,  ['COMPESS=DEFLATE'])
+                reprojected_dataset = driver.Create(tmp_filepath, size_x, size_y, 1, gdal.gdalconst.GDT_Float64,  ['COMPRESS=DEFLATE'])
                 reprojected_dataset.SetGeoTransform((x_min, gridsize, 0, y_max, 0, -gridsize))
                 band = reprojected_dataset.GetRasterBand(1)
                 #print dir(band)
