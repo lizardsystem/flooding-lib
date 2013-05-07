@@ -230,7 +230,7 @@ def get_dijkring_mask(dijkringnr, geo_projection, geo_transform, size_x, size_y)
         # layer.CreateFeature(feature)
 
         # Prepare on disk a copy of ds_gdal
-        tmp_filepath = '/tmp/temp_export_mask.tif'
+        tmp_filepath = b'/tmp/temp_export_mask.tif'
         if os.path.isfile(tmp_filepath):
             os.remove(tmp_filepath)
         ds_result = gdal.GetDriverByName(tmp_filepath).Create(
@@ -325,7 +325,7 @@ def dijkring_arrays_to_zip(input_files, tmp_zip_filename, gridtype='output', gri
                 dataset = gdal.Open(str(filename_in_zip))
                 driver = gdal.GetDriverByName(b'mem')
 
-                tmp_filepath = '/tmp/temp_export_reprojected_dataset.tif'
+                tmp_filepath = b'/tmp/temp_export_reprojected_dataset.tif'
                 if os.path.isfile(tmp_filepath):
                     os.remove(tmp_filepath)
 
