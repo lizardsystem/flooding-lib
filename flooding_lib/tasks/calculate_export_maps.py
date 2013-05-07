@@ -113,7 +113,8 @@ def generate_export_meta(export_run, dst_filename):
         "description": export_run.description,
         "selectedmaps": export_run.selected_maps,
         "scenarios": export_run.meta_scenarios,
-        "filelocation": dst_filename}
+        "filelocation": dst_filename,
+        "gridsize": export_run.gridsize}
     return export_meta
         
 

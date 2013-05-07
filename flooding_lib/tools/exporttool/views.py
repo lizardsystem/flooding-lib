@@ -196,19 +196,6 @@ def new_export(request):
 
                 # Choices here are gridmaxwaterdepth and gridmaxflowvelocity
                 export_result_type = ResultType.objects.get(name='gridmaxwaterdepth').id
-                #export_result_type = 1  # TODO: get the id from ResultType table.
-
-                # Get the EXPORT_FOLDER settings (from the settings of
-                # the export-tool)
-                export_folder = Setting.objects.get(key='EXPORT_FOLDER').value
-                csv_file_location = os.path.join(
-                    export_folder, str(new_export_run.id) + '.csv')
-                text_file_location = os.path.join(
-                    export_folder, str(new_export_run.id) + '.txt')
-                #new_export_run.create_csv_file_for_gis_operation(
-                #    export_result_type, csv_file_location)
-                #new_export_run.create_general_file_for_gis_operation(
-                #    text_file_location)
 
             # Make a workflow for the export and run it
             workflow_template = WorkflowTemplate.objects.get(code='4')
