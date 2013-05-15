@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.77 (unreleased)
+2.77 (2013-05-15)
 -----------------
 
 - Revrite calculate_export_maps script to reduce memory usage.
