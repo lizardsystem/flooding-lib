@@ -21,12 +21,13 @@
 					<td width="75"><b>{% trans "Creation date" %}</b></td>
 					<td width="373"><b>{% trans "Description" %}</b></td>
 					<td width="75"><b>{% trans "State"%}</b></td>
-					<td width="50"><b>{% trans "Result file" %}</b></td>
+					<td width="80"><b>{% trans "Result file" %}</b></td>
+					<td width="50"><b>{% trans "Edit" %}</b></td>
 				</thead>
 				<tbody>
 				{% if  export_run_list %}
 			 		{% for export_run in export_run_list %}
-                    {# 0: name, 1: creation_date, 2: description, 3: path, 4: detail_url, 5: state #}
+                    {# 0: name, 1: creation_date, 2: description, 3: path, 4: detail_url, 5: state, 6: id #}
 					    <tr class="{% cycle 'cellDark' 'cell'%}">
 				    		<td>
 				    			<a href="{{export_run.4}}">{{export_run.0}}</a>
@@ -41,6 +42,7 @@
 				    				-
 				    			{% endif %}
 				    		</td>
+						<td><a href="{% url flooding_tools_reuse_export export_run.6 %}">{% trans "Edit" %}</a></td>
 				    	</tr>
 			    	{% endfor %}
 			    {% else %}

@@ -35,6 +35,10 @@ isc.DataSource.create({
     ]
 });
 
+isc.ResultSet.create({
+    dataSource : "dsProjects"
+});
+
 isc.DataSource.create({
     ID: "dsScenariosExport",
     showPrompt: false,
@@ -126,6 +130,7 @@ window['exportRunCallbackFormFunction'] = function() {
 	httpMethod: "POST",
 	params: postParams,
 	callback: function(response, data, request){
+	    debugger;
 	    if (response.httpResponseCode == 200) {
 		console.log("Data ophalen gelukt, tonen op scherm.");
 		// check if we have to open it in the pane or in the complete window
@@ -274,6 +279,9 @@ isc.Label.create({
     contents:"Data aan het laden ..."
 })
 
+
+
+
 isc.ScenariosListGrid.create({
     ID:"scenariosToExportListGrid",
     canDragRecordsOut: true,
@@ -327,3 +335,67 @@ isc.VLayout.create({
     ]
 });
 msg.hide();
+
+var createExportRunDs = function(export_run_id){
+var ds = isc.DataSource.create({
+    showPrompt: false,
+    dataFormat: "json",
+    dataURL: exporttool_config.url_export_scenarios,
+    transformRequest: function (dsRequest) {
+	if (dsRequest.operationType == "fetch") {
+	    var params = {export_run_id : export_run_id};
+	    // combine paging parameters with criteria
+	    return isc.addProperties({}, dsRequest.data, params);
+	}
+    },
+    autoFetchData:false,
+    autoDraw:false,
+    //clientOnly: true,
+    fields:[
+	{name:"scenario_id", primaryKey:true, hidden:false, type:"int"},
+	{name:"scenario_name", hidden: false, type:"text"},
+	{name:"breach_ids", hidden: false, type:"text"},
+	{name:"breach_names", hidden: false, type:"text"},
+	{name:"region_ids", hidden: false, type:"text"},
+	{name:"region_names", hidden: false, type:"text"},
+	{name:"project_id", hidden: false, type:"int"},
+	{name:"project_name", hidden: false, type:"text"},
+	{name:"owner_id", hidden: false, type:"int"},
+	{name:"owner_name", hidden: false, type:"text"},
+	{name:"extwrepeattime", type:"text"},
+	{name:"extwname", type:"text"},
+	{name:"extwtype", type:"text"},
+	//{name:"calcmethod", type:"text"},
+	//{name: "statesecurity", type: "text"},
+        //{name: "shelflife", type: "text"},
+	{name: "_visible", hidden: true, type: "text"}
+    ]
+});
+    return ds;
+}
+
+
+if (exporttool_config.export_run_id != '' && exporttool_config.export_run_id != null) {
+    //alert(export_run_id);
+    var prField = projectSelector.getFields()[0]
+    //debugger;
+    //var projects = prField.pickList.getData().allRows
+    //var rec = projects.find('id', export_run_id)
+    //var recordIndex = projects.findIndex(projects.find('id', export_run_id))
+    prField.setValue(exporttool_config.project_name);
+    LoadScenariosForProject(exporttool_config.project_id);
+    var dsExport = createExportRunDs(exporttool_config.export_run_id);
+    msg.animateShow();
+    dsExport.fetchData({}, function(response, data, request){
+	// call fetchData on list grid to 
+	// prepare the local store for filtering
+	scenariosToExportListGrid.setData(data);
+	scenariosToExportListGrid.redraw();
+	msg.animateHide();
+    });
+    dsExport.destroy();
+    //var sendingForm = document.forms["exportRunForm"];
+    //sendingForm["0"].value = exporttool_config.export_run_name;
+    //sendingForm["1"].value = exporttool_config.export_run_description;
+    //sendingForm["2"].value = exporttool_config.export_run_gridsize;
+}

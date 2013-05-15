@@ -19,6 +19,15 @@
       exporttool_config.url_export_tool = '{% url flooding_tools_export_new_export %}';
       
       exporttool_config.breadcrumbs = '<div class="breadcrumbs">{% if breadcrumbs %}&rsaquo;{% endif %}{% for blitem in breadcrumbs %}{% if blitem.url %}<a href="{{ blitem.url }}"> {{ blitem.name }} </a>{% else %} {{ blitem.name }} {% endif %}{% ifnotequal forloop.revcounter0 0 %}&rsaquo;{% endifnotequal %}{% endfor %}</div>';
+      
+      exporttool_config.export_run_id = '{{ export_run.id }}';
+      exporttool_config.export_run_gridsize = '{{ export_run.gridsize }}';
+      exporttool_config.export_run_name = '{{ export_run.name }}';
+      exporttool_config.export_run_description = '{{ export_run.description }}'
+      exporttool_config.url_export_scenarios = '{% url flooding_tools_reuse_export_scenarios export_run.id %}';
+
+      exporttool_config.project_name = '{{ project.name }}';
+      exporttool_config.project_id = '{{ project.id }}';
     </script>
 
     <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/weblib/isomorphic/system/modules/ISC_Core.js"></SCRIPT>

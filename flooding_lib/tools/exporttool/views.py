@@ -52,14 +52,14 @@ def index(request):
         path = main_result.file_basename if main_result else None
         detail_url = reverse(
             'flooding_tools_export_detail', args=[export_run.id])
-        print path
         export_run_list.append(
             (export_run.name,
              export_run.creation_date,
              export_run.description,
              path,
              detail_url,
-             export_run.get_state_display())
+             export_run.get_state_display(),
+             export_run.id,)
             )
 
     breadcrumbs = [
@@ -233,3 +233,72 @@ def service_get_max_water_depth_result(request, path):
         'attachment; filename="' + file_name + '"')
     file_object.close()
     return  response
+
+
+def get_breaches_info(scenario):
+    info = {}
+    breaches = scenario.breaches.all()
+    breaches_values= breaches.values(
+        "name", "id", "region__id", "region__name", "externalwater__name",
+        "externalwater__type")
+    info["names"] = [v.get("name") for v in breaches_values]
+    info["region_names"] = [v.get("region__name") for v in breaches_values]
+    info["externalwater_name"] = [v.get("externalwater__name") for v in breaches_values]
+    info["externalwater_type"] = [v.get("externalwater__type") for v in breaches_values]
+    return info
+
+
+def export_run_scenarios(request, export_run_id):
+    if not request.user.has_perm('exporttool.can_create'):
+        return HttpResponse(_("No permission to download export"))
+
+    export_run = get_object_or_404(ExportRun, pk=export_run_id)
+    scenarios_export_list = []
+    for s in export_run.scenarios.all():
+        breaches_values = get_breaches_info(s)
+        scenarios_export_list.append(
+            {
+                'scenario_id': s.id,
+                'scenario_name': s.name,
+                'breach_names': breaches_values.get("names"),
+                'region_names': breaches_values.get("region_names"),
+                'extwname': breaches_values.get("externalwater_name"),
+                'extwtype': breaches_values.get("externalwater_type"),
+                'project_id': s.main_project.id,
+                'project_name': s.main_project.name,
+                'extwrepeattime': [sbr.extwrepeattime for sbr in s.scenariobreach_set.all()]
+            })
+    return HttpResponse(
+        simplejson.dumps(scenarios_export_list), mimetype="application/json")
+
+
+def reuse_export(request, export_run_id):
+    if not request.user.has_perm('exporttool.can_create'):
+        return HttpResponse(_("No permission to download export"))
+
+    export_run = get_object_or_404(ExportRun, pk=export_run_id)
+
+    scenarios = export_run.scenarios.all()
+    
+    projecten = {}
+    count = 0
+    for s in scenarios:
+        project = s.main_project
+        if project in projecten.keys():
+            projecten[project] = projecten[project] + 1
+        else:
+            projecten[project] = 0
+
+    project = max(projecten, key=projecten.get)
+    breadcrumbs = [
+        {'name': _('Export tool'),
+         'url': reverse('flooding_tools_export_index')},
+        {'name': _('New export')}]
+    
+    return render_to_response('export/export_edit.html',
+                              {'breadcrumbs': breadcrumbs,
+                               'export_run': export_run,
+                               'project': project})
+
+    
+    
