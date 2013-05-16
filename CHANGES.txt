@@ -4,7 +4,7 @@ Changelog of flooding-lib
 2.78 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Completed implementation of 'edit' functionality for export tool. 
 
 
 2.77 (2013-05-15)

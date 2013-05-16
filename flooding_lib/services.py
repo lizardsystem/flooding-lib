@@ -528,7 +528,8 @@ def service_get_scenarios_export_list(
                 'project_name': project.name,
                 'owner_id': s.owner.id,
                 'owner_name': s.owner.username,
-                'extwrepeattime': [sbr.extwrepeattime for sbr in s.scenariobreach_set.all()]
+                'extwrepeattime': [sbr.extwrepeattime for sbr in s.scenariobreach_set.all()],
+                '_visible': True
             })
     ## Bij ROR project neem te veel tijd, request wordt gekilld
     ## Niet verwijderen totdat er een definitief oplossing komt.

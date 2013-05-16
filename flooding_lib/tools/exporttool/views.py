@@ -8,7 +8,6 @@ from django.utils import simplejson
 from django.utils.translation import ugettext as _
 
 from flooding_lib.models import Scenario
-from flooding_lib.models import ResultType
 from flooding_lib.tools.exporttool.forms import ExportRunForm
 from flooding_lib.tools.exporttool.models import ExportRun, Setting
 
@@ -29,7 +28,8 @@ def index(request):
     """
     Renders Lizard-flooding page with an overview of all exports
 
-    Optionally provide "?action=get_attachment&path=3090850/zipfiles/totaal.zip"
+    Optionally provide
+    "?action=get_attachment&path=3090850/zipfiles/totaal.zip"
     """
     if request.method == 'GET':
         action = request.GET.get('action', '')
@@ -59,8 +59,7 @@ def index(request):
              path,
              detail_url,
              export_run.get_state_display(),
-             export_run.id,)
-            )
+             export_run.id,))
 
     breadcrumbs = [
         {'name': _('Export tool')}]
@@ -83,7 +82,7 @@ def export_detail(request, export_run_id):
     export_run = get_object_or_404(ExportRun, pk=export_run_id)
 
     main_result = export_run.get_main_result()
-    
+
     path = main_result.file_basename if main_result else None
 
     num_scenarios = len(export_run.scenarios.all())
@@ -149,6 +148,17 @@ def new_export_index(request):
                               {'breadcrumbs': breadcrumbs})
 
 
+def load_export_form(request, export_run_id):
+    """Render the html form to load export run."""
+    if not (request.user.is_authenticated() and
+            request.user.has_perm('exporttool.can_update')):
+        return HttpResponse(_("No permission to create export"))
+    export_run = get_object_or_404(ExportRun, pk=export_run_id)
+    form = ExportRunForm(instance=export_run)
+    return render_to_response('export/exports_new.html',
+                              {'form': form})
+
+
 def new_export(request):
     """
     Renders a html with only the form for creating a new export run
@@ -185,17 +195,10 @@ def new_export(request):
                 export_max_waterdepth=form.cleaned_data['export_max_waterdepth'],
                 export_max_flowvelocity=form.cleaned_data['export_max_flowvelocity'],
                 export_possibly_flooded=form.cleaned_data['export_possibly_flooded']
-                )
+            )
             new_export_run.save()
             new_export_run.scenarios = Scenario.objects.filter(
                 pk__in=scenario_ids)
-
-            # This part is obsolete, soon to be removed if the task is finished.
-            if (new_export_run.export_type ==
-                ExportRun.EXPORT_TYPE_WATER_DEPTH_MAP):
-
-                # Choices here are gridmaxwaterdepth and gridmaxflowvelocity
-                export_result_type = ResultType.objects.get(name='gridmaxwaterdepth').id
 
             # Make a workflow for the export and run it
             workflow_template = WorkflowTemplate.objects.get(code='4')
@@ -203,7 +206,6 @@ def new_export(request):
                 new_export_run.id,
                 workflow_template.id, log_level='INFO',
                 scenario_type='flooding_exportrun')
-            #print 'ActionWorkflowExportRun: %r' % result
 
             return HttpResponse(
                 'redirect_in_js_to_' + reverse('flooding_tools_export_index'))
@@ -238,7 +240,7 @@ def service_get_max_water_depth_result(request, path):
 def get_breaches_info(scenario):
     info = {}
     breaches = scenario.breaches.all()
-    breaches_values= breaches.values(
+    breaches_values = breaches.values(
         "name", "id", "region__id", "region__name", "externalwater__name",
         "externalwater__type")
     info["names"] = [v.get("name") for v in breaches_values]
@@ -277,11 +279,8 @@ def reuse_export(request, export_run_id):
         return HttpResponse(_("No permission to download export"))
 
     export_run = get_object_or_404(ExportRun, pk=export_run_id)
-
     scenarios = export_run.scenarios.all()
-    
     projecten = {}
-    count = 0
     for s in scenarios:
         project = s.main_project
         if project in projecten.keys():
@@ -294,11 +293,8 @@ def reuse_export(request, export_run_id):
         {'name': _('Export tool'),
          'url': reverse('flooding_tools_export_index')},
         {'name': _('New export')}]
-    
+
     return render_to_response('export/export_edit.html',
                               {'breadcrumbs': breadcrumbs,
                                'export_run': export_run,
                                'project': project})
-
-    
-    

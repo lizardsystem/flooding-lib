@@ -55,8 +55,12 @@
 					<td>
 						<a href="{% url flooding_tools_export_detail_scenarios export_run_id=export_run.id %}">{{ num_scenarios }} {% trans "out of" %} {{num_projects}}</a> 
 					</td>
-				</tr>				
+				</tr>
 				<tr class="cellDark">
+					<td><b>{% get_verbose_name export_run "gridsize" %}</b></td>
+					<td>{{ export_run.gridsize }}</td>
+				</tr>
+				<tr class="cell">
 					<td><b>{% trans "Result file" %}</b></td>					
 					<td>
 						{% if path %}

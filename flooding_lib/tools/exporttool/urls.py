@@ -23,6 +23,10 @@ urlpatterns = patterns(
         'flooding_lib.tools.exporttool.views.new_export',
         name='flooding_tools_export_new_export'),
 
+    url(r'^loadexportform/(?P<export_run_id>\d+)/$',
+        'flooding_lib.tools.exporttool.views.load_export_form',
+        name='flooding_tools_export_load_export_form'),
+
     url(r'^reuseexport/(?P<export_run_id>\d+)$',
         'flooding_lib.tools.exporttool.views.reuse_export',
         name='flooding_tools_reuse_export'),

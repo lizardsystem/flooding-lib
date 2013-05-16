@@ -185,15 +185,6 @@ isc.DynamicForm.create({
     autodraw: true
 });
 
-/*** Create UI elements***/
-isc.HTMLPane.create({
-    ID: "exportRunHTMLPane",
-    width:"100%",
-    overflow:"visible",
-    border: "0px",
-    contentsURL: exporttool_config.root_url + "flooding/tools/export/newexport"
-});
-
 isc.ScenariosListGrid.create({
     ID:"scenariosAllListGrid",
     autodraw:false,
@@ -280,8 +271,6 @@ isc.Label.create({
 })
 
 
-
-
 isc.ScenariosListGrid.create({
     ID:"scenariosToExportListGrid",
     canDragRecordsOut: true,
@@ -302,6 +291,25 @@ isc.ScenariosListGrid.create({
     ],
     emptyMessage:"<br><br>Sleep scenario's hier heen voor export."
 });
+
+
+var getExportForm = function() {
+    var contentsURL = ""
+    if (exporttool_config.export_run_id != '' && exporttool_config.export_run_id != null) {
+	contentsURL = exporttool_config.url_export_edit; 
+    } else {
+	contentsURL = exporttool_config.root_url + "flooding/tools/export/newexport";
+    }
+
+    var exportForm = isc.HTMLPane.create({
+	ID: "exportRunHTMLPane",
+	width:"100%",
+	overflow:"visible",
+	border: "0px",
+	contentsURL: contentsURL
+    });
+    return exportForm;
+};
 
 /*** Arrange UI elements ***/
 isc.VLayout.create({
@@ -331,57 +339,49 @@ isc.VLayout.create({
 		    members: [arrowRight,arrowLeft]}),
 		scenariosToExportListGrid
 	    ]}),
-	exportRunHTMLPane
+	getExportForm()
     ]
 });
 msg.hide();
 
 var createExportRunDs = function(export_run_id){
-var ds = isc.DataSource.create({
-    showPrompt: false,
-    dataFormat: "json",
-    dataURL: exporttool_config.url_export_scenarios,
-    transformRequest: function (dsRequest) {
-	if (dsRequest.operationType == "fetch") {
-	    var params = {export_run_id : export_run_id};
-	    // combine paging parameters with criteria
-	    return isc.addProperties({}, dsRequest.data, params);
-	}
-    },
-    autoFetchData:false,
-    autoDraw:false,
-    //clientOnly: true,
-    fields:[
-	{name:"scenario_id", primaryKey:true, hidden:false, type:"int"},
-	{name:"scenario_name", hidden: false, type:"text"},
-	{name:"breach_ids", hidden: false, type:"text"},
-	{name:"breach_names", hidden: false, type:"text"},
-	{name:"region_ids", hidden: false, type:"text"},
-	{name:"region_names", hidden: false, type:"text"},
-	{name:"project_id", hidden: false, type:"int"},
-	{name:"project_name", hidden: false, type:"text"},
-	{name:"owner_id", hidden: false, type:"int"},
-	{name:"owner_name", hidden: false, type:"text"},
-	{name:"extwrepeattime", type:"text"},
-	{name:"extwname", type:"text"},
-	{name:"extwtype", type:"text"},
-	//{name:"calcmethod", type:"text"},
-	//{name: "statesecurity", type: "text"},
-        //{name: "shelflife", type: "text"},
-	{name: "_visible", hidden: true, type: "text"}
-    ]
-});
-    return ds;
+    var ds = isc.DataSource.create({
+	showPrompt: false,
+	dataFormat: "json",
+	dataURL: exporttool_config.url_export_scenarios,
+	transformRequest: function (dsRequest) {
+	    if (dsRequest.operationType == "fetch") {
+		var params = {export_run_id : export_run_id};
+		// combine paging parameters with criteria
+		return isc.addProperties({}, dsRequest.data, params);
+	    }
+	},
+	autoFetchData:false,
+	autoDraw:false,
+	fields:[
+	    {name:"scenario_id", primaryKey:true, hidden:false, type:"int"},
+	    {name:"scenario_name", hidden: false, type:"text"},
+	    {name:"breach_ids", hidden: false, type:"text"},
+	    {name:"breach_names", hidden: false, type:"text"},
+	    {name:"region_ids", hidden: false, type:"text"},
+	    {name:"region_names", hidden: false, type:"text"},
+	    {name:"project_id", hidden: false, type:"int"},
+	    {name:"project_name", hidden: false, type:"text"},
+	    {name:"owner_id", hidden: false, type:"int"},
+	    {name:"owner_name", hidden: false, type:"text"},
+	    {name:"extwrepeattime", type:"text"},
+	    {name:"extwname", type:"text"},
+	    {name:"extwtype", type:"text"},
+	    {name: "_visible", hidden: true, type: "text"}
+	]
+    });
+    return ds; 
 }
 
 
 if (exporttool_config.export_run_id != '' && exporttool_config.export_run_id != null) {
-    //alert(export_run_id);
+    // Put scenarios into grids, set project
     var prField = projectSelector.getFields()[0]
-    //debugger;
-    //var projects = prField.pickList.getData().allRows
-    //var rec = projects.find('id', export_run_id)
-    //var recordIndex = projects.findIndex(projects.find('id', export_run_id))
     prField.setValue(exporttool_config.project_name);
     LoadScenariosForProject(exporttool_config.project_id);
     var dsExport = createExportRunDs(exporttool_config.export_run_id);
@@ -394,8 +394,4 @@ if (exporttool_config.export_run_id != '' && exporttool_config.export_run_id != 
 	msg.animateHide();
     });
     dsExport.destroy();
-    //var sendingForm = document.forms["exportRunForm"];
-    //sendingForm["0"].value = exporttool_config.export_run_name;
-    //sendingForm["1"].value = exporttool_config.export_run_description;
-    //sendingForm["2"].value = exporttool_config.export_run_gridsize;
 }
