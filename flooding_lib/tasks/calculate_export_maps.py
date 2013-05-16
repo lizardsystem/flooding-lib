@@ -329,7 +329,9 @@ def dijkring_arrays_to_zip(input_files, tmp_zip_filename, gridtype='output', gri
                                                              newlinemaskedarray]).max(0)
                         oldmax_band.WriteRaster(0, lineno, reprojected_dataset.RasterXSize, 1,
                                                 newmaxlinemaskedarray.filled(NO_DATA_VALUE).tostring())
-
+                        
+                    oldmaxdataset = None
+                    reprojected_dataset = None
                     log.debug("END TIME: {}".format(datetime.today().isoformat()))
                 else:
                     # The tempfile wil be removed at the end of export
@@ -339,7 +341,7 @@ def dijkring_arrays_to_zip(input_files, tmp_zip_filename, gridtype='output', gri
                     tifdriver.CreateCopy(tmp_file_name, reprojected_dataset, options=['COMPRESS=DEFLATE'])
                     log.debug("END COPY TIME: {}".format(datetime.today().isoformat()))
                     dijkring_datasets[dijkringnr] = tmp_file_name
-                    del reprojected_dataset
+                    reprojected_dataset = None
                 if os.path.isfile(tif_filename):
                     os.remove(tif_filename)
 
