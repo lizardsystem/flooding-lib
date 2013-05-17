@@ -4,7 +4,7 @@ Changelog of flooding-lib
 2.80 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Fix tests.
 
 
 2.79 (2013-05-16)
