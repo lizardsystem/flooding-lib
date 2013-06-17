@@ -5,7 +5,6 @@ import datetime
 import logging
 import operator
 import os
-import shutil
 
 from treebeard.al_tree import AL_Node  # Adjacent list implementation
 
@@ -110,13 +109,13 @@ class SobekModel(models.Model):
     SOBEKMODELTYPE_CHOICES = (
         (1, _('canal')),
         (2, _('inundation')),
-        )
+    )
     SOBEKMODELTYPE_CANAL = 1
     SOBEKMODELTYPE_INUNDATION = 2
     TYPE_DICT = {
         1: u'%s' % _('canal'),
         2: u'%s' % _('inundation'),
-        }
+    }
     sobekversion = models.ForeignKey(SobekVersion)
     sobekmodeltype = models.IntegerField(choices=SOBEKMODELTYPE_CHOICES)
 
@@ -140,6 +139,7 @@ class SobekModel(models.Model):
         max_length=200, null=True, blank=True)
 
     code = models.CharField(max_length=15, null=True, blank=True)
+    keep_initial_level = models.BooleanField()
 
     class Meta:
         verbose_name = _('Sobek model')
@@ -160,7 +160,6 @@ class SobekModel(models.Model):
                     (self.TYPE_DICT[self.sobekmodeltype],
                      self.model_case,
                      self.model_version))
-
 
     def get_summary_str(self):
         """Return object summary in unicode, with markdown layout
@@ -212,7 +211,7 @@ class ThreediCalculation(models.Model):
         (STATUS_CREATED, 'created'),
         (STATUS_NETCDF_CREATED, 'netcdf created'),
         (STATUS_IMAGES_CREATED, 'images created, finished.'),
-        )
+    )
 
     threedi_model = models.ForeignKey('ThreediModel')
     scenario = models.ForeignKey('Scenario')
@@ -277,7 +276,7 @@ class CutoffLocation(models.Model):
         (4, _('bridge')),   # brug
         (5, _('undefined')),
         (6, _('generic_internal')),  # kan vanalles zijn, intern
-        )
+    )
 
     CUTOFFLOCATION_TYPE_LOCK = 1
     CUTOFFLOCATION_TYPE_CULVERT = 2
@@ -341,7 +340,7 @@ class ExternalWater(models.Model):
         (6, _('river')),
         (7, _('unknown')),
         (8, _('lower_river')),
-        )
+    )
     TYPE_SEA = 1
     TYPE_LAKE = 2
     TYPE_CANAL = 3
@@ -418,7 +417,7 @@ class WaterlevelSet(models.Model):
         (1, _('undefined')),
         (2, _('tide')),
         (3, _('breach')),
-        )
+    )
     WATERLEVELSETTYPE_UNDEFINED = 1
     WATERLEVELSETTYPE_TIDE = 2
     WATERLEVELSETTYPE_BREACH = 3
@@ -778,7 +777,7 @@ class UserPermission(models.Model):
         (PERMISSION_SCENARIO_APPROVE, _('approve_scenario')),
         (PERMISSION_SCENARIO_DELETE, _('delete_scenario')),
         (PERMISSION_SCENARIO_EDIT_SIMPLE, _('edit_scenario_simple')),
-        )
+    )
 
     user = models.ForeignKey(User)
     permission = models.IntegerField(choices=PERMISSION_CHOICES)
@@ -881,7 +880,7 @@ class ExtraScenarioInfo(models.Model):
         search = {
             'scenario': scenario,
             'extrainfofield__name': fieldname
-            }
+        }
         if scenario_overview_only:
             search['extrainfofield__use_in_scenario_overview'] = True
 
@@ -987,7 +986,7 @@ class Scenario(models.Model):
         (20, _('low')),
         (30, _('medium')),
         (40, _('high')),
-        )
+    )
     CALCPRIORITY_LOW = 20
     CALCPRIORITY_MEDIUM = 30
     CALCPRIORITY_HIGH = 40
@@ -1008,7 +1007,7 @@ class Scenario(models.Model):
         (STATUS_ERROR, _('error')),
         (STATUS_WAITING, _('waiting')),
         (STATUS_NONE, _('none')),
-        )
+    )
 
     name = models.CharField(_('name'), max_length=200)
     owner = models.ForeignKey(User)
@@ -1059,7 +1058,7 @@ class Scenario(models.Model):
     result_base_path = models.TextField(
         null=True, blank=True,
         help_text='If left blank, the path is retrieved through scenario.breaches[0].region.path'
-        )
+    )
     # This field for 3di a setting
     config_3di = models.CharField(
         max_length=50, blank=True, null=True)
@@ -1262,7 +1261,7 @@ class Scenario(models.Model):
                 extrainfofield__header=header,
                 extrainfofield__use_in_scenario_overview=True
                 ).order_by('-extrainfofield__position')
-            ]
+        ]
 
     def get_attachment_list(self):
         """Return a list with information about this scenario's
@@ -1313,7 +1312,7 @@ class Scenario(models.Model):
             {'type': 'externalwatermodel',
              'description': _('External water model attachments'),
              'attachments': breachmodel_attachments}
-            ]
+        ]
 
         return attachment_list
 
@@ -1373,7 +1372,7 @@ class Scenario(models.Model):
                 'breach': breach,
                 'externalwater': breach.externalwater,
                 'region': breach.region
-                }
+            }
 
         return self._data_objects
 
@@ -1390,9 +1389,9 @@ class Scenario(models.Model):
         """Retrieve a value for inputfield from ExtraScenarioInfo model,
         if the value is an integer retrieve the value from InputField.
         """
-        
+
         value = self.value_for_inputfield(inputfield)
-        
+
         if isinstance(value, int):
             try:
                 return inputfield.parsed_options[value]
@@ -1570,7 +1569,7 @@ class ScenarioBreach(models.Model):
         (2, _('at moment x')),
         (3, _('at crossing level x')),
         (4, _('unknown/error at import')),
-        )
+    )
     METHOD_START_BREACH_TOP = 1
     METHOD_START_BREACH_TIME = 2
     METHOD_START_BREACH_CROSS = 3

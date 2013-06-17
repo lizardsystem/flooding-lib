@@ -1,19 +1,20 @@
 from django.contrib import admin
 from django.contrib.gis.admin import OSMGeoAdmin
-#from django.contrib.gis.admin import GeoModelAdmin as OSMGeoAdmin  # temp hack
 
-from flooding_lib.models import (Attachment, Breach, BreachSobekModel,
-                    CutoffLocation, CutoffLocationSet,
-                    CutoffLocationSobekModelSetting, Dike,
-                    Project, ProjectGroupPermission, Region, RegionSet, Map,
-                    Result, ResultType,
-                    ResultType_PresentationType, Scenario, ScenarioBreach,
-                    ScenarioCutoffLocation,
-                    Scenario_PresentationLayer,  SobekModel, SobekVersion,
-                    Task, TaskType,
-                    ThreediCalculation, ThreediModel,
-                    UserPermission, Waterlevel, WaterlevelSet, ExternalWater,
-                    ExtraInfoField, ExtraScenarioInfo)
+from flooding_lib.models import (
+    Attachment, Breach, BreachSobekModel,
+    CutoffLocation, CutoffLocationSet,
+    CutoffLocationSobekModelSetting, Dike,
+    Project, ProjectGroupPermission, Region, RegionSet, Map,
+    Result, ResultType,
+    ResultType_PresentationType, Scenario, ScenarioBreach,
+    ScenarioCutoffLocation,
+    Scenario_PresentationLayer,  SobekModel, SobekVersion,
+    Task, TaskType,
+    ThreediCalculation, ThreediModel,
+    UserPermission, Waterlevel, WaterlevelSet, ExternalWater,
+    ExtraInfoField, ExtraScenarioInfo
+)
 
 
 class ProjectGroupPermissionInline(admin.TabularInline):
@@ -31,7 +32,7 @@ class SobekmodelAdmin(admin.ModelAdmin):
     list_filter = ('active', 'sobekmodeltype', 'regions', )
     list_display = (
         'active', 'code', 'sobekmodeltype', 'project_fileloc',
-        'model_case', 'model_version', 'model_varname',)
+        'model_case', 'model_version', 'model_varname', 'keep_initial_level',)
     search_fields = ['var', 'longname', ]
 
 
