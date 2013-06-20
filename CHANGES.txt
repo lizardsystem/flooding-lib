@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.82 (unreleased)
+2.82 (2013-06-20)
 -----------------
 
 - Set permission check on editing of export_run.
