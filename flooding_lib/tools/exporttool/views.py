@@ -151,7 +151,7 @@ def new_export_index(request):
 def load_export_form(request, export_run_id):
     """Render the html form to load export run."""
     if not (request.user.is_authenticated() and
-            request.user.has_perm('exporttool.can_update')):
+            request.user.has_perm('exporttool.can_create')):
         return HttpResponse(_("No permission to create export"))
     export_run = get_object_or_404(ExportRun, pk=export_run_id)
     form = ExportRunForm(instance=export_run)
