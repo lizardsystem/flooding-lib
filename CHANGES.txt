@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.83 (unreleased)
+2.83 (2013-07-02)
 -----------------
 
 - Fix script calc.py for defining 'waterstandswerloop' points.
