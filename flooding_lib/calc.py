@@ -118,7 +118,7 @@ class BoundaryConditions:
                 waterleveltbl.append({
                         'time': 0.5 * self.tstorm,
                         'waterlevel': self.extwbaselevel})
-                if self.tsim > 0.5 * self.tpeak:
+                if self.tsim > 0.5 * self.tstorm:
                     waterleveltbl.append({
                             'time': self.tsim,
                             'waterlevel': self.extwbaselevel})
