@@ -4,7 +4,7 @@ Changelog of flooding-lib
 2.84 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Add field 'initialcrest' to ScenarioBreach models for import functionality.
 
 
 2.83 (2013-07-02)
