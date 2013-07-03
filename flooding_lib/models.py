@@ -1588,7 +1588,7 @@ class ScenarioBreach(models.Model):
     brf1 = models.FloatField()
     brf2 = models.FloatField()
     bottomlevelbreach = models.FloatField()
-    initialcrest = models.FloatField()
+    initialcrest = models.FloatField(null=True, blank=True)
     ucritical = models.FloatField()
     pitdepth = models.FloatField()
     tmaxdepth = models.FloatField()  # datetime.timedelta
