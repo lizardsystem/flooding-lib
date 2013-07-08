@@ -8,6 +8,8 @@
 # and we can use that to figure out which province a given scenario
 # belongs to.
 
+import json
+
 from django.contrib.gis.db import models
 
 import flooding_lib.models
@@ -24,8 +26,17 @@ logger = logging.getLogger(__name__)
 class Province(models.Model):
     name = models.CharField(max_length=100)
 
+    statistics = models.TextField(null=True) # Bit of JSON
+                                             # representing the
+                                             # dictionary with
+                                             # computed scenario
+                                             # statistics
+
     @classmethod
     def province_for(cls, scenario):
+        if scenario.ror_province:
+            return scenario.ror_province
+
         try:
             ownerid = flooding_lib.models.ExtraScenarioInfo.objects.get(
                 extrainfofield__id=OWNER_EXTRAINFOFIELD_ID,
@@ -42,12 +53,19 @@ class Province(models.Model):
             return Owner.objects.get(name=ownerid).province
 
     def in_province(self, scenario):
-        return Province.province_for(scenario) == self
+        if not scenario.ror_province:
+            scenario.ror_province = Province.province_for(scenario)
+            scenario.save()
+        return scenario.ror_province == self
 
     def scenario_stats(self, project, scenarios):
+        if self.statistics:
+            return json.loads(self.statistics)
+
         logger.debug('in scenario_stats')
         scenarios = [
-            scenario for scenario in scenarios if self.in_province(scenario)]
+            scenario for scenario in scenarios
+            if self.in_province(scenario)]
         logger.debug('in scenario_stats 2')
 
         stats = {
@@ -65,6 +83,9 @@ class Province(models.Model):
             stats['amount'] - stats['approved'] - stats['disapproved'])
 
         logger.debug(stats)
+
+        self.statistics = json.dumps(stats)
+        self.save()
 
         return stats
 

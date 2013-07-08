@@ -102,13 +102,12 @@ class Dashboard(View):
 
     def scenarios(self):
         if not hasattr(self, '_scenarios'):
-            scenarios = flooding_lib.models.Scenario.objects.filter(
+            self._scenarios = flooding_lib.models.Scenario.objects.filter(
                 scenarioproject__project=self.project)
 
-            return (scenario for scenario in scenarios
-                    if (
-                    not self.province or self.province.in_province(scenario)))
-        return self._scenarios
+        return (scenario for scenario in self._scenarios
+                if (
+                not self.province or self.province.in_province(scenario)))
 
 
 @permission_manager.receives_permission_manager

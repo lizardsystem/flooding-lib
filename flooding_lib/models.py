@@ -974,7 +974,6 @@ def find_imported_value(fieldobject, data_objects):
 class Scenario(models.Model):
     """scenario properties:
 
-    - belongs to a single project
     - is related to 1 or more breaches
     - is related to 0 or more cutofflocations
     - is related to 1 or more sobekmodels
@@ -1062,6 +1061,10 @@ class Scenario(models.Model):
     # This field for 3di a setting
     config_3di = models.CharField(
         max_length=50, blank=True, null=True)
+
+    # Used by the ROR Dashboard in the sharedproject subapp. Only
+    # works as a cache to speed up those pages.
+    ror_province = models.ForeignKey('sharedproject.Province', null=True)
 
     class Meta:
         ordering = ('name', 'owner', )
