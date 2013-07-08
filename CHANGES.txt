@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.85 (unreleased)
+2.85 (2013-07-08)
 -----------------
 
 - Cache the province a Scenario belongs to. Cache a province's
