@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.86 (unreleased)
+2.86 (2013-07-10)
 -----------------
 
 - Correctly create ROR approval Excel sheets for each province.
