@@ -4,7 +4,11 @@ Changelog of flooding-lib
 2.86 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Correctly create ROR approval Excel sheets for each province.
+
+- Don't generate them from the view if they already exist.
+
+- (In flooding) call the script each hour.
 
 
 2.85 (2013-07-08)

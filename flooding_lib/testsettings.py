@@ -15,6 +15,7 @@ INSTALLED_APPS = [
     'flooding_lib.tools.importtool',
     'flooding_lib.tools.exporttool',
     'flooding_lib.tools.approvaltool',
+    'flooding_lib.sharedproject',
     'flooding_presentation',
     'flooding_visualization',
     'lizard_worker',

@@ -28,11 +28,9 @@ def excel_dir(project):
 
 
 def scenario_list(project, province):
-    return (
-        scenario for scenario in
-        flooding_lib.models.Scenario.objects.filter(
-            scenarioproject__project=project)
-        if (province.in_province(scenario)))
+    return flooding_lib.models.Scenario.objects.filter(
+        scenarioproject__project=project,
+        ror_province=province)
 
 
 class ParameterMixin(object):
@@ -140,12 +138,15 @@ def get_excel(request, project, province):
         os.makedirs(directory)
 
     filename = "{0}.xls".format(province.name)
+    fullpath = os.path.join(directory, filename)
 
-    scenarios = scenario_list(project, province)
-
-    excel_import_export.create_excel_file(
-        project, scenarios, os.path.join(directory, filename),
-        include_approval=True)
+    # Excel files are created every hour by a cronjob calling the
+    # 'create_province_excel' management command
+    if not os.path.exists(fullpath):
+        scenarios = scenario_list(project, province)
+        excel_import_export.create_excel_file(
+            project, scenarios, fullpath,
+            include_approval=True)
 
     return viewutil.serve_file(
         request=request,
