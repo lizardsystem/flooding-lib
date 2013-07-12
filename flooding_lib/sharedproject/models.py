@@ -26,11 +26,11 @@ logger = logging.getLogger(__name__)
 class Province(models.Model):
     name = models.CharField(max_length=100)
 
-    statistics = models.TextField(null=True) # Bit of JSON
-                                             # representing the
-                                             # dictionary with
-                                             # computed scenario
-                                             # statistics
+    statistics = models.TextField(null=True)  # Bit of JSON
+                                              # representing the
+                                              # dictionary with
+                                              # computed scenario
+                                              # statistics
 
     @classmethod
     def province_for(cls, scenario):

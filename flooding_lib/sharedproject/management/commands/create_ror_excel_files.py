@@ -15,6 +15,7 @@ from flooding_lib import excel_import_export
 from django.utils.translation import activate
 
 from flooding_lib.scenario_sharing import PROJECT_ROR
+from flooding_lib.sharedproject import views
 
 
 class Command(BaseCommand):
@@ -26,15 +27,11 @@ class Command(BaseCommand):
 
         for province in sharedmodels.Province.objects.all():
             filename = os.path.join(
-                settings.EXCEL_DIRECTORY,
+                settings.EXCEL_DIRECTORY, 'shared', 'ror',
                 "{0}.xls".format(province.name))
 
-            scenarios = (scenario for scenario in
-                         models.Scenario.objects.filter(
-                    scenarioproject__project=ror)
-                         if province.in_province(scenario))
-
-            #print("Creating Excel for project {0}.".format(project.id))
+            scenarios = views.scenario_list(ror, province)
+            print("Creating Excel for project {0}.".format(ror.id))
             excel_import_export.create_excel_file(
                 ror, scenarios, filename,
                 include_approval=True)
