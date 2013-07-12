@@ -4,7 +4,7 @@ Changelog of flooding-lib
 2.87 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Fix error 'To many open files' by exporttool.
 
 
 2.86 (2013-07-10)
