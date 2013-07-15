@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.88 (unreleased)
+2.88 (2013-07-15)
 -----------------
 
 - Field 'ror_province' should not be mandatory in the admin.
