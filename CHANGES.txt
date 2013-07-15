@@ -4,13 +4,13 @@ Changelog of flooding-lib
 2.88 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Field 'ror_province' should not be mandatory in the admin.
 
 
-2.87 (2013-07-15)
+2.87 (2013-07-12)
 -----------------
 
-- Field 'ror_province' should not be mandatory in the admin.
+- Fix error 'To many open files' by exporttool.
 
 
 2.86 (2013-07-10)

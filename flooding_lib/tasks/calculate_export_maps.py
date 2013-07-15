@@ -182,10 +182,10 @@ def add_to_zip(output_zipfile, zip_result):
     #print 'zipping result into %s' % output_zipfile
     with zipfile.ZipFile(output_zipfile, 'a', zipfile.ZIP_DEFLATED, allowZip64=True) as myzip:
         for file_in_zip in zip_result:
-            #print 'zipping %s...' % file_in_zip['arcname']
+            log.debug('zipping %s...' % file_in_zip['arcname'])
             myzip.write(file_in_zip['filename'], file_in_zip['arcname'])
             if file_in_zip.get('delete_after', False):
-                #print 'removing %r (%s in arc)' % (file_in_zip['filename'], file_in_zip['arcname'])
+                log.debug('removing %r (%s in arc)' % (file_in_zip['filename'], file_in_zip['arcname']))
                 os.remove(file_in_zip['filename'])
 
 
@@ -279,7 +279,7 @@ def dijkring_arrays_to_zip(input_files, tmp_zip_filename, gridtype='output', gri
 
                 dataset = gdal.Open(str(filename_in_zip))
 
-                tif_filename = tempfile.mkstemp()[1]
+                fd, tif_filename = tempfile.mkstemp()
                 reprojected_dataset = tifdriver.Create(
                     str(tif_filename), size_x, size_y, 1, gdal.gdalconst.GDT_Float64, options=['COMPRESS=DEFLATE']
                 )
@@ -343,6 +343,7 @@ def dijkring_arrays_to_zip(input_files, tmp_zip_filename, gridtype='output', gri
                     dijkring_datasets[dijkringnr] = tmp_file_name
                     reprojected_dataset = None
                 if os.path.isfile(tif_filename):
+                    os.close(fd)
                     os.remove(tif_filename)
 
     #for dijkringnr, dataset in dijkring_datasets.items():
@@ -358,7 +359,7 @@ def dijkring_arrays_to_zip(input_files, tmp_zip_filename, gridtype='output', gri
         # # Everything is masked: a) if it was masked already OR b) it's in the dijkring_mask
         # max_array.mask = np.maximum(mask, max_array.mask)
 
-        ascii_filename = tempfile.mkstemp()[1]
+        fd, ascii_filename = tempfile.mkstemp()
         ascdriver.CreateCopy(ascii_filename, dataset)
         if dijkringnr is None:
             dijkringnr = 0
@@ -366,6 +367,7 @@ def dijkring_arrays_to_zip(input_files, tmp_zip_filename, gridtype='output', gri
         add_to_zip(tmp_zip_filename,
                    [{'filename': ascii_filename, 'arcname': arc_name, 'delete_after': True}])
         if os.path.isfile(ascii_filename):
+            os.close(fd)
             os.remove(ascii_filename)
 
         del dataset
@@ -420,7 +422,7 @@ def calc_possible_flooded_area(tmp_zip_filename, max_waterdepths_datasets):
         flooded_array = np.ma.zeros(maxarray.shape, dtype=np.uint8)
         flooded_array[np.ma.greater_equal(maxarray, 0.02)] = 1
 
-        ascii_filename = tempfile.mkstemp()[1]
+        fd, ascii_filename = tempfile.mkstemp()
         if dijkringnr is None:
             dijkringnr = 0
         arc_name = 'possibly_flooded_%d.asc' % (dijkringnr)
@@ -434,6 +436,7 @@ def calc_possible_flooded_area(tmp_zip_filename, max_waterdepths_datasets):
               'arcname': arc_name,
               'delete_after': True}])
         if os.path.isfile(ascii_filename):
+            os.close(fd)
             os.remove(ascii_filename)
 
 
@@ -455,7 +458,7 @@ def calculate_export_maps(exportrun_id):
     max_waterdepths = {}
     max_flowvelocity = {}
 
-    tmp_zip_filename = tempfile.mkstemp()[1]
+    zip_fd, tmp_zip_filename = tempfile.mkstemp()
 
     if export_run.export_max_waterdepth or export_run.export_possibly_flooded:
         max_waterdepths = calc_max_waterdepths(
@@ -498,6 +501,7 @@ def calculate_export_maps(exportrun_id):
 
     # remove tmp files
     if os.path.isfile(tmp_zip_filename):
+        os.close(zip_fd)
         os.remove(tmp_zip_filename)
 
     for tmp_file in max_waterdepths.values():
