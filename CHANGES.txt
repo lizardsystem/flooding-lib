@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.89 (unreleased)
+2.89 (2013-07-18)
 -----------------
 
 - Copy STRUCT3B file in place of STRUCT to sobek model.
