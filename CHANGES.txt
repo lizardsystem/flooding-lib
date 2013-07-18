@@ -1,10 +1,16 @@
 Changelog of flooding-lib
 ===================================================
 
-2.88 (unreleased)
+2.89 (unreleased)
 -----------------
 
 - Copy STRUCT3B file in place of STRUCT to sobek model.
+
+
+2.88 (2013-07-15)
+-----------------
+
+- Field 'ror_province' should not be mandatory in the admin.
 
 
 2.87 (2013-07-12)

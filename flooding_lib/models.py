@@ -1064,7 +1064,8 @@ class Scenario(models.Model):
 
     # Used by the ROR Dashboard in the sharedproject subapp. Only
     # works as a cache to speed up those pages.
-    ror_province = models.ForeignKey('sharedproject.Province', null=True)
+    ror_province = models.ForeignKey(
+        'sharedproject.Province', null=True, blank=True)
 
     class Meta:
         ordering = ('name', 'owner', )
