@@ -320,7 +320,7 @@ class Scenario:
 
     def save_spacific_files_to_output_file(self, output_file_name):
         """Copy specific files from 'boezemmodel' to 'poldermodel'."""
-        filenames_to_copy = ['3B_', 'BOUND3B', 'GREENHSE', 'OPENWATE', 'PLUVIUS', 'PAVED', 'SACRMNTO', 'STRUCT', 'UNPAVED']
+        filenames_to_copy = ['3B_', 'BOUND3B', 'GREENHSE', 'OPENWATE', 'PLUVIUS', 'PAVED', 'SACRMNTO', 'STRUCT3B', 'UNPAVED']
         boezemmodel_path = os.path.join(self.source_dir, "%(project_fileloc)s/%(model_case)i/" % self.breachlinkproperty.sobekmodel_externalwater.__dict__)
         boezemmodel_path = boezemmodel_path.replace('\\', os.sep)
         zip_output = ZipFile(output_file_name, 'r')
