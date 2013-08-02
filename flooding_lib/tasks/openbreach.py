@@ -86,11 +86,15 @@ def add_prefix_to_values_of_attributes(obj, prefix, skip_attribs=[]):
     except those listed in skip_attribute."""
 
     prefix_attribs = ['bn', 'ci', 'cj', 'dd', 'di', 'en', 'id', 'ml', 'si', ]
+    #prefix_attribs = ['bn', 'ci', 'cj', 'dd', 'di', 'en', 'id', 'ml', 'si', 'op', 'uh', 'ca', ] #ri? 3b_link?
     skip_attribs = {'D2FR': ['ci', 'id'],
                     'GLFR': ['dd'],
                     'GLIN': ['id'],
                     'NODE': ['ml'],
-                    'D2IN': ['id', 'ci']
+                    'D2IN': ['id', 'ci'],
+                    'UNIH': ['id'],
+                    'OPAR': ['id'],
+                    'CAPS': ['id']
                     }.get(obj.tag, [])
 
     for a_name in prefix_attribs:
@@ -204,7 +208,9 @@ class Scenario:
                          'network.cn', 'network.cp', 'network.cr', 'network.d12',
                          'network.gr', 'network.st', 'network.tp',
                          'nodes.dat', 'initial.dat', 'lateral.dat', 'network.me',
-                         'profile.dat', 'profile.def', 'struct.dat', 'struct.def', ]
+                         'profile.dat', 'profile.def', 'struct.dat', 'struct.def',
+                         '3b_link.tp', '3b_nod.tp', 'bound3b.3b', 'paved.3b', 'sacrmnto.3b', 'unpaved.3b']
+                         #voorlopig niet ondersteund: greenhouse.3b, industry.3b, openwate.3b, pluvius.3b, struct.3b, wwtp.3b
 
         for item in os.listdir(sobek.File.getSourceDir()):
             if item == '.svn':
@@ -318,25 +324,6 @@ class Scenario:
 
         return output_file_name
 
-    def save_spacific_files_to_output_file(self, output_file_name):
-        """Copy specific files from 'boezemmodel' to 'poldermodel'."""
-        filenames_to_copy = ['3B_', 'BOUND3B', 'GREENHSE', 'OPENWATE', 'PLUVIUS', 'PAVED', 'SACRMNTO', 'STRUCT3B', 'UNPAVED']
-        boezemmodel_path = os.path.join(self.source_dir, "%(project_fileloc)s/%(model_case)i/" % self.breachlinkproperty.sobekmodel_externalwater.__dict__)
-        boezemmodel_path = boezemmodel_path.replace('\\', os.sep)
-        zip_output = ZipFile(output_file_name, 'r')
-        zip_output_tmp = ZipFile(os.path.join(self.tmp_dir, "model.zip"),
-                                 mode="w", compression=ZIP_DEFLATED)
-        for item in zip_output.infolist():
-            if item.filename.split('.')[0] not in filenames_to_copy:
-                buffer = zip_output.read(item.filename)
-                zip_output_tmp.writestr(item, buffer)
-            else:
-                log.debug("add file {} to zip.".format(os.path.join(boezemmodel_path, item.filename)))
-                zip_output_tmp.write(os.path.join(boezemmodel_path, item.filename), item.filename)
-        zip_output.close()
-        zip_output_tmp.close()
-        shutil.copy(zip_output_tmp.filename, output_file_name)
-        os.remove(zip_output_tmp.filename)
 
     def compute_sobek_model(self):
 
@@ -374,8 +361,20 @@ class Scenario:
             path = path.replace('\\', os.sep)
             sobek.File.setSourceDir(path)
             pool2 = {}
+            files_to_overwrite_from_canal_model = \
+                ['3b_link', '3b_nod', '3brunoff', 'bound3b', 'greenhse', 'openwate',
+                 'pluvius', 'paved', 'sacrmnto', 'struct3b', 'unpaved', 'wwtp']
+
             for filename in self.files_to_edit:
                 pool2[filename] = sobek.File(filename)
+
+            for item in os.listdir(sobek.File.getSourceDir()):
+                if item == '.svn':
+                    continue
+                fn = item.lower().split('.')
+                if fn[0] in files_to_overwrite_from_canal_model and item.lower() not in self.files_to_edit:
+                    log.info('overwrite %s from canal model'%item)
+                    self.pool[item.lower()] = sobek.Verbatim(item)
 
             # in initial.dat staan er twee type objecten: FLIN en GLIN. de
             # FLIN beschrijven de ... en hun 'lv ll' parameter is de
@@ -1289,8 +1288,6 @@ def compute_sobek_model(scenario, tmp_dir='c:/tmp/1/'):
     s.collect_initial_data()
     s.compute_sobek_model()
     output_file_name = s.save_sobek_model()
-    if s.breach.externalwater.type == DB_CANAL or s.breach.externalwater.type == DB_INNER_CANAL:
-        s.save_spacific_files_to_output_file(output_file_name)
     log.debug("close db connection to avoid an idle process.")
     db.close_connection()
     return True
