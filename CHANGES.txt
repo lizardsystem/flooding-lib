@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.90 (unreleased)
+2.90 (2013-08-14)
 -----------------
 
 - Colormaping for resulttype 0 and 1.
