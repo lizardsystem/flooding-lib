@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.91 (unreleased)
+2.91 (2013-08-15)
 -----------------
 
 - Fix exporttool form for IE.
