@@ -161,7 +161,7 @@ isc.defineClass("ScenariosListGrid", "ListGrid").addProperties({
     showHeader:true,
     leaveScrollbarGap:false,
     dataproperties: {
-    	useClientFiltering: true,
+    	useClientFiltering: true
     	//useClientSorting: true
     }
 });
