@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-06-12 14:38+0200\n"
+"POT-Creation-Date: 2013-08-29 03:33-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,71 +18,119 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 
-#: models.py:15
+#: models.py:20
 msgid "Export run"
 msgstr ""
 
-#: models.py:16
+#: models.py:21
 msgid "Export runs"
 msgstr ""
 
-#: models.py:25
+#: models.py:30
 msgid "Water depth map"
 msgstr ""
 
-#: models.py:35
+#: models.py:40
 msgid "Waiting"
 msgstr ""
 
-#: models.py:39
+#: models.py:44
 msgid "Klaar"
 msgstr ""
 
-#: models.py:113
+#: models.py:47 templates/export/exports_overview.html:20
+msgid "Name"
+msgstr ""
+
+#: models.py:48 templates/export/exports_overview.html:22
+msgid "Description"
+msgstr ""
+
+#: models.py:55
+msgid "The maximal waterdepth"
+msgstr ""
+
+#: models.py:57
+msgid "The maximal flowvelicity"
+msgstr ""
+
+#: models.py:59
+msgid "The flooded area"
+msgstr ""
+
+#: models.py:61
+msgid "Owner"
+msgstr ""
+
+#: models.py:63 templates/export/exports_overview.html:21
+msgid "Creation date"
+msgstr ""
+
+#: models.py:65
+msgid "Run date"
+msgstr ""
+
+#: models.py:67
+msgid "Approved date"
+msgstr ""
+
+#: models.py:69
+msgid "Gridsize"
+msgstr ""
+
+#: models.py:210
 msgid "Result"
 msgstr ""
 
-#: models.py:114
+#: models.py:211
 msgid "Results"
 msgstr ""
 
-#: models.py:121
+#: models.py:218
 msgid "Diked area"
 msgstr ""
 
-#: models.py:122
+#: models.py:219
 msgid "Province"
 msgstr ""
 
-#: models.py:123
+#: models.py:220
 msgid "Country"
 msgstr ""
 
-#: views.py:32 views.py:65 views.py:99 views.py:183
+#: views.py:43 views.py:80 views.py:113 views.py:223 views.py:255 views.py:279
 msgid "No permission to download export"
 msgstr ""
 
-#: views.py:53 views.py:82 views.py:105 views.py:124
+#: views.py:65 views.py:93 views.py:119 views.py:143 views.py:293
 msgid "Export tool"
 msgstr ""
 
-#: views.py:83 views.py:106
+#: views.py:95 views.py:121
 msgid "Export detail"
 msgstr ""
 
-#: views.py:107
+#: views.py:124
 msgid "Export detail scenarios and projects"
 msgstr ""
 
-#: views.py:121 views.py:142
+#: views.py:140 views.py:155 views.py:175
 msgid "No permission to create export"
 msgstr ""
 
-#: views.py:125
+#: views.py:145
 msgid "New export"
 msgstr ""
 
-#: templates/export/exports_new.html:18
+#: views.py:295
+msgid "Edit export"
+msgstr "Bewerk export"
+
+#: templates/export/exports_new.html:24
+msgid "Select export maps"
+msgstr ""
+
+#: templates/export/exports_new.html:41
 msgid "Submit"
 msgstr ""
 
@@ -90,69 +138,51 @@ msgstr ""
 msgid "Export run overview"
 msgstr ""
 
-#: templates/export/exports_overview.html:20
-#: templates/export/exports_run_detail.html:22
-msgid "Name"
-msgstr ""
-
-#: templates/export/exports_overview.html:21
-#: templates/export/exports_run_detail.html:30
-msgid "Creation date"
-msgstr ""
-
-#: templates/export/exports_overview.html:22
-#: templates/export/exports_run_detail.html:42
-msgid "Description"
-msgstr ""
-
 #: templates/export/exports_overview.html:23
 msgid "State"
 msgstr ""
 
 #: templates/export/exports_overview.html:24
-#: templates/export/exports_overview.html:38
-#: templates/export/exports_run_detail.html:52
-#: templates/export/exports_run_detail.html:69
+#: templates/export/exports_overview.html:40
+#: templates/export/exports_run_detail.html:64
+#: templates/export/exports_run_detail.html:67
 msgid "Result file"
 msgstr ""
 
-#: templates/export/exports_overview.html:53
+#: templates/export/exports_overview.html:25
+#: templates/export/exports_overview.html:45
+msgid "Edit"
+msgstr ""
+
+#: templates/export/exports_overview.html:56
 msgid "New export run"
 msgstr ""
 
-#: templates/export/exports_run_detail.html:15
+#: templates/export/exports_run_detail.html:16
 #: templates/export/exports_run_detail_scenarios_and_projects.html:14
 msgid "Export run details"
 msgstr ""
 
-#: templates/export/exports_run_detail.html:26
-msgid "Owner"
+#: templates/export/exports_run_detail.html:39
+msgid "Selected maps"
 msgstr ""
 
-#: templates/export/exports_run_detail.html:34
-msgid "Run date"
-msgstr ""
-
-#: templates/export/exports_run_detail.html:38
-msgid "Approved date"
-msgstr ""
-
-#: templates/export/exports_run_detail.html:46
+#: templates/export/exports_run_detail.html:54
 msgid "Used scenarios and projects (x out of y)"
 msgstr ""
 
-#: templates/export/exports_run_detail.html:48
+#: templates/export/exports_run_detail.html:56
 msgid "out of"
 msgstr ""
 
-#: templates/export/exports_run_detail.html:68
-msgid "Area"
-msgstr ""
-
 #: templates/export/exports_run_detail_scenarios_and_projects.html:20
-msgid "Scenario"
+msgid "Scenario ID"
 msgstr ""
 
 #: templates/export/exports_run_detail_scenarios_and_projects.html:21
+msgid "Scenario"
+msgstr ""
+
+#: templates/export/exports_run_detail_scenarios_and_projects.html:22
 msgid "Project"
 msgstr ""

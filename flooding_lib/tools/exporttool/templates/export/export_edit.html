@@ -12,7 +12,7 @@
     <link href="{% url root_url %}static_media/style/forms.css" media="screen" type="text/css" rel="stylesheet">
     <link href="{% url root_url %}static_media/Isomorphic_NenS_skin/skin_styles.css" media="screen" type="text/css" rel="stylesheet">
     <script> 
-      var isomorphicDir="{% url root_url %}static_media/weblib/isomorphic/"; // abs path to isomorphic, needed to locate SmartClient CSS
+      var isomorphicDir="{% url root_url %}static_media/weblib/smartclient/9.0/isomorphic/"; // abs path to isomorphic, needed to locate SmartClient CSS
       var exporttool_config = {};
       var export_run = {};
       exporttool_config.root_url = '{% url root_url %}';
@@ -28,14 +28,14 @@
       exporttool_config.url_export_edit = '{% url flooding_tools_export_load_export_form export_run.id %}'
     </script>
 
-    <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/weblib/isomorphic/system/modules/ISC_Core.js"></SCRIPT>
-    <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/weblib/isomorphic/system/modules/ISC_Foundation.js"></SCRIPT>
-    <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/weblib/isomorphic/system/modules/ISC_Containers.js"></SCRIPT>
-    <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/weblib/isomorphic/system/modules/ISC_Grids.js"></SCRIPT>
-    <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/weblib/isomorphic/system/modules/ISC_Forms.js"></SCRIPT>
-    <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/weblib/isomorphic/system/modules/ISC_DataBinding.js"></SCRIPT>
+    <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/weblib/smartclient/9.0/isomorphic/system/modules/ISC_Core.js"></SCRIPT>
+    <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/weblib/smartclient/9.0/isomorphic/system/modules/ISC_Foundation.js"></SCRIPT>
+    <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/weblib/smartclient/9.0/isomorphic/system/modules/ISC_Containers.js"></SCRIPT>
+    <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/weblib/smartclient/9.0/isomorphic/system/modules/ISC_Grids.js"></SCRIPT>
+    <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/weblib/smartclient/9.0/isomorphic/system/modules/ISC_Forms.js"></SCRIPT>
+    <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/weblib/smartclient/9.0/isomorphic/system/modules/ISC_DataBinding.js"></SCRIPT>
     <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/Isomorphic_NenS_skin/load_skin.js"></SCRIPT>
-    <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/weblib/SCpatch.js"></SCRIPT>
+    <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/scripts/shared/SCpatch.js"></SCRIPT>
     <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/scripts/shared/lib/NGeneral.js"></SCRIPT>	
     <SCRIPT type="text/javascript" SRC="{% url root_url %}get_config.js"></SCRIPT>
     <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/scripts/shared/JSONparser.js"></SCRIPT>   

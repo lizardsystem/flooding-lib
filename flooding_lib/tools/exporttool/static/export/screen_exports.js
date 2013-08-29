@@ -130,7 +130,6 @@ window['exportRunCallbackFormFunction'] = function() {
 	httpMethod: "POST",
 	params: postParams,
 	callback: function(response, data, request){
-	    debugger;
 	    if (response.httpResponseCode == 200) {
 		console.log("Data ophalen gelukt, tonen op scherm.");
 		// check if we have to open it in the pane or in the complete window

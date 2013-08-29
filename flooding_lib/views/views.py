@@ -969,7 +969,7 @@ def scenario_list(request, permission_manager):
             if permission_manager.check_project_permission(
                 o, UserPermission.PERMISSION_SCENARIO_DELETE):
                 delete_field = {
-                    'icon': '/static_media/images/icons/delete.png',
+                    'icon': 'static_media/images/icons/delete',
                     'icontitle': _('delete this item'),
                     'urlpost': reverse(
                         "flooding_scenario_delete",

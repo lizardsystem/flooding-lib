@@ -292,7 +292,7 @@ def reuse_export(request, export_run_id):
     breadcrumbs = [
         {'name': _('Export tool'),
          'url': reverse('flooding_tools_export_index')},
-        {'name': _('New export')}]
+        {'name': _('Edit export')}]
 
     return render_to_response('export/export_edit.html',
                               {'breadcrumbs': breadcrumbs,
