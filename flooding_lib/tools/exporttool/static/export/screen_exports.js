@@ -381,7 +381,7 @@ var createExportRunDs = function(export_run_id){
 if (exporttool_config.export_run_id != '' && exporttool_config.export_run_id != null) {
     // Put scenarios into grids, set project
     var prField = projectSelector.getFields()[0]
-    prField.setValue(exporttool_config.project_name);
+    prField.setValue(exporttool_config.project_id);
     LoadScenariosForProject(exporttool_config.project_id);
     var dsExport = createExportRunDs(exporttool_config.export_run_id);
     msg.animateShow();
