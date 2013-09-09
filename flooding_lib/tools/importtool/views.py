@@ -805,3 +805,19 @@ def import_scenario_into_flooding(request, importscenario):
     return HttpResponse(simplejson.dumps({
                 'successful': success,
                 'save_log': save_log}))
+
+
+def ror_keringen(request):
+    """ Show ror-keringen. """
+    # if not (request.user.is_authenticated() and
+    #         request.user.has_perm('exporttool.can_create')):
+    #     return HttpResponse(_("No permission to create export"))
+
+    breadcrumbs = [
+        {'name': _('Oveview ROR-keringen'),
+         'url': reverse('flooding_tools_ror_keringen')},
+        {'name': _('New export')}]
+
+    return render_to_response('import/down_upload_ror_keringen.html',
+                              {'breadcrumbs': breadcrumbs})
+    

@@ -45,7 +45,6 @@ isc.DataSource.create({
     dataFormat: "json",
     dataURL: locationFloodingData,
     transformRequest: function (dsRequest) {
-	alert("transform grid");
 	if (dsRequest.operationType == "fetch") {
 	    var params = {action : 'get_scenarios_export_list'};
 	    // combine paging parameters with criteria
