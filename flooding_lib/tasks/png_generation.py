@@ -40,6 +40,7 @@ from flooding_lib.util import colormap
 from flooding_lib.util import files
 from flooding_lib.util import flshinc
 
+INPUTFIELD_STARTMOMENT_BREACHGROWTH_ID = 9
 
 if sys.version_info < (2, 4):
     print("I think I need version python2.4 and I was called from %d.%d" %
@@ -209,8 +210,6 @@ def correct_gridta(grid, result):
     in many scenarios the actual wave only starts much later. We need
     to subtract the breach's start time, which is stored in the
     'Startmoment bresgroei' inputfield of the scenario."""
-    INPUTFIELD_STARTMOMENT_BREACHGROWTH_ID = 9
-
     startmoment_breachgrowth_inputfield = InputField.objects.get(
         pk=INPUTFIELD_STARTMOMENT_BREACHGROWTH_ID)
     startmoment_days = result.scenario.value_for_inputfield(
