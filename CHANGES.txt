@@ -4,7 +4,8 @@ Changelog of flooding-lib
 2.93 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- PNG generation for gridta results now corrects for the actual start
+  time of the breach.
 
 
 2.92 (2013-09-09)

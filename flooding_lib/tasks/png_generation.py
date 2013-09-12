@@ -35,10 +35,12 @@ from django import db
 
 from flooding_base.models import Setting
 from flooding_lib.models import Scenario
+from flooding_lib.tools.importtool.models import InputField
 from flooding_lib.util import colormap
 from flooding_lib.util import files
 from flooding_lib.util import flshinc
 
+INPUTFIELD_STARTMOMENT_BREACHGROWTH_ID = 9
 
 if sys.version_info < (2, 4):
     print("I think I need version python2.4 and I was called from %d.%d" %
@@ -99,7 +101,9 @@ def common_generation(scenario_id, source_programs, tmp_dir):
     for result in results:
         logger.debug("examining results record: '%s'" % str(result))
 
-        result_location = os.path.join(destination_dir, result.resultloc)
+        result_location = os.path.join(
+            destination_dir, result.resultloc.replace('\\', '/'))
+        logger.debug("Result location: " + result_location)
         result_output_dir = os.path.join(
             output_dir_name, result.resulttype.name)
 
@@ -163,86 +167,102 @@ def compute_png_files(
     returns the common part of the name of the images produced.
     """
 
-    inc_files = [i for i in input_files if i.endswith('.inc')]
-    if inc_files:
-        logger.debug("first candidate is a .inc file.")
-        input_files = inc_files[:1]
-        basename = os.path.basename(input_files[0]).replace('_', '')[:4]
-    else:
-        logger.debug("no .inc files, use all .asc files.")
-        input_files = [i for i in input_files if i.endswith('.asc')]
-        logger.debug('input files are: %s' % str(input_files))
-        if len(input_files) == 1:
-            basename = os.path.basename(input_files[0])[:8]
-        elif len(input_files) > 1:
-            basename = os.path.basename(input_files[0])[:4]
-        else:
-            logger.warning('no files found to generate pngs')
-            return None
-
-    logger.debug("sort input files alfabetically.")
-    input_files.sort()
-    logger.info("produce images from %s." % input_files)
-
-    logger.debug(
-        "there are %s input files, basename for output files is '%s'"
-        % (len(input_files), basename))
-
     colormapobject = colormap.ColorMap(colormapping)
 
-    i = 0
-    i_in_filename = False
+    # If we have an inc file, use that
+    inc_file = next(
+        (i for i in input_files if i.lower().endswith('.inc')), None)
 
-    for filename in input_files:
-        only_one = filename.endswith('.asc') and len(input_files) == 1
-
-        if only_one:
-            output_file = os.path.join(output_dir_name, basename + ".png")
-        else:
-            output_file = os.path.join(
-                output_dir_name, basename[:4] + "%04d.png")
-            i_in_filename = True
-
-        if i_in_filename:
-            real_filename = output_file % i
-        else:
-            real_filename = output_file
-
-        if filename.endswith('.asc'):
-            try:
-                dataset = gdal.Open(str(filename))
-                colormapobject = colormap.ColorMap(colormapping)
-                colored_grid = colormapobject.apply_to_grid(
-                    dataset.ReadAsArray())
-                files.save_geopng(
-                    real_filename, colored_grid, dataset.GetGeoTransform())
-            finally:
-                del dataset  # Closes the file object so that it can
-                             # be deleted on Windows
-            i += 1
-            if i_in_filename:
-                real_filename = output_file % i
-        elif filename.endswith('.inc'):
-            logger.debug("Generating PNGs from {0}.".format(filename))
-            inc = flshinc.Flsh(filename, one_per_hour=True)
-            classes = inc.get_classes()
-            geo_transform = inc.geo_transform()
-
-            for timestamp, grid in inc:
-                logger.debug(
-                    "saving {1} for {0}".format(timestamp, real_filename))
-                flshinc.save_grid_to_image(
-                    grid, real_filename, classes,
-                    colormapobject, geo_transform)
-                i += 1
-                if i_in_filename:
-                    real_filename = output_file % i
+    if inc_file:
+        amount, basename = generate_from_inc(
+            output_dir_name, inc_file, colormapobject)
+    else:
+        amount, basename = generate_from_asc(
+            output_dir_name, input_files, colormapobject, result)
 
     result.firstnr = 0
-    result.lastnr = i
-    logger.debug("saved %d files." % (i + 1))
+    result.lastnr = amount
 
     return (basename + "####")[:8]
+
+
+def generate_from_inc(output_dir_name, inc_file, colormapobject):
+    basename = os.path.basename(inc_file).replace('_', '')[:4]
+    output_file = os.path.join(
+        output_dir_name, basename + "{:04d}.png")
+
+    inc = flshinc.Flsh(inc_file, one_per_hour=True)
+    classes = inc.get_classes()
+    geo_transform = inc.geo_transform()
+
+    for i, (timestamp, grid) in enumerate(inc):
+        real_filename = output_file.format(i)
+
+        flshinc.save_grid_to_image(
+            grid, real_filename, classes,
+            colormapobject, geo_transform)
+
+    return i + 1, basename
+
+
+def correct_gridta(grid, result):
+    """Wavefront grids (gridta) count the hours from t = 0. However,
+    in many scenarios the actual wave only starts much later. We need
+    to subtract the breach's start time, which is stored in the
+    'Startmoment bresgroei' inputfield of the scenario."""
+    startmoment_breachgrowth_inputfield = InputField.objects.get(
+        pk=INPUTFIELD_STARTMOMENT_BREACHGROWTH_ID)
+    startmoment_days = result.scenario.value_for_inputfield(
+        startmoment_breachgrowth_inputfield)
+    startmoment_hours = int(startmoment_days * 24 + 0.5)
+
+    # Subtract 'startmoment_hours' from every number in the
+    # grid that is higher than it
+    if startmoment_hours > 0:
+        where = (startmoment_hours <= grid)
+        grid -= where * startmoment_hours  # Use fact that True == 1
+
+
+def generate_from_asc(
+    output_dir_name, input_files, colormapobject, result):
+    input_files = sorted(i for i in input_files if i.lower().endswith('.asc'))
+
+    amount = len(input_files)
+
+    if amount == 1:
+        basename = os.path.basename(input_files[0])[:8]
+        output_file = os.path.join(output_dir_name, basename + ".png")
+    elif amount > 1:
+        basename = os.path.basename(input_files[0])[:4]
+        output_file = os.path.join(
+            output_dir_name, basename[:4] + "{:04d}.png")
+    else:
+        logger.warning('no files found to generate pngs')
+        return 0, None
+
+    for i, filename in enumerate(input_files):
+        real_filename = output_file.format(i)
+
+        try:
+            dataset = gdal.Open(str(filename))
+            if dataset is None:
+                logger.debug("Dataset None: " + str(filename))
+            else:
+                grid = dataset.ReadAsArray()
+
+                # Hack -- correct grid_ta for start moment of breach
+                if result.resulttype.name == 'gridta':
+                    correct_gridta(grid, result)
+
+                colored_grid = colormapobject.apply_to_grid(grid)
+
+                files.save_geopng(
+                    real_filename, colored_grid, dataset.GetGeoTransform())
+        finally:
+            del dataset  # Closes the file object so that it can be
+                         # deleted on Windows
+
+    return amount, basename
 
 
 def sobek(scenario_id, tmp_dir):
