@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.93 (unreleased)
+2.93 (2013-09-13)
 -----------------
 
 - PNG generation for gridta results now corrects for the actual start
