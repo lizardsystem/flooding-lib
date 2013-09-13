@@ -1749,7 +1749,9 @@ class Result(models.Model):
         db_table = 'flooding_result'
 
     def __unicode__(self):
-        return 'Result for %s' % self.scenario
+        return (
+            '{t} for scenario {i} ({n})'
+            .format(t=self.resulttype, i=self.scenario_id, n=self.scenario))
 
 
 class CutoffLocationSobekModelSetting(models.Model):
