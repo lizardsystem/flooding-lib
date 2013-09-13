@@ -725,10 +725,12 @@ def get_or_create_pngserie_with_defaultlegend_from_old_results(scenario, pt):
                     'flooding', 'scenario', str(scenario.id), old_file[-2])
                 output_file_name = os.path.join(output_dir_name, old_file[-1])
 
-                s_dir = os.path.join(dest_dir, os.path.dirname(resultpngloc))
+                s_dir = os.path.join(
+                    dest_dir, os.path.dirname(resultpngloc)).replace('\\', os.sep)
 
                 #destination dir
-                d_dir = os.path.join(presentation_dir, output_dir_name)
+                d_dir = os.path.join(
+                    presentation_dir, output_dir_name).replace('\\', os.sep)
                 if os.path.isdir(d_dir):
                     rmtree(d_dir)  # or move(presentation_dir +
                                    # output_dir_name, presentation_dir

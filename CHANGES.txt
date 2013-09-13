@@ -4,7 +4,8 @@ Changelog of flooding-lib
 2.94 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Replace \\ by os.sep to make presentationlayer generation work on
+  Linux.
 
 
 2.93 (2013-09-13)
