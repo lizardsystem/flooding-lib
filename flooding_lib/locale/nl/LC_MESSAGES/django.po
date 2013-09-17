@@ -824,7 +824,7 @@ msgid "The maximal waterdepth"
 msgstr "De maximale waterdiepte"
 
 #: tools/exporttool/models.py:57
-msgid "The maximal flowvelicity"
+msgid "The maximal flowvelocity"
 msgstr "De maximale stroomsnelheid"
 
 #: tools/exporttool/models.py:59

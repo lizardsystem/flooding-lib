@@ -54,7 +54,7 @@ class ExportRun(models.Model):
     export_max_waterdepth = models.BooleanField(
         default=True, verbose_name=_('The maximal waterdepth'))
     export_max_flowvelocity = models.BooleanField(
-        default=True, verbose_name=_('The maximal flowvelicity'))
+        default=True, verbose_name=_('The maximal flowvelocity'))
     export_possibly_flooded = models.BooleanField(
         default=True, verbose_name=_('The flooded area'))
     export_arrival_times = models.BooleanField(
@@ -76,18 +76,21 @@ class ExportRun(models.Model):
         default=EXPORT_STATE_WAITING)
 
     @property
-    def selected_maps(cls):
+    def selected_maps(self):
         """Return list with verbose_names of selected maps."""
         maps = []
-        map1_field = ExportRun._meta.get_field_by_name("export_max_waterdepth")[0]
-        map2_field = ExportRun._meta.get_field_by_name("export_max_flowvelocity")[0]
-        map3_field = ExportRun._meta.get_field_by_name("export_possibly_flooded")[0]
-        if cls.export_max_waterdepth:
-            maps.append(map1_field.verbose_name.capitalize())
-        if cls.export_max_flowvelocity:
-            maps.append(map2_field.verbose_name.capitalize())
-        if cls.export_possibly_flooded:
-            maps.append(map3_field.verbose_name.capitalize())
+
+        for fieldname in (
+            'export_max_waterdepth',
+            'export_max_flowvelocity',
+            'export_possibly_flooded',
+            'export_arrival_times',
+            'export_period_of_increasing_waterlevel',
+            ):
+            if getattr(self, fieldname):
+                maps.append(
+                    ExportRun._meta.get_field_by_name(fieldname)[0]
+                    .verbose_name.capitalize())
         return maps
 
     @property
