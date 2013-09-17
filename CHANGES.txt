@@ -4,7 +4,7 @@ Changelog of flooding-lib
 2.95 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Add two maps (period of increasing water level, wavefonts) to export runs.
 
 
 2.94 (2013-09-13)

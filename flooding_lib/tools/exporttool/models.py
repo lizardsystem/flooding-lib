@@ -57,6 +57,10 @@ class ExportRun(models.Model):
         default=True, verbose_name=_('The maximal flowvelicity'))
     export_possibly_flooded = models.BooleanField(
         default=True, verbose_name=_('The flooded area'))
+    export_arrival_times = models.BooleanField(
+        default=True, verbose_name=_('The arrival times'))
+    export_period_of_increasing_waterlevel = models.BooleanField(
+        default=True, verbose_name=_('The period of increasing waterlevel'))
 
     owner = models.ForeignKey(User, verbose_name=_('Owner'))
     creation_date = models.DateTimeField(
@@ -70,7 +74,7 @@ class ExportRun(models.Model):
     state = models.IntegerField(
         choices=EXPORT_STATE_CHOICES,
         default=EXPORT_STATE_WAITING)
-    
+
     @property
     def selected_maps(cls):
         """Return list with verbose_names of selected maps."""

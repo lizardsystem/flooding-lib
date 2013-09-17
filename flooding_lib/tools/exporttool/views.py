@@ -202,7 +202,7 @@ def new_export(request):
 
             # Make a workflow for the export and run it
             workflow_template = WorkflowTemplate.objects.get(code='4')
-            result = start_workflow(
+            start_workflow(
                 new_export_run.id,
                 workflow_template.id, log_level='INFO',
                 scenario_type='flooding_exportrun')

@@ -1,12 +1,12 @@
 {% load i18n %}
 
-<form id="exportRunForm" action="javascript: window['exportRunCallbackFormFunction']();">	
-	{{form.errors}}	
+<form id="exportRunForm" action="javascript: window['exportRunCallbackFormFunction']();">
+	{{form.errors}}
     <table style="float:left; width:100%;">
       <tr width="100%">
 	<td width="50%">
 	  <table>
-            <tr>        	
+            <tr>
               <th>{{form.name.label_tag}}</th>
               <td>{{form.name}}</td>
             </tr>
@@ -27,12 +27,18 @@
 	      {{form.export_max_waterdepth}}
 	      {{form.export_max_waterdepth.label_tag}}
 
-	  <br>	      
+	  <br>
 	      {{form.export_max_flowvelocity}}
 	      {{form.export_max_flowvelocity.label_tag}}
 	  <br>
 	      {{form.export_possibly_flooded}}
 	      {{form.export_possibly_flooded.label_tag}}
+	  <br>
+	      {{form.export_arrival_times}}
+	      {{form.export_arrival_times.label_tag}}
+	  <br>
+	      {{form.export_period_of_increasing_waterlevel}}
+	      {{form.export_period_of_increasing_waterlevel.label_tag}}
 	  <br>
 	</td>
       </tr>
