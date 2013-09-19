@@ -158,29 +158,19 @@ class ExportRun(models.Model):
     def input_files(
         self, export_result_type):
         """
-        Returns a csv file containing the:
-        * the region ids
+        Return a list of dictionaries, containing:
+            'scenario': a scenario object,
+            'dijkringnr': a region's dijkring number,
+            'filename': the file containing this result type
 
-        * the result files (e.g. ASCII) related to the scenario(s) for
-          the region with that region id
-
-        Inputparameter:
-
-        * export_result_type (integer): the type of the result of the
-          scenario (e.g. max. water depth (=1))
-
-        * csv_file_location: the file_location to store the csv file
-
-        The information is gathered by:
-        1) looping over the scenarios,
-        2) the regions of that scenario,
-        3) the results with the specifief result_type of that scenario
+        For each of this object's scenarios, for each of the regions of those scenarios,
+        for the given result type.
         """
         dest_dir = BaseSetting.objects.get(key='destination_dir').value
 
         result = []
         for s in self.scenarios.all():
-            for r in Region.objects.filter(breach__scenario__id=s.id).all():
+            for r in Region.objects.filter(breach__scenario=s):
                 for rs in s.result_set.filter(resulttype=export_result_type):
                     result.append({
                             'scenario': s,
