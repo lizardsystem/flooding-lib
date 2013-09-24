@@ -54,9 +54,13 @@ class ExportRun(models.Model):
     export_max_waterdepth = models.BooleanField(
         default=True, verbose_name=_('The maximal waterdepth'))
     export_max_flowvelocity = models.BooleanField(
-        default=True, verbose_name=_('The maximal flowvelicity'))
+        default=True, verbose_name=_('The maximal flowvelocity'))
     export_possibly_flooded = models.BooleanField(
         default=True, verbose_name=_('The flooded area'))
+    export_arrival_times = models.BooleanField(
+        default=True, verbose_name=_('The arrival times'))
+    export_period_of_increasing_waterlevel = models.BooleanField(
+        default=True, verbose_name=_('The period of increasing waterlevel'))
 
     owner = models.ForeignKey(User, verbose_name=_('Owner'))
     creation_date = models.DateTimeField(
@@ -70,20 +74,23 @@ class ExportRun(models.Model):
     state = models.IntegerField(
         choices=EXPORT_STATE_CHOICES,
         default=EXPORT_STATE_WAITING)
-    
+
     @property
-    def selected_maps(cls):
+    def selected_maps(self):
         """Return list with verbose_names of selected maps."""
         maps = []
-        map1_field = ExportRun._meta.get_field_by_name("export_max_waterdepth")[0]
-        map2_field = ExportRun._meta.get_field_by_name("export_max_flowvelocity")[0]
-        map3_field = ExportRun._meta.get_field_by_name("export_possibly_flooded")[0]
-        if cls.export_max_waterdepth:
-            maps.append(map1_field.verbose_name.capitalize())
-        if cls.export_max_flowvelocity:
-            maps.append(map2_field.verbose_name.capitalize())
-        if cls.export_possibly_flooded:
-            maps.append(map3_field.verbose_name.capitalize())
+
+        for fieldname in (
+            'export_max_waterdepth',
+            'export_max_flowvelocity',
+            'export_possibly_flooded',
+            'export_arrival_times',
+            'export_period_of_increasing_waterlevel',
+            ):
+            if getattr(self, fieldname):
+                maps.append(
+                    ExportRun._meta.get_field_by_name(fieldname)[0]
+                    .verbose_name.capitalize())
         return maps
 
     @property
@@ -151,29 +158,19 @@ class ExportRun(models.Model):
     def input_files(
         self, export_result_type):
         """
-        Returns a csv file containing the:
-        * the region ids
+        Return a list of dictionaries, containing:
+            'scenario': a scenario object,
+            'dijkringnr': a region's dijkring number,
+            'filename': the file containing this result type
 
-        * the result files (e.g. ASCII) related to the scenario(s) for
-          the region with that region id
-
-        Inputparameter:
-
-        * export_result_type (integer): the type of the result of the
-          scenario (e.g. max. water depth (=1))
-
-        * csv_file_location: the file_location to store the csv file
-
-        The information is gathered by:
-        1) looping over the scenarios,
-        2) the regions of that scenario,
-        3) the results with the specifief result_type of that scenario
+        For each of this object's scenarios, for each of the regions of those scenarios,
+        for the given result type.
         """
         dest_dir = BaseSetting.objects.get(key='destination_dir').value
 
         result = []
         for s in self.scenarios.all():
-            for r in Region.objects.filter(breach__scenario__id=s.id).all():
+            for r in Region.objects.filter(breach__scenario=s):
                 for rs in s.result_set.filter(resulttype=export_result_type):
                     result.append({
                             'scenario': s,

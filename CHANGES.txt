@@ -1,10 +1,31 @@
 Changelog of flooding-lib
 ===================================================
 
-2.93 (unreleased)
+2.96 (unreleased)
 -----------------
 
 - Nothing changed yet.
+
+
+2.95 (2013-09-24)
+-----------------
+
+- Add two maps (period of increasing water level, wavefonts) to export runs.
+  Let the calculate_export_maps.py script calculate them.
+
+
+2.94 (2013-09-13)
+-----------------
+
+- Replace \\ by os.sep to make presentationlayer generation work on
+  Linux.
+
+
+2.93 (2013-09-13)
+-----------------
+
+- PNG generation for gridta results now corrects for the actual start
+  time of the breach.
 
 
 2.92 (2013-09-09)
