@@ -41,7 +41,7 @@ isc.DataSource.create({
 	{name:"title", hidden:false, type:"text"},
 	{name:"created_at", hidden: false, type:"text"},
 	{name:"owner_name", hidden: false, type:"text"},
-	{name:"url", hidden: false, type:"text"}
+	{name:"status", hidden: false, type:"text"}
     ]
 });
     
