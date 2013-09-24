@@ -1,7 +1,13 @@
 Changelog of flooding-lib
 ===================================================
 
-2.92 (unreleased)
+2.93 (unreleased)
+-----------------
+
+- Nothing changed yet.
+
+
+2.92 (2013-09-09)
 -----------------
 
 - Update templates to use smartclient v9.0.

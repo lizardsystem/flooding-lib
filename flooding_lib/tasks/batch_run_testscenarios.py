@@ -22,13 +22,14 @@ log.setLevel(20)
 def start_scenarios_again(start_id, end_id):
 
     for scenario_id in range(start_id, end_id+1):
-        
+
         workflow_template = workermodels.WorkflowTemplate.objects.get(
                 code=workermodels.WorkflowTemplate.DEFAULT_TEMPLATE_CODE)
         workerexecutor.start_workflow(scenario_id, workflow_template.id)
 
-
-def add_test_calcs():
+# If this has 'test' in the name, while the file has 'test' in the name too,
+# nose will try to run it as a unit test...
+def add_te_st_calcs():
     user = User.objects.get(username='BR')
     project = Project.objects.get(pk=140)
 
@@ -37,13 +38,13 @@ def add_test_calcs():
 
     #for region in region_set.regionset_regions.region.all():
     for region in region_set.regions.filter(id__in=[455,456,463,464,467]):
-       
+
         for breach in region.breach_set.filter(active=True):
 
             print "breach: %i0"%breach.id
 
             request = {
-                'tsim_ms': 7200000, 
+                'tsim_ms': 7200000,
                 'breach_id': breach.id,
                 'name': 'test som config',
                 'user': user,
@@ -52,7 +53,7 @@ def add_test_calcs():
                 'externalwatermodel': breach.externalwater.sobekmodels.all()[0].id,
                 'calcpriority': 20,
                 'project_fk': project.id,
-        
+
                 'extwmaxlevel': -9999,
                 'tpeak_ms': 0,
                 'tstorm_ms': 0,
@@ -61,7 +62,7 @@ def add_test_calcs():
                 'extwbaselevel': -9999,
 
                 'widthbrinit': 10,
-                'brdischcoef': 1, 
+                'brdischcoef': 1,
                 'brf1': 1.3,
                 'brf2': 0.04,
                 'bottomlevelbreach': breach.groundlevel,
