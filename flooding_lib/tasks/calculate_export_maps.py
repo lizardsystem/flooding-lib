@@ -15,6 +15,8 @@ from flooding_lib.models import ResultType
 from flooding_lib.tools.importtool.models import InputField
 from flooding_lib.tools.exporttool.models import ExportRun
 from flooding_lib.tools.exporttool.models import Setting
+from flooding_lib.models import Result as FloodingResult
+from flooding_base.models import Setting as BaseSetting
 from flooding_lib.tools.exporttool.models import Result
 from flooding_lib.util import files
 
@@ -37,6 +39,32 @@ AAIGRIDDRIVER = gdal.GetDriverByName(b'aaigrid')
 
 SizeInfo = namedtuple(
     'Size', 'x_min x_max y_min y_max size_x size_y gridsize')
+
+
+def gdal_open(filepath):
+    """Open the dataset in filepath, even if it's zipped."""
+    if filepath.endswith('.zip'):
+        filepath = '/vsizip/' + filepath
+
+    filepath = filepath.encode('utf8')
+
+    return gdal.Open(filepath)
+
+
+def maxwaterdepth_geotransform(scenario):
+    try:
+        maxdepth_result = scenario.result_set.get(
+            resulttype__name='gridmaxwaterdepth')
+        resultloc = maxdepth_result.absolute_resultloc
+        dataset = gdal_open(maxdepth_result.absolute_resultloc)
+
+        if dataset is None:
+            log.debug("Gdal failed to open: {}".format(resultloc))
+            return None
+
+        return dataset.GetGeoTransform()
+    except FloodingResult.DoesNotExist:
+        return None
 
 
 def mktemp():
@@ -99,7 +127,10 @@ def all_files_in(filename):
             for filename_in_zip in files_in_zip:
                 yield filename_in_zip.encode('utf8')
     else:
-        yield filename.encode('utf8')
+        if os.path.isfile(filename) and not filename.endswith(".zip"):
+            yield filename.encode('utf8')
+        # If it's not a file, or a bad zip, just return without
+        # yielding anything.
 
 
 def generate_dst_filename(export_run):
@@ -391,10 +422,8 @@ def save_dijkring_datasets_to_zip(zip_file, dijkring_datasets, gridtype):
 def calc_max_waterdepths(tmp_zip_filename, export_run):
     log.debug('export_max_waterdepth')
     gridtype = 'gridmaxwaterdepth'
-    # Calc max waterdepth
-    export_result_type = ResultType.objects.get(name=gridtype)
     # Find out input files for this type
-    input_files = export_run.input_files(export_result_type)
+    input_files = export_run.input_files(gridtype)
     if not input_files:
         log.warn("No file to calc max waterdepths.")
         return {}
@@ -406,8 +435,7 @@ def calc_max_waterdepths(tmp_zip_filename, export_run):
 
 def calc_wavefronts(tmp_zip_filename, export_run):
     gridtype = 'gridta'
-    export_result_type = ResultType.objects.get(name=gridtype)
-    input_files = export_run.input_files(export_result_type)
+    input_files = export_run.input_files(gridtype)
 
     if not input_files:
         return {}
@@ -418,6 +446,11 @@ def calc_wavefronts(tmp_zip_filename, export_run):
     # and do that in a temporary file, that is later removed.
     temporary_files = []
     for input_file in input_files:
+        # HACK. Some gridta files have a wrong extent. The extent of
+        # the max waterdepth grid is always correct, and they should
+        # be equal. So we take the extent from there.
+        geo_transform = maxwaterdepth_geotransform(input_file['scenario'])
+
         startmoment_days = input_file['scenario'].value_for_inputfield(
             startmoment_breachgrowth_inputfield)
 
@@ -433,6 +466,10 @@ def calc_wavefronts(tmp_zip_filename, export_run):
             tmpdir = tempfile.mkdtemp()
             tmpfile = os.path.join(tmpdir, b'temptif.tif')
             new_dataset = TIFDRIVER.CreateCopy(tmpfile, dataset)
+
+            if geo_transform is not None:
+                new_dataset.SetGeoTransform(geo_transform)
+
             dataset = None
             array = new_dataset.ReadAsArray()
 
@@ -560,7 +597,15 @@ def calc_rise_period(tmp_zip_filename, export_run):
         dataset = TIFDRIVER.Create(
             tmpfile, xsize, ysize, 1, gdal.gdalconst.GDT_Float64,
             options=[b'COMPRESS=DEFLATE'])
-        dataset.SetGeoTransform(geo_transform)
+
+        # We use the geotransform of the max water depth ascii, if
+        # available!  Some geotransforms of the gridta/gridta rasters
+        # have a wrong Y coordinate, but the max waterdepth, if
+        # available, is always correct.
+        geo_transform_maxd = maxwaterdepth_geotransform(
+            gridta['scenario']) or geo_transform
+        dataset.SetGeoTransform(geo_transform_maxd)
+
         band = dataset.GetRasterBand(1)
         band.SetNoDataValue(NO_DATA_VALUE)
         band.WriteArray(rise_periods_masked_array.filled(NO_DATA_VALUE))
