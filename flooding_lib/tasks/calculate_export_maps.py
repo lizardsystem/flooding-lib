@@ -46,7 +46,7 @@ def gdal_open(filepath):
     if filepath.endswith('.zip'):
         filepath = '/vsizip/' + filepath
 
-    filepath = filepath.encode('utf8')
+    filepath = linuxify_pathname(filepath).encode('utf8')
 
     return gdal.Open(filepath)
 
@@ -208,8 +208,8 @@ def write_masked_array(
     size_y, size_x = filled.shape
     num_bands = 1
 
-    ds = TIFDRIVER.Create(filename, size_x, size_y, num_bands,
-                          gdal.gdalconst.GDT_Byte)
+    ds = driver.Create(filename, size_x, size_y, num_bands,
+                       gdal.gdalconst.GDT_Byte)
     band = ds.GetRasterBand(1)
     band.WriteArray(filled)
     band.SetNoDataValue(NO_DATA_VALUE)
@@ -246,7 +246,10 @@ def find_boundary(input_files, gridsize):
 
     for input_file in input_files:
         for filename in all_files_in(input_file['filename']):
-            dataset = gdal.Open(filename)
+            dataset = gdal_open(filename)
+            if dataset is None:
+                continue  # Skip, corrupt file
+
             dataset.RasterXSize, dataset.RasterYSize
             geo_transform = dataset.GetGeoTransform()
             # something like (183050.0, 25.0, 0.0, 521505.0, 0.0, -25.0)
@@ -462,7 +465,11 @@ def calc_wavefronts(tmp_zip_filename, export_run):
         for filename in all_files_in(input_file['filename']):
             # Create a new dataset that is a copy of the existing one,
             # and read it as array.
-            dataset = gdal.Open(filename)
+            dataset = gdal_open(filename)
+
+            if dataset is None:
+                # Corrupt?
+                continue
             tmpdir = tempfile.mkdtemp()
             tmpfile = os.path.join(tmpdir, b'temptif.tif')
             new_dataset = TIFDRIVER.CreateCopy(tmpfile, dataset)
