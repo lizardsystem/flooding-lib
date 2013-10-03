@@ -367,7 +367,7 @@ var createExportRunDs = function(export_run_id){
 	    {name:"project_name", hidden: false, type:"text"},
 	    {name:"owner_id", hidden: false, type:"int"},
 	    {name:"owner_name", hidden: false, type:"text"},
-	    {name:"extwrepeattime", type:"text"},
+	    {name:"extwrepeattimeser", type:"text"},
 	    {name:"extwname", type:"text"},
 	    {name:"extwtype", type:"text"},
 	    {name: "_visible", hidden: true, type: "text"}

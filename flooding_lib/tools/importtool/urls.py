@@ -32,7 +32,7 @@ urlpatterns = patterns(
         name='flooding_tools_upload_files'),
 
     url(r'^rorkeringen/$$',
-        'flooding_lib.tools.importtool.views.ror_keringen',
-        name='flooding_tools_ror_keringen'),
+        'flooding_lib.tools.importtool.views.ror_keringen_page',
+        name='flooding_tools_ror_keringen_page'),
 
 )

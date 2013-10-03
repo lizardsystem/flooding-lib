@@ -2,6 +2,7 @@
 from flooding_lib.tools.importtool.models import ImportScenario
 from flooding_lib.tools.importtool.models import ImportScenarioInputField
 from flooding_lib.tools.importtool.models import InputField
+from flooding_lib.tools.importtool.models import RORKering
 
 
 from django.contrib import admin
@@ -32,7 +33,14 @@ class InputFieldAdmin(admin.ModelAdmin):
     search_fields = ['name']
 
 
+class RORKeringAdmin(admin.ModelAdmin):
+    list_display = ['title', 'uploaded_at', 'owner', 'file_name', 'status', 'type_kering']
+    list_filter = ['status', 'type_kering', 'owner']
+    search_fields = ['title']
+
+
 #alphabetical order
 admin.site.register(ImportScenario, ImportScenarioAdmin)
 admin.site.register(ImportScenarioInputField)
 admin.site.register(InputField, InputFieldAdmin)
+admin.site.register(RORKering, RORKeringAdmin)

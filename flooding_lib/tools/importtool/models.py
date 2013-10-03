@@ -1003,3 +1003,47 @@ class InputField(models.Model):
         return ((self.destination_table.lower() not in (
                     'scenario', 'scenariobreach', 'extrascenarioinfo')) or
                 (self.type == InputField.TYPE_FILE))
+
+
+class RORKering(models.Model):
+    
+    NOT_APPLIEND =  _('not applied')
+    APPLIED = _('applied')
+    PRIMARE = _('primary')
+    REGIONAL = _('regional')
+
+    STATE = (
+         (APPLIED, APPLIED),
+         (NOT_APPLIEND, NOT_APPLIEND)
+    )
+    TYPE_KERING = (
+        (PRIMARE, PRIMARE),
+        (REGIONAL, REGIONAL)
+    )
+    
+    title = models.CharField(max_length=100,
+                             null=True, blank=True,
+                             verbose_name=_('Title'))
+    uploaded_at = models.DateTimeField(auto_now_add=True,
+                                       verbose_name=_('Uploaded At'))
+    owner = models.ForeignKey(User, verbose_name=_('Owner'))
+    file_name = models.CharField(max_length=100, verbose_name=_('File name'))
+    status = models.CharField(choices=STATE, max_length=20,
+                              verbose_name=_('Status'),
+                              default=NOT_APPLIEND)
+    type_kering = models.CharField(choices=TYPE_KERING, max_length=20,
+                                   verbose_name=_('Type'))
+
+    @property
+    def kering_as_dict(self):
+        return {
+            'title': self.title,
+            'uploaded_at': self.uploaded_at.strftime('%Y-%b-%d %H:%M'),
+            'owner': self.owner.get_full_name(),
+            'file_name': self.file_name,
+            'status': self.status,
+            'type_kering': self.type_kering
+        }
+
+    class Meta:
+        ordering = ['-uploaded_at']

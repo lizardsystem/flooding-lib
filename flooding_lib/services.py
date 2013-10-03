@@ -4,10 +4,11 @@ import StringIO
 import mapnik
 import os
 
+from django.contrib.auth.models import User
 from django.conf import settings
 from django.contrib.gis.geos import GEOSGeometry, MultiPolygon
 from django.core.urlresolvers import reverse
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.utils import simplejson
 from django.views.decorators.cache import never_cache
@@ -38,6 +39,7 @@ from flooding_lib.views import service_save_new_scenario
 from flooding_lib.views import service_save_new_3di_scenario
 from flooding_lib.views import service_select_strategy
 from flooding_lib.tools.importtool.models import InputField
+from flooding_lib.tools.importtool.models import RORKering
 
 SPHERICAL_MERCATOR = (
     '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 ' +
@@ -1263,6 +1265,33 @@ def service_delete_measure(measure_ids):
     return HttpResponse(simplejson.dumps(answer), mimetype="application/json")
 
 
+def upload_ror_keringen(request):
+    """Save zipfile."""
+    
+    upload_path = settings.ROR_KERINGEN_NOTAPPLIED_PATH
+    if not os.path.isdir(upload_path):
+        os.makedirs(upload_path)
+
+    f_upload = request.FILES.get('zip', None)
+    if f_upload is not None:
+        with open(os.path.join(upload_path, f_upload.name), 'wb') as f_destination:
+            for chunk in f_upload.chunks():
+                f_destination.write(chunk)
+    else:
+       return HttpResponse("Error on upload", mimetype="text/html") 
+                
+    try:
+        RORKering(
+            title=request.POST.get('title'),
+            owner=User.objects.get(username=request.user),
+            file_name=f_upload.name,
+            type_kering=request.POST.get('type')).save() 
+    except:
+        return HttpResponse("Error on save", mimetype="text/html")
+
+    return HttpResponse("Done", mimetype="text/html")
+
+
 def service_load_strategies(current_strategy, strategies):
     selected_strategies_ids = strategies.split(';')
     new_measures = []
@@ -1363,13 +1392,23 @@ def get_raw_result_scenario(request, scenarioid):
             "results": results
             })
 
+def get_ror_keringen_types():
+    types = [{'type': unicode(RORKering.PRIMARE)},
+             {'type': unicode(RORKering.REGIONAL)}]
+    return HttpResponse(simplejson.dumps(types),
+                        mimetype='application/json')
+
+def get_ror_keringen():
+    keringen = [k.kering_as_dict for k in RORKering.objects.all()]
+    return HttpResponse(simplejson.dumps(keringen),
+                        mimetype='application/json')
 
 def service(request):
     """Calls other service functions
 
     parameters depend on action.
     """
-
+    #import pdb; pdb.set_trace();
     if request.method == 'GET':
         query = request.GET
 
@@ -1683,6 +1722,10 @@ def service(request):
             scenariobreach_id = int(query.get('scenariobreach_id', None))
             return get_externalwater_graph_infowindow(
                 request, width, height, scenariobreach_id)
+        elif action_name == 'get_ror_keringen':
+            return get_ror_keringen()
+        elif action_name == 'get_ror_keringen_types':
+            return get_ror_keringen_types()
         else:
             #pass
             raise Http404
@@ -1690,7 +1733,7 @@ def service(request):
     elif request.method == 'POST':
         query = request.POST
         action_name = query.get('action', query.get('ACTION')).lower()
-
+        
         if action_name == 'post_newscenario':
             return service_save_new_scenario(request)
         elif action_name == 'post_new3discenario':
@@ -1757,6 +1800,8 @@ def service(request):
                                         use_manual_input,
                                         timeserie,
                                         True)
+        elif action_name == 'upload_ror_keringen':
+            return upload_ror_keringen(request)
         else:
             raise Http404
 

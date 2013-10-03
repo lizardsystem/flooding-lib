@@ -10,6 +10,7 @@ import Image
 import ImageDraw
 
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
 from django.core.urlresolvers import reverse
@@ -1524,6 +1525,24 @@ def excel_download(request, permission_manager, project_id):
         dirname=directory,
         filename=filename,
         nginx_dirname='/download_excel')
+
+
+def ror_keringen_download(request, filename):
+    
+    # Check permissions
+    user = User.objects.get(username=request.user)
+    if user is None or not user.is_authenticated():
+        raise PermissionDenied()
+
+    directory = settings.ROR_KERINGEN_APPLIED_PATH
+    full_path = os.path.join(directory, filename)
+    response = viewutil.serve_file(
+        request=request,
+        dirname=directory,
+        filename=filename,
+        nginx_dirname=directory)
+    response['Content-Disposition'] = 'attachment; filename="{}"'.format(filename)
+    return response
 
 
 @receives_permission_manager

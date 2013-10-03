@@ -14,9 +14,18 @@
     <script> 
       var isomorphicDir="{% url root_url %}static_media/weblib/smartclient/9.0/isomorphic/"; // abs path to isomorphic, needed to locate SmartClient CSS
       var ror_config = {};
+      var ror_files = new Array();
+      ror_config.files = '{{ keringen_file_names|escape }}';
       ror_config.root_url = '{% url root_url %}';
       
       ror_config.breadcrumbs = '<div class="breadcrumbs">{% if breadcrumbs %}&rsaquo;{% endif %}{% for blitem in breadcrumbs %}{% if blitem.url %}<a href="{{ blitem.url }}"> {{ blitem.name }} </a>{% else %} {{ blitem.name }} {% endif %}{% ifnotequal forloop.revcounter0 0 %}&rsaquo;{% endifnotequal %}{% endfor %}</div>';
+
+      {% for item in keringen_file_names %}
+        var file_dict = {};
+        file_dict.name = '{{item.name|safe}}';
+        file_dict.path = '{{item.path|safe }}';
+        ror_files[{{item.id}}] = file_dict;
+      {% endfor %}
     </script>
 
     <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/weblib/smartclient/9.0/isomorphic/system/modules/ISC_Core.js"></SCRIPT>

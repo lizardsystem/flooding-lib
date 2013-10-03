@@ -14,6 +14,7 @@ from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.shortcuts import get_object_or_404
 from django.utils import simplejson
+from django.conf import settings
 from django.utils.translation import ugettext as _
 
 from flooding_base.models import Text
@@ -30,6 +31,7 @@ from flooding_lib.tools.importtool.models import GroupImport
 from flooding_lib.tools.importtool.models import ImportScenario
 from flooding_lib.tools.importtool.models import ImportScenarioInputField
 from flooding_lib.tools.importtool.models import InputField
+from flooding_lib.tools.importtool.models import RORKering
 from flooding_lib.util.files import remove_comments_from_asc_files
 
 logger = logging.getLogger(__name__)
@@ -807,17 +809,22 @@ def import_scenario_into_flooding(request, importscenario):
                 'save_log': save_log}))
 
 
-def ror_keringen(request):
+def ror_keringen_page(request):
     """ Show ror-keringen. """
-    # if not (request.user.is_authenticated() and
-    #         request.user.has_perm('exporttool.can_create')):
-    #     return HttpResponse(_("No permission to create export"))
+    if not (request.user.is_authenticated()):
+        return HttpResponse(_("Not authenticated."))
+
+    
+    files = os.listdir(settings.ROR_KERINGEN_APPLIED_PATH)
+    keringen_file_names = [
+        {'id': files.index(f),
+         'name': f,
+         'path': reverse('flooding_ror_keringen_download', kwargs={'filename': f})} for f in files]
 
     breadcrumbs = [
-        {'name': _('Oveview ROR-keringen'),
-         'url': reverse('flooding_tools_ror_keringen')},
-        {'name': _('New export')}]
-
+        {'name': _('Importtool'),
+         'url': reverse('flooding_tools_import_overview')},
+        {'name': _('Down- upload ROR-keringen')}]
     return render_to_response('import/down_upload_ror_keringen.html',
-                              {'breadcrumbs': breadcrumbs})
-    
+                              {'breadcrumbs': breadcrumbs,
+                               'keringen_file_names': keringen_file_names})

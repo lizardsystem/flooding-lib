@@ -185,6 +185,10 @@ urlpatterns = patterns(
     url(r'^excel/(?P<project_id>\d+)/',
         'flooding_lib.views.excel_download',
         name='flooding_excel_download'),
+    
+    url(r'^ror_keringen_zip/applied/(?P<filename>[a-zA-Z0-9\._\-]+)',
+        'flooding_lib.views.ror_keringen_download',
+        name='flooding_ror_keringen_download'),
 
     (r'^shared/', include(flooding_lib.sharedproject.urls)),
 
