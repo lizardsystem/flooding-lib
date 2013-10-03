@@ -196,7 +196,7 @@ def np_max(list_of_arrays):
 
 
 def write_masked_array(
-    filename, masked_array, geo_transform):
+    filename, masked_array, geo_transform, driver=AAIGRIDDRIVER):
     """
     Use gdal to write a masked_array to a ascii file.
     """
