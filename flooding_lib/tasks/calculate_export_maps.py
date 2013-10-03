@@ -196,8 +196,7 @@ def np_max(list_of_arrays):
 
 
 def write_masked_array(
-    filename, masked_array, geo_transform,
-    driver=AAIGRIDDRIVER):
+    filename, masked_array, geo_transform):
     """
     Use gdal to write a masked_array to a ascii file.
     """
@@ -208,8 +207,8 @@ def write_masked_array(
     size_y, size_x = filled.shape
     num_bands = 1
 
-    ds = driver.Create(filename, size_x, size_y, num_bands,
-                       gdal.gdalconst.GDT_Byte)
+    ds = TIFDRIVER.Create(filename, size_x, size_y, num_bands,
+                          gdal.gdalconst.GDT_Byte)
     band = ds.GetRasterBand(1)
     band.WriteArray(filled)
     band.SetNoDataValue(NO_DATA_VALUE)
