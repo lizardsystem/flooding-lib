@@ -42,10 +42,7 @@ SizeInfo = namedtuple(
 
 
 def gdal_open(filepath):
-    """Open the dataset in filepath, even if it's zipped."""
-    if filepath.endswith('.zip'):
-        filepath = '/vsizip/' + filepath
-
+    """Open the dataset in filepath."""
     filepath = linuxify_pathname(filepath).encode('utf8')
 
     return gdal.Open(filepath)
@@ -56,13 +53,15 @@ def maxwaterdepth_geotransform(scenario):
         maxdepth_result = scenario.result_set.get(
             resulttype__name='gridmaxwaterdepth')
         resultloc = maxdepth_result.absolute_resultloc
-        dataset = gdal_open(maxdepth_result.absolute_resultloc)
 
-        if dataset is None:
-            log.debug("Gdal failed to open: {}".format(resultloc))
-            return None
+        for fn in all_files_in(resultloc):
+            dataset = gdal_open(fn)
 
-        return dataset.GetGeoTransform()
+            if dataset is None:
+                log.debug("Gdal failed to open: {}".format(resultloc))
+                return None
+
+            return dataset.GetGeoTransform()
     except FloodingResult.DoesNotExist:
         return None
 
@@ -300,21 +299,25 @@ def get_dataset_line_masked_array(dataset, band, line):
 def combine_with_dijkring_datasets(
     dijkring_datasets, dijkringnr, filename, size_info, combine_method='max'):
 
-    dataset = gdal.Open(filename.encode('utf8'))
+    for dataset_pathname in all_files_in(filename):
+        dataset = gdal_open(dataset_pathname)
 
-    # Reproject dataset into TIF
-    fd, tif_filename = tempfile.mkstemp()
-    reprojected_dataset = TIFDRIVER.Create(
-        str(tif_filename), size_info.size_x, size_info.size_y, 1,
-        gdal.gdalconst.GDT_Float64, options=['COMPRESS=DEFLATE']
-        )
-    reprojected_dataset.SetGeoTransform(
-        (size_info.x_min, size_info.gridsize, 0,
-         size_info.y_max, 0, -size_info.gridsize))
-    reprojected_band = reprojected_dataset.GetRasterBand(1)
-    reprojected_band.SetNoDataValue(NO_DATA_VALUE)
-    reprojected_band.Fill(NO_DATA_VALUE)
-    gdal.ReprojectImage(dataset, reprojected_dataset)
+        # Reproject dataset into TIF
+        fd, tif_filename = tempfile.mkstemp()
+        reprojected_dataset = TIFDRIVER.Create(
+            str(tif_filename), size_info.size_x, size_info.size_y, 1,
+            gdal.gdalconst.GDT_Float64,
+            options=[b'COMPRESS=DEFLATE', b'BIGTIFF=YES']
+            )
+        reprojected_dataset.SetGeoTransform(
+            (size_info.x_min, size_info.gridsize, 0,
+             size_info.y_max, 0, -size_info.gridsize))
+        reprojected_band = reprojected_dataset.GetRasterBand(1)
+        reprojected_band.SetNoDataValue(NO_DATA_VALUE)
+        reprojected_band.Fill(NO_DATA_VALUE)
+        gdal.ReprojectImage(dataset, reprojected_dataset)
+        dataset = None
+        break
 
     if dijkringnr in dijkring_datasets:
         # Combine with existing dataset
@@ -357,7 +360,7 @@ def combine_with_dijkring_datasets(
             prefix=str(dijkringnr), suffix='.tif')[1]
         TIFDRIVER.CreateCopy(
             str(tmp_file_name), reprojected_dataset,
-            options=[b'COMPRESS=DEFLATE'])
+            options=[b'COMPRESS=DEFLATE', b'BIGTIFF=YES'])
         dijkring_datasets[dijkringnr] = tmp_file_name
         reprojected_dataset = None
 
@@ -399,7 +402,7 @@ def dijkring_arrays_to_zip(
 
 def save_dijkring_datasets_to_zip(zip_file, dijkring_datasets, gridtype):
     for dijkringnr, dataset_filename in dijkring_datasets.items():
-        dataset = gdal.Open(str(dataset_filename))
+        dataset = gdal_open(dataset_filename)
 
         fd, ascii_filename = tempfile.mkstemp()
 
@@ -554,10 +557,10 @@ def calc_rise_period(tmp_zip_filename, export_run):
         # Open both datasets, check if they are the same
         # Strange loop structure is because of how all_files_in works
         for f in all_files_in(gridta['filename']):
-            gridta_ds = gdal.Open(f)
+            gridta_ds = gdal_open(f)
             geo_transform = gridta_ds.GetGeoTransform()
             for f in all_files_in(gridtd['filename']):
-                gridtd_ds = gdal.Open(f)
+                gridtd_ds = gdal_open(f)
 
                 # Check geo_transforms
                 if geo_transform != gridtd_ds.GetGeoTransform():
@@ -602,7 +605,7 @@ def calc_rise_period(tmp_zip_filename, export_run):
         ysize, xsize = rise_periods_masked_array.shape
         dataset = TIFDRIVER.Create(
             tmpfile, xsize, ysize, 1, gdal.gdalconst.GDT_Float64,
-            options=[b'COMPRESS=DEFLATE'])
+            options=[b'COMPRESS=DEFLATE', b'BIGTIFF=YES'])
 
         # We use the geotransform of the max water depth ascii, if
         # available!  Some geotransforms of the gridta/gridta rasters
@@ -653,7 +656,7 @@ def calc_possible_flooded_area(tmp_zip_filename, max_waterdepths_datasets):
     log.debug('export_possibly_flooded')
     for dijkringnr, dataset_filename in max_waterdepths_datasets.items():
 
-        dataset = gdal.Open(str(dataset_filename))
+        dataset = gdal_open(dataset_filename)
 
         geo_transform = dataset.GetGeoTransform()
         maxarray = dataset2array(dataset)
