@@ -1748,6 +1748,18 @@ class Result(models.Model):
         verbose_name_plural = _('Results')
         db_table = 'flooding_result'
 
+    @property
+    def absolute_resultloc(self):
+        """Return absolute location, as a byte string, with path
+        separators for this OS."""
+        dest_dir = Setting.objects.get(key='destination_dir').value
+        abspath = os.path.join(dest_dir, self.resultloc)
+        if os.path.sep == '/':
+            abspath = abspath.replace('\\', '/')
+        else:
+            abspath = abspath.replace('/', '\\')
+        return abspath.encode('utf8')
+
     def __unicode__(self):
         return (
             '{t} for scenario {i} ({n})'

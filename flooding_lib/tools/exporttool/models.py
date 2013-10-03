@@ -163,15 +163,23 @@ class ExportRun(models.Model):
             'dijkringnr': a region's dijkring number,
             'filename': the file containing this result type
 
-        For each of this object's scenarios, for each of the regions of those scenarios,
-        for the given result type.
+        For each of this object's scenarios, for each of the regions
+        of those scenarios, for the given result type (name or
+        resulttype instance).
         """
         dest_dir = BaseSetting.objects.get(key='destination_dir').value
+
+        if isinstance(export_result_type, basestring):
+            # Name of result type given
+            resulttype_filter = {'resulttype__name': export_result_type}
+        else:
+            # Result type itself
+            resulttype_filter = {'resulttype': export_result_type}
 
         result = []
         for s in self.scenarios.all():
             for r in Region.objects.filter(breach__scenario=s):
-                for rs in s.result_set.filter(resulttype=export_result_type):
+                for rs in s.result_set.filter(**resulttype_filter):
                     result.append({
                             'scenario': s,
                             'dijkringnr': r.dijkringnr,
