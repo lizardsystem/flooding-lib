@@ -736,8 +736,8 @@ def get_or_create_pngserie_with_defaultlegend_from_old_results(scenario, pt):
                                    # output_dir_name, presentation_dir
                                    # + output_dir_name + '_old')
 
-                log.debug('source dir is {0}'.format(s_dir))
-                log.debug('destination dir is {0}'.format(d_dir))
+                log.debug('source dir is {0}'.format(s_dir.encode('utf-8')))
+                log.debug('destination dir is {0}'.format(d_dir.encode('utf-8')))
                 copytree(s_dir, d_dir)
 
                 if result.resulttype.overlaytype == 'ANIMATEDMAPOVERLAY':
