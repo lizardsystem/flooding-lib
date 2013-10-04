@@ -5,7 +5,8 @@ console.log('loading screaan_exports ..');
 /**** description: 	This script provides the functionaly to export 
                         'waterdieptekaart'
 /********************************************************************/
-
+var iframe_content = "<iframe height=25 scrolling='no' name='uploadFrame' width='150'" +
+    "align='top' marginheight='0' marginwidth='0' frameborder='0' allowtransparency='true'></iframe>";
 isc.Canvas.create({
     ID:'breadcrumbs',
     height:"15",
@@ -105,6 +106,7 @@ isc.IButton.create({
 	var val = uploadForm.validate();
 	if (val) {
 	    uploadForm.submit();
+	    uploadFrame.contents = iframe_content
 	    uploadFrame.show();
 	} else {
 	    console.log("Error on submit.");
@@ -146,8 +148,7 @@ isc.DynamicForm.create({
 isc.Canvas.create({
     ID:'uploadFrame',
     height: 25,
-    contents: "<iframe height=25 scrolling='no' name='uploadFrame' width='150'" +
-              "align='top' marginheight='0' marginwidth='0' frameborder='0' allowtransparency='true'>:</iframe>",
+    contents: iframe_content,
     autodraw: false,
     autoFit: true,
 });
