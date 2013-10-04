@@ -3,6 +3,7 @@ import Image
 import StringIO
 import mapnik
 import os
+import datetime
 
 from django.contrib.auth.models import User
 from django.conf import settings
@@ -1269,14 +1270,23 @@ def upload_ror_keringen(request):
     """Save zipfile."""
     
     upload_path = settings.ROR_KERINGEN_NOTAPPLIED_PATH
+    c_date = datetime.datetime.today()
+    f_prefix = "{0:04}{1:02}{2:02}_{3:02}{4:02}".format(
+                c_date.year, c_date.month, c_date.day,
+                c_date.hour, c_date.minute)
     if not os.path.isdir(upload_path):
         os.makedirs(upload_path)
 
     f_upload = request.FILES.get('zip', None)
+    
     if f_upload is not None:
-        with open(os.path.join(upload_path, f_upload.name), 'wb') as f_destination:
-            for chunk in f_upload.chunks():
-                f_destination.write(chunk)
+        try:
+            unique_name = "{0}_{1}".format(f_prefix, f_upload.name)          
+            with open(os.path.join(upload_path, unique_name), 'wb') as f_destination:
+                for chunk in f_upload.chunks():
+                    f_destination.write(chunk)
+        except:
+           return HttpResponse("Error on upload", mimetype="text/html") 
     else:
        return HttpResponse("Error on upload", mimetype="text/html") 
                 
@@ -1284,12 +1294,13 @@ def upload_ror_keringen(request):
         RORKering(
             title=request.POST.get('title'),
             owner=User.objects.get(username=request.user),
-            file_name=f_upload.name,
-            type_kering=request.POST.get('type')).save() 
+            file_name="{0}_{1}".format(f_prefix, f_upload.name),
+            type_kering=request.POST.get('type'),
+            description=request.POST.get('opmerking')).save() 
     except:
         return HttpResponse("Error on save", mimetype="text/html")
 
-    return HttpResponse("Done", mimetype="text/html")
+    return HttpResponse("File Uploaded", mimetype="text/html")
 
 
 def service_load_strategies(current_strategy, strategies):
@@ -1394,7 +1405,8 @@ def get_raw_result_scenario(request, scenarioid):
 
 def get_ror_keringen_types():
     types = [{'type': unicode(RORKering.PRIMARE)},
-             {'type': unicode(RORKering.REGIONAL)}]
+             {'type': unicode(RORKering.REGIONAL)},
+             {'type': unicode(RORKering.WATER)}]
     return HttpResponse(simplejson.dumps(types),
                         mimetype='application/json')
 

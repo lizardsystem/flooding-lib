@@ -1009,8 +1009,9 @@ class RORKering(models.Model):
     
     NOT_APPLIEND =  _('not applied')
     APPLIED = _('applied')
-    PRIMARE = _('primary')
-    REGIONAL = _('regional')
+    PRIMARE = _('primary kering')
+    REGIONAL = _('regional kering')
+    WATER = _('waters')
 
     STATE = (
          (APPLIED, APPLIED),
@@ -1018,7 +1019,8 @@ class RORKering(models.Model):
     )
     TYPE_KERING = (
         (PRIMARE, PRIMARE),
-        (REGIONAL, REGIONAL)
+        (REGIONAL, REGIONAL),
+        (WATER, WATER)
     )
     
     title = models.CharField(max_length=100,
@@ -1033,16 +1035,20 @@ class RORKering(models.Model):
                               default=NOT_APPLIEND)
     type_kering = models.CharField(choices=TYPE_KERING, max_length=20,
                                    verbose_name=_('Type'))
+    description = models.TextField(null=True, blank=True,
+                                   verbose_name=_('Description'))
 
     @property
     def kering_as_dict(self):
         return {
+            'id': self.id,
             'title': self.title,
             'uploaded_at': self.uploaded_at.strftime('%Y-%b-%d %H:%M'),
             'owner': self.owner.get_full_name(),
             'file_name': self.file_name,
             'status': self.status,
-            'type_kering': self.type_kering
+            'type_kering': self.type_kering,
+            'description': self.description
         }
 
     class Meta:

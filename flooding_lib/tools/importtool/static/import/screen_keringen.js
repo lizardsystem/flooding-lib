@@ -47,12 +47,7 @@ isc.DataSource.create({
 	    return isc.addProperties({}, dsRequest.data, params);
 	}
     },
-    transformResponse: function(dsRequest, dsResponse, jsonData) {
-	//alert('');
-    },
-    //autoFetchData:true,
     autoDraw:false,
-    //clientOnly: false,
     fields:[
 	{name: "id", primaryKey: true, hidden: true, type: "int"},
 	{name: "title", hidden: false, type: "text", required: true},
@@ -63,24 +58,27 @@ isc.DataSource.create({
 	{name: "type_kering", hidden: true, type:"text"},
 	{name: "type", hidden: true, type:"text", required: true},
 	{name: "zip", hidden: true, type:"text", required: true},
-	{name: "action", hidden: true, type:"text", required: true}
+	{name: "action", hidden: true, type:"text", required: true},
+	{name: "description", hidden: false, type:"text", required: false}
     ]
 });
     
 isc.ListGrid.create({
     ID: "listGridKering",
-    width:650, height:224, alternateRecordStyles:true,
+    height:"100%",
+    alternateRecordStyles:true,
     dataSource: dsRORKeringen,
     selectionType: "simple",
     autoFetchData: true,
     fields:[
-	{name: "id", title:"ID", type:"int", width: 20},
-	{name: "title", title: "Titel", type: "text", width: 100},
+	{name: "id", title:"ID", type:"int", width: 30},
+	{name: "title", title: "Titel", type: "text", width: 150},
 	{name: "uploaded_at", title: "Geüpload op", type: "text",width: 120},
-	{name:"owner", title: "Eigenaar", type:"text", width: 100},
-	{name:"file_name", title: "Bestandnaam", type:"text", width: 100},
+	{name:"owner", title: "Eigenaar", type:"text", width: 150},
+	{name:"file_name", title: "Bestandnaam", type:"text", width: 200},
 	{name:"status", title: "Status", type:"text", width: 100},
-	{name:"type_kering", title: "Type", type:"text", width: 100}
+	{name:"type_kering", title: "Type", type:"text", width: 100},
+	{name:"description", title: "Opmerking", type:"text"}
     ],
     emptyMessage:"<br><br>Geen shape is beschikbaar."
 });
@@ -118,7 +116,12 @@ isc.IButton.create({
     ID: "btClose",
     title: "Close",
     autoFit: true,
-    click : function () { uploadWindow.hide(); }
+    click : function () { 
+	uploadWindow.hide();
+	dsRORKeringen.fetchData({}, function(response, data, request){
+	    listGridKering.setData(data);
+	});
+    }
 });
 
 isc.DynamicForm.create({
@@ -131,8 +134,9 @@ isc.DynamicForm.create({
     autoDraw: false,
     fields: [
 	{ name: "title", required: true },
+	{ name: "opmerking", required: false, type: "textArea" },
 	{ name: "type", required: true, editorType: "select",
-	  optionDataSource: "dsTypeKering"},
+	  optionDataSource: "dsTypeKering" },
 	{ name: "zip", type: "upload", required: true  },
 	{ name: "action", type: "hidden", defaultValue: "upload_ror_keringen" }
     ],
@@ -141,9 +145,9 @@ isc.DynamicForm.create({
 
 isc.Canvas.create({
     ID:'uploadFrame',
-    height: 20,
-    contents: "<iframe height=20 scrolling='no' name='uploadFrame' width='100'" +
-              "align='top' border='0' frameborder='0' allowtransparency='true'>AAA</iframe>",
+    height: 25,
+    contents: "<iframe height=25 scrolling='no' name='uploadFrame' width='150'" +
+              "align='top' marginheight='0' marginwidth='0' frameborder='0' allowtransparency='true'>:</iframe>",
     autodraw: false,
     autoFit: true,
 });
@@ -164,7 +168,7 @@ isc.Window.create({
     isModal: true,
     showModalMask: true,
     autoDraw: false,
-    width: 400,
+    //width: 400,
     closeClick : function () { 
 	dsRORKeringen.fetchData({}, function(response, data, request){
 	    listGridKering.setData(data);
@@ -187,9 +191,10 @@ isc.HLayout.create({
 
 isc.VLayout.create({
     ID: "mainLayout",
-    width: 700,
+    width: "100%",
+    height: "100%",
     membersMargin: 10,
-    members: [breadcrumbs, listGridKering, buttons]
+    members: [breadcrumbs, buttons, listGridKering]
 });
 
 var downloadButtons = function() {
