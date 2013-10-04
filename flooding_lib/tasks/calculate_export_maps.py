@@ -494,39 +494,43 @@ def calc_wavefronts(tmp_zip_filename, export_run):
 
         startmoment_hours = int(startmoment_days * 24 + 0.5)
 
-        for filename in all_files_in(input_file['filename']):
-            # Create a new dataset that is a copy of the existing one,
-            # and read it as array.
-            dataset = gdal_open(filename)
+        if startmoment_hours > 0:
+            for filename in all_files_in(input_file['filename']):
+                # Create a new dataset that is a copy of the existing one,
+                # and read it as array.
+                log.debug("Open wavefront dataset {f}".format(f=filename))
+                dataset = gdal_open(filename)
 
-            if dataset is None:
-                # Corrupt?
-                continue
-            tmpdir = tempfile.mkdtemp()
-            tmpfile = os.path.join(tmpdir, b'temptif.tif')
-            new_dataset = TIFDRIVER.CreateCopy(tmpfile, dataset)
+                if dataset is None:
+                    # Corrupt?
+                    continue
+                tmpdir = tempfile.mkdtemp()
+                tmpfile = os.path.join(tmpdir, b'temptif.tif')
+                new_dataset = TIFDRIVER.CreateCopy(tmpfile, dataset)
 
-            if geo_transform is not None:
-                new_dataset.SetGeoTransform(geo_transform)
+                if geo_transform is not None:
+                    new_dataset.SetGeoTransform(geo_transform)
 
-            dataset = None
-            array = new_dataset.ReadAsArray()
+                dataset = None
+                array = new_dataset.ReadAsArray()
 
-            # For all places where the value is greater than startmoment_hours,
-            # subtract startmoment_hours
-            where = (startmoment_hours <= array)
-            array -= where * startmoment_hours  # Use fact that True == 1
+                # For all places where the value is greater than
+                # startmoment_hours, subtract startmoment_hours
+                log.debug("Correcting for startmoment_hours {i}".
+                          format(i=startmoment_hours))
+                where = (startmoment_hours <= array)
+                array -= where * startmoment_hours  # Use fact that True == 1
 
-            # Save the array and start using the new dataset instead
-            # of the old one.
-            new_dataset.GetRasterBand(1).WriteArray(array)
-            new_dataset = None
-            input_file['filename'] = tmpfile
-            temporary_files.append(tmpdir)
+                # Save the array and start using the new dataset instead
+                # of the old one.
+                new_dataset.GetRasterBand(1).WriteArray(array)
+                new_dataset = None
+                input_file['filename'] = tmpfile
+                temporary_files.append(tmpdir)
 
-            # We only loop over the first file -- there's only supposed to
-            # be one anyway. See the doc string of all_files_in().
-            break
+                # We only loop over the first file -- there's only supposed to
+                # be one anyway. See the doc string of all_files_in().
+                break
 
     dijkring_datasets = dijkring_arrays_to_zip(
         input_files, tmp_zip_filename, gridtype,
