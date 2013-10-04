@@ -151,7 +151,7 @@ isc.Canvas.create({
     height: 25,
     contents: iframe_content,
     autodraw: false,
-    autoFit: true,
+    autoFit: true
 });
 
 isc.HLayout.create({
@@ -170,7 +170,6 @@ isc.Window.create({
     isModal: true,
     showModalMask: true,
     autoDraw: false,
-    //width: 400,
     closeClick : function () { 
 	dsRORKeringen.fetchData({}, function(response, data, request){
 	    listGridKering.setData(data);
