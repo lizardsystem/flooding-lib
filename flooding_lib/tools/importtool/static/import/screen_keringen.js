@@ -106,7 +106,8 @@ isc.IButton.create({
 	var val = uploadForm.validate();
 	if (val) {
 	    uploadForm.submit();
-	    uploadFrame.contents = iframe_content
+	    uploadFrame.contents = iframe_content;
+	    uploadFrame.redraw();
 	    uploadFrame.show();
 	} else {
 	    console.log("Error on submit.");
