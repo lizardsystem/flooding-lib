@@ -43,12 +43,14 @@ SizeInfo = namedtuple(
 
 def gdal_open(filepath):
     """Open the dataset in filepath."""
+    log.debug("gdal_open({f})".format(f=filepath))
     filepath = linuxify_pathname(filepath).encode('utf8')
 
     return gdal.Open(filepath)
 
 
 def maxwaterdepth_geotransform(scenario):
+    log.debug("maxwaterdepth_geotransform({s})".format(s=scenario))
     try:
         maxdepth_result = scenario.result_set.get(
             resulttype__name='gridmaxwaterdepth')
@@ -67,6 +69,7 @@ def maxwaterdepth_geotransform(scenario):
 
 
 def mktemp():
+    log.debug("mktemp()")
     """Make a temp file
 
     You are responsible for deleting it.
@@ -87,11 +90,13 @@ def linuxify_pathname(pathname):
     """
     #return '/mnt/p-flod-fs-00-d1/Flooding/resultaten-staging/Dijkring 31 - Zuid-Beveland - oost/13072/gridmaxwaterdepth.zip'
     #return '/mnt/p-flod-fs-00-d1/Flooding/resultaten-staging/Dijkring 31 - Zuid-Beveland - oost/13072/gridmaxwaterlevel.zip'
+    log.debug("linuxify_pathname({p})".format(p=pathname))
     return pathname.replace('\\', '/')
 
 
 def is_valid_zipfile(linux_filename):
     """Check if the passed file is a valid zipfile."""
+    log.debug("is_valid_zipfile({f})".format(f=linux_filename))
     if not os.path.isfile(linux_filename):
         return False
     try:
@@ -119,6 +124,7 @@ def all_files_in(filename):
         process(f)  # Process first file
         break       # Skip rest; files are cleaned up here
     """
+    log.debug("all_files_in({f})".format(f=filename))
     filename = linuxify_pathname(filename)
 
     if is_valid_zipfile(filename):
@@ -138,6 +144,7 @@ def generate_dst_filename(export_run):
 
     Replace all ' ' with '_' in export name
     Cat export name to 20 chars."""
+    log.debug("generate_dst_filename({e})".format(e=export_run))
     max_length = 20
     export_name = ""
     if export_run.name is not None:
@@ -157,6 +164,8 @@ def generate_dst_filename(export_run):
 def generate_export_meta(export_run, dst_filename):
     """Generate a dict with meta data for
     passed export."""
+    log.debug("generate_export_meta({e}, {d})"
+              .format(e=export_run, d=dst_filename))
     export_meta = {
         "name": export_run.name,
         "owner": export_run.owner.username,
@@ -171,6 +180,8 @@ def generate_export_meta(export_run, dst_filename):
 
 def create_json_meta_file(tmp_zip_filename, export_run, dst_filename):
     """Create meta file."""
+    log.debug("create_json_meta_file({t}, {e}, {d})"
+              .format(t=tmp_zip_filename, e=export_run, d=dst_filename))
     export_meta = generate_export_meta(export_run, dst_filename)
     io = StringIO()
     json.dump(export_meta, io, indent=4)
@@ -191,6 +202,7 @@ def np_max(list_of_arrays):
     Max of a list of arrays
     Actual legitimate use of reduce()!
     """
+    log.debug("np_max({l})".format(l=list_of_arrays))
     return reduce(np.maximum, list_of_arrays)
 
 
@@ -199,6 +211,8 @@ def write_masked_array(
     """
     Use gdal to write a masked_array to a ascii file.
     """
+    log.debug("write_masked_array({f}, {m}, {g}, {d})"
+              .format(f=filename, m=masked_array, g=geo_transform, d=driver))
     filename = filename.encode('utf8')  # GDAL wants bytestring filenames
 
     masked_array.fill_value = NO_DATA_VALUE
@@ -226,7 +240,7 @@ def add_to_zip(output_zipfile, zip_result):
     - arcname: target filename in archive
     - delete_after: set this to remove file from file system after zipping
     """
-
+    log.debug("add_to_zip({o}, {z})".format(o=output_zipfile, z=zip_result))
     with zipfile.ZipFile(
         output_zipfile, 'a', zipfile.ZIP_DEFLATED, allowZip64=True) as myzip:
         for file_in_zip in zip_result:
@@ -237,6 +251,7 @@ def add_to_zip(output_zipfile, zip_result):
 
 def find_boundary(input_files, gridsize):
     """Return tuple with x_min, x_max, y_min, y_max."""
+    log.debug("find_boundary({i}, {g})".format(i=input_files, g=gridsize))
     x_min = None
     x_max = None
     y_max = None
@@ -246,6 +261,7 @@ def find_boundary(input_files, gridsize):
         for filename in all_files_in(input_file['filename']):
             dataset = gdal_open(filename)
             if dataset is None:
+                log.debug("Not found: {}".format(filename))
                 continue  # Skip, corrupt file
 
             dataset.RasterXSize, dataset.RasterYSize
@@ -278,12 +294,15 @@ def find_boundary(input_files, gridsize):
 
 def dataset2array(dataset):
     """ Return numpy masked array. """
+    log.debug("dataset2array({d})".format(d=dataset))
     data = dataset.ReadAsArray()
     mask = np.equal(data, dataset.GetRasterBand(1).GetNoDataValue())
     return np.ma.array(data, mask=mask)
 
 
 def get_dataset_line_masked_array(dataset, band, line):
+    log.debug("get_dataset_line_masked_array({d}, {b}, {l})"
+              .format(d=dataset, b=band, l=line))
     linearray = np.fromstring(
         band.ReadRaster(
             0, line, dataset.RasterXSize, 1),
@@ -298,7 +317,9 @@ def get_dataset_line_masked_array(dataset, band, line):
 
 def combine_with_dijkring_datasets(
     dijkring_datasets, dijkringnr, filename, size_info, combine_method='max'):
-
+    log.debug("combine_with_dijkring_datasets({dd}, {d}, {f}, {s}, {c})"
+              .format(dd=dijkring_datasets, d=dijkringnr, f=filename,
+                      s=size_info, c=combine_method))
     for dataset_pathname in all_files_in(filename):
         dataset = gdal_open(dataset_pathname)
 
@@ -381,6 +402,10 @@ def dijkring_arrays_to_zip(
 
     gridtype is used to generate useful arcnames
     """
+    log.debug("dijkring_arrays_to_zip({i}, {z}, {g}, {gs}, {c})"
+              .format(i=input_files, z=zip_filename, g=gridtype,
+                      gs=gridsize, c=combine_method))
+
     dijkring_datasets = {}  # key is dijkringnr, values are tif
                             # filenames of combined datasets
 
@@ -401,6 +426,8 @@ def dijkring_arrays_to_zip(
 
 
 def save_dijkring_datasets_to_zip(zip_file, dijkring_datasets, gridtype):
+    log.debug("save_dijkring_datasets_to_zip({z}, {dd}, {g}"
+              .format(z=zip_file, dd=dijkring_datasets, g=gridtype))
     for dijkringnr, dataset_filename in dijkring_datasets.items():
         dataset = gdal_open(dataset_filename)
 
@@ -425,7 +452,8 @@ def save_dijkring_datasets_to_zip(zip_file, dijkring_datasets, gridtype):
 
 
 def calc_max_waterdepths(tmp_zip_filename, export_run):
-    log.debug('export_max_waterdepth')
+    log.debug('calc_max_waterdepths({t}, {e})'
+              .format(t=tmp_zip_filename, e=export_run))
     gridtype = 'gridmaxwaterdepth'
     # Find out input files for this type
     input_files = export_run.input_files(gridtype)
@@ -439,6 +467,8 @@ def calc_max_waterdepths(tmp_zip_filename, export_run):
 
 
 def calc_wavefronts(tmp_zip_filename, export_run):
+    log.debug("calc_wavefronts({t}, {e})"
+              .format(t=tmp_zip_filename, e=export_run))
     gridtype = 'gridta'
     input_files = export_run.input_files(gridtype)
 
@@ -530,7 +560,8 @@ def calc_rise_period(tmp_zip_filename, export_run):
     We create completely new TIF files for each scenario, that will be
     discarded after combining them into files for each dijkring.
     """
-
+    log.debug("calc_rise_period({t}, {e})"
+              .format(t=tmp_zip_filename, e=export_run))
     gridtype = 'grid_rise_period'  # Result grid name
 
     scenario_duration_inputfield = InputField.objects.get(
@@ -637,7 +668,8 @@ def calc_rise_period(tmp_zip_filename, export_run):
 
 def calc_max_flowvelocity(tmp_zip_filename, export_run):
     # Calc max flow velocity
-    log.debug('export_max_flowvelocity')
+    log.debug('calc_max_flowvelocity({t}, {e})'
+              .format(t=tmp_zip_filename, e=export_run))
     gridtype = 'gridmaxflowvelocity'
     export_result_type = ResultType.objects.get(name=gridtype)
     # Find out input files for this type
@@ -653,7 +685,8 @@ def calc_max_flowvelocity(tmp_zip_filename, export_run):
 
 def calc_possible_flooded_area(tmp_zip_filename, max_waterdepths_datasets):
     # Calculate the possible flooded area
-    log.debug('export_possibly_flooded')
+    log.debug('calc_possible_flooded_area({t}, {m})'
+              .format(t=tmp_zip_filename, m=max_waterdepths_datasets))
     for dijkringnr, dataset_filename in max_waterdepths_datasets.items():
 
         dataset = gdal_open(dataset_filename)
@@ -697,6 +730,7 @@ def calculate_export_maps(exportrun_id):
     path yourself by prepending the name with Setting.EXPORT_FOLDER.
 
     """
+    log.debug("calculate_export_maps({e})".format(e=exportrun_id))
     export_run = ExportRun.objects.get(id=exportrun_id)
     export_folder = Setting.objects.get(key='EXPORT_FOLDER').value
     max_waterdepths = {}
