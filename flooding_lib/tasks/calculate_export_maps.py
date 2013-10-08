@@ -904,8 +904,6 @@ def calculate_export_maps(exportrun_id):
 
     zip_fd, tmp_zip_filename = tempfile.mkstemp()
 
-    calc_sources_of_inundation(tmp_zip_filename, export_run)
-
     if export_run.export_max_waterdepth or export_run.export_possibly_flooded:
         max_waterdepths = calc_max_waterdepths(
             tmp_zip_filename, export_run)
@@ -924,6 +922,9 @@ def calculate_export_maps(exportrun_id):
 
     if export_run.export_period_of_increasing_waterlevel:
         calc_rise_period(tmp_zip_filename, export_run)
+
+    if export_run.export_sources_of_inundation:
+        calc_sources_of_inundation(tmp_zip_filename, export_run)
 
     dst_basename = generate_dst_filename(export_run)
     dst_filename = os.path.join(export_folder, dst_basename)
