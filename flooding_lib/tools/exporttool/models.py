@@ -61,6 +61,8 @@ class ExportRun(models.Model):
         default=True, verbose_name=_('The arrival times'))
     export_period_of_increasing_waterlevel = models.BooleanField(
         default=True, verbose_name=_('The period of increasing waterlevel'))
+    export_inundation_sources = models.BooleanField(
+        default=True, verbose_name=_('Sources of inundation'))
 
     owner = models.ForeignKey(User, verbose_name=_('Owner'))
     creation_date = models.DateTimeField(
@@ -70,7 +72,8 @@ class ExportRun(models.Model):
     approved_date = models.DateTimeField(
         blank=True, null=True, verbose_name=_('Approved date'))
     scenarios = models.ManyToManyField(Scenario)
-    gridsize = models.PositiveIntegerField(default=50, verbose_name=_('Gridsize'))
+    gridsize = models.PositiveIntegerField(
+        default=50, verbose_name=_('Gridsize'))
     state = models.IntegerField(
         choices=EXPORT_STATE_CHOICES,
         default=EXPORT_STATE_WAITING)
@@ -86,6 +89,7 @@ class ExportRun(models.Model):
             'export_possibly_flooded',
             'export_arrival_times',
             'export_period_of_increasing_waterlevel',
+            'export_inundation_sources'
             ):
             if getattr(self, fieldname):
                 maps.append(

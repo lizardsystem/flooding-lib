@@ -14,4 +14,5 @@ class ExportRunForm(forms.ModelForm):
                   'export_possibly_flooded',
                   'export_arrival_times',
                   'export_period_of_increasing_waterlevel',
+                  'export_inundation_sources',
                   )

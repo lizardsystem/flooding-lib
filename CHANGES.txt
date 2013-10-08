@@ -21,6 +21,10 @@ Changelog of flooding-lib
 
 - Add some helper functions and tests.
 
+- Add export for inundation source maps. Note: the meaning of '3' and '4'
+  are reversed in these maps, needs to be fixed after combining them in the
+  ROR export server.
+
 
 2.95 (2013-09-24)
 -----------------
