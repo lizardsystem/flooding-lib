@@ -5,8 +5,26 @@ console.log('loading screaan_exports ..');
 /**** description: 	This script provides the functionaly to export 
                         'waterdieptekaart'
 /********************************************************************/
-var iframe_content = "<iframe height=25 scrolling='no' name='uploadFrame' width='150'" +
+
+function setUploadMessage(iframe) {
+    var iframe_doc = iframe.contentDocument || iframe.contentWindow.document;
+    var response_el = iframe_doc.getElementById('upload_message');
+    var message = "";
+    if ((response_el != null) && (response_el.childNodes.length > 0)) {
+	message = response_el.childNodes[0].nodeValue;
+    }
+    lbUpload.setContents(message);
+    lbUpload.icon = null;
+    if (btSubmit.isDisabled()) {
+	btSubmit.enable();
+    }
+    lbUpload.redraw();
+}
+var loading_img = ror_config.root_url + "static_media/Isomorphic_NenS_skin/images/loading.gif";
+var iframe_content = "<iframe height=1 scrolling='no' onload='setUploadMessage(this);' " +
+    "id='up_frame' name='up_frame' width='0' " +
     "align='top' marginheight='0' marginwidth='0' frameborder='0' allowtransparency='true'></iframe>";
+
 isc.Canvas.create({
     ID:'breadcrumbs',
     height:"15",
@@ -32,7 +50,8 @@ isc.DataSource.create({
     },
     autoFetchData:true,
     fields:[
-    	{name:"type", hidden: false, type:"text"}
+    	{name:"type", hidden: false, type:"text"},
+	{name:"code", hidden: false, type:"text"}
     ]
 });
 
@@ -67,18 +86,17 @@ isc.DataSource.create({
 isc.ListGrid.create({
     ID: "listGridKering",
     height:"100%",
-    alternateRecordStyles:true,
+    //alternateRecordStyles:true,
     dataSource: dsRORKeringen,
     selectionType: "simple",
     autoFetchData: true,
     fields:[
 	{name: "id", title:"ID", type:"int", width: 30},
-	{name: "title", title: "Titel", type: "text", width: 150},
-	{name: "uploaded_at", title: "Geüpload op", type: "text",width: 120},
+	{name: "title", title: "Naam", type: "text", width: 150},
+	{name: "uploaded_at", title: "Datum", type: "text",width: 120},
 	{name:"owner", title: "Eigenaar", type:"text", width: 150},
-	{name:"file_name", title: "Bestandnaam", type:"text", width: 200},
-	{name:"status", title: "Status", type:"text", width: 100},
 	{name:"type_kering", title: "Type", type:"text", width: 100},
+	{name:"status", title: "Status", type:"text", width: 100},
 	{name:"description", title: "Opmerking", type:"text"}
     ],
     emptyMessage:"<br><br>Geen shape is beschikbaar."
@@ -93,31 +111,41 @@ isc.IButton.create({
     actionType: "checkbox",
     click : function () {
 	uploadWindow.show(); 
-	uploadFrame.hide();
 	uploadForm.reset()
+	if (btSubmit.isDisabled()) {
+	    btSubmit.enable();
+	}
     } 
+});
+
+isc.Label.create({
+    ID: "lbUpload",
+    valign: "center",
+    contents: ""
 });
 
 isc.IButton.create({
     ID: "btSubmit",
-    title: "Submit",
+    title: "Verzenden",
     autoFit: true,
     click : function () {
 	var val = uploadForm.validate();
 	if (val) {
-	    uploadForm.submit();
-	    uploadFrame.contents = iframe_content;
-	    uploadFrame.redraw();
-	    uploadFrame.show();
+	    lbUpload.setContents('Uploaden ...');
+	    lbUpload.icon = loading_img;
+	    if (!this.isDisabled()) {
+		this.disable();
+	    }
+	    this.getForm().submit();   
 	} else {
-	    console.log("Error on submit.");
+	    console.log("Fout bij uploaden.");
     	}
     }
 });
 
 isc.IButton.create({
     ID: "btClose",
-    title: "Close",
+    title: "Afsluiten",
     autoFit: true,
     click : function () { 
 	uploadWindow.hide();
@@ -131,24 +159,23 @@ isc.DynamicForm.create({
     ID: "uploadForm",
     dataSource: dsRORKeringen,
     action: locationFloodingData,
-    target: "uploadFrame",
+    target: "up_frame",
     dataFormat: "multipart/form-data",
     method: "POST",
     autoDraw: false,
     fields: [
-	{ name: "title", required: true },
-	{ name: "opmerking", required: false, type: "textArea" },
-	{ name: "type", required: true, editorType: "select",
-	  optionDataSource: "dsTypeKering" },
-	{ name: "zip", type: "upload", required: true  },
+	{ name: "title", title: "Naam*", required: true },
+	{ name: "opmerking", title: "Opmerking", required: false, type: "textArea" },
+	{ name: "code", title: "Type*", required: true, editorType: "select",
+	  optionDataSource: "dsTypeKering", valueField:"code", displayField:"type"},
+	{ name: "zip", title: "Bestand(zip)*", type: "upload", required: true  },
 	{ name: "action", type: "hidden", defaultValue: "upload_ror_keringen" }
-    ],
-    canSubmit: true
+    ]
 });
 
 isc.Canvas.create({
     ID:'uploadFrame',
-    height: 25,
+    height: 1,
     contents: iframe_content,
     autodraw: false,
     autoFit: true
@@ -159,12 +186,12 @@ isc.HLayout.create({
     membersMargin: 5,
     padding: 5,
     height: 20,
-    members: [btSubmit, btClose, uploadFrame]
+    members: [btSubmit, btClose, lbUpload, uploadFrame]
 });
 
 isc.Window.create({
     ID: "uploadWindow",
-    title: "Upload kering",
+    title: "Upload",
     autoSize:true,
     autoCenter: true,
     isModal: true,

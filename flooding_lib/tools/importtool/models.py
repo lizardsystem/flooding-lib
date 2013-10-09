@@ -1007,20 +1007,26 @@ class InputField(models.Model):
 
 class RORKering(models.Model):
     
-    NOT_APPLIEND =  _('not applied')
-    APPLIED = _('applied')
-    PRIMARE = _('primary kering')
-    REGIONAL = _('regional kering')
-    WATER = _('waters')
+    # NOT_APPLIEND =  _('not applied')
+    # APPLIED = _('applied')
+    # PRIMARE = _('primary kering')
+    # REGIONAL = _('regional kering')
+    # WATER = _('waters')
+
+    NOT_APPLIEND = u'10'
+    APPLIED = u'20'
+    PRIMARE = u'10'
+    REGIONAL = u'20'
+    WATER = u'30'
 
     STATE = (
-         (APPLIED, APPLIED),
-         (NOT_APPLIEND, NOT_APPLIEND)
+         (APPLIED, _('applied')),
+         (NOT_APPLIEND, _('not applied'))
     )
     TYPE_KERING = (
-        (PRIMARE, PRIMARE),
-        (REGIONAL, REGIONAL),
-        (WATER, WATER)
+        (PRIMARE, _('primary kering')),
+        (REGIONAL, _('regional kering')),
+        (WATER, _('waters'))
     )
     
     title = models.CharField(max_length=100,
@@ -1037,6 +1043,18 @@ class RORKering(models.Model):
                                    verbose_name=_('Type'))
     description = models.TextField(null=True, blank=True,
                                    verbose_name=_('Description'))
+    
+    def get_state(self):
+        for i in RORKering.STATE:   
+            if i[0] == self.status:
+                return unicode(i[1])
+        return self.status
+          
+    def get_type(self):
+        for i in RORKering.TYPE_KERING:   
+            if i[0] == self.type_kering:
+                return unicode(i[1])
+        return self.type_kering
 
     @property
     def kering_as_dict(self):
@@ -1046,8 +1064,8 @@ class RORKering(models.Model):
             'uploaded_at': self.uploaded_at.strftime('%Y-%b-%d %H:%M'),
             'owner': self.owner.get_full_name(),
             'file_name': self.file_name,
-            'status': self.status,
-            'type_kering': self.type_kering,
+            'status': self.get_state(),
+            'type_kering': self.get_type(),
             'description': self.description
         }
 

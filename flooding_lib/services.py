@@ -5,6 +5,7 @@ import mapnik
 import os
 import datetime
 
+from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.contrib.gis.geos import GEOSGeometry, MultiPolygon
@@ -1268,7 +1269,8 @@ def service_delete_measure(measure_ids):
 
 def upload_ror_keringen(request):
     """Save zipfile."""
-    
+    #import pdb; pdb.set_trace()
+    template = 'import/upload_message.html'
     upload_path = settings.ROR_KERINGEN_NOTAPPLIED_PATH
     c_date = datetime.datetime.today()
     f_prefix = "{0:04}{1:02}{2:02}_{3:02}{4:02}".format(
@@ -1286,21 +1288,22 @@ def upload_ror_keringen(request):
                 for chunk in f_upload.chunks():
                     f_destination.write(chunk)
         except:
-           return HttpResponse("Error on upload", mimetype="text/html") 
+            return render_to_response(template, {'message': _('Error on upload.')}) 
     else:
-       return HttpResponse("Error on upload", mimetype="text/html") 
+       return render_to_response(template, {'message': _('Error on upload.')})
                 
     try:
+        
         RORKering(
             title=request.POST.get('title'),
             owner=User.objects.get(username=request.user),
             file_name="{0}_{1}".format(f_prefix, f_upload.name),
-            type_kering=request.POST.get('type'),
+            type_kering=request.POST.get('code'),
             description=request.POST.get('opmerking')).save() 
     except:
-        return HttpResponse("Error on save", mimetype="text/html")
+        return render_to_response(template, {'message': _('Error on save.')})
 
-    return HttpResponse("File Uploaded", mimetype="text/html")
+    return render_to_response(template, {'message': _('Uploaded.')})
 
 
 def service_load_strategies(current_strategy, strategies):
@@ -1404,9 +1407,7 @@ def get_raw_result_scenario(request, scenarioid):
             })
 
 def get_ror_keringen_types():
-    types = [{'type': unicode(RORKering.PRIMARE)},
-             {'type': unicode(RORKering.REGIONAL)},
-             {'type': unicode(RORKering.WATER)}]
+    types = [{'code': unicode(i[0]), 'type': unicode(i[1])} for i in RORKering.TYPE_KERING]
     return HttpResponse(simplejson.dumps(types),
                         mimetype='application/json')
 
@@ -1420,7 +1421,6 @@ def service(request):
 
     parameters depend on action.
     """
-    #import pdb; pdb.set_trace();
     if request.method == 'GET':
         query = request.GET
 
