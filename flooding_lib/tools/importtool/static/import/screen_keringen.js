@@ -115,6 +115,8 @@ isc.IButton.create({
 	if (btSubmit.isDisabled()) {
 	    btSubmit.enable();
 	}
+	lbUpload.setContents("");
+	lbUpload.icon = null;
     } 
 });
 

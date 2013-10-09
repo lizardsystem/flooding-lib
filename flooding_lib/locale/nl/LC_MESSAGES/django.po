@@ -1114,11 +1114,11 @@ msgstr ""
 
 #: tools/importtool/models.py:1023
 msgid "applied"
-msgstr "gekeurd"
+msgstr "verwerkt"
 
 #: tools/importtool/models.py:1024
 msgid "not applied"
-msgstr "nog niet gekeurd"
+msgstr "nog niet verwerkt"
 
 #: tools/importtool/models.py:1027
 msgid "primary kering"
@@ -1126,7 +1126,7 @@ msgstr "primaire kering"
 
 #: tools/importtool/models.py:1028
 msgid "regional kering"
-msgstr "regionaal kering"
+msgstr "regionale kering"
 
 #: tools/importtool/models.py:1029
 msgid "waters"
