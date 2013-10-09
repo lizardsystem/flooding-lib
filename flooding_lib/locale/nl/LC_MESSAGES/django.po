@@ -841,8 +841,8 @@ msgstr "De stijgingsduur"
 
 #: tools/exporttool/models.py:65
 #, fuzzy
-msgid "Sources of inundation"
-msgstr "Bronnen van overstroming"
+msgid "The sources of inundation"
+msgstr "De bronnen van overstroming"
 
 #: tools/exporttool/models.py:67
 msgid "Owner"
