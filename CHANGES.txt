@@ -4,7 +4,16 @@ Changelog of flooding-lib
 2.96 (unreleased)
 -----------------
 
-- Add download/upload functionality for ror-keringen, -wateren.
+- Add download, upload functionality for ror-keringen, -wateren.
+
+- Set Django version to 1.4.8 in buildout (only for testing), because
+  the tests fail with 1.5+.
+
+- When gridta and gridtd rasters are processed, we use the
+  geotransform from the max waterdepth grids, as that is always
+  correct while the gridta and gridtd's are sometimes wrong.
+
+- Add some helper functions and tests.
 
 
 2.95 (2013-09-24)

@@ -15,6 +15,8 @@ from flooding_lib.models import ResultType
 from flooding_lib.tools.importtool.models import InputField
 from flooding_lib.tools.exporttool.models import ExportRun
 from flooding_lib.tools.exporttool.models import Setting
+from flooding_lib.models import Result as FloodingResult
+from flooding_base.models import Setting as BaseSetting
 from flooding_lib.tools.exporttool.models import Result
 from flooding_lib.util import files
 
@@ -39,7 +41,35 @@ SizeInfo = namedtuple(
     'Size', 'x_min x_max y_min y_max size_x size_y gridsize')
 
 
+def gdal_open(filepath):
+    """Open the dataset in filepath."""
+    log.debug("gdal_open({f})".format(f=filepath))
+    filepath = linuxify_pathname(filepath).encode('utf8')
+
+    return gdal.Open(filepath)
+
+
+def maxwaterdepth_geotransform(scenario):
+    log.debug("maxwaterdepth_geotransform({s})".format(s=scenario))
+    try:
+        maxdepth_result = scenario.result_set.get(
+            resulttype__name='gridmaxwaterdepth')
+        resultloc = maxdepth_result.absolute_resultloc
+
+        for fn in all_files_in(resultloc):
+            dataset = gdal_open(fn)
+
+            if dataset is None:
+                log.debug("Gdal failed to open: {}".format(resultloc))
+                return None
+
+            return dataset.GetGeoTransform()
+    except FloodingResult.DoesNotExist:
+        return None
+
+
 def mktemp():
+    log.debug("mktemp()")
     """Make a temp file
 
     You are responsible for deleting it.
@@ -60,11 +90,13 @@ def linuxify_pathname(pathname):
     """
     #return '/mnt/p-flod-fs-00-d1/Flooding/resultaten-staging/Dijkring 31 - Zuid-Beveland - oost/13072/gridmaxwaterdepth.zip'
     #return '/mnt/p-flod-fs-00-d1/Flooding/resultaten-staging/Dijkring 31 - Zuid-Beveland - oost/13072/gridmaxwaterlevel.zip'
+    log.debug("linuxify_pathname({p})".format(p=pathname))
     return pathname.replace('\\', '/')
 
 
 def is_valid_zipfile(linux_filename):
     """Check if the passed file is a valid zipfile."""
+    log.debug("is_valid_zipfile({f})".format(f=linux_filename))
     if not os.path.isfile(linux_filename):
         return False
     try:
@@ -92,6 +124,7 @@ def all_files_in(filename):
         process(f)  # Process first file
         break       # Skip rest; files are cleaned up here
     """
+    log.debug("all_files_in({f})".format(f=filename))
     filename = linuxify_pathname(filename)
 
     if is_valid_zipfile(filename):
@@ -99,7 +132,10 @@ def all_files_in(filename):
             for filename_in_zip in files_in_zip:
                 yield filename_in_zip.encode('utf8')
     else:
-        yield filename.encode('utf8')
+        if os.path.isfile(filename) and not filename.endswith(".zip"):
+            yield filename.encode('utf8')
+        # If it's not a file, or a bad zip, just return without
+        # yielding anything.
 
 
 def generate_dst_filename(export_run):
@@ -108,6 +144,7 @@ def generate_dst_filename(export_run):
 
     Replace all ' ' with '_' in export name
     Cat export name to 20 chars."""
+    log.debug("generate_dst_filename({e})".format(e=export_run))
     max_length = 20
     export_name = ""
     if export_run.name is not None:
@@ -127,6 +164,8 @@ def generate_dst_filename(export_run):
 def generate_export_meta(export_run, dst_filename):
     """Generate a dict with meta data for
     passed export."""
+    log.debug("generate_export_meta({e}, {d})"
+              .format(e=export_run, d=dst_filename))
     export_meta = {
         "name": export_run.name,
         "owner": export_run.owner.username,
@@ -141,6 +180,8 @@ def generate_export_meta(export_run, dst_filename):
 
 def create_json_meta_file(tmp_zip_filename, export_run, dst_filename):
     """Create meta file."""
+    log.debug("create_json_meta_file({t}, {e}, {d})"
+              .format(t=tmp_zip_filename, e=export_run, d=dst_filename))
     export_meta = generate_export_meta(export_run, dst_filename)
     io = StringIO()
     json.dump(export_meta, io, indent=4)
@@ -161,15 +202,17 @@ def np_max(list_of_arrays):
     Max of a list of arrays
     Actual legitimate use of reduce()!
     """
+    log.debug("np_max({l})".format(l=list_of_arrays))
     return reduce(np.maximum, list_of_arrays)
 
 
 def write_masked_array(
-    filename, masked_array, geo_transform,
-    driver=AAIGRIDDRIVER):
+    filename, masked_array, geo_transform, driver=AAIGRIDDRIVER):
     """
     Use gdal to write a masked_array to a ascii file.
     """
+    log.debug("write_masked_array({f}, {m}, {g}, {d})"
+              .format(f=filename, m=masked_array, g=geo_transform, d=driver))
     filename = filename.encode('utf8')  # GDAL wants bytestring filenames
 
     masked_array.fill_value = NO_DATA_VALUE
@@ -197,7 +240,7 @@ def add_to_zip(output_zipfile, zip_result):
     - arcname: target filename in archive
     - delete_after: set this to remove file from file system after zipping
     """
-
+    log.debug("add_to_zip({o}, {z})".format(o=output_zipfile, z=zip_result))
     with zipfile.ZipFile(
         output_zipfile, 'a', zipfile.ZIP_DEFLATED, allowZip64=True) as myzip:
         for file_in_zip in zip_result:
@@ -208,6 +251,7 @@ def add_to_zip(output_zipfile, zip_result):
 
 def find_boundary(input_files, gridsize):
     """Return tuple with x_min, x_max, y_min, y_max."""
+    log.debug("find_boundary({i}, {g})".format(i=input_files, g=gridsize))
     x_min = None
     x_max = None
     y_max = None
@@ -215,7 +259,11 @@ def find_boundary(input_files, gridsize):
 
     for input_file in input_files:
         for filename in all_files_in(input_file['filename']):
-            dataset = gdal.Open(filename)
+            dataset = gdal_open(filename)
+            if dataset is None:
+                log.debug("Not found: {}".format(filename))
+                continue  # Skip, corrupt file
+
             dataset.RasterXSize, dataset.RasterYSize
             geo_transform = dataset.GetGeoTransform()
             # something like (183050.0, 25.0, 0.0, 521505.0, 0.0, -25.0)
@@ -246,12 +294,15 @@ def find_boundary(input_files, gridsize):
 
 def dataset2array(dataset):
     """ Return numpy masked array. """
+    log.debug("dataset2array({d})".format(d=dataset))
     data = dataset.ReadAsArray()
     mask = np.equal(data, dataset.GetRasterBand(1).GetNoDataValue())
     return np.ma.array(data, mask=mask)
 
 
 def get_dataset_line_masked_array(dataset, band, line):
+    log.debug("get_dataset_line_masked_array({d}, {b}, {l})"
+              .format(d=dataset, b=band, l=line))
     linearray = np.fromstring(
         band.ReadRaster(
             0, line, dataset.RasterXSize, 1),
@@ -266,22 +317,28 @@ def get_dataset_line_masked_array(dataset, band, line):
 
 def combine_with_dijkring_datasets(
     dijkring_datasets, dijkringnr, filename, size_info, combine_method='max'):
+    log.debug("combine_with_dijkring_datasets({dd}, {d}, {f}, {s}, {c})"
+              .format(dd=dijkring_datasets, d=dijkringnr, f=filename,
+                      s=size_info, c=combine_method))
+    for dataset_pathname in all_files_in(filename):
+        dataset = gdal_open(dataset_pathname)
 
-    dataset = gdal.Open(filename.encode('utf8'))
-
-    # Reproject dataset into TIF
-    fd, tif_filename = tempfile.mkstemp()
-    reprojected_dataset = TIFDRIVER.Create(
-        str(tif_filename), size_info.size_x, size_info.size_y, 1,
-        gdal.gdalconst.GDT_Float64, options=['COMPRESS=DEFLATE']
-        )
-    reprojected_dataset.SetGeoTransform(
-        (size_info.x_min, size_info.gridsize, 0,
-         size_info.y_max, 0, -size_info.gridsize))
-    reprojected_band = reprojected_dataset.GetRasterBand(1)
-    reprojected_band.SetNoDataValue(NO_DATA_VALUE)
-    reprojected_band.Fill(NO_DATA_VALUE)
-    gdal.ReprojectImage(dataset, reprojected_dataset)
+        # Reproject dataset into TIF
+        fd, tif_filename = tempfile.mkstemp()
+        reprojected_dataset = TIFDRIVER.Create(
+            str(tif_filename), size_info.size_x, size_info.size_y, 1,
+            gdal.gdalconst.GDT_Float64,
+            options=[b'COMPRESS=DEFLATE', b'BIGTIFF=YES']
+            )
+        reprojected_dataset.SetGeoTransform(
+            (size_info.x_min, size_info.gridsize, 0,
+             size_info.y_max, 0, -size_info.gridsize))
+        reprojected_band = reprojected_dataset.GetRasterBand(1)
+        reprojected_band.SetNoDataValue(NO_DATA_VALUE)
+        reprojected_band.Fill(NO_DATA_VALUE)
+        gdal.ReprojectImage(dataset, reprojected_dataset)
+        dataset = None
+        break
 
     if dijkringnr in dijkring_datasets:
         # Combine with existing dataset
@@ -324,7 +381,7 @@ def combine_with_dijkring_datasets(
             prefix=str(dijkringnr), suffix='.tif')[1]
         TIFDRIVER.CreateCopy(
             str(tmp_file_name), reprojected_dataset,
-            options=[b'COMPRESS=DEFLATE'])
+            options=[b'COMPRESS=DEFLATE', b'BIGTIFF=YES'])
         dijkring_datasets[dijkringnr] = tmp_file_name
         reprojected_dataset = None
 
@@ -345,6 +402,10 @@ def dijkring_arrays_to_zip(
 
     gridtype is used to generate useful arcnames
     """
+    log.debug("dijkring_arrays_to_zip({i}, {z}, {g}, {gs}, {c})"
+              .format(i=input_files, z=zip_filename, g=gridtype,
+                      gs=gridsize, c=combine_method))
+
     dijkring_datasets = {}  # key is dijkringnr, values are tif
                             # filenames of combined datasets
 
@@ -365,8 +426,10 @@ def dijkring_arrays_to_zip(
 
 
 def save_dijkring_datasets_to_zip(zip_file, dijkring_datasets, gridtype):
+    log.debug("save_dijkring_datasets_to_zip({z}, {dd}, {g}"
+              .format(z=zip_file, dd=dijkring_datasets, g=gridtype))
     for dijkringnr, dataset_filename in dijkring_datasets.items():
-        dataset = gdal.Open(str(dataset_filename))
+        dataset = gdal_open(dataset_filename)
 
         fd, ascii_filename = tempfile.mkstemp()
 
@@ -389,12 +452,11 @@ def save_dijkring_datasets_to_zip(zip_file, dijkring_datasets, gridtype):
 
 
 def calc_max_waterdepths(tmp_zip_filename, export_run):
-    log.debug('export_max_waterdepth')
+    log.debug('calc_max_waterdepths({t}, {e})'
+              .format(t=tmp_zip_filename, e=export_run))
     gridtype = 'gridmaxwaterdepth'
-    # Calc max waterdepth
-    export_result_type = ResultType.objects.get(name=gridtype)
     # Find out input files for this type
-    input_files = export_run.input_files(export_result_type)
+    input_files = export_run.input_files(gridtype)
     if not input_files:
         log.warn("No file to calc max waterdepths.")
         return {}
@@ -405,9 +467,10 @@ def calc_max_waterdepths(tmp_zip_filename, export_run):
 
 
 def calc_wavefronts(tmp_zip_filename, export_run):
+    log.debug("calc_wavefronts({t}, {e})"
+              .format(t=tmp_zip_filename, e=export_run))
     gridtype = 'gridta'
-    export_result_type = ResultType.objects.get(name=gridtype)
-    input_files = export_run.input_files(export_result_type)
+    input_files = export_run.input_files(gridtype)
 
     if not input_files:
         return {}
@@ -418,6 +481,11 @@ def calc_wavefronts(tmp_zip_filename, export_run):
     # and do that in a temporary file, that is later removed.
     temporary_files = []
     for input_file in input_files:
+        # HACK. Some gridta files have a wrong extent. The extent of
+        # the max waterdepth grid is always correct, and they should
+        # be equal. So we take the extent from there.
+        geo_transform = maxwaterdepth_geotransform(input_file['scenario'])
+
         startmoment_days = input_file['scenario'].value_for_inputfield(
             startmoment_breachgrowth_inputfield)
 
@@ -426,31 +494,43 @@ def calc_wavefronts(tmp_zip_filename, export_run):
 
         startmoment_hours = int(startmoment_days * 24 + 0.5)
 
-        for filename in all_files_in(input_file['filename']):
-            # Create a new dataset that is a copy of the existing one,
-            # and read it as array.
-            dataset = gdal.Open(filename)
-            tmpdir = tempfile.mkdtemp()
-            tmpfile = os.path.join(tmpdir, b'temptif.tif')
-            new_dataset = TIFDRIVER.CreateCopy(tmpfile, dataset)
-            dataset = None
-            array = new_dataset.ReadAsArray()
+        if startmoment_hours > 0:
+            for filename in all_files_in(input_file['filename']):
+                # Create a new dataset that is a copy of the existing one,
+                # and read it as array.
+                log.debug("Open wavefront dataset {f}".format(f=filename))
+                dataset = gdal_open(filename)
 
-            # For all places where the value is greater than startmoment_hours,
-            # subtract startmoment_hours
-            where = (startmoment_hours <= array)
-            array -= where * startmoment_hours  # Use fact that True == 1
+                if dataset is None:
+                    # Corrupt?
+                    continue
+                tmpdir = tempfile.mkdtemp()
+                tmpfile = os.path.join(tmpdir, b'temptif.tif')
+                new_dataset = TIFDRIVER.CreateCopy(tmpfile, dataset)
 
-            # Save the array and start using the new dataset instead
-            # of the old one.
-            new_dataset.GetRasterBand(1).WriteArray(array)
-            new_dataset = None
-            input_file['filename'] = tmpfile
-            temporary_files.append(tmpdir)
+                if geo_transform is not None:
+                    new_dataset.SetGeoTransform(geo_transform)
 
-            # We only loop over the first file -- there's only supposed to
-            # be one anyway. See the doc string of all_files_in().
-            break
+                dataset = None
+                array = new_dataset.ReadAsArray()
+
+                # For all places where the value is greater than
+                # startmoment_hours, subtract startmoment_hours
+                log.debug("Correcting for startmoment_hours {i}".
+                          format(i=startmoment_hours))
+                where = (startmoment_hours <= array)
+                array -= where * startmoment_hours  # Use fact that True == 1
+
+                # Save the array and start using the new dataset instead
+                # of the old one.
+                new_dataset.GetRasterBand(1).WriteArray(array)
+                new_dataset = None
+                input_file['filename'] = tmpfile
+                temporary_files.append(tmpdir)
+
+                # We only loop over the first file -- there's only supposed to
+                # be one anyway. See the doc string of all_files_in().
+                break
 
     dijkring_datasets = dijkring_arrays_to_zip(
         input_files, tmp_zip_filename, gridtype,
@@ -484,7 +564,8 @@ def calc_rise_period(tmp_zip_filename, export_run):
     We create completely new TIF files for each scenario, that will be
     discarded after combining them into files for each dijkring.
     """
-
+    log.debug("calc_rise_period({t}, {e})"
+              .format(t=tmp_zip_filename, e=export_run))
     gridtype = 'grid_rise_period'  # Result grid name
 
     scenario_duration_inputfield = InputField.objects.get(
@@ -511,10 +592,10 @@ def calc_rise_period(tmp_zip_filename, export_run):
         # Open both datasets, check if they are the same
         # Strange loop structure is because of how all_files_in works
         for f in all_files_in(gridta['filename']):
-            gridta_ds = gdal.Open(f)
+            gridta_ds = gdal_open(f)
             geo_transform = gridta_ds.GetGeoTransform()
             for f in all_files_in(gridtd['filename']):
-                gridtd_ds = gdal.Open(f)
+                gridtd_ds = gdal_open(f)
 
                 # Check geo_transforms
                 if geo_transform != gridtd_ds.GetGeoTransform():
@@ -559,8 +640,16 @@ def calc_rise_period(tmp_zip_filename, export_run):
         ysize, xsize = rise_periods_masked_array.shape
         dataset = TIFDRIVER.Create(
             tmpfile, xsize, ysize, 1, gdal.gdalconst.GDT_Float64,
-            options=[b'COMPRESS=DEFLATE'])
-        dataset.SetGeoTransform(geo_transform)
+            options=[b'COMPRESS=DEFLATE', b'BIGTIFF=YES'])
+
+        # We use the geotransform of the max water depth ascii, if
+        # available!  Some geotransforms of the gridta/gridta rasters
+        # have a wrong Y coordinate, but the max waterdepth, if
+        # available, is always correct.
+        geo_transform_maxd = maxwaterdepth_geotransform(
+            gridta['scenario']) or geo_transform
+        dataset.SetGeoTransform(geo_transform_maxd)
+
         band = dataset.GetRasterBand(1)
         band.SetNoDataValue(NO_DATA_VALUE)
         band.WriteArray(rise_periods_masked_array.filled(NO_DATA_VALUE))
@@ -583,7 +672,8 @@ def calc_rise_period(tmp_zip_filename, export_run):
 
 def calc_max_flowvelocity(tmp_zip_filename, export_run):
     # Calc max flow velocity
-    log.debug('export_max_flowvelocity')
+    log.debug('calc_max_flowvelocity({t}, {e})'
+              .format(t=tmp_zip_filename, e=export_run))
     gridtype = 'gridmaxflowvelocity'
     export_result_type = ResultType.objects.get(name=gridtype)
     # Find out input files for this type
@@ -599,10 +689,11 @@ def calc_max_flowvelocity(tmp_zip_filename, export_run):
 
 def calc_possible_flooded_area(tmp_zip_filename, max_waterdepths_datasets):
     # Calculate the possible flooded area
-    log.debug('export_possibly_flooded')
+    log.debug('calc_possible_flooded_area({t}, {m})'
+              .format(t=tmp_zip_filename, m=max_waterdepths_datasets))
     for dijkringnr, dataset_filename in max_waterdepths_datasets.items():
 
-        dataset = gdal.Open(str(dataset_filename))
+        dataset = gdal_open(dataset_filename)
 
         geo_transform = dataset.GetGeoTransform()
         maxarray = dataset2array(dataset)
@@ -643,6 +734,7 @@ def calculate_export_maps(exportrun_id):
     path yourself by prepending the name with Setting.EXPORT_FOLDER.
 
     """
+    log.debug("calculate_export_maps({e})".format(e=exportrun_id))
     export_run = ExportRun.objects.get(id=exportrun_id)
     export_folder = Setting.objects.get(key='EXPORT_FOLDER').value
     max_waterdepths = {}
