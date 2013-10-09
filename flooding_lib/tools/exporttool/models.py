@@ -62,7 +62,7 @@ class ExportRun(models.Model):
     export_period_of_increasing_waterlevel = models.BooleanField(
         default=True, verbose_name=_('The period of increasing waterlevel'))
     export_inundation_sources = models.BooleanField(
-        default=True, verbose_name=_('Sources of inundation'))
+        default=True, verbose_name=_('The sources of inundation'))
 
     owner = models.ForeignKey(User, verbose_name=_('Owner'))
     creation_date = models.DateTimeField(

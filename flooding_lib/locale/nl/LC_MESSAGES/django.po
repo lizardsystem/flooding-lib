@@ -848,8 +848,10 @@ msgstr "De aankomsttijden"
 msgid "The period of increasing waterlevel"
 msgstr "De stijgingsduur"
 
-msgid "Sources of inundation"
-msgstr "Bronnen van overstroming"
+#: tools/exporttool/models.py:65
+#, fuzzy
+msgid "The sources of inundation"
+msgstr "De bronnen van overstroming"
 
 #: tools/exporttool/models.py:67
 msgid "Owner"
