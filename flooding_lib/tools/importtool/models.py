@@ -1069,5 +1069,8 @@ class RORKering(models.Model):
             'description': self.description
         }
 
+    def __unicode__(self):
+        return self.get_type()
+
     class Meta:
         ordering = ['-uploaded_at']

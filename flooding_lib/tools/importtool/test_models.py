@@ -49,6 +49,18 @@ class InputFieldF(factory.Factory):
     required = False
 
 
+class RORKeringF(factory.Factory):
+    FACTORY_FOR = models.RORKering
+    
+    title = 'dummy'
+    uploaded_at = datetime.datetime.today()
+    owner = UserF.create(username='alex')
+    file_name = 'wateren.zip'
+    status = models.RORKering.NOT_APPLIEND
+    type_kering= models.RORKering.PRIMARE
+    description = ''
+
+
 class TestStringValue(TestCase):
     """StringValues are trivial and only need a single test."""
     def test_trivial(self):
@@ -517,3 +529,20 @@ class TestDisplayValueUnicode(TestCase):
         self.assertEquals(
             inputfield.display_unicode("grr"),
             "grr")
+
+class TestRORKering(TestCase):
+
+    def setUp(self):
+        self.kering = RORKeringF.build(
+            type_kering=models.RORKering.PRIMARE,
+            status=models.RORKering.APPLIED)
+
+    def test_unicode(self):
+        uni = self.kering.__unicode__()
+        self.assertTrue(isinstance(uni, unicode))
+
+    def test_kering_as_dict(self):
+        kering_dict = self.kering.kering_as_dict
+        self.assertEquals(kering_dict['title'], 'dummy')
+        self.assertEquals(kering_dict['type_kering'], models.RORKering.TYPE_KERING[0][1])
+        self.assertEquals(kering_dict['status'], models.RORKering.STATE[0][1])
