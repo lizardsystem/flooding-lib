@@ -194,7 +194,11 @@ def new_export(request):
                 gridsize=form.cleaned_data['gridsize'],
                 export_max_waterdepth=form.cleaned_data['export_max_waterdepth'],
                 export_max_flowvelocity=form.cleaned_data['export_max_flowvelocity'],
-                export_possibly_flooded=form.cleaned_data['export_possibly_flooded']
+                export_possibly_flooded=form.cleaned_data['export_possibly_flooded'],
+                export_arrival_times=form.cleaned_data['export_arrival_times'],
+                export_period_of_increasing_waterlevel=
+                form.cleaned_data['export_period_of_increasing_waterlevel'],
+                export_inundation_sources=form.cleaned_data['export_inundation_sources']
             )
             new_export_run.save()
             new_export_run.scenarios = Scenario.objects.filter(

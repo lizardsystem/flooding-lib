@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-09-17 05:23-0500\n"
+"POT-Creation-Date: 2013-10-08 09:43-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -465,65 +465,65 @@ msgstr "Resultaattype"
 msgid "Result types"
 msgstr "Resultaattypes"
 
-#: models.py:1747 tools/exporttool/models.py:214
+#: models.py:1747 tools/exporttool/models.py:219
 msgid "Result"
 msgstr "Resultaat"
 
 #: models.py:1748 templates/flooding/index.html:19
-#: tools/exporttool/models.py:215 views/views.py:1313
+#: tools/exporttool/models.py:220 views/views.py:1313
 msgid "Results"
 msgstr "Resultaten"
 
-#: models.py:1773
+#: models.py:1785
 msgid "Cutoff location sobek model setting"
 msgstr ""
 
-#: models.py:1774
+#: models.py:1786
 msgid "Cutoff location sobek model settings"
 msgstr ""
 
-#: models.py:1802 templates/flooding/task_detail.html:16
+#: models.py:1814 templates/flooding/task_detail.html:16
 msgid "Task type"
 msgstr "Taaktype"
 
-#: models.py:1803
+#: models.py:1815
 msgid "Task types"
 msgstr "Taaktypen"
 
-#: models.py:1831
+#: models.py:1843
 msgid "Task"
 msgstr "Taak"
 
-#: models.py:1832 templates/flooding/index.html:23 views/views.py:666
+#: models.py:1844 templates/flooding/index.html:23 views/views.py:666
 #: views/views.py:678
 msgid "Tasks"
 msgstr "Taken"
 
-#: models.py:1882
+#: models.py:1894
 msgid "Task executor"
 msgstr "Taakuitvoerder"
 
-#: models.py:1883
+#: models.py:1895
 msgid "Task executors"
 msgstr "Taakuitvoerders"
 
-#: models.py:1941
+#: models.py:1953
 msgid "unkown"
 msgstr "onbekend"
 
-#: models.py:1942
+#: models.py:1954
 msgid "existing level"
 msgstr "bestaand niveau"
 
-#: models.py:1943
+#: models.py:1955
 msgid "new level"
 msgstr "nieuw niveau"
 
-#: models.py:1968
+#: models.py:1980
 msgid "existing"
 msgstr "bestaand"
 
-#: models.py:1969
+#: models.py:1981
 msgid "new"
 msgstr "nieuw"
 
@@ -635,7 +635,7 @@ msgstr "De eigenschappen zijn veranderd. U kunt dit window nu sluiten."
 #: templates/flooding/scenario_form.html:15
 #: templates/flooding/scenario_name_remarks_form.html:13
 #: templates/flooding/showattachments.html:47
-#: tools/exporttool/templates/export/exports_new.html:47
+#: tools/exporttool/templates/export/exports_new.html:50
 #: tools/importtool/templates/import/groupimport_new.html:24
 #: tools/importtool/templates/import/import_file_upload.html:32
 msgid "Submit"
@@ -840,48 +840,53 @@ msgid "The period of increasing waterlevel"
 msgstr "De stijgingsduur"
 
 #: tools/exporttool/models.py:65
+#, fuzzy
+msgid "The sources of inundation"
+msgstr "De bronnen van overstroming"
+
+#: tools/exporttool/models.py:67
 msgid "Owner"
 msgstr "Eigenaar"
 
-#: tools/exporttool/models.py:67
+#: tools/exporttool/models.py:69
 #: tools/exporttool/templates/export/exports_overview.html:21
 #: tools/importtool/templates/import/imports_overview.html:23
 msgid "Creation date"
 msgstr "Aangemaakt op"
 
-#: tools/exporttool/models.py:69
+#: tools/exporttool/models.py:71
 msgid "Run date"
 msgstr "Uitgevoerd op"
 
-#: tools/exporttool/models.py:71
+#: tools/exporttool/models.py:73
 msgid "Approved date"
 msgstr "Aangenomen op"
 
-#: tools/exporttool/models.py:73
+#: tools/exporttool/models.py:76
 msgid "Gridsize"
 msgstr "Celgrootte"
 
-#: tools/exporttool/models.py:222
+#: tools/exporttool/models.py:227
 msgid "Diked area"
 msgstr ""
 
-#: tools/exporttool/models.py:223
+#: tools/exporttool/models.py:228
 msgid "Province"
 msgstr ""
 
-#: tools/exporttool/models.py:224
+#: tools/exporttool/models.py:229
 msgid "Country"
 msgstr ""
 
 #: tools/exporttool/views.py:43 tools/exporttool/views.py:80
-#: tools/exporttool/views.py:113 tools/exporttool/views.py:223
-#: tools/exporttool/views.py:255 tools/exporttool/views.py:279
+#: tools/exporttool/views.py:113 tools/exporttool/views.py:227
+#: tools/exporttool/views.py:259 tools/exporttool/views.py:283
 msgid "No permission to download export"
 msgstr ""
 
 #: tools/exporttool/views.py:65 tools/exporttool/views.py:93
 #: tools/exporttool/views.py:119 tools/exporttool/views.py:143
-#: tools/exporttool/views.py:293
+#: tools/exporttool/views.py:297
 msgid "Export tool"
 msgstr ""
 
@@ -902,7 +907,7 @@ msgstr ""
 msgid "New export"
 msgstr "Nieuw export"
 
-#: tools/exporttool/views.py:295
+#: tools/exporttool/views.py:299
 #, fuzzy
 msgid "Edit export"
 msgstr "Bewerk export"
@@ -922,8 +927,8 @@ msgstr ""
 
 #: tools/exporttool/templates/export/exports_overview.html:24
 #: tools/exporttool/templates/export/exports_overview.html:40
-#: tools/exporttool/templates/export/exports_run_detail.html:64
-#: tools/exporttool/templates/export/exports_run_detail.html:67
+#: tools/exporttool/templates/export/exports_run_detail.html:73
+#: tools/exporttool/templates/export/exports_run_detail.html:76
 msgid "Result file"
 msgstr "Resultaat file"
 
@@ -940,11 +945,11 @@ msgstr ""
 msgid "Selected maps"
 msgstr "Geselecteerde kaarten"
 
-#: tools/exporttool/templates/export/exports_run_detail.html:54
+#: tools/exporttool/templates/export/exports_run_detail.html:63
 msgid "Used scenarios and projects (x out of y)"
 msgstr "Geselecteerde scenario's en projecten (x uit y)"
 
-#: tools/exporttool/templates/export/exports_run_detail.html:56
+#: tools/exporttool/templates/export/exports_run_detail.html:65
 msgid "out of"
 msgstr "uit"
 

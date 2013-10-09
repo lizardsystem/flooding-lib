@@ -1,14 +1,14 @@
 {% extends "lizard/base.html" %}
 {% load i18n %}
 {% load verbosenametag %}
-{% block title %}Lizard export detail{% endblock %}		
-{% block stylesheets %}		
+{% block title %}Lizard export detail{% endblock %}
+{% block stylesheets %}
 		<link rel="shortcut icon" href="{{ url_favicon }}">
 		<link href="{% url root_url %}static_media/style/style.css" media="screen" type="text/css" rel="stylesheet">
 		<link href="{% url root_url %}static_media/style/forms.css" media="screen" type="text/css" rel="stylesheet">
 		<link href="{% url root_url %}static_media/Isomorphic_NenS_skin/skin_styles.css" media="screen" type="text/css" rel="stylesheet">
 {% endblock stylesheets %}
-	
+
 
 {% block content %}
 <div id="scrollablecontent">
@@ -30,7 +30,7 @@
 				<tr class="cellDark">
 					<td><b>{% get_verbose_name export_run "creation_date" %}</b></td>
 					<td>{{ export_run.creation_date|date:"d-m-Y h:m"}}</td>
-				</tr>			
+				</tr>
 				<tr class="cell">
 					<td><b>{% get_verbose_name export_run "description" %}</b></td>
 					<td>{{ export_run.description }}</td>
@@ -48,12 +48,21 @@
 					    {% if export_run.export_possibly_flooded %}
 					       {% get_verbose_name export_run "export_possibly_flooded" %}
 					    {% endif %}
+					    {% if export_run.export_arrival_times %}
+					       {% get_verbose_name export_run "export_arrival_times" %}
+					    {% endif %}
+					    {% if export_run.export_period_of_increasing_waterlevel %}
+					       {% get_verbose_name export_run "export_period_of_increasing_waterlevel" %}
+					    {% endif %}
+					    {% if export_run.export_inundation_sources %}
+					       {% get_verbose_name export_run "export_inundation_sources" %}
+					    {% endif %}
 					</td>
 				</tr>
 				<tr class="cell">
 					<td><b>{% trans "Used scenarios and projects (x out of y)" %}</b></td>
 					<td>
-						<a href="{% url flooding_tools_export_detail_scenarios export_run_id=export_run.id %}">{{ num_scenarios }} {% trans "out of" %} {{num_projects}}</a> 
+						<a href="{% url flooding_tools_export_detail_scenarios export_run_id=export_run.id %}">{{ num_scenarios }} {% trans "out of" %} {{num_projects}}</a>
 					</td>
 				</tr>
 				<tr class="cellDark">
@@ -61,7 +70,7 @@
 					<td>{{ export_run.gridsize }}</td>
 				</tr>
 				<tr class="cell">
-					<td><b>{% trans "Result file" %}</b></td>					
+					<td><b>{% trans "Result file" %}</b></td>
 					<td>
 						{% if path %}
 							<a href="{% url flooding_tools_export_index %}?action=get_attachment&path={{path}}">{% trans "Result file" %}</a>
@@ -69,7 +78,7 @@
 							-
 						{% endif %}
 					</td>
-				</tr>	
+				</tr>
 				</tbody>
 			</table>
 		</table>

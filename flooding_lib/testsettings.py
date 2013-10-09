@@ -4,8 +4,12 @@ TMP_DIR = '/tmp/'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.contrib.gis.db.backends.spatialite',
-        'NAME': 'test.db'
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'NAME': 'flooding_lib_test',
+        'USER': 'buildout',
+        'PASSWORD': 'buildout',
+        'HOST': '',
+        'PORT': ''
         }
 }
 
