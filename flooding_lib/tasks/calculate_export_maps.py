@@ -50,14 +50,19 @@ SizeInfo = namedtuple(
     'Size', 'x_min x_max y_min y_max size_x size_y gridsize')
 
 
+def fix_path(path):
+    """Linuxify pathname, force bytestring."""
+    if isinstance(path, unicode):
+        path = path.encode('utf8')
+    return path.replace('\\', '/')
+
+
 def gdal_open(filepath):
     """Open the dataset in filepath. Linuxify path and turn it into a
     bytestring."""
     log.debug("gdal_open({f})".format(f=filepath))
 
-    filepath = linuxify_pathname(filepath).encode('utf8')
-
-    return gdal.Open(filepath)
+    return gdal.Open(fix_path(filepath))
 
 
 def maxwaterdepth_geotransform(scenario):
@@ -101,20 +106,6 @@ def remove_mkstemp(fd, path):
         os.remove(path)
 
 
-def linuxify_pathname(pathname):
-    """
-    Based on Remco's experience on this problem, we'll just replace
-    all '\\' with '/' and symlink the correct paths to the mounts.
-
-    input: \\\\p-flod-fs-00-d1.external-nens.local\\flod-share\\Flooding\\resultaten-staging/Dijkring 44 - Kromme Rijn\\3649\\gridmaxwaterdepth.zip
-    output: /mnt/p-flod-fs-00-d1/Flooding/resultaten-staging/Dijkring 44 - Kromme Rijn/3649/gridmaxwaterdepth.zip
-    """
-    #return '/mnt/p-flod-fs-00-d1/Flooding/resultaten-staging/Dijkring 31 - Zuid-Beveland - oost/13072/gridmaxwaterdepth.zip'
-    #return '/mnt/p-flod-fs-00-d1/Flooding/resultaten-staging/Dijkring 31 - Zuid-Beveland - oost/13072/gridmaxwaterlevel.zip'
-    log.debug("linuxify_pathname({p})".format(p=pathname))
-    return pathname.replace('\\', '/')
-
-
 def is_valid_zipfile(linux_filename):
     """Check if the passed file is a valid zipfile."""
     log.debug("is_valid_zipfile({f})".format(f=linux_filename))
@@ -134,9 +125,8 @@ def is_valid_zipfile(linux_filename):
 
 def all_files_in(filename):
     """Generator that yields filename if it is not a zip, and all
-    files inside otherwise. First linuxifies filename. Forces UTF8
-    bytestring filenames. Yields nothing in case filename is not a
-    file, or a bad zip file.
+    files inside otherwise. First linuxifies filename. Yields nothing
+    in case filename is not a file, or a bad zip file.
 
     Unzipped files are cleaned up (and thus unusable) after looping
     through this! Therefore if you only need to read the first file,
@@ -147,15 +137,15 @@ def all_files_in(filename):
         break       # Skip rest; files are cleaned up here
     """
     log.debug("all_files_in({f})".format(f=filename))
-    filename = linuxify_pathname(filename)
+    filename = fix_path(filename)
 
     if is_valid_zipfile(filename):
         with files.temporarily_unzipped(filename) as files_in_zip:
             for filename_in_zip in files_in_zip:
-                yield filename_in_zip.encode('utf8')
+                yield filename_in_zip
     else:
         if os.path.isfile(filename) and not filename.endswith(".zip"):
-            yield filename.encode('utf8')
+            yield filename
         # If it's not a file, or a bad zip, just return without
         # yielding anything.
 
@@ -236,7 +226,7 @@ def write_masked_array(
     """
     log.debug("write_masked_array({f}, {m}, {g}, {d})"
               .format(f=filename, m=masked_array, g=geo_transform, d=driver))
-    filename = filename.encode('utf8')  # GDAL wants bytestring filenames
+    filename = fix_path(filename)  # GDAL wants bytestring filenames
 
     if hasattr(masked_array, 'fill_value'):
         masked_array.fill_value = NO_DATA_VALUE
@@ -373,7 +363,7 @@ def combine_with_dijkring_datasets(
         # Reproject dataset into TIF
         fd, tif_filename = tempfile.mkstemp()
         reprojected_dataset = TIFDRIVER.Create(
-            str(tif_filename), size_info.size_x, size_info.size_y, 1,
+            tif_filename, size_info.size_x, size_info.size_y, 1,
             gdal.gdalconst.GDT_Float64,
             options=[b'COMPRESS=DEFLATE', b'BIGTIFF=YES']
             )
@@ -433,7 +423,7 @@ def combine_with_dijkring_datasets(
         tmp_file_name = tempfile.mkstemp(
             prefix=str(dijkringnr), suffix='.tif')[1]
         TIFDRIVER.CreateCopy(
-            str(tmp_file_name), reprojected_dataset,
+            tmp_file_name, reprojected_dataset,
             options=[b'COMPRESS=DEFLATE', b'BIGTIFF=YES'])
         dijkring_datasets[dijkringnr] = tmp_file_name
         reprojected_dataset = None
@@ -449,7 +439,6 @@ def combine_with_dijkring_datasets_byte(
     so far is "bitwise or", used for the inundation sources map. Datasets
     are filled with the nodata value 0 instead of -9999."""
 
-    log.debug("Opening {}".format(filename.encode('utf8')))
     dataset = gdal_open(filename)
     if dataset is None:
         return
@@ -458,7 +447,7 @@ def combine_with_dijkring_datasets_byte(
     fd, tif_filename = tempfile.mkstemp()
 
     reprojected_dataset = TIFDRIVER.Create(
-        str(tif_filename), size_info.size_x, size_info.size_y, 1,
+        tif_filename, size_info.size_x, size_info.size_y, 1,
         gdal.gdalconst.GDT_Byte, options=['COMPRESS=DEFLATE'])
 
     reprojected_dataset.SetGeoTransform(
@@ -502,7 +491,7 @@ def combine_with_dijkring_datasets_byte(
         tmp_file_name = tempfile.mkstemp(
             prefix=str(dijkringnr), suffix='.tif')[1]
         TIFDRIVER.CreateCopy(
-            str(tmp_file_name), reprojected_dataset,
+            tmp_file_name, reprojected_dataset,
             options=[b'COMPRESS=DEFLATE'])
         dijkring_datasets[dijkringnr] = tmp_file_name
         reprojected_dataset = None
