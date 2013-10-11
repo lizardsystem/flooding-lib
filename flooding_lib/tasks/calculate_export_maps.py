@@ -763,12 +763,17 @@ def calc_rise_period(tmp_zip_filename, export_run):
             # Only a gridta, no gridtd
             continue
 
+        gridta_geo_transform = None
+        gridtd_geo_transform = None
+
         # Open both datasets, check if they are the same
         # Strange loop structure is because of how all_files_in works
         for f in all_files_in(gridta['filename']):
             gridta_ds = gdal_open(f)
+            gridta_geo_transform = gridta_ds.GetGeoTransform()
             for f in all_files_in(gridtd['filename']):
                 gridtd_ds = gdal_open(f)
+                gridtd_geo_transform = gridtd_ds.GetGeoTransform()
 
                 # Read both into a masked array
                 array_ta = dataset2array(gridta_ds)
@@ -815,7 +820,8 @@ def calc_rise_period(tmp_zip_filename, export_run):
         # available, is always correct.
         geo_transform_maxd = maxwaterdepth_geotransform(
             gridta['scenario'])
-        dataset.SetGeoTransform(geo_transform_maxd)
+        dataset.SetGeoTransform(
+            geo_transform_maxd or gridta_geo_transform or gridtd_geo_transform)
 
         band = dataset.GetRasterBand(1)
         band.SetNoDataValue(NO_DATA_VALUE)
