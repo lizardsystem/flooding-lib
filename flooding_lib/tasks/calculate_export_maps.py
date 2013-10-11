@@ -62,7 +62,10 @@ def gdal_open(filepath):
     bytestring."""
     log.debug("gdal_open({f})".format(f=filepath))
 
-    return gdal.Open(fix_path(filepath))
+    filepath = fix_path(filepath)
+    if filepath.endswith('.zip'):
+        filepath = '/vsizip/' + filepath
+    return gdal.Open(filepath)
 
 
 def maxwaterdepth_geotransform(scenario):
