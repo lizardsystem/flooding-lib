@@ -272,7 +272,7 @@ def find_boundary(input_files, gridsize):
     """Return a SizeInfo object that contains the size information of
     the bounding box of the input_files. Yields an exception if there
     are 0 input files."""
-    log.debug("find_boundary({i}, {g})".format(i=input_files, g=gridsize))
+    log.debug(b"find_boundary({i}, {g})".format(i=input_files, g=gridsize))
     x_min = None
     x_max = None
     y_max = None
@@ -514,9 +514,12 @@ def dijkring_arrays_to_zip(
 
     gridtype is used to generate useful arcnames
     """
-    log.debug("dijkring_arrays_to_zip({i}, {z}, {g}, {gs}, {c})"
-              .format(i=input_files, z=zip_filename, g=gridtype,
-                      gs=gridsize, c=combine_method))
+    try:
+        log.debug(b"dijkring_arrays_to_zip({i}, {z}, {g}, {gs}, {c})"
+                  .format(i=input_files, z=zip_filename, g=gridtype,
+                          gs=gridsize, c=combine_method))
+    except Exception as ex:
+        import pdb; pdb.set_trace()
 
     dijkring_datasets = {}  # key is dijkringnr, values are tif
                             # filenames of combined datasets
@@ -538,7 +541,7 @@ def dijkring_arrays_to_zip(
 
 
 def save_dijkring_datasets_to_zip(zip_file, dijkring_datasets, gridtype):
-    log.debug("save_dijkring_datasets_to_zip({z}, {dd}, {g}"
+    log.debug(b"save_dijkring_datasets_to_zip({z}, {dd}, {g}"
               .format(z=zip_file, dd=dijkring_datasets, g=gridtype))
 
     for dijkringnr, dataset_filename in dijkring_datasets.items():

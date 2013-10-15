@@ -1074,6 +1074,10 @@ class Scenario(models.Model):
         db_table = 'flooding_scenario'
 
     def __unicode__(self):
+        """
+        LET OP: I's claims to be a unicode but it's not
+        f.e. in case of Rees-Löwenberg 
+        """
         return self.name
 
     def set_project(self, project):
