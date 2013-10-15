@@ -229,7 +229,7 @@ def service_get_breach_tree(
     None or Scenario.STATUS_*
 
     """
-
+    import pdb; pdb.set_trace()
     scenarios = permission_manager.get_scenarios(
         None, permission, filter_scenario)
 

@@ -84,3 +84,49 @@ class EditScenarioPropertiesForm(forms.Form):
 class ExcelImportForm(forms.Form):
     excel_file = forms.FileField(
         label=_('Upload the modified Excel file to update the scenarios'))
+
+
+class ScenarioArchiveForm(forms.Form):
+    
+    scenarioid = forms.CharField(widget=forms.HiddenInput())
+    action = forms.CharField(widget=forms.HiddenInput())
+    archived = forms.BooleanField(
+        label=_('Archived'),
+        required=False)
+    archived_at = forms.DateField(
+        label=_('Archived at'),
+        required=False,
+        widget=forms.widgets.TextInput(attrs={'readonly': 'True'}))
+    archived_by = forms.CharField(
+        label=_('Archived by'),
+        required=False,
+        widget=forms.widgets.TextInput(attrs={'readonly': 'True'}))
+
+    def __init__(self, *args, **kwargs):
+        self.action_value = kwargs['action']
+        self.instance = kwargs['instance']
+        kwargs.pop('action')
+        kwargs.pop('instance')
+        super(ScenarioArchiveForm, self).__init__(*args, **kwargs)
+        self.set_initials()
+
+    def set_initials(self):
+        self.fields['scenarioid'].initial = self.instance.id
+        self.fields['action'].initial = self.action_value
+        self.fields['archived'].initial = self.instance.archived
+        self.fields['archived_at'].initial = self.instance.archived_at
+        self.fields['archived_by'].initial = self.instance.archived_by
+
+    def clean_scenarioid(self):
+        return self.cleaned_data.get('scenarioid')
+
+    def clean_archived(self):
+        return self.cleaned_data.get('archived')
+    
+    def clean_archived_at(self):
+        return self.cleaned_data.get('archived_at')
+
+    def clean_archived_by(self):
+        return self.cleaned_data.get('archived_by')
+        
+    

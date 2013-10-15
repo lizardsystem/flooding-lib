@@ -6,6 +6,7 @@ import math
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.files.base import ContentFile
+from django.contrib.auth.models import User
 
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
@@ -15,6 +16,7 @@ from django.utils.safestring import SafeString
 from django.utils.translation import ugettext_lazy as _, ungettext, ugettext
 
 from flooding_lib.forms import AttachmentForm
+from flooding_lib.forms import ScenarioArchiveForm
 from flooding_lib.forms import EditScenarioPropertiesForm
 from flooding_lib.forms import ScenarioNameRemarksForm
 from flooding_lib.models import Attachment
@@ -49,6 +51,7 @@ def infowindow(request):
     # action and scenarioid can be in get or post (to keep the
     # javascript RPC-calls simple) therefore we use REQUEST instead of
     # GET or POST
+    #import pdb; pdb.set_trace()
     action_name = request.REQUEST.get('action')
     scenario_id = request.REQUEST.get('scenarioid')
 
@@ -84,6 +87,41 @@ def infowindow(request):
 
     elif action_name == 'showattachments':
         return showattachments(request, scenario_id)
+
+    elif action_name == 'archive':
+        return archive_scenario(request, scenario_id)
+
+
+def archive_scenario(request, scenario_id):
+    """Archive scenario using the model form"""
+    succeeded = False
+    scenario = get_object_or_404(Scenario, pk=scenario_id)
+    user = User.objects.get(username=request.user)
+    template = ""
+
+    if request.method == 'POST':
+        form = ScenarioArchiveForm(request.POST,
+                                   instance=scenario,
+                                   action='archive')
+        if form.is_valid():
+            if form.cleaned_data['archived']:
+                scenario.archived = form.cleaned_data['archived']
+                scenario.archived_at = datetime.datetime.today()
+                scenario.archived_by = user
+            else:
+                scenario.archived = False
+                scenario.archived_by = None
+                scenario.archived_at = None
+                
+            scenario.save()
+            form = ScenarioArchiveForm(instance=scenario, action='archive')
+        template = 'flooding/archiveform.html'         
+    else:
+        form = ScenarioArchiveForm(instance=scenario, action='archive')
+        template = 'flooding/archive.html'
+
+    return render_to_response(
+        template, {'form': form, 'succeeded': succeeded})
 
 
 def extra_infowindow_information_fields(header_title, scenario):

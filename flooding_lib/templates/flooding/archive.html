@@ -1,0 +1,25 @@
+{# 20090312 kkh form to add scenario breach #}
+
+{% extends "lizard/base.html" %}
+{% load i18n %}
+
+{% block title %}
+Scenario-breach details
+{% endblock %}
+
+{% block content %}
+<h2>{% trans 'Archive' %}</h2>
+<script type="text/javascript" >
+  var archivePostResponse = function(iframe) {
+      iframe_doc = iframe.contentDocument || iframe.contentWindow.document;
+      response_el = iframe_doc.getElementById('archiveForm');
+      if (response_el) {
+         document.getElementById('archiveForm').innerHTML = iframe_doc.getElementById('archiveForm').innerHTML;
+      }
+  };
+</script>
+<iframe id='archivePostFrame' onload='archivePostResponse(this);' name='archivePostFrame'  height=0 scrolling='no' width='0' align='top' marginheight='0' marginwidth='0' frameborder='0' allowtransparency='true'>{% if succeeded %} {{succeeded}} {% endif %}</iframe>
+
+{% include "flooding/archiveform.html" %}
+
+{% endblock %}

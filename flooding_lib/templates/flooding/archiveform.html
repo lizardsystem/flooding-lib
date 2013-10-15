@@ -1,0 +1,24 @@
+{% load i18n %}
+<form id="archiveForm" action="{% url infowindow %}" target="archivePostFrame" method="POST">
+    {{ form.scenarioid }}
+    {{ form.action }}
+    <table>
+      <tr>
+	<td>{{ form.archived }}</td>
+	<td>{{ form.archived.label_tag}}:</td>
+      </tr>
+    </table>
+    <p>&nbsp;</p>
+    <table>
+      <tr>
+        <td>{{ form.archived_at.label_tag}}:</td>
+        <td>{{ form.archived_at.value|date:"d-m-Y" }}</td>
+      </tr>
+      <tr>
+        <td>{{ form.archived_by.label_tag}}:</td>
+        <td>{% if form.archived_by.value %}{{ form.archived_by.value }}{% endif %}</td>
+      </tr>
+    </table>
+    <br>
+   <input type="submit" value="{% trans 'Save' %}" />
+</form>

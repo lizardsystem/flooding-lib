@@ -997,6 +997,7 @@ class Scenario(models.Model):
     STATUS_ERROR = 50
     STATUS_WAITING = 60
     STATUS_NONE = 70
+    STATUS_ARCHIVED = 80
 
     STATUS_CHOICES = (
         (STATUS_DELETED, _('deleted')),
@@ -1006,6 +1007,7 @@ class Scenario(models.Model):
         (STATUS_ERROR, _('error')),
         (STATUS_WAITING, _('waiting')),
         (STATUS_NONE, _('none')),
+        (STATUS_ARCHIVED, _('archived')),
     )
 
     name = models.CharField(_('name'), max_length=200)
@@ -1066,6 +1068,13 @@ class Scenario(models.Model):
     # works as a cache to speed up those pages.
     ror_province = models.ForeignKey(
         'sharedproject.Province', null=True, blank=True)
+
+    archived = models.BooleanField(default=False, verbose_name=_('Archived'))
+    archived_at = models.DateTimeField(null=True, blank=True, 
+                                       verbose_name=_('Archived at'))
+    archived_by = models.ForeignKey(User, null=True, blank=True,
+                                    related_name='archived_by_user',
+                                    verbose_name=_('Archived by'))
 
     class Meta:
         ordering = ('name', 'owner', )
