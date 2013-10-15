@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.98 (unreleased)
+2.98 (2013-10-15)
 -----------------
 
 - Fix a calculate_export_maps crash than can happen when a scenario
