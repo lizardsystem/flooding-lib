@@ -4,7 +4,8 @@ Changelog of flooding-lib
 2.98 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Fix a calculate_export_maps crash than can happen when a scenario
+  doesn't have a startmoment bresgroei set.
 
 
 2.97 (2013-10-11)
