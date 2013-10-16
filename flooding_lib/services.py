@@ -229,10 +229,8 @@ def service_get_breach_tree(
     None or Scenario.STATUS_*
 
     """
-
     scenarios = permission_manager.get_scenarios(
         None, permission, filter_scenario)
-
     if region_id:
         region = get_object_or_404(Region, pk=region_id)
         if not(permission_manager.check_region_permission(
@@ -377,14 +375,14 @@ def service_get_project_regions(
     """Get all regions for a given project_id and given permission."""
     project = Project.objects.filter(id=project_id)
     regions = []
-    if project.exists():        
+    if project.exists():
         regionsets = project[0].regionsets.all()
-    
+
         for regionset in regionsets:
             if (permission_manager.check_regionset_permission(
                     regionset, permission)):
                 regions.extend([r for r in regionset.get_all_regions()])
-                 
+
         result_list = [{'id': r.id, 'name': str(r.name)} for r in regions]
     else:
         result_list = []
@@ -486,7 +484,7 @@ def service_get_projects(
 def get_breaches_info(scenario):
     info = {}
     breaches = scenario.breaches.all()
-    breaches_values= breaches.values(
+    breaches_values = breaches.values(
         "name", "id", "region__id", "region__name", "externalwater__name",
         "externalwater__type")
     info["names"] = [v.get("name") for v in breaches_values]
@@ -496,7 +494,7 @@ def get_breaches_info(scenario):
     info["externalwater_name"] = [v.get("externalwater__name") for v in breaches_values]
     info["externalwater_type"] = [v.get("externalwater__type") for v in breaches_values]
     return info
-        
+
 
 @never_cache
 @receives_permission_manager
@@ -1269,7 +1267,6 @@ def service_delete_measure(measure_ids):
 
 def upload_ror_keringen(request):
     """Save zipfile."""
-    #import pdb; pdb.set_trace()
     template = 'import/upload_message.html'
     upload_path = settings.ROR_KERINGEN_NOTAPPLIED_PATH
     c_date = datetime.datetime.today()
@@ -1280,26 +1277,26 @@ def upload_ror_keringen(request):
         os.makedirs(upload_path)
 
     f_upload = request.FILES.get('zip', None)
-    
+
     if f_upload is not None:
         try:
-            unique_name = "{0}_{1}".format(f_prefix, f_upload.name)          
+            unique_name = "{0}_{1}".format(f_prefix, f_upload.name)
             with open(os.path.join(upload_path, unique_name), 'wb') as f_destination:
                 for chunk in f_upload.chunks():
                     f_destination.write(chunk)
         except:
-            return render_to_response(template, {'message': _('Error on upload.')}) 
+            return render_to_response(template, {'message': _('Error on upload.')})
     else:
-       return render_to_response(template, {'message': _('Error on upload.')})
-                
+        return render_to_response(template, {'message': _('Error on upload.')})
+
     try:
-        
+
         RORKering(
             title=request.POST.get('title'),
             owner=User.objects.get(username=request.user),
             file_name="{0}_{1}".format(f_prefix, f_upload.name),
             type_kering=request.POST.get('code'),
-            description=request.POST.get('opmerking')).save() 
+            description=request.POST.get('opmerking')).save()
     except:
         return render_to_response(template, {'message': _('Error on save.')})
 
@@ -1406,15 +1403,18 @@ def get_raw_result_scenario(request, scenarioid):
             "results": results
             })
 
+
 def get_ror_keringen_types():
     types = [{'code': unicode(i[0]), 'type': unicode(i[1])} for i in RORKering.TYPE_KERING]
     return HttpResponse(simplejson.dumps(types),
                         mimetype='application/json')
 
+
 def get_ror_keringen():
     keringen = [k.kering_as_dict for k in RORKering.objects.all()]
     return HttpResponse(simplejson.dumps(keringen),
                         mimetype='application/json')
+
 
 def service(request):
     """Calls other service functions
@@ -1467,6 +1467,7 @@ def service(request):
                 'rejected': [Scenario.STATUS_DISAPPROVED],
                 'accepted': [Scenario.STATUS_APPROVED],
                 'verify': [Scenario.STATUS_CALCULATED],
+                'archive': [Scenario.STATUS_ARCHIVED],
                 }
             filter_scenariostatus = filter_dict[filter.lower()]
 
@@ -1530,6 +1531,7 @@ def service(request):
                 'rejected': [Scenario.STATUS_DISAPPROVED],
                 'accepted': [Scenario.STATUS_APPROVED],
                 'verify': [Scenario.STATUS_CALCULATED],
+                'archive': [Scenario.STATUS_ARCHIVED],
                 }
             filter_scenario = filter_dict[filter.lower()]
 
@@ -1547,7 +1549,7 @@ def service(request):
             project_id = query.get('project_id')
             return service_get_project_regions(
                 request, project_id, permission=permission)
-        elif action_name == 'get_region_maps':
+        elif action_name == 'get_region_macps':
             region_id = query.get('region_id', None)
             return service_get_region_maps(request, region_id)
         elif action_name == 'get_cutofflocations':
@@ -1745,7 +1747,7 @@ def service(request):
     elif request.method == 'POST':
         query = request.POST
         action_name = query.get('action', query.get('ACTION')).lower()
-        
+
         if action_name == 'post_newscenario':
             return service_save_new_scenario(request)
         elif action_name == 'post_new3discenario':
