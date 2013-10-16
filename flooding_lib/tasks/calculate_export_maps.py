@@ -514,12 +514,9 @@ def dijkring_arrays_to_zip(
 
     gridtype is used to generate useful arcnames
     """
-    try:
-        log.debug(b"dijkring_arrays_to_zip({i}, {z}, {g}, {gs}, {c})"
-                  .format(i=input_files, z=zip_filename, g=gridtype,
-                          gs=gridsize, c=combine_method))
-    except Exception as ex:
-        import pdb; pdb.set_trace()
+    log.debug(b"dijkring_arrays_to_zip({i}, {z}, {g}, {gs}, {c})"
+              .format(i=input_files, z=zip_filename, g=gridtype,
+                      gs=gridsize, c=combine_method))
 
     dijkring_datasets = {}  # key is dijkringnr, values are tif
                             # filenames of combined datasets
