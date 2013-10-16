@@ -1212,6 +1212,9 @@ class Scenario(models.Model):
 
         todo: yet to be implemented
         """
+        if self.archived:
+            return self.STATUS_ARCHIVED
+
         tasks = (self.task_set.all().
                  order_by('-tasktype', '-tstart'))  # reverse order!
         if not(tasks):

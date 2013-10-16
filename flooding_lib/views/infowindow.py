@@ -93,7 +93,8 @@ def infowindow(request):
 
 
 def archive_scenario(request, scenario_id):
-    """Archive scenario using the model form"""
+    """Archive scenario using the model form,
+    update scenario_cache"""
     succeeded = False
     scenario = get_object_or_404(Scenario, pk=scenario_id)
     user = User.objects.get(username=request.user)
@@ -112,10 +113,11 @@ def archive_scenario(request, scenario_id):
                 scenario.archived = False
                 scenario.archived_by = None
                 scenario.archived_at = None
-                
+
             scenario.save()
+            scenario.update_status()
             form = ScenarioArchiveForm(instance=scenario, action='archive')
-        template = 'flooding/archiveform.html'         
+        template = 'flooding/archiveform.html'
     else:
         form = ScenarioArchiveForm(instance=scenario, action='archive')
         template = 'flooding/archive.html'
