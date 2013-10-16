@@ -5,6 +5,7 @@ Changelog of flooding-lib
 -----------------
 
 - Fix error on decode ascii.
+- Add archief functionality
 
 
 2.98 (2013-10-15)
