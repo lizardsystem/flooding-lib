@@ -769,6 +769,7 @@ def calc_rise_period(tmp_zip_filename, export_run):
         gridta_geo_transform = None
         gridtd_geo_transform = None
 
+        array_td = array_ta = None
         # Open both datasets, check if they are the same
         # Strange loop structure is because of how all_files_in works
         for f in all_files_in(gridta['filename']):
@@ -793,6 +794,15 @@ def calc_rise_period(tmp_zip_filename, export_run):
                 gridtd_ds = None
                 break
             break
+
+        if array_ta is None:
+            log.debug("Scenario {} has no gridta! (should be {})"
+                         .format(gridta['scenario'], gridta['filename']))
+            continue
+        if array_td is None:
+            log.debug("Scenario {} has no gridtd! (should be {})"
+                         .format(gridtd['scenario'], gridtd['filename']))
+            continue
 
         # Now we have two numpy masked arrays, for td and ta
         # In td, we're going to fill in the scenario duration as fill-value
