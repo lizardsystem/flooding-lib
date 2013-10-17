@@ -50,6 +50,8 @@ Changelog of flooding-lib
 - Fix error on decode ascii.
 - Add archief functionality
 
+- Add a new 'flooding_lib.tools.pyramids' app that can store grids and
+  animations as gislib pyramids.
 
 2.98 (2013-10-15)
 -----------------
