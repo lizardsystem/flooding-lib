@@ -54,7 +54,7 @@ def fix_path(path):
     """Linuxify pathname, force bytestring."""
     if isinstance(path, unicode):
         path = path.encode('utf8')
-    return path.replace('\\', '/')
+    return path.replace(b'\\', b'/')
 
 
 def gdal_open(filepath):
@@ -64,7 +64,7 @@ def gdal_open(filepath):
 
     filepath = fix_path(filepath)
     if filepath.endswith('.zip'):
-        filepath = '/vsizip/' + filepath
+        filepath = b'/vsizip/' + filepath
     return gdal.Open(filepath)
 
 

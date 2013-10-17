@@ -10,6 +10,14 @@ def cem(attr):
     return 'flooding_lib.tasks.calculate_export_maps.{attr}'.format(attr=attr)
 
 
+class TestFixPath(TestCase):
+    def test_turns_unicode_into_str(self):
+        filename = u"filename"
+        print(repr(calculate_export_maps.fix_path(filename)))
+        self.assertTrue(
+            isinstance(calculate_export_maps.fix_path(filename), str))
+
+
 class TestAllFilesIn(TestCase):
     @mock.patch(cem('is_valid_zipfile'), return_value=False)
     @mock.patch('os.path.isfile', return_value=False)

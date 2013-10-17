@@ -27,4 +27,5 @@ class TestExportRun(TestCase):
                 'The flooded area',
                 'The arrival times',
                 'The period of increasing waterlevel',
+                'The sources of inundation'
                 ])
