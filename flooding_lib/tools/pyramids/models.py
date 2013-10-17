@@ -11,6 +11,9 @@ from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import division
 
+import os
+
+from django.conf import settings
 from django.db import models
 from django_extensions.db.fields import UUIDField
 
@@ -21,6 +24,14 @@ class Raster(models.Model):
     uuid = UUIDField(unique=True)
 
     def uuid_parts(self):
+        chars = unicode(self.uuid)
         return (
-            list(self.uuid[:SUBDIR_DEPTH]) + [self.uuid[SUBDIR_DEPTH:]])
+            list(chars[:SUBDIR_DEPTH]) + [chars[SUBDIR_DEPTH:]])
 
+    @property
+    def pyramid_path(self):
+        pyramid_base_dir = getattr(
+            settings, 'PYRAMIDS_BASE_DIR',
+            os.path.join(settings.BUILDOUT_DIR, 'var', 'pyramids'))
+
+        return os.path.join(pyramid_base_dir, *self.uuid_parts())

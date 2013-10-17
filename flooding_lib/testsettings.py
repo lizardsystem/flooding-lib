@@ -1,3 +1,5 @@
+import os
+
 DEBUG = True
 TEMPLATE_DEBUG = True
 TMP_DIR = '/tmp/'
@@ -12,6 +14,13 @@ DATABASES = {
         'PORT': ''
         }
 }
+
+SETTINGS_DIR = os.path.dirname(os.path.realpath(__file__))
+
+# BUILDOUT_DIR is for access to the "surrounding" buildout, for instance for
+# BUILDOUT_DIR/var/media files to give django-staticfiles a proper place
+# to place all collected static files.
+BUILDOUT_DIR = os.path.abspath(os.path.join(SETTINGS_DIR, '..'))
 
 SITE_ID = 1
 INSTALLED_APPS = [
