@@ -4,7 +4,7 @@ Changelog of flooding-lib
 2.100 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Apply permissions to archive functionality.
 
 
 2.99 (2013-10-21)

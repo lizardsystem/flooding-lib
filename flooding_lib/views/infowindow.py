@@ -51,7 +51,6 @@ def infowindow(request):
     # action and scenarioid can be in get or post (to keep the
     # javascript RPC-calls simple) therefore we use REQUEST instead of
     # GET or POST
-    #import pdb; pdb.set_trace()
     action_name = request.REQUEST.get('action')
     scenario_id = request.REQUEST.get('scenarioid')
 
@@ -92,18 +91,29 @@ def infowindow(request):
         return archive_scenario(request, scenario_id)
 
 
-def archive_scenario(request, scenario_id):
+@receives_permission_manager
+def archive_scenario(request, permission_manager, scenario_id):
     """Archive scenario using the model form,
     update scenario_cache"""
-    succeeded = False
+    can_edit = False
     scenario = get_object_or_404(Scenario, pk=scenario_id)
+
+    if permission_manager.check_project_permission(
+        scenario.main_project,
+        UserPermission.PERMISSION_SCENARIO_EDIT):
+        can_edit = True
+
+    succeeded = False    
     user = User.objects.get(username=request.user)
     template = ""
-
     if request.method == 'POST':
+        if not can_edit:
+            return HttpResponse(
+                unicode(_("No permission to edit scenario or login")))
         form = ScenarioArchiveForm(request.POST,
                                    instance=scenario,
-                                   action='archive')
+                                   action='archive',
+                                   can_edit=can_edit)
         if form.is_valid():
             if form.cleaned_data['archived']:
                 scenario.archived = form.cleaned_data['archived']
@@ -116,10 +126,10 @@ def archive_scenario(request, scenario_id):
 
             scenario.save()
             scenario.update_status()
-            form = ScenarioArchiveForm(instance=scenario, action='archive')
+            form = ScenarioArchiveForm(instance=scenario, action='archive', can_edit=can_edit)
         template = 'flooding/archiveform.html'
     else:
-        form = ScenarioArchiveForm(instance=scenario, action='archive')
+        form = ScenarioArchiveForm(instance=scenario, action='archive', can_edit=can_edit)
         template = 'flooding/archive.html'
 
     return render_to_response(

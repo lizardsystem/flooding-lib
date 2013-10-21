@@ -20,5 +20,7 @@
       </tr>
     </table>
     <br>
-   <input type="submit" value="{% trans 'Save' %}" />
+    
+   <input type="submit" value="{% trans 'Save' %}" 
+	  {% if form.can_edit.value == 'no' %} DISABLED {% endif %}/>
 </form>

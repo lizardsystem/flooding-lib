@@ -90,6 +90,8 @@ class ScenarioArchiveForm(forms.Form):
     
     scenarioid = forms.CharField(widget=forms.HiddenInput())
     action = forms.CharField(widget=forms.HiddenInput())
+    can_edit = forms.CharField(widget=forms.HiddenInput(),
+                               required=False)
     archived = forms.BooleanField(
         label=_('To archive'),
         required=False)
@@ -105,8 +107,10 @@ class ScenarioArchiveForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.action_value = kwargs['action']
         self.instance = kwargs['instance']
+        self.can_edit = kwargs['can_edit']
         kwargs.pop('action')
         kwargs.pop('instance')
+        kwargs.pop('can_edit')
         super(ScenarioArchiveForm, self).__init__(*args, **kwargs)
         self.set_initials()
 
@@ -116,6 +120,10 @@ class ScenarioArchiveForm(forms.Form):
         self.fields['archived'].initial = self.instance.archived
         self.fields['archived_at'].initial = self.instance.archived_at
         self.fields['archived_by'].initial = self.instance.archived_by
+        self.fields['can_edit'].initial = 'yes'
+        if not self.can_edit:
+            self.fields['archived'].widget.attrs['DISABLED'] = True
+            self.fields['can_edit'].initial = 'no'
 
     def clean_scenarioid(self):
         return self.cleaned_data.get('scenarioid')
