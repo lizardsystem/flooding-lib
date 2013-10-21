@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-2.99 (unreleased)
+2.99 (2013-10-21)
 -----------------
 
 - Fix error on decode ascii.
