@@ -730,6 +730,10 @@ class Project(models.Model):
         """Return a queryset of all scenarios attached to this project."""
         return self.scenarios.all()
 
+    def all_active_scenarios(self):
+        """Return all not archived scenarios attached to this project"""
+        return self.scenarios.filter(archived=False)
+
     def original_scenarios(self):
         """Return a queryset of Scenarios that were originally in this project,
         not added to it later. Doesn't include deleted scenarios."""

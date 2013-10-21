@@ -91,7 +91,7 @@ class ScenarioArchiveForm(forms.Form):
     scenarioid = forms.CharField(widget=forms.HiddenInput())
     action = forms.CharField(widget=forms.HiddenInput())
     archived = forms.BooleanField(
-        label=_('Archived'),
+        label=_('To archive'),
         required=False)
     archived_at = forms.DateField(
         label=_('Archived at'),

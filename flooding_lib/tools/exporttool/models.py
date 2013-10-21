@@ -119,6 +119,10 @@ class ExportRun(models.Model):
         else:
             return None
 
+    def all_active_scenarios(self):
+        """Return all not archived scenarios attached to this export."""
+        return self.scenarios.filter(archived=False)
+
     def __unicode__(self):
         return self.name
 

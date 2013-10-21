@@ -260,7 +260,7 @@ def export_run_scenarios(request, export_run_id):
 
     export_run = get_object_or_404(ExportRun, pk=export_run_id)
     scenarios_export_list = []
-    for s in export_run.scenarios.all():
+    for s in export_run.all_active_scenarios():
         breaches_values = get_breaches_info(s)
         scenarios_export_list.append(
             {
@@ -283,7 +283,7 @@ def reuse_export(request, export_run_id):
         return HttpResponse(_("No permission to download export"))
 
     export_run = get_object_or_404(ExportRun, pk=export_run_id)
-    scenarios = export_run.scenarios.all()
+    scenarios = export_run.all_active_scenarios()
     projecten = {}
     for s in scenarios:
         project = s.main_project

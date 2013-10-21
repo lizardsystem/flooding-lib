@@ -512,7 +512,7 @@ def service_get_scenarios_export_list(
     if not(permission_manager.check_project_permission(project, permission)):
         raise Http404
     scenarios_export_list = []
-    for s in project.all_scenarios():
+    for s in project.all_active_scenarios():
         breaches_values = get_breaches_info(s)
         scenarios_export_list.append(
             {
