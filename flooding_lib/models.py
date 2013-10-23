@@ -1271,6 +1271,11 @@ class Scenario(models.Model):
         return reverse('flooding_scenario_detail',
                        kwargs={'object_id': self.pk})
 
+    def get_scenarioresults_url(self, project_id):
+        return reverse('preload_scenario_redirect',
+                       kwargs={'scenario_id': self.pk,
+                               'project_id': project_id})
+
     def get_scenario_overview_extra_info(self, header):
         """Return a list of (fieldname, fieldvalue) tuples that should
         be should under this header in the scenario overview."""

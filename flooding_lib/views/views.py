@@ -76,9 +76,13 @@ scenario_list_search_table_columns = (
      'sort': 'status',
      'sort_rev': 'status_rev',
      'width': '3%'},
-    {'name': _('project'),
-     'sort': 'project',
-     'sort_rev': 'project_rev',
+    {'name': _('mainproject'),
+     'sort': 'projects',
+     'sort_rev': 'mainproject_rev',
+     'width': '8%'},
+    {'name': _('projects'),
+     'sort': 'projects',
+     'sort_rev': 'projects_rev',
      'width': '8%'},
     {'name': _('region'),
      'width': '8%'},
@@ -831,12 +835,15 @@ def scenario_list(request, permission_manager):
     if search_session['repeattime_gte'] is not None:
         scenarios = scenarios.exclude(
            scenariobreach__extwrepeattime__lt=search_session['repeattime_gte'])
+    
+    scenarios = scenarios.distinct('id')
 
     #order the object list
     order_dict = {
         'id': 'id', 'id_rev': '-id',
         'name': 'name', 'name_rev': '-name',
-        'project': 'project', 'project_rev': '-project',
+        'projects': 'projects', 'projects_rev': '-projects',
+        'mainproject': 'projects', 'mainproject_rev': '-projects',
         'sobekmodelinundation': 'sobekmodel_inundation',
         'sobekmodelinundation_rev': '-sobekmodel_inundation',
         'tsim': 'tsim', 'tsim_rev': '-tsim',
@@ -970,7 +977,7 @@ def scenario_list(request, permission_manager):
             if permission_manager.check_project_permission(
                 o, UserPermission.PERMISSION_SCENARIO_DELETE):
                 delete_field = {
-                    'icon': 'static_media/images/icons/delete',
+                    'icon': '/static_media/images/icons/delete',
                     'icontitle': _('delete this item'),
                     'urlpost': reverse(
                         "flooding_scenario_delete",
@@ -979,7 +986,7 @@ def scenario_list(request, permission_manager):
                 }
             else:
                 delete_field = {
-                    'icon': 'delete_disabled',
+                    'icon': '/static_media/images/icons/delete_disabled',
                     'icontitle': _('you need permission to delete this item')
                     }
 
@@ -1006,13 +1013,14 @@ def scenario_list(request, permission_manager):
                 [r.name for r in Region.objects.filter(
                         breach__scenario__in=[o]).distinct()])
 
-            row = [{'url': o.get_absolute_url(),
-                    'value': o.id},
-                   {'url': o.get_absolute_url(),
+            row = [{'value': o.id},
+                   {'url': o.get_scenarioresults_url(o.main_project.id),
+                    'target': '_top',
                     'value': o},
                    {'value': o.get_status_cache_display()},
                    {'url': o.main_project.get_absolute_url(),
                     'value': o.main_project},
+                   {'value': ''.join([b"* %s \n" % p.name for p in o.projects.all()])},
                    {'value': regions_str},
                    {'value': o.sobekmodel_inundation.get_summary_str()},
                    {'value': breaches_summary},
@@ -1048,6 +1056,8 @@ def scenario_list(request, permission_manager):
                      search_session['status'].count(50) != 0),
                     (_('waiting'), 60,
                      search_session['status'].count(60) != 0),
+                    (_('archive'), 80,
+                     search_session['status'].count(80) != 0),
                     (_('none'), 70,
                      search_session['status'].count(70) != 0),
                     ),

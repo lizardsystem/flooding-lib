@@ -4,7 +4,7 @@ Changelog of flooding-lib
 3.2 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Fix table app.
 
 
 3.01 (2013-10-21)
