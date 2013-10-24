@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import json
 import Image
 import StringIO
 import mapnik
@@ -10,9 +11,9 @@ from django.contrib.auth.models import User
 from django.conf import settings
 from django.contrib.gis.geos import GEOSGeometry, MultiPolygon
 from django.core.urlresolvers import reverse
-from django.http import HttpResponse, Http404, HttpResponseRedirect
+from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response, get_object_or_404
-from django.utils import simplejson
+
 from django.views.decorators.cache import never_cache
 from django.db.models.query import QuerySet
 
@@ -87,6 +88,11 @@ def get_search_params(request):
     return (region_ids, project_ids, externalwater_ids)
 
 
+def JSONResponse(ob):
+    return HttpResponse(
+        json.dumps(ob), mimetype="application/json")
+
+
 def external_file_location(filename):
     """Return full filename of file that's on smb (currently)
 
@@ -108,7 +114,7 @@ def external_file_location(filename):
 
 
 def get_region_as_tree_item(region, regionset_id=None):
-    """Create tree item."""   
+    """Create tree item."""
     west, south, east, north = region.geom.extent
     tree_item = {
         'rid': region.id,
@@ -169,7 +175,7 @@ def get_projects_by_regions(region_ids):
     """Retrieve all unique projects for the passed regions."""
     projects = Project.objects.none()
     scenarios = Scenario.objects.none()
-    
+
     breaches = Breach.objects.filter(region__id__in=region_ids)
     for breach in breaches:
         scenarios = scenarios | breach.scenario_set.all().distinct()
@@ -231,7 +237,7 @@ def service_get_region_tree_search(
 
     required: list of region's ids in request.
     """
-    
+
     region_ids = None
     project_ids = None
     externalwater_ids = None
@@ -263,7 +269,7 @@ def service_get_region_tree_search(
     region_list_total = region_list_total.distinct().order_by("name")
     for region in region_list_total:
         object_list.append(get_region_as_tree_item(region))
-    
+
     return HttpResponse(
         simplejson.dumps(object_list), mimetype="application/json")
 
@@ -311,10 +317,11 @@ def service_get_region_tree(
 
         if region_list.count() > 0:
             rswest, rssouth, rseast, rsnorth = (1e8, 1e8, None, None)
+
         for region in region_list:
             west, south, east, north = region.geom.extent
             object_list.append(get_region_as_tree_item(region, regionset.id))
-            
+
             #used function below because of performance. Instead
             #of #west, south, east, north =
             #regionset.regions.unionagg().extent
@@ -323,7 +330,7 @@ def service_get_region_tree(
                 rssouth = min(rssouth, south)
                 rseast = max(rseast, east)
                 rsnorth = max(rsnorth, north)
-  
+
         if regionset.parent:
             parentid = regionset.parent.id
         else:
@@ -338,9 +345,8 @@ def service_get_region_tree(
                             'east': rseast,
                             'north': rsnorth,
                             })
-    
-    return HttpResponse(
-        simplejson.dumps(object_list), mimetype="application/json")
+
+    return JSONResponse(object_list)
 
 
 def service_get_region_maps(request,
@@ -362,8 +368,7 @@ def service_get_region_maps(request,
                             'srs': map.srs
                             })
 
-    response = HttpResponse(
-        simplejson.dumps(object_list), mimetype="application/json")
+    response = JSONResponse(object_list)
     response['Cache-Control'] = 'max-age=0'
     return response
 
@@ -403,7 +408,7 @@ def service_get_breach_tree_search(
     permitted_projects = permission_manager.get_projects(permission)
     region_ids, project_ids, externalwater_ids = get_search_params(request)
     breaches_list = Breach.objects.all()
-    
+
     if ((region_ids is not None) and (len(region_ids) > 0)):
         breaches = Breach.objects.none()
         for region_id in region_ids:
@@ -425,7 +430,7 @@ def service_get_breach_tree_search(
 
     externalwater_list = ExternalWater.objects.filter(
         breach__in=breaches_list).distinct()
-    
+
     object_list = create_breaches_tree(
         breaches_list, externalwater_list, permission_manager, issearch=True)
     return HttpResponse(
@@ -479,7 +484,7 @@ def service_get_breach_tree(
 
     externalwater_list = ExternalWater.objects.filter(
         breach__in=breach_list).distinct()
-    
+
     object_list = create_breaches_tree(
         breach_list, externalwater_list, permission_manager)
     return HttpResponse(
@@ -505,7 +510,7 @@ def service_get_scenario_tree_search(
         breach=None, permission=permission, status_list=filter_scenariostatus)
     region_ids, project_ids, externalwater_ids = get_search_params(request)
     permitted_projects = permission_manager.get_projects(permission)
-    
+
     project_list = permitted_projects
     if ((region_ids is not None) and (len(region_ids) > 0)):
         breaches = Breach.objects.none()
@@ -543,7 +548,7 @@ def service_get_scenario_tree_search(
             if (project in project_list and
                 scenario.visible_in_project(
                     permission_manager, project, permission)):
-                
+
                 projects_shown.add(project.id)
                 breaches = scenario.breaches.all()
                 breach_id = -1
@@ -568,8 +573,8 @@ def service_get_scenario_tree_search(
                                 'isscenario': False,
                                 'status': 0,
                                 })
-    return HttpResponse(
-        simplejson.dumps(object_list), mimetype="application/json")
+
+    return JSONResponse(object_list)
 
 
 @never_cache
@@ -629,8 +634,7 @@ def service_get_scenario_tree(
                                 'status': 0,
                                 })
 
-    return HttpResponse(
-        simplejson.dumps(object_list), mimetype="application/json")
+    return JSONResponse(object_list)
 
 
 @never_cache
@@ -676,11 +680,9 @@ def service_get_project_regions(
         result_list = [{'id': r.id, 'name': str(r.name)} for r in regions]
     else:
         result_list = []
-    return HttpResponse(
-        simplejson.dumps(
-            {'identifier': 'id',
+    return JSONResponse({'identifier': 'id',
              'label': 'name',
-             'items': result_list}), mimetype="application/json")
+             'items': result_list})
 
 
 @never_cache
@@ -700,8 +702,7 @@ def service_get_regions(
         filter_active = True
     regions = regionset.get_all_regions(filter_active)
     result_list = [{'id': r.id, 'name': str(r.name)} for r in regions]
-    return HttpResponse(
-        simplejson.dumps(result_list), mimetype="application/json")
+    return JSONResponse(result_list)
 
 
 @never_cache
@@ -718,8 +719,7 @@ def service_get_regionsets(
 
     regionsets = permission_manager.get_regionsets(permission).order_by('name')
     result_list = [{'id': r.id, 'name': str(r.name)} for r in regionsets]
-    return HttpResponse(
-        simplejson.dumps(result_list), mimetype="application/json")
+    return JSONResponse(result_list)
 
 
 @never_cache
@@ -737,7 +737,7 @@ def service_get_breaches(
     try:
         region = Region.objects.get(pk=region_id)
     except Region.DoesNotExist:
-        return HttpResponse(simplejson.dumps([]), mimetype="application/json")
+        return JSONResponse([])
 
     if not(permission_manager.check_region_permission(
             region,
@@ -753,8 +753,7 @@ def service_get_breaches(
 
     result_list = [{'id': b.id, 'name': str(b)} for b in breaches]
 
-    return HttpResponse(
-        simplejson.dumps(result_list), mimetype="application/json")
+    return JSONResponse(result_list)
 
 
 @never_cache
@@ -859,8 +858,7 @@ def service_get_scenarios_export_list(
     #         'shelflife': s.string_value_for_inputfield(inputfield_shelflife),
     #         'extwrepeattime': [sbr.extwrepeattime for sbr in s.scenariobreach_set.all()]}
     #     for s in project.all_scenarios()]
-    return HttpResponse(
-        simplejson.dumps(scenarios_export_list), mimetype="application/json")
+    return JSONResponse(scenarios_export_list)
 
 
 @never_cache
@@ -873,8 +871,7 @@ def service_get_all_regions(
 
     regions = permission_manager.get_regions(permission).order_by('name')
     result_list = [{'id': r.id, 'name': str(r.name)} for r in regions]
-    return HttpResponse(
-        simplejson.dumps(result_list), mimetype="application/json")
+    return JSONResponse(result_list)
 
 
 @never_cache
@@ -911,7 +908,7 @@ def service_get_inundationmodels(
             'name': str(obj.model_version) + ', ' + str(obj.model_varname),
             'is_3di': obj.is_3di()
             } for obj in models]
-    return HttpResponse(simplejson.dumps(resp), mimetype='application/json')
+    return JSONResponse(resp)
 
 
 @never_cache
@@ -932,7 +929,7 @@ def service_get_externalwatermodels(
             'name':str(obj.model_version) + ', ' + str(obj.model_varname)
             } for obj in models]
 
-    return HttpResponse(simplejson.dumps(resp), mimetype='application/json')
+    return JSONResponse(resp)
 
 
 @never_cache
@@ -965,7 +962,7 @@ def service_get_cutofflocations(
                 'tdef': obj.deftclose,
                 'x': loc.x,
                 'y': loc.y})
-    return HttpResponse(simplejson.dumps(resp), mimetype='application/json')
+    return JSONResponse(resp)
 
 
 @never_cache
@@ -992,7 +989,7 @@ def service_get_cutofflocationsets(
                 'name': set.name,
                 'number': len(cutofflocation_ids),
                 'cuttofflocation': cutofflocation_ids})
-    return HttpResponse(simplejson.dumps(resp), mimetype='application/json')
+    return JSONResponse(resp)
 
 
 @never_cache
@@ -1107,7 +1104,7 @@ def service_get_presentations_of_scenario(
                 'geoType': pl.presentationtype.geo_type,
                 'valueType': pl.presentationtype.value_type})
 
-    return HttpResponse(simplejson.dumps(resp), mimetype='application/json')
+    return JSONResponse(resp)
 
 
 @never_cache
@@ -1130,7 +1127,7 @@ def service_get_raw_result(
         return response
 
     resp = {'opmerking': 'Ruwe resultaten niet beschikbaar'}
-    return HttpResponse(simplejson.dumps(resp), mimetype='application/json')
+    return JSONResponse(resp)
 
 
 @never_cache
@@ -1534,12 +1531,10 @@ def service_save_drawn_embankment(geometries, strategy_id, region_id):
             'name': selected_measure.name,
             'number_embankment_units':
             selected_measure.embankmentunit_set.all().count()}
-        return HttpResponse(
-            simplejson.dumps(answer), mimetype="application/json")
+        return JSONResponse(answer)
     else:
         answer = {'successful': False}
-        return HttpResponse(
-            simplejson.dumps(answer), mimetype="application/json")
+        return JSONResponse(answer)
 
 
 def select_existing_embankments_by_polygon(geometries, strategy_id, region_id):
@@ -1570,12 +1565,10 @@ def select_existing_embankments_by_polygon(geometries, strategy_id, region_id):
             'name': selected_measure.name,
             'number_embankment_units':
             selected_measure.embankmentunit_set.all().count()}
-        return HttpResponse(
-            simplejson.dumps(answer), mimetype="application/json")
+        return JSONResponse(answer)
     else:
         answer = {'successful': False}
-        return HttpResponse(
-            simplejson.dumps(answer), mimetype="application/json")
+        return JSONResponse(answer)
 
 
 def service_delete_measure(measure_ids):
@@ -1583,7 +1576,7 @@ def service_delete_measure(measure_ids):
     measure_ids = [int(id) for id in measure_ids.split(';')]
     Measure.objects.filter(id__in=measure_ids).delete()
     answer = {'successful': True}
-    return HttpResponse(simplejson.dumps(answer), mimetype="application/json")
+    return JSONResponse(answer)
 
 
 def upload_ror_keringen(request):
@@ -1651,14 +1644,14 @@ def service_load_strategies(current_strategy, strategies):
              'adjustment': measure.adjustment,
              'reference': measure.reference_adjustment})
 
-    return HttpResponse(simplejson.dumps(answer), mimetype="application/json")
+    return JSONResponse(answer)
 
 
 def service_get_strategy_id():
 
     strategy = Strategy.objects.create(name='-')
     answer = {'successful': True, 'strategyId': strategy.id}
-    return HttpResponse(simplejson.dumps(answer), mimetype="application/json")
+    return JSONResponse(answer)
 
 
 def service_import_embankment_shape():
@@ -1726,15 +1719,15 @@ def get_raw_result_scenario(request, scenarioid):
 
 
 def get_ror_keringen_types():
-    types = [{'code': unicode(i[0]), 'type': unicode(i[1])} for i in RORKering.TYPE_KERING]
-    return HttpResponse(simplejson.dumps(types),
-                        mimetype='application/json')
+    types = [
+        {'code': unicode(i[0]), 'type': unicode(i[1])}
+        for i in RORKering.TYPE_KERING]
+    return JSONResponse(types)
 
 
 def get_ror_keringen():
     keringen = [k.kering_as_dict for k in RORKering.objects.all()]
-    return HttpResponse(simplejson.dumps(keringen),
-                        mimetype='application/json')
+    return JSONResponse(keringen)
 
 
 def service(request):
@@ -1817,7 +1810,7 @@ def service(request):
         elif action_name == 'get_external_waters':
             return service_get_external_waters(
                 request, permission=permission)
-                                              
+
         elif action_name == 'get_regionsets':
             return service_get_regionsets(request, permission=permission)
 
@@ -1854,7 +1847,7 @@ def service(request):
                 onlyscenariobreaches]
 
             filter = query.get('filter', 'all')
-            
+
             filter_scenario = FILTER_DICT[filter.lower()]
 
             return service_get_breach_tree(
@@ -1862,7 +1855,7 @@ def service(request):
                 filter_onlyscenariobreaches=filter_onlyscenariobreaches,
                 filter_scenario=filter_scenario,
                 filter_active=filter_active)
-        
+
         elif action_name == 'get_breach_tree_search':
 
             filter_bool_dict = {'1': True, '0': False}
@@ -1874,7 +1867,7 @@ def service(request):
                 onlyscenariobreaches]
 
             filter = query.get('filter', 'all')
-            
+
             filter_scenario = FILTER_DICT[filter.lower()]
 
             return service_get_breach_tree_search(
@@ -1882,7 +1875,7 @@ def service(request):
                 filter_onlyscenariobreaches=filter_onlyscenariobreaches,
                 filter_scenario=filter_scenario,
                 filter_active=filter_active)
-        
+
         elif action_name == 'get_regions':
             regionset_id = query.get('regionset_id')
             return service_get_regions(

@@ -9,21 +9,13 @@ from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import division
 
-import uuid
-
-from gislib import pyramids
-
 from . import models
 
 
 def save_dataset_as_pyramid(dataset):
     """Return a Raster instance that represents a saved dataset."""
 
-    unique_id = uuid.uuid4()
-    raster = models.Raster(uuid=unique_id)
+    raster = models.Raster.objects.create()
+    raster.add(dataset, blocksize=(512, 512))
 
-    pyramid = pyramids.Pyramid(path=raster.pyramid_path)
-    pyramid.add(dataset, blocksize=(512, 512))
-
-    raster.save()
     return raster

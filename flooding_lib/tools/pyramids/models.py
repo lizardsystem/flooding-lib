@@ -17,6 +17,8 @@ from django.conf import settings
 from django.db import models
 from django_extensions.db.fields import UUIDField
 
+from gislib import pyramids
+
 SUBDIR_DEPTH = 6  # Number of characters of a UUID to use as directories
 
 
@@ -35,3 +37,10 @@ class Raster(models.Model):
             os.path.join(settings.BUILDOUT_DIR, 'var', 'pyramids'))
 
         return os.path.join(pyramid_base_dir, *self.uuid_parts())
+
+    @property
+    def pyramid(self):
+        return pyramids.Pyramid(path=self.pyramid_path)
+
+    def add(self, dataset, **kwargs):
+        self.pyramid.add(dataset, **kwargs)

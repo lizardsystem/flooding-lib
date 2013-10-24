@@ -15,7 +15,6 @@ import tempfile
 
 import gdal
 
-from django.conf import settings
 from django.test import TestCase
 
 from flooding_lib.tools import pyramids
@@ -34,7 +33,7 @@ class TestSaveDatasetAsPyramid(TestCase):
     def test_creates_pyramid_from_ascii(self):
         dataset = gdal.Open(ASCII_FILENAME)
 
-        settings.PYRAMIDS_BASE_DIR = self.data_dir
-        pyramids.save_dataset_as_pyramid(dataset)
+        with self.settings(PYRAMIDS_BASE_DIR=self.data_dir):
+            pyramids.save_dataset_as_pyramid(dataset)
 
         self.assertEquals(len(os.listdir(self.data_dir)), 1)

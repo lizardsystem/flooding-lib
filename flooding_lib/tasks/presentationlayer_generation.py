@@ -117,7 +117,8 @@ def get_or_create_model_shapefile_def(model_loc, output_dir, generate, srid,
             os.stat(os.path.join(model_loc.encode('utf8'), 'network.gr'))[8])
 
     source_up_to_date = False
-    log.debug('in db origin date is {0}'.format(check_source_file_last_modified))
+    log.debug(
+        'in db origin date is {0}'.format(check_source_file_last_modified))
     log.debug('file date is {0}'.format(source_file_last_modified))
     if (check_source_file_last_modified and (
             check_source_file_last_modified >= source_file_last_modified)):

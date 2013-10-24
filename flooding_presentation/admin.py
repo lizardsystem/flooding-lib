@@ -56,7 +56,7 @@ class PresentationTypeAdmin(admin.ModelAdmin):
         'name', 'active', 'custom_indicator', 'absolute', 'object',
         'parameter', 'geo_type', 'value_type', 'value_source_id_prefix',
         'generation_geo_source', 'generation_geo_source_part',
-        'geo_source_filter', 'permission_level')
+        'geo_source_filter', 'permission_level', 'code')
     inlines = [PresentationTypeInline, FieldInline, SupportLayersInline]
 
 
