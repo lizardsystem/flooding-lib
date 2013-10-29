@@ -792,6 +792,9 @@ def uber_service(request):
         presentationlayer_id = q.get('result_id', None)
         legend_id = q.get('legend_id', None)
         framenr = q.get('framenr', 0)
+        if framenr == 'undefined':
+            framenr = 0
+
         return service_get_gridframe(
             request,
             presentationlayer_id=presentationlayer_id,

@@ -11,12 +11,14 @@ class PresentationType(models.Model):
         (3, _('line')),
         (4, _('point')),
         (5, _('no geom')),
+        (6, _('pyramid')),
         )
     GEO_TYPE_GRID = 1
     GEO_TYPE_POLYGON = 2
     GEO_TYPE_LINE = 3
     GEO_TYPE_POINT = 4
     GEO_TYPE_NO_GEOM = 5
+    GEO_TYPE_PYRAMID = 6  # New way to store grids
 
     VALUE_TYPE = (
         (1, _('only_geometry')),

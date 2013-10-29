@@ -20,6 +20,7 @@ from flooding_base.models import Setting
 from flooding_presentation.models import PresentationLayer, PresentationType
 from flooding_lib.tools.approvaltool.models import ApprovalObject
 from flooding_lib.tools.approvaltool.models import ApprovalObjectType
+from flooding_lib.tools.pyramids import models as pyramidmodels
 from flooding_lib import coordinates
 from lizard_worker import models as workermodels
 from lizard_worker import executor as workerexecutor
@@ -1755,6 +1756,7 @@ class Result(models.Model):
     deltat = models.FloatField(null=True, blank=True)  # datetime.timedelta
 
     resultpngloc = models.CharField(max_length=200, null=True, blank=True)
+    raster = models.ForeignKey(pyramidmodels.Raster, null=True, blank=True)
     startnr = models.IntegerField(blank=True, null=True)  # mag weg
     firstnr = models.IntegerField(blank=True, null=True)
     lastnr = models.IntegerField(blank=True, null=True)

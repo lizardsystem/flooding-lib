@@ -43,4 +43,10 @@ class Raster(models.Model):
         return pyramids.Pyramid(path=self.pyramid_path)
 
     def add(self, dataset, **kwargs):
-        self.pyramid.add(dataset, **kwargs)
+        defaults = {
+            'tilesize': (1024, 1024),
+            'blocksize': (256, 256)
+            }
+        defaults.update(kwargs)
+
+        self.pyramid.add(dataset, **defaults)

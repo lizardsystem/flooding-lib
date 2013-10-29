@@ -108,7 +108,8 @@ def legend_shapedata(request):
         return render_to_response('visualization/legend_shapedata_point.html',
                                   {'title': title, 'blocks': blocks})
 
-    elif geo_type == PresentationType.GEO_TYPE_GRID:
+    elif geo_type in (PresentationType.GEO_TYPE_GRID,
+                      PresentationType.GEO_TYPE_PYRAMID):
         try:
             pl = get_object_or_404(
                 PresentationLayer, pk=request.GET['presentationlayer_id'])
