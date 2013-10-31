@@ -1075,7 +1075,7 @@ class Scenario(models.Model):
         'sharedproject.Province', null=True, blank=True)
 
     archived = models.BooleanField(default=False, verbose_name=_('Archived'))
-    archived_at = models.DateTimeField(null=True, blank=True, 
+    archived_at = models.DateTimeField(null=True, blank=True,
                                        verbose_name=_('Archived at'))
     archived_by = models.ForeignKey(User, null=True, blank=True,
                                     related_name='archived_by_user',

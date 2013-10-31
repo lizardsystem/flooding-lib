@@ -210,6 +210,20 @@ class PresentationLayer(models.Model):
                 (unicode(self.presentationtype),
                  self.SOURCE_APPLICATION_DICT[self.source_application]))
 
+    def results(self):
+        """Find the result(s) belonging to this presentationlayer."""
+        resulttypes = self.presentationtype.resulttype_set.all()
+        scenarios = self.scenario_set.all()
+
+        results = [
+            scenario.get_result(resulttype=resulttype)
+            for scenario in scenarios
+            for resulttype in resulttypes]
+
+        # Get result returns a newly created Result object, we don't
+        # want them
+        return [result for result in results if result.id]
+
 
 class Animation(models.Model):
     """ Information about the PresentationLayer's timeserie of data """

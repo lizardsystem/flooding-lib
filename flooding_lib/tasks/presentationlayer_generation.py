@@ -793,6 +793,20 @@ def get_or_create_pngserie_with_defaultlegend_from_old_results(scenario, pt):
                 pl.delete()
 
 
+def create_presentationlayer(scenario, presentationtype):
+    """Pyramids don't use presentationtool's functionality, but
+    require a simple presentationlayer as a link between
+    presentationlayer and result."""
+
+    if not scenario.presentationlayer.filter(
+        presentationtype=presentationtype).exists():
+        presentationlayer = PresentationLayer.objects.create(
+            presentationtype=presentationtype)
+        Scenario_PresentationLayer.objects.create(
+                scenario=scenario,
+                presentationlayer=presentationlayer)
+
+
 def perform_presentation_generation(scenario_id, tasktype_id):
     """main routine
 
@@ -814,6 +828,9 @@ def perform_presentation_generation(scenario_id, tasktype_id):
                              PresentationType.GEO_TYPE_POINT]:
             log.debug('type shape')
             get_or_create_shape_layer(scenario, pt, False)
+        elif pt.geo_type == PresentationType.GEO_TYPE_PYRAMID:
+            log.debug('type pyramid')
+            create_presentationlayer(scenario, pt)
         elif pt.geo_type == PresentationType.GEO_TYPE_NO_GEOM:
             log.debug('type no geom')
             log.debug('this is not for this task')

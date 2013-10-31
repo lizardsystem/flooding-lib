@@ -16,4 +16,6 @@ urlpatterns = patterns(
     url(r'^approval/',
         include('flooding_lib.tools.approvaltool.urls')),
 
+    url(r'^pyramids/',
+        include('flooding_lib.tools.pyramids.urls')),
 )

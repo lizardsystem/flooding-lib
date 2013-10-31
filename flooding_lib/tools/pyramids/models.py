@@ -42,6 +42,10 @@ class Raster(models.Model):
     def pyramid(self):
         return pyramids.Pyramid(path=self.pyramid_path)
 
+    @property
+    def layer(self):
+        return ':'.join(self.uuid_parts())
+
     def add(self, dataset, **kwargs):
         defaults = {
             'tilesize': (1024, 1024),
