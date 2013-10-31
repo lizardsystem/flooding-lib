@@ -1549,7 +1549,7 @@ def service(request):
             project_id = query.get('project_id')
             return service_get_project_regions(
                 request, project_id, permission=permission)
-        elif action_name == 'get_region_macps':
+        elif action_name == 'get_region_maps':
             region_id = query.get('region_id', None)
             return service_get_region_maps(request, region_id)
         elif action_name == 'get_cutofflocations':
