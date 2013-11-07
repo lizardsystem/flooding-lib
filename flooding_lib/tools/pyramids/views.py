@@ -11,10 +11,7 @@ from flooding_lib.services import JSONResponse
 logger = logging.getLogger(__name__)
 
 
-@require_GET
-def pyramid_parameters(request):
-    presentationlayer_id = request.GET.get('presentationlayer_id')
-
+def get_result_by_presentationlayer_id(presentationlayer_id):
     try:
         presentation_layer = models.PresentationLayer.objects.get(
             pk=presentationlayer_id)
@@ -39,9 +36,37 @@ def pyramid_parameters(request):
             .format(presentationlayer_id, result.id))
         raise Http404()
 
-    layer = result.raster.layer
+    return result
+
+
+@require_GET
+def pyramid_parameters(request):
+    presentationlayer_id = request.GET.get('presentationlayer_id')
+    result = get_result_by_presentationlayer_id(presentationlayer_id)
 
     return JSONResponse({
-            'layer': layer,
+            'layer': result.raster.layer,
             'styles': 'PuBu'
             })
+
+
+@require_GET
+def pyramid_value(request):
+    """Get value in pyramid at some lat/lon coordinate."""
+    presentationlayer_id = request.GET.get('presentationlayer_id')
+    lon = request.GET.get('lon')
+    lat = request.GET.get('lat')
+
+    result = get_result_by_presentationlayer_id(presentationlayer_id)
+    pyramid = result.layer
+
+    # Pyramids don't support get_value at a point yet, I have to stop
+    # here.
+
+    #return pyramid.get_data(...)
+
+    return JSONResponse({
+            'value':
+                "I would return the value of pyramid at directory {}"
+            " and lat/lon {}/{}, but that isn't supported yet by gislib."
+            .format(pyramid.pyramid_path, lat, lon)})

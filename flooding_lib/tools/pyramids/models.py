@@ -54,3 +54,51 @@ class Raster(models.Model):
         defaults.update(kwargs)
 
         self.pyramid.add(dataset, **defaults)
+
+
+class Animation(models.Model):
+    """Animations are stored in UUID-based directories, just like
+    Rasters, but with one subdirectory per animation frame."""
+    uuid = UUIDField(unique=True)
+    frames = models.IntegerField()
+
+    def uuid_parts(self):
+        chars = unicode(self.uuid)
+        return (
+            list(chars[:SUBDIR_DEPTH]) + [chars[SUBDIR_DEPTH:]])
+
+    def pyramid_path(self, frame_nr):
+        """Frame_nr starts at 1."""
+        if not (1 <= frame_nr <= self.frames):
+            raise ValueError(
+                "frame_nr ({}) outside of range [1, {}]."
+                .format(frame_nr, self.frames))
+
+        pyramid_base_dir = getattr(
+            settings, 'PYRAMIDS_BASE_DIR',
+            os.path.join(settings.BUILDOUT_DIR, 'var', 'pyramids'))
+
+        return os.path.join(
+            pyramid_base_dir,
+            os.path.join(*self.uuid_parts()),
+            str(frame_nr))
+
+    def pyramid(self, frame_nr):
+        """Frame_nr starts at 1."""
+        return pyramids.Pyramid(path=self.pyramid_path(frame_nr))
+
+    def layer(self, frame_nr):
+        return ':'.join(self.uuid_parts() + [str(frame_nr)])
+
+    def add(self, dataset, **kwargs):
+        """Adds a new frame, increases frame number."""
+        self.frames += 1
+
+        defaults = {
+            'tilesize': (1024, 1024),
+            'blocksize': (256, 256)
+            }
+        defaults.update(kwargs)
+
+        self.pyramid(self.frames).add(dataset, **defaults)
+        self.save()  # Save increased frames counter
