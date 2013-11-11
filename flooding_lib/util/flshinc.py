@@ -72,7 +72,7 @@ class Flsh(object):
 
         return [
             header['x0'], header['dx'], 0.0,
-            header['y0'], 0.0, header['dx']
+            header['y0'] + header['nrows'] * header['dx'], 0.0, -header['dx']
             ]
 
     def get_classes(self):
@@ -89,6 +89,14 @@ class Flsh(object):
             return zipf.open(namelist[0], mode='rU')
         else:
             return file(self.path, 'rU')
+
+    @property
+    def nrows(self):
+        return self._parse_header()['nrows']
+
+    @property
+    def ncols(self):
+        return self._parse_header()['ncols']
 
     def _parse_header(self):
         if hasattr(self, '_header'):

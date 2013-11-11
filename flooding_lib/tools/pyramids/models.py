@@ -60,7 +60,7 @@ class Animation(models.Model):
     """Animations are stored in UUID-based directories, just like
     Rasters, but with one subdirectory per animation frame."""
     uuid = UUIDField(unique=True)
-    frames = models.IntegerField()
+    frames = models.IntegerField(default=0)
 
     def uuid_parts(self):
         chars = unicode(self.uuid)
