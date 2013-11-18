@@ -27,7 +27,7 @@ install_requires = [
     'xlrd',
     'xlwt',
     'lizard_ui',
-    'threedilib',
+    #'threedilib',
     'django-excel-response',
 #    'pyproj', # We do need it, but requiring it doesn't work well
     ],

@@ -7,7 +7,13 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group
 from django.db.models import Q
 
-from flooding_lib.models import UserPermission, Project, Region, RegionSet
+from flooding_lib.models import (
+    UserPermission,
+    Project,
+    Region,
+    RegionSet,
+    ExternalWater
+)
 from flooding_lib.models import ProjectGroupPermission, Scenario
 
 log = logging.getLogger('permission_manager')
@@ -70,6 +76,10 @@ class SuperuserPermissionManager(object):
     def get_regions(self, permission=UserPermission.PERMISSION_SCENARIO_VIEW):
         """Superuser can see all Regions."""
         return Region.objects.all()
+
+    def get_external_waters(self, permission=UserPermission.PERMISSION_SCENARIO_VIEW):
+        """Superuser can see all ExternalWaters."""
+        return ExternalWater.objects.all()
 
     def get_scenarios(
         self, breach=None, permission=UserPermission.PERMISSION_SCENARIO_VIEW,

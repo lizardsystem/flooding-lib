@@ -14,6 +14,7 @@ from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.utils import simplejson
 from django.views.decorators.cache import never_cache
+from django.db.models.query import QuerySet
 
 from flooding_lib import scenario_sharing
 from flooding_base.models import Setting
@@ -53,7 +54,37 @@ RDS = (
     "+towgs84=565.237,50.0087,465.658,-0.406857,0.350733," +
     "-1.87035,4.0812 +units=m +no_defs")
 
+FILTER_DICT = {
+    'all': None,
+    'all_with_results': [
+        Scenario.STATUS_DISAPPROVED,
+        Scenario.STATUS_APPROVED,
+        Scenario.STATUS_CALCULATED
+    ],
+    'rejected': [Scenario.STATUS_DISAPPROVED],
+    'accepted': [Scenario.STATUS_APPROVED],
+    'verify': [Scenario.STATUS_CALCULATED],
+    'archive': [Scenario.STATUS_ARCHIVED]
+}
+
 #-------------------- Services ----------------
+
+def get_search_params(request):
+    search_by = None
+    region_ids= None
+    project_ids = None
+    externalwater_ids =None
+
+    if request.method == "GET":
+        search_by = request.GET.get('searchBy', None)
+
+    if search_by is not None:
+        search_by_parsed = simplejson.loads(search_by)
+        region_ids = search_by_parsed.get('Regio')
+        project_ids = search_by_parsed.get('Project')
+        externalwater_ids = search_by_parsed.get('Buitenwater')
+
+    return (region_ids, project_ids, externalwater_ids)
 
 
 def external_file_location(filename):
@@ -74,6 +105,161 @@ def external_file_location(filename):
         base_dir = Setting.objects.get(key='destination_dir').value
         full_name = os.path.join(base_dir, filename.lstrip('\\').lstrip('/'))
     return str(full_name)
+
+
+def get_region_as_tree_item(region, regionset_id=None):
+    """Create tree item."""   
+    west, south, east, north = region.geom.extent
+    tree_item = {
+        'rid': region.id,
+        'name': region.__unicode__(),
+        'parentid': regionset_id,
+        'isregion': True,
+        'west': west,
+        'south': south,
+        'east': east,
+        'north': north
+    }
+    return tree_item
+
+def create_breaches_tree(breach_list, externalwater_list, permission_manager):
+    """Create tree where externalwater is a parent and breach is a leaf."""
+    object_list = [
+        {'id': -ew.id,
+         'name': unicode(ew),
+         'type': ew.type,
+         'parentid': None,
+         'isbreach': False,
+         'info_url': None,
+         }
+        for ew in externalwater_list]
+
+    object_list += [
+        {'id': breach.id,
+         'name': unicode(breach),
+         'parentid': -breach.externalwater.id,
+         'isbreach': True,
+         'x': breach.geom.x,
+         'y': breach.geom.y,
+         'info_url': breach_info_url(breach, permission_manager),
+         }
+        for breach in breach_list]
+    return object_list
+
+
+def get_breaches_by_scenarios(scenarios):
+    breaches = None
+    for scenario in scenarios:
+        if breaches is None:
+            breaches = scenario.breaches.all()
+            continue
+        breaches = breaches | scenario.breaches.all()
+    if breaches is not None:
+        breaches = breaches.distinct()
+    return breaches
+
+
+def get_projects_by_regions(region_ids):
+    """Retrieve all unique projects for the passed regions."""
+    projects = Project.objects.none()
+    scenarios = Scenario.objects.none()
+    
+    breaches = Breach.objects.filter(region__id__in=region_ids)
+    for breach in breaches:
+        scenarios = scenarios | breach.scenario_set.all().distinct()
+    projects = get_projects_by_scenarios(scenarios)
+    return projects.distinct()
+
+
+def get_scenarios_by_externalwaters(externalwater_ids):
+    """"
+    Return queryset of scenarios by externalwaters or None,
+    ExternalWater - Breach - Scenario.
+    """
+    breaches = Breach.objects.filter(
+        externalwater__id__in=externalwater_ids)
+    scenarios = Scenario.objects.none()
+    for breach in breaches:
+        scenarios = scenarios | breach.scenario_set.all()
+    return scenarios
+
+
+def get_scenarios_by_projects(project_ids):
+    """
+    Return query of scenarios by projects or None,
+    Project - Scenario.
+    """
+    scenarios = Scenario.objects.none()
+    projects = Project.objects.filter(id__in=project_ids)
+    for project in projects:
+        scenarios = scenarios | project.scenarios.all()
+    return scenarios
+
+
+def get_projects_by_scenarios(scenarios):
+    projects = Project.objects.none()
+    for scenario in scenarios:
+        projects = projects | scenario.projects.all()
+    return projects
+
+
+@never_cache
+@receives_permission_manager
+def service_get_region_tree_search(
+    request, permission_manager,
+    permission=UserPermission.PERMISSION_SCENARIO_VIEW,
+    filter_has_model=False):
+    """Get a tree of regionsets and regions
+
+    optional: Filter on permissions
+
+    optional: Filter which selects regions through through project -
+                    scenario - breaches - regions, otherwise
+                    project-regionsets-regions
+
+    optional: filter_onlyscenariobreaches=filter only the breaches in
+    scenario's
+
+    optional: filter_scenario: filter on scenario status. choices are
+    None or Scenario.STATUS_*
+
+    required: list of region's ids in request.
+    """
+    
+    region_ids = None
+    project_ids = None
+    externalwater_ids = None
+
+    if request.method == "GET":
+        #see if there's a parameter called "permission"
+        permission_from_get = request.GET.get('permission')
+        if permission_from_get is not None:
+            permission = int(permission_from_get)
+
+    regionset_list = permission_manager.get_regionsets(permission)
+    region_list_total = permission_manager.get_regions(permission)
+    region_ids, project_ids, externalwater_ids = get_search_params(request)
+    if ((region_ids is not None) and (len(region_ids) > 0)):
+        region_list_total = region_list_total.filter(
+            id__in=region_ids)
+    if ((project_ids is not None) and (len(project_ids) > 0)):
+        scenarios = get_scenarios_by_projects(project_ids)
+        breaches = Breach.objects.filter(scenario__in=scenarios).distinct()
+        region_list_total = region_list_total.filter(
+            breach__in=breaches).distinct()
+    if ((externalwater_ids is not None) and (len(externalwater_ids) > 0)):
+        scenarios = get_scenarios_by_externalwaters(externalwater_ids)
+        projects = get_projects_by_scenarios(scenarios)
+        region_list_total = region_list_total.filter(
+            project__in=projects)
+
+    object_list = []
+    region_list_total = region_list_total.distinct().order_by("name")
+    for region in region_list_total:
+        object_list.append(get_region_as_tree_item(region))
+    
+    return HttpResponse(
+        simplejson.dumps(object_list), mimetype="application/json")
 
 
 @never_cache
@@ -106,6 +292,7 @@ def service_get_region_tree(
     region_list_total = permission_manager.get_regions(permission)
 
     object_list = []
+
     for regionset in regionset_list:
 
         if filter_has_model:
@@ -118,46 +305,60 @@ def service_get_region_tree(
 
         if region_list.count() > 0:
             rswest, rssouth, rseast, rsnorth = (1e8, 1e8, None, None)
-            for region in region_list:
-                west, south, east, north = region.geom.extent
+        for region in region_list:
+            west, south, east, north = region.geom.extent
+            object_list.append(get_region_as_tree_item(region, regionset.id))
+            
+            #used function below because of performance. Instead
+            #of #west, south, east, north =
+            #regionset.regions.unionagg().extent
+            if east:
+                rswest = min(rswest, west)
+                rssouth = min(rssouth, south)
+                rseast = max(rseast, east)
+                rsnorth = max(rsnorth, north)
+  
+        if regionset.parent:
+            parentid = regionset.parent.id
+        else:
+            parentid = None
 
-                object_list.append({'rid': region.id,
-                                    'name': region.__unicode__(),
-                                    'parentid': regionset.id,
-                                    'isregion': True,
-                                    'west': west,
-                                    'south': south,
-                                    'east': east,
-                                    'north': north,
-                                    })
-                #used function below because of performance. Instead
-                #of #west, south, east, north =
-                #regionset.regions.unionagg().extent
-                if east:
-                    rswest = min(rswest, west)
-                    rssouth = min(rssouth, south)
-                    rseast = max(rseast, east)
-                    rsnorth = max(rsnorth, north)
-
-            if regionset.parent:
-                parentid = regionset.parent.id
-            else:
-                parentid = None
-            #add regionset
-
-            object_list.append({'rsid': regionset.id,
-                                'name': regionset.__unicode__(),
-                                'parentid': parentid,
-                                'isregion': False,
-                                'west': rswest,
-                                'south': rssouth,
-                                'east': rseast,
-                                'north': rsnorth,
-                                })
-
+        object_list.append({'rsid': regionset.id,
+                            'name': regionset.__unicode__(),
+                            'parentid': parentid,
+                            'isregion': False,
+                            'west': rswest,
+                            'south': rssouth,
+                            'east': rseast,
+                            'north': rsnorth,
+                            })
+    
     return HttpResponse(
         simplejson.dumps(object_list), mimetype="application/json")
-#render_to_response('flooding/regiontree.json', {'object_list': object_list})
+
+
+def service_get_regions_maps(request,
+                            region_ids):
+    """Get maps linked to scenario's
+
+    """
+
+    regions = Region.objects.filter(id__in=region_ids)
+    object_list = []
+    for region in regions:
+        maps = region.maps.filter(active=True).order_by('index')
+        object_list.extend([{'id': map.id,
+                            'name': map.name,
+                            'url': map.url,
+                            'layers': map.layers,
+                            'transparent': map.transparent,
+                            'tiled': map.tiled,
+                            'srs': map.srs
+                            } for map in maps])
+    response = HttpResponse(
+        simplejson.dumps(object_list), mimetype="application/json")
+    response['Cache-Control'] = 'max-age=0'
+    return response
 
 
 def service_get_region_maps(request,
@@ -165,7 +366,6 @@ def service_get_region_maps(request,
     """Get maps linked to scenario's
 
     """
-
     region = get_object_or_404(Region, pk=region_id)
     print str(region)
     object_list = []
@@ -206,6 +406,48 @@ def breach_info_url(breach, permission_manager):
                 kwargs=dict(project_id=project_id, breach_id=breach.id))
 
     return None
+
+
+@never_cache
+@receives_permission_manager
+def service_get_breach_tree_search(
+    request, permission_manager,
+    permission=UserPermission.PERMISSION_SCENARIO_VIEW,
+    filter_onlyscenariobreaches=False,
+    filter_scenario=None, filter_active=None):
+    """Get breaches tree on search."""
+    permitted_scenarios = permission_manager.get_scenarios(
+        None, permission, filter_scenario)
+    permitted_projects = permission_manager.get_projects(permission)
+    region_ids, project_ids, externalwater_ids = get_search_params(request)
+    breaches_list = Breach.objects.all()
+    
+    if ((region_ids is not None) and (len(region_ids) > 0)):
+        breaches = Breach.objects.none()
+        for region_id in region_ids:
+            region = get_object_or_404(Region, pk=region_id)
+            if not(permission_manager.check_region_permission(
+                    region, permission)):
+                raise Http404
+            breaches = breaches | region.breach_set.filter(
+                scenario__in=permitted_scenarios).distinct()
+        breaches_list = breaches_list.filter(id__in=list(breaches.values_list('id', flat=True)))
+    if ((project_ids is not None) and (len(project_ids) > 0)):
+        projects_list = permitted_projects.filter(id__in=project_ids)
+        scenarios = get_scenarios_by_projects(
+            list(projects_list.values_list('id', flat=True)))
+        breaches_list = breaches_list.filter(scenario__in=scenarios).distinct()
+    if ((externalwater_ids is not None) and (len(externalwater_ids) > 0)):
+        breaches_list = breaches_list.filter(
+                externalwater__id__in=externalwater_ids)
+
+    externalwater_list = ExternalWater.objects.filter(
+        breach__in=breaches_list).distinct()
+    
+    object_list = create_breaches_tree(
+        breaches_list, externalwater_list, permission_manager)
+    return HttpResponse(
+        simplejson.dumps(object_list), mimetype="application/json")
 
 
 @never_cache
@@ -255,28 +497,82 @@ def service_get_breach_tree(
 
     externalwater_list = ExternalWater.objects.filter(
         breach__in=breach_list).distinct()
+    
+    object_list = create_breaches_tree(
+        breach_list, externalwater_list, permission_manager)
+    return HttpResponse(
+        simplejson.dumps(object_list), mimetype="application/json")
 
-    object_list = [
-        {'id': -ew.id,
-         'name': unicode(ew),
-         'type': ew.type,
-         'parentid': None,
-         'isbreach': False,
-         'info_url': None,
-         }
-        for ew in externalwater_list]
 
-    object_list += [
-        {'id': breach.id,
-         'name': unicode(breach),
-         'parentid': -breach.externalwater.id,
-         'isbreach': True,
-         'x': breach.geom.x,
-         'y': breach.geom.y,
-         'info_url': breach_info_url(breach, permission_manager),
-         }
-        for breach in breach_list]
+@never_cache
+@receives_permission_manager
+def service_get_scenario_tree_search(
+    request, permission_manager,
+    permission=UserPermission.PERMISSION_SCENARIO_VIEW,
+    filter_scenarioproject=None,
+    filter_onlyprojectswithscenario=False,
+    filter_scenariostatus=None):
+    """Get tree with projects and scenario's as leafs given a single breach.
 
+    Input: region_ids, project_ids, externalwater_ids
+    """
+    if filter_scenariostatus == 0:
+        filter_scenariostatus = []
+    #select all projects that you can see
+    scenario_list = permission_manager.get_scenarios(
+        breach=None, permission=permission, status_list=filter_scenariostatus)
+    region_ids, project_ids, externalwater_ids = get_search_params(request)
+    permitted_projects = permission_manager.get_projects(permission)
+    
+    project_list = permitted_projects
+    if ((region_ids is not None) and (len(region_ids) > 0)):
+        regions_projects = get_projects_by_regions(region_ids)
+        project_list = project_list.filter(
+            id__in=list(regions_projects.values_list('id', flat=True)))
+        pr_scenarios = get_scenarios_by_projects(
+            list(project_list.values_list('id', flat=True)))
+        scenario_list = scenario_list.filter(
+            id__in=list(pr_scenarios.values_list('id', flat=True)))
+    if ((project_ids is not None) and (len(project_ids) > 0)):
+        project_list = project_list.filter(id__in=project_ids)
+        pr_scenarios = get_scenarios_by_projects(project_ids)
+        scenario_list = scenario_list.filter(
+            id__in=list(pr_scenarios.values_list('id', flat=True)))
+    if ((externalwater_ids is not None) and (len(externalwater_ids) > 0)):
+        ew_scenarios = get_scenarios_by_externalwaters(
+            externalwater_ids)
+        scenario_list = scenario_list.filter(
+            id__in=list(ew_scenarios.values_list('id', flat=True)))
+
+    object_list = []
+    projects_shown = set()
+
+    for scenario in scenario_list:
+        # If a scenario is in multiple projects, we add it to the object
+        # list once for each project.
+        for project in scenario.projects.all():
+            if (project in project_list and
+                scenario.visible_in_project(
+                    permission_manager, project, permission)):
+
+                projects_shown.add(project.id)
+                object_list.append({'sid': scenario.id,
+                                    'name': scenario.__unicode__(),
+                                    'parentid': project.id,
+                                    'isscenario': True,
+                                    'status': scenario.get_status(),
+                                    'strategy_id': scenario.strategy_id,
+                                    })
+    for project in project_list:
+        # Only show the projects under which there are actually
+        # scenarios visible to this user.
+        if project.id in projects_shown:
+            object_list.append({'pid': project.id,
+                                'name': project.__unicode__(),
+                                'parentid': None,
+                                'isscenario': False,
+                                'status': 0,
+                                })
     return HttpResponse(
         simplejson.dumps(object_list), mimetype="application/json")
 
@@ -297,7 +593,6 @@ def service_get_scenario_tree(
     """
     if filter_scenariostatus == 0:
         filter_scenariostatus = []
-
     #select all projects that you can see
     scenario_list = permission_manager.get_scenarios(
         breach_id, permission, filter_scenariostatus)
@@ -481,6 +776,20 @@ def service_get_projects(
         {'project_list': project_list})
 
 
+@never_cache
+@receives_permission_manager
+def service_get_projects_only(
+    request, permission_manager,
+    permission=UserPermission.PERMISSION_SCENARIO_VIEW):
+    """Get the list of projects with given permission and return in
+    JSON format."""
+
+    project_list = permission_manager.get_projects(permission).distinct()
+    return render_to_response(
+        'flooding/projects.json',
+        {'project_list': project_list})
+
+
 def get_breaches_info(scenario):
     info = {}
     breaches = scenario.breaches.all()
@@ -569,6 +878,23 @@ def service_get_all_regions(
 
     regions = permission_manager.get_regions(permission).order_by('name')
     result_list = [{'id': r.id, 'name': str(r.name)} for r in regions]
+    return HttpResponse(
+        simplejson.dumps(result_list), mimetype="application/json")
+
+
+@never_cache
+@receives_permission_manager
+def service_get_external_waters(
+    request, permission_manager,
+    permission=UserPermission.PERMISSION_SCENARIO_VIEW):
+    """Get the list of external waters with given permission
+    and return in JSON format."""
+    permitted_scenarios = permission_manager.get_scenarios(
+        None, permission)
+    breaches_list = Breach.objects.filter(scenario__in=permitted_scenarios).distinct()
+    external_waters = ExternalWater.objects.filter(
+            breach__in=breaches_list).distinct().order_by('name')
+    result_list = [{'id': ew.id, 'name': str(ew.name)} for ew in external_waters]
     return HttpResponse(
         simplejson.dumps(result_list), mimetype="application/json")
 
@@ -1428,7 +1754,6 @@ def service(request):
             raise Http404
 
         action_name = query.get('action', query.get('ACTION')).lower()
-
         # I have no idea why we let the user decide which permission level
         # to use, but OK...
         permission = int(
@@ -1437,7 +1762,8 @@ def service(request):
 
         if action_name == 'get_projects':
             return service_get_projects(request, permission)
-
+        elif action_name == 'get_projects_only':
+            return service_get_projects_only(request, permission)
         elif action_name == 'get_scenarios_from_project':
             project_id = query.get('project_id')
             return service_get_scenarios_from_project(
@@ -1458,21 +1784,23 @@ def service(request):
                 query.get('onlyprojectswithscenario', '0')]
 
             filter = query.get('filter', 'all')
-            filter_dict = {
-                'all': None,
-                'all_with_results': [
-                    Scenario.STATUS_DISAPPROVED,
-                    Scenario.STATUS_APPROVED,
-                    Scenario.STATUS_CALCULATED],
-                'rejected': [Scenario.STATUS_DISAPPROVED],
-                'accepted': [Scenario.STATUS_APPROVED],
-                'verify': [Scenario.STATUS_CALCULATED],
-                'archive': [Scenario.STATUS_ARCHIVED],
-                }
-            filter_scenariostatus = filter_dict[filter.lower()]
+            filter_scenariostatus = FILTER_DICT[filter.lower()]
 
             return service_get_scenario_tree(
                request, breach_id, permission=permission,
+               filter_onlyprojectswithscenario=filter_onlyprojectswithscenario,
+               filter_scenariostatus=filter_scenariostatus)
+
+        elif action_name == 'get_scenario_tree_search':
+            true_or_false = {'0': False, '1': True, 'None': None}
+            filter_onlyprojectswithscenario = true_or_false[
+                query.get('onlyprojectswithscenario', '0')]
+
+            filter = query.get('filter', 'all')
+            filter_scenariostatus = FILTER_DICT[filter.lower()]
+
+            return service_get_scenario_tree_search(
+               request, permission=permission,
                filter_onlyprojectswithscenario=filter_onlyprojectswithscenario,
                filter_scenariostatus=filter_scenariostatus)
 
@@ -1491,6 +1819,10 @@ def service(request):
             return service_get_cutofflocations_from_scenario(
                 request, scenario_id, permission=permission)
 
+        elif action_name == 'get_external_waters':
+            return service_get_external_waters(
+                request, permission=permission)
+                                              
         elif action_name == 'get_regionsets':
             return service_get_regionsets(request, permission=permission)
 
@@ -1499,8 +1831,13 @@ def service(request):
 
         elif action_name == 'get_region_tree':
             filter_has_model = int(query.get('has_model', 0))
-
             return service_get_region_tree(
+                request, permission=permission,
+                filter_has_model=filter_has_model)
+
+        elif action_name == 'get_region_tree_search':
+            filter_has_model = int(query.get('has_model', 0))
+            return service_get_region_tree_search(
                 request, permission=permission,
                 filter_has_model=filter_has_model)
 
@@ -1522,25 +1859,35 @@ def service(request):
                 onlyscenariobreaches]
 
             filter = query.get('filter', 'all')
-            filter_dict = {
-                'all': None,
-                'all_with_results': [
-                    Scenario.STATUS_DISAPPROVED,
-                    Scenario.STATUS_APPROVED,
-                    Scenario.STATUS_CALCULATED],
-                'rejected': [Scenario.STATUS_DISAPPROVED],
-                'accepted': [Scenario.STATUS_APPROVED],
-                'verify': [Scenario.STATUS_CALCULATED],
-                'archive': [Scenario.STATUS_ARCHIVED],
-                }
-            filter_scenario = filter_dict[filter.lower()]
+            
+            filter_scenario = FILTER_DICT[filter.lower()]
 
             return service_get_breach_tree(
                 request, permission=permission, region_id=region_id,
                 filter_onlyscenariobreaches=filter_onlyscenariobreaches,
                 filter_scenario=filter_scenario,
                 filter_active=filter_active)
+        
+        elif action_name == 'get_breach_tree_search':
 
+            filter_bool_dict = {'1': True, '0': False}
+
+            active = query.get('active', '0')
+            onlyscenariobreaches = query.get('onlyscenariobreaches', '0')
+            filter_active = filter_bool_dict[active]
+            filter_onlyscenariobreaches = filter_bool_dict[
+                onlyscenariobreaches]
+
+            filter = query.get('filter', 'all')
+            
+            filter_scenario = FILTER_DICT[filter.lower()]
+
+            return service_get_breach_tree_search(
+                request, permission=permission,
+                filter_onlyscenariobreaches=filter_onlyscenariobreaches,
+                filter_scenario=filter_scenario,
+                filter_active=filter_active)
+        
         elif action_name == 'get_regions':
             regionset_id = query.get('regionset_id')
             return service_get_regions(
@@ -1816,8 +2163,25 @@ def service(request):
                                         True)
         elif action_name == 'upload_ror_keringen':
             return upload_ror_keringen(request)
+        elif action_name == 'search_navigation_objects':
+            return service_search_navigation_objects(
+                request)
         else:
             raise Http404
+
+@never_cache
+@receives_permission_manager
+def service_search_navigation_objects(
+    request, permission_manager,
+    permission=UserPermission.PERMISSION_SCENARIO_VIEW):
+    """Get the list of external waters with given permission
+    and return in JSON format."""
+    params = request.POST.get('params')
+    #for param in params:
+    #    if param.get('')
+    result_list = [{1: 1}, {2:2}]
+    return HttpResponse(
+        simplejson.dumps(result_list), mimetype="application/json")
 
 
 @receives_permission_manager

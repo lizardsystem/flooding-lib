@@ -1,0 +1,9 @@
+{# 20090217 k.k.ha template for json project file #}
+{% spaceless %}
+[
+  {% for p in project_list %}
+  {id:{{ p.id }},name:'{{ p.name }}'}
+  {% ifequal forloop.last 0 %},{% endifequal %}
+  {% endfor %}
+]
+{% endspaceless %}

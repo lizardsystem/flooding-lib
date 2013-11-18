@@ -49,7 +49,7 @@ scenario_list_search_defaults = {
     'q': '',
     'page_nr': 1,
     'items_per_page': 25,
-    'status': [20],
+    'status': [10, 20, 30, 40, 50, 60, 70, 80],
     'regionset': 0,
     'region': 0,
     'breach': 0,
