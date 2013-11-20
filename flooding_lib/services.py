@@ -122,7 +122,7 @@ def get_region_as_tree_item(region, regionset_id=None):
     }
     return tree_item
 
-def create_breaches_tree(breach_list, externalwater_list, permission_manager):
+def create_breaches_tree(breach_list, externalwater_list, permission_manager, issearch=False):
     """Create tree where externalwater is a parent and breach is a leaf."""
     object_list = [
         {'id': -ew.id,
@@ -142,6 +142,12 @@ def create_breaches_tree(breach_list, externalwater_list, permission_manager):
          'x': breach.geom.x,
          'y': breach.geom.y,
          'info_url': breach_info_url(breach, permission_manager),
+         'rid': breach.region.id,
+         'west': breach.region.geom.extent[0],
+         'south': breach.region.geom.extent[1],
+         'east': breach.region.geom.extent[2],
+         'north': breach.region.geom.extent[3],
+         'issearch': issearch
          }
         for breach in breach_list]
     return object_list
@@ -337,30 +343,6 @@ def service_get_region_tree(
         simplejson.dumps(object_list), mimetype="application/json")
 
 
-def service_get_regions_maps(request,
-                            region_ids):
-    """Get maps linked to scenario's
-
-    """
-
-    regions = Region.objects.filter(id__in=region_ids)
-    object_list = []
-    for region in regions:
-        maps = region.maps.filter(active=True).order_by('index')
-        object_list.extend([{'id': map.id,
-                            'name': map.name,
-                            'url': map.url,
-                            'layers': map.layers,
-                            'transparent': map.transparent,
-                            'tiled': map.tiled,
-                            'srs': map.srs
-                            } for map in maps])
-    response = HttpResponse(
-        simplejson.dumps(object_list), mimetype="application/json")
-    response['Cache-Control'] = 'max-age=0'
-    return response
-
-
 def service_get_region_maps(request,
                             region_id):
     """Get maps linked to scenario's
@@ -445,7 +427,7 @@ def service_get_breach_tree_search(
         breach__in=breaches_list).distinct()
     
     object_list = create_breaches_tree(
-        breaches_list, externalwater_list, permission_manager)
+        breaches_list, externalwater_list, permission_manager, issearch=True)
     return HttpResponse(
         simplejson.dumps(object_list), mimetype="application/json")
 
@@ -526,13 +508,20 @@ def service_get_scenario_tree_search(
     
     project_list = permitted_projects
     if ((region_ids is not None) and (len(region_ids) > 0)):
-        regions_projects = get_projects_by_regions(region_ids)
+        breaches = Breach.objects.none()
+        for region_id in region_ids:
+            region = get_object_or_404(Region, pk=region_id)
+            if not(permission_manager.check_region_permission(
+                    region, permission)):
+                raise Http404
+            breaches = breaches | region.breach_set.filter(
+                scenario__in=scenario_list).distinct()
+        scenarios = Scenario.objects.none()
+        for breach in breaches:
+            scenarios = scenarios | breach.scenario_set.all()
         project_list = project_list.filter(
-            id__in=list(regions_projects.values_list('id', flat=True)))
-        pr_scenarios = get_scenarios_by_projects(
-            list(project_list.values_list('id', flat=True)))
-        scenario_list = scenario_list.filter(
-            id__in=list(pr_scenarios.values_list('id', flat=True)))
+            id__in=list(get_projects_by_scenarios(scenarios).values_list('id', flat=True)))
+        scenario_list = scenarios
     if ((project_ids is not None) and (len(project_ids) > 0)):
         project_list = project_list.filter(id__in=project_ids)
         pr_scenarios = get_scenarios_by_projects(project_ids)
@@ -554,14 +543,20 @@ def service_get_scenario_tree_search(
             if (project in project_list and
                 scenario.visible_in_project(
                     permission_manager, project, permission)):
-
+                
                 projects_shown.add(project.id)
+                breaches = scenario.breaches.all()
+                breach_id = -1
+                if breaches.exists():
+                    breach_id = breaches[0].id
                 object_list.append({'sid': scenario.id,
                                     'name': scenario.__unicode__(),
                                     'parentid': project.id,
                                     'isscenario': True,
                                     'status': scenario.get_status(),
                                     'strategy_id': scenario.strategy_id,
+                                    'breachid': breach_id,
+                                    'issearch': True
                                     })
     for project in project_list:
         # Only show the projects under which there are actually

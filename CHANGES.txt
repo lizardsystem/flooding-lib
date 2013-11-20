@@ -4,7 +4,7 @@ Changelog of flooding-lib
 3.4 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Select breaches in the navigation tree on click.
 
 
 3.03 (2013-11-18)
