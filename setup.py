@@ -1,7 +1,7 @@
 from setuptools import setup
 import os.path
 
-version = '3.4dev'
+version = '3.04'
 
 long_description = '\n\n'.join([
     open('README.txt').read(),
