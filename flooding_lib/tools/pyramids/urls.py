@@ -8,5 +8,8 @@ urlpatterns = patterns(
         name='pyramids_parameters'),
     url(r'^animated_pyramid_parameters/$',
         'flooding_lib.tools.pyramids.views.animated_pyramid_parameters',
-        name='animated_pyramids_parameters')
+        name='animated_pyramids_parameters'),
+    url(r'^pyramid_value/$',
+        'flooding_lib.tools.pyramids.views.pyramid_value',
+        name='pyramid_value')
 )

@@ -18,6 +18,16 @@ RD_PROJECTION = Proj(RD)
 GOOGLE_PROJECTION = Proj(GOOGLE)
 
 
+def google_to_rd(x, y):
+    """Return RD coordinates from GOOGLE coordinates."""
+    return transform(GOOGLE_PROJECTION, RD_PROJECTION, x, y)
+
+
+def rd_to_google(x, y):
+    """Return GOOGLE coordinates from RD coordinates."""
+    return transform(RD_PROJECTION, GOOGLE_PROJECTION, x, y)
+
+
 class GeoImage(object):
     def __init__(self, filename):
         """Filename is a geo-aware image filename (e.g. a .png with

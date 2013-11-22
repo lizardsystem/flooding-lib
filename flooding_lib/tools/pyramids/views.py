@@ -2,18 +2,18 @@
 
 import logging
 
-from gislib import projections
-
 from django.http import Http404
 from django.views.decorators.http import require_GET
 
 from flooding_presentation import models
+from flooding_lib.util import geo
 from flooding_lib.services import JSONResponse
 
 logger = logging.getLogger(__name__)
 
 
-def get_result_by_presentationlayer_id(presentationlayer_id):
+def get_result_by_presentationlayer_id(
+    presentationlayer_id, return_layer=False):
     try:
         presentation_layer = models.PresentationLayer.objects.get(
             pk=presentationlayer_id)
@@ -38,7 +38,10 @@ def get_result_by_presentationlayer_id(presentationlayer_id):
             .format(presentationlayer_id, result.id))
         raise Http404()
 
-    return result
+    if return_layer:
+        return result, presentation_layer
+    else:
+        return result
 
 
 @require_GET
@@ -68,21 +71,23 @@ def animated_pyramid_parameters(request):
 def pyramid_value(request):
     """Get value in pyramid at some lat/lon coordinate."""
     presentationlayer_id = request.GET.get('presentationlayer_id')
-    lat = request.GET.get('lat')
-    lon = request.GET.get('lon')
+    x = request.GET.get('lon')  # In Google
+    y = request.GET.get('lat')
 
-    result = get_result_by_presentationlayer_id(presentationlayer_id)
-    pyramid = result.layer
+    rd_x, rd_y = geo.google_to_rd(x, y)
 
-    # Pyramids don't support get_value at a point yet, I have to stop
-    # here.
+    result, presentation_layer = get_result_by_presentationlayer_id(
+        presentationlayer_id, return_layer=True)
+    unit = presentation_layer.presentationtype.unit
 
-    values = pyramid.get_data(
-        wkt='POINT({lat} {lon})'.format(lat=lat, lon=lon),
-        crs=projections.WGS84)
+    pyramid = result.raster.pyramid
 
-    if values and values[0] is not None:
-        return JSONResponse({'value': values[0]})
+    value = pyramid.fetch_single_point(rd_x, rd_y)[0]
+
+    if value is not None and value > 0:
+        return JSONResponse({
+                'value': value,
+                'unit': unit or ""
+                })
     else:
         return JSONResponse({})
-
