@@ -11,11 +11,17 @@ from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import division
 
+import gdal
+import Image
+import io
+from matplotlib import cm
+import numpy as np
 import os
 
 from django.conf import settings
 from django.db import models
 from django_extensions.db.fields import UUIDField
+from django_extensions.db.fields.json import JSONField
 
 from gislib import pyramids
 
@@ -48,8 +54,8 @@ class Raster(models.Model):
 
     def add(self, dataset, **kwargs):
         defaults = {
-            'tilesize': (1024, 1024),
-            'blocksize': (256, 256)
+            'raster_size': (1024, 1024),
+            'block_size': (256, 256)
             }
         defaults.update(kwargs)
 
@@ -57,48 +63,64 @@ class Raster(models.Model):
 
 
 class Animation(models.Model):
-    """Animations are stored in UUID-based directories, just like
-    Rasters, but with one subdirectory per animation frame."""
-    uuid = UUIDField(unique=True)
+    """We don't store animations in pyramids anymore, but as
+    individual geotiffs.  Filenames are of the form 'dataset0001.tiff'
+    and they are stored in the results directory (same place as the
+    old .pngs).
+
+    This model keeps metadata of the animation. We _assume_ all frames
+    are RD projection (28992)."""
+
     frames = models.IntegerField(default=0)
+    cols = models.IntegerField(default=0)
+    rows = models.IntegerField(default=0)
+    geotransform = JSONField()
+    basedir = models.TextField()
 
-    def uuid_parts(self):
-        chars = unicode(self.uuid)
-        return (
-            list(chars[:SUBDIR_DEPTH]) + [chars[SUBDIR_DEPTH:]])
-
-    def pyramid_path(self, frame_nr):
-        """Frame_nr starts at 1."""
-        if not (1 <= frame_nr <= self.frames):
+    def get_dataset_path(self, i):
+        if not (0 <= i < self.frames):
             raise ValueError(
-                "frame_nr ({}) outside of range [1, {}]."
-                .format(frame_nr, self.frames))
-
-        pyramid_base_dir = getattr(
-            settings, 'PYRAMIDS_BASE_DIR',
-            os.path.join(settings.BUILDOUT_DIR, 'var', 'pyramids'))
+                "i must be a valid frame number, is {}, num frames is {}."
+                .format(i, self.frames))
 
         return os.path.join(
-            pyramid_base_dir,
-            os.path.join(*self.uuid_parts()),
-            str(frame_nr))
+            self.basedir.encode('utf8'), b'dataset{:04d}.tiff'.format(i))
 
-    def pyramid(self, frame_nr):
-        """Frame_nr starts at 1."""
-        return pyramids.Pyramid(path=self.pyramid_path(frame_nr))
+    @property
+    def bounds(self):
+        x0, dxx, dxy, y0, dyx, dyy = self.geotransform['geotransform']
 
-    def layer(self, frame_nr):
-        return ':'.join(self.uuid_parts() + [str(frame_nr)])
+        # Note that JSONField returns Decimals, not floats...
+        return {
+            'west': float(x0),
+            'east': float(x0 + self.cols * dxx),
+            'north': float(y0),
+            'south': float(y0 + self.rows * dyy),
+            'projection': 28992,
+        }
 
-    def add(self, dataset, **kwargs):
-        """Adds a new frame, increases frame number."""
-        self.frames += 1
+    @property
+    def gridsize(self):
+        # Assume square pixels, that is, dxx == dyy == gridsize
+        return float(self.geotransform['geotransform'][1])  # dxx
 
-        defaults = {
-            'tilesize': (1024, 1024),
-            'blocksize': (256, 256)
-            }
-        defaults.update(kwargs)
+    def __unicode__(self):
+        return "{} frames in {}".format(self.frames, self.basedir)
 
-        self.pyramid(self.frames).add(dataset, **defaults)
-        self.save()  # Save increased frames counter
+    def save_image_to_response(self, response, framenr=0, colormap='PuBu'):
+        dataset = gdal.Open(self.get_dataset_path(framenr))
+        colormap = cm.get_cmap(colormap)
+
+        # Get data as masked array
+        data = np.ma.masked_equal(
+            dataset.GetRasterBand(1).ReadAsArray(), 0, copy=False)
+
+        # Apply colormap
+        rgba = colormap(data, bytes=True)
+
+        # Turn into PIL image
+        image = Image.fromarray(rgba)
+
+        # Save into response
+        response['Content-type'] = 'image/png'
+        image.save(response, 'png')

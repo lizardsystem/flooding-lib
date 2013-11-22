@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import json
 import Image
 import StringIO
 import mapnik
@@ -11,7 +10,8 @@ from django.contrib.auth.models import User
 from django.conf import settings
 from django.contrib.gis.geos import GEOSGeometry, MultiPolygon
 from django.core.urlresolvers import reverse
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse
+from django.http import Http404
 from django.shortcuts import render_to_response, get_object_or_404
 
 from django.views.decorators.cache import never_cache
@@ -44,6 +44,7 @@ from flooding_lib.views import service_save_new_3di_scenario
 from flooding_lib.views import service_select_strategy
 from flooding_lib.tools.importtool.models import InputField
 from flooding_lib.tools.importtool.models import RORKering
+from flooding_lib.util.http import JSONResponse
 
 SPHERICAL_MERCATOR = (
     '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 ' +
@@ -86,11 +87,6 @@ def get_search_params(request):
         externalwater_ids = search_by_parsed.get('Buitenwater')
 
     return (region_ids, project_ids, externalwater_ids)
-
-
-def JSONResponse(ob):
-    return HttpResponse(
-        json.dumps(ob), mimetype="application/json")
 
 
 def external_file_location(filename):

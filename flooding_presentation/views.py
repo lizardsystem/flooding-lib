@@ -32,6 +32,8 @@ from flooding_presentation.permission_manager import PermissionManager
 from flooding_visualization.mapnik_legend import MapnikPointLegend
 from flooding_visualization.models import ShapeDataLegend
 from flooding_visualization.symbol_manager import SymbolManager
+from flooding_lib.tools.pyramids import pyramids
+from flooding_lib.util.http import JSONResponse
 from nens.mock import Stream
 from nens.sobek import HISFile
 
@@ -102,13 +104,17 @@ def service_get_presentationlayer_settings(
         pl, PermissionManager.PERMISSION_PRESENTATIONLAYER_VIEW):
         raise Http404
 
+    result = pyramids.get_result_by_presentationlayer(pl)
+    if result is not None and result.animation:
+        return JSONResponse(
+            pyramids.settings_for_animation(result.animation))
+
     rec = {}
     if pl.presentationtype.geo_type == PresentationType.GEO_TYPE_GRID:
         try:
             pl.presentationgrid
         except PresentationGrid.DoesNotExist:
-            return HttpResponse(
-                simplejson.dumps({}), mimetype="application/json")
+            return JSONResponse({})
 
         rec['bounds'] = {}
         rec['bounds']['projection'] = pl.presentationgrid.bbox_orignal_srid
@@ -168,7 +174,7 @@ def service_get_presentationlayer_settings(
 
     log.debug('json dump van info')
     log.debug(simplejson.dumps(info))
-    return HttpResponse(simplejson.dumps(info), mimetype="application/json")
+    return JSONResponse(info)
 
 
 def service_get_wms_of_shape(
@@ -463,6 +469,13 @@ def service_get_gridframe(request, presentationlayer_id, legend_id, framenr=0):
     """
     pl = get_object_or_404(PresentationLayer, pk=presentationlayer_id)
 
+    result = pyramids.get_result_by_presentationlayer(pl)
+    if result is not None and result.animation:
+        # New style animation
+        response = HttpResponse()
+        result.animation.save_image_to_response(response, framenr)
+        return response
+
     log.debug('get png name')
     png_name = external_file_location(
         pl.presentationgrid.png_default_legend.file_location)
@@ -511,7 +524,7 @@ def service_get_shapes(
             "name": feature.GetField(id_index)}
             for feature in layer]
 
-    return HttpResponse(simplejson.dumps(answer), mimetype='application/json')
+    return JSONResponse(answer)
 
 
 class TimestepFormatter(Formatter):

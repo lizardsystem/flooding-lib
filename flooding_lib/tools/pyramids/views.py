@@ -2,6 +2,8 @@
 
 import logging
 
+from gislib import projections
+
 from django.http import Http404
 from django.views.decorators.http import require_GET
 
@@ -29,10 +31,10 @@ def get_result_by_presentationlayer_id(presentationlayer_id):
 
     result = results[0]
 
-    if not result.raster:
+    if not result.raster and not result.animation:
         logger.debug(
             "pyramid result (presentationlayer {}, result {})"
-            " does not have a raster."
+            " does not have a raster or animation."
             .format(presentationlayer_id, result.id))
         raise Http404()
 
@@ -51,11 +53,23 @@ def pyramid_parameters(request):
 
 
 @require_GET
+def animated_pyramid_parameters(request):
+    presentationlayer_id = request.GET.get('presentationlayer_id')
+    result = get_result_by_presentationlayer_id(presentationlayer_id)
+
+    return JSONResponse({
+            'frames': result.animation.frames,
+            'layer': result.animation.layer(frame_nr='FRAME'),
+            'styles': 'PuBu'
+            })
+
+
+@require_GET
 def pyramid_value(request):
     """Get value in pyramid at some lat/lon coordinate."""
     presentationlayer_id = request.GET.get('presentationlayer_id')
-    lon = request.GET.get('lon')
     lat = request.GET.get('lat')
+    lon = request.GET.get('lon')
 
     result = get_result_by_presentationlayer_id(presentationlayer_id)
     pyramid = result.layer
@@ -63,10 +77,12 @@ def pyramid_value(request):
     # Pyramids don't support get_value at a point yet, I have to stop
     # here.
 
-    #return pyramid.get_data(...)
+    values = pyramid.get_data(
+        wkt='POINT({lat} {lon})'.format(lat=lat, lon=lon),
+        crs=projections.WGS84)
 
-    return JSONResponse({
-            'value':
-                "I would return the value of pyramid at directory {}"
-            " and lat/lon {}/{}, but that isn't supported yet by gislib."
-            .format(pyramid.pyramid_path, lat, lon)})
+    if values and values[0] is not None:
+        return JSONResponse({'value': values[0]})
+    else:
+        return JSONResponse({})
+
