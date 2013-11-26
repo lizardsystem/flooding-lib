@@ -124,3 +124,6 @@ class Animation(models.Model):
         # Save into response
         response['Content-type'] = 'image/png'
         image.save(response, 'png')
+
+    def get_geotransform(self):
+        return [float(g) for g in self.geotransform['geotransform']]

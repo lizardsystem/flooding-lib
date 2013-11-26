@@ -2,6 +2,10 @@
 
 import logging
 
+from osgeo import gdal
+from osgeo import gdal_array
+import numpy as np
+
 from django.http import Http404
 from django.views.decorators.http import require_GET
 
@@ -91,3 +95,59 @@ def pyramid_value(request):
                 })
     else:
         return JSONResponse({})
+
+
+@require_GET
+def animation_value(request):
+    presentationlayer_id = request.GET.get('presentationlayer_id')
+    framenr = request.GET.get('framenr')
+    x = request.GET.get('lon')  # In Google
+    y = request.GET.get('lat')
+
+    if None in (presentationlayer_id, framenr, x, y):
+        raise Http404()
+
+    try:
+        framenr = int(framenr)
+    except ValueError:
+        raise Http404()
+
+    result, presentation_layer = get_result_by_presentationlayer_id(
+        presentationlayer_id, return_layer=True)
+    unit = presentation_layer.presentationtype.unit
+
+    animation = result.animation
+
+    if animation is None:
+        return JSONResponse({})
+
+    if not (0 <= int(framenr) < animation.frames):
+        raise Http404()
+
+    rd_x, rd_y = geo.google_to_rd(x, y)
+
+    value = point_from_dataset(animation, framenr, (rd_x, rd_y))
+
+    return JSONResponse({'value': value, 'unit': unit})
+
+
+def point_from_dataset(animation, framenr, point):
+    x, y = point
+    p, a, b, q, c, d = animation.get_geotransform()
+    minv = np.linalg.inv([[a, b], [c, d]])
+    u, v = np.dot(minv, [x - p, y - q])
+
+    u = int(u)
+    v = int(v)
+
+    if not ((0 <= u < animation.cols) and (0 <= v < animation.rows)):
+        # Outside animation
+        return None
+
+    dataset = gdal.Open(animation.get_dataset_path(framenr))
+    if dataset is None:
+        return None
+
+    data = dataset.ReadRaster(u, v, 1, 1, band_list=[1])
+    data_type = gdal_array.flip_code(dataset.GetRasterBand(1).DataType)
+    return np.fromstring(data, dtype=data_type)[0]
