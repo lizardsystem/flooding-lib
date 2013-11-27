@@ -10,6 +10,7 @@ from django.http import Http404
 from django.views.decorators.http import require_GET
 
 from flooding_presentation import models
+from flooding_lib.tools.pyramids.models import LIMIT
 from flooding_lib.util import geo
 from flooding_lib.services import JSONResponse
 
@@ -88,7 +89,7 @@ def pyramid_value(request):
 
     value = pyramid.fetch_single_point(rd_x, rd_y)[0]
 
-    if value is not None and value > 0:
+    if value is not None and value >= LIMIT:
         return JSONResponse({
                 'value': value,
                 'unit': unit or ""
@@ -128,7 +129,10 @@ def animation_value(request):
 
     value = point_from_dataset(animation, framenr, (rd_x, rd_y))
 
-    return JSONResponse({'value': value, 'unit': unit})
+    if value >= LIMIT:
+        return JSONResponse({'value': value, 'unit': unit})
+    else:
+        return JSONResponse({})
 
 
 def point_from_dataset(animation, framenr, point):

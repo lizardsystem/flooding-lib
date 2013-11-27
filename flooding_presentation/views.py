@@ -473,7 +473,10 @@ def service_get_gridframe(request, presentationlayer_id, legend_id, framenr=0):
     if result is not None and result.animation:
         # New style animation
         response = HttpResponse()
-        result.animation.save_image_to_response(response, framenr)
+        colormap = request.GET.get('colormap')
+        maxvalue = request.GET.get('maxvalue')
+        result.animation.save_image_to_response(
+            response, framenr, colormap, maxvalue)
         return response
 
     log.debug('get png name')

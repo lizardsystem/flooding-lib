@@ -3,6 +3,8 @@ import os
 import stat
 import sys
 
+import numpy as np
+
 from django import db
 
 from flooding_base.models import Setting
@@ -144,10 +146,17 @@ def animation_from_inc(inc_file, output_dir):
 
     geotransform = fls.geo_transform()
 
+    maxvalue = None
+
     for i, (timestamp, array) in enumerate(fls):
         filename = b'dataset{:04d}.tiff'.format(i)
         filepath = os.path.join(output_dir, filename)
         logger.debug("Writing {}.".format(filepath))
+        if i == 0:
+            maxvalue = np.amax(array)
+        else:
+            maxvalue = max(maxvalue, np.amax(array))
+
         save_to_tiff(filepath, array, geotransform)
 
     rows, cols = array.shape
@@ -155,21 +164,36 @@ def animation_from_inc(inc_file, output_dir):
     animation = pyramidmodels.Animation.objects.create(
         frames=i + 1, cols=cols, rows=rows,
         geotransform={'geotransform': geotransform},
-        basedir=output_dir)
+        basedir=output_dir,
+        maxvalue=maxvalue)
 
     return animation
 
 
 def animation_from_ascs(input_files, output_dir):
-    animation = pyramidmodels.Animation.objects.create()
+    maxvalue = None
+
     for i, input_file in enumerate(input_files):
         filename = b'dataset{:04d}.tiff'.format(i)
         filepath = os.path.join(output_dir, filename)
         dataset = gdal.Open(input_file)
+        array = dataset.GetRasterBand(1).ReadAsArray()
+        if i == 0:
+            maxvalue = np.amax(array)
+        else:
+            maxvalue = max(maxvalue, np.amax(array))
+        geotransform = dataset.GetGeoTransform()
         save_to_tiff(
             filepath,
-            dataset.GetRasterBand(1).ReadAsArray(),
-            dataset.GetGeoTransform())
+            array,
+            geotransform)
+
+    rows, cols = array.shape
+    animation = pyramidmodels.Animation.objects.create(
+        frames=i + 1, cols=cols, rows=rows,
+        geotransform={'geotransform': geotransform},
+        basedir=output_dir,
+        maxvalue=maxvalue)
 
     return animation
 

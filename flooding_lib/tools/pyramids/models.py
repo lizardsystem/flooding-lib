@@ -13,8 +13,8 @@ from __future__ import division
 
 import gdal
 import Image
-import io
 from matplotlib import cm
+from matplotlib import colors
 import numpy as np
 import os
 
@@ -26,6 +26,8 @@ from django_extensions.db.fields.json import JSONField
 from gislib import pyramids
 
 SUBDIR_DEPTH = 6  # Number of characters of a UUID to use as directories
+
+LIMIT = 0.01  # Values below this are considered to be zero / nodata
 
 
 class Raster(models.Model):
@@ -74,6 +76,7 @@ class Animation(models.Model):
     frames = models.IntegerField(default=0)
     cols = models.IntegerField(default=0)
     rows = models.IntegerField(default=0)
+    maxvalue = models.FloatField(null=True, blank=True)
     geotransform = JSONField()
     basedir = models.TextField()
 
@@ -107,16 +110,26 @@ class Animation(models.Model):
     def __unicode__(self):
         return "{} frames in {}".format(self.frames, self.basedir)
 
-    def save_image_to_response(self, response, framenr=0, colormap='PuBu'):
+    def save_image_to_response(
+        self, response, framenr=0,
+        colormap=None, maxvalue=None):
+        if colormap is None:
+            colormap = 'PuBu'
+        if maxvalue is None:
+            maxvalue = self.maxvalue
+
         dataset = gdal.Open(self.get_dataset_path(framenr))
         colormap = cm.get_cmap(colormap)
 
         # Get data as masked array
-        data = np.ma.masked_equal(
-            dataset.GetRasterBand(1).ReadAsArray(), 0, copy=False)
+        data = np.ma.masked_less(
+            dataset.GetRasterBand(1).ReadAsArray(), LIMIT, copy=False)
+
+        # Normalize
+        normalize = colors.Normalize(vmin=0, vmax=maxvalue)
 
         # Apply colormap
-        rgba = colormap(data, bytes=True)
+        rgba = colormap(normalize(data), bytes=True)
 
         # Turn into PIL image
         image = Image.fromarray(rgba)

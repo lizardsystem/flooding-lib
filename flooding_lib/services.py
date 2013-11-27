@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import Image
+import json
 import StringIO
 import mapnik
 import os
@@ -15,7 +16,6 @@ from django.http import Http404
 from django.shortcuts import render_to_response, get_object_or_404
 
 from django.views.decorators.cache import never_cache
-from django.db.models.query import QuerySet
 
 from flooding_lib import scenario_sharing
 from flooding_base.models import Setting
@@ -42,7 +42,6 @@ from flooding_lib.views import service_compose_3di_scenario
 from flooding_lib.views import service_save_new_scenario
 from flooding_lib.views import service_save_new_3di_scenario
 from flooding_lib.views import service_select_strategy
-from flooding_lib.tools.importtool.models import InputField
 from flooding_lib.tools.importtool.models import RORKering
 from flooding_lib.util.http import JSONResponse
 
@@ -71,17 +70,18 @@ FILTER_DICT = {
 
 #-------------------- Services ----------------
 
+
 def get_search_params(request):
     search_by = None
-    region_ids= None
+    region_ids = None
     project_ids = None
-    externalwater_ids =None
+    externalwater_ids = None
 
     if request.method == "GET":
         search_by = request.GET.get('searchBy', None)
 
     if search_by is not None:
-        search_by_parsed = simplejson.loads(search_by)
+        search_by_parsed = json.loads(search_by)
         region_ids = search_by_parsed.get('Regio')
         project_ids = search_by_parsed.get('Project')
         externalwater_ids = search_by_parsed.get('Buitenwater')
@@ -124,7 +124,9 @@ def get_region_as_tree_item(region, regionset_id=None):
     }
     return tree_item
 
-def create_breaches_tree(breach_list, externalwater_list, permission_manager, issearch=False):
+
+def create_breaches_tree(
+    breach_list, externalwater_list, permission_manager, issearch=False):
     """Create tree where externalwater is a parent and breach is a leaf."""
     object_list = [
         {'id': -ew.id,
@@ -244,7 +246,6 @@ def service_get_region_tree_search(
         if permission_from_get is not None:
             permission = int(permission_from_get)
 
-    regionset_list = permission_manager.get_regionsets(permission)
     region_list_total = permission_manager.get_regions(permission)
     region_ids, project_ids, externalwater_ids = get_search_params(request)
     if ((region_ids is not None) and (len(region_ids) > 0)):
@@ -266,8 +267,7 @@ def service_get_region_tree_search(
     for region in region_list_total:
         object_list.append(get_region_as_tree_item(region))
 
-    return HttpResponse(
-        simplejson.dumps(object_list), mimetype="application/json")
+    return JSONResponse(object_list)
 
 
 @never_cache
@@ -414,7 +414,8 @@ def service_get_breach_tree_search(
                 raise Http404
             breaches = breaches | region.breach_set.filter(
                 scenario__in=permitted_scenarios).distinct()
-        breaches_list = breaches_list.filter(id__in=list(breaches.values_list('id', flat=True)))
+        breaches_list = breaches_list.filter(
+            id__in=list(breaches.values_list('id', flat=True)))
     if ((project_ids is not None) and (len(project_ids) > 0)):
         projects_list = permitted_projects.filter(id__in=project_ids)
         scenarios = get_scenarios_by_projects(
@@ -429,8 +430,7 @@ def service_get_breach_tree_search(
 
     object_list = create_breaches_tree(
         breaches_list, externalwater_list, permission_manager, issearch=True)
-    return HttpResponse(
-        simplejson.dumps(object_list), mimetype="application/json")
+    return JSONResponse(object_list)
 
 
 @never_cache
@@ -483,8 +483,7 @@ def service_get_breach_tree(
 
     object_list = create_breaches_tree(
         breach_list, externalwater_list, permission_manager)
-    return HttpResponse(
-        simplejson.dumps(object_list), mimetype="application/json")
+    return JSONResponse(object_list)
 
 
 @never_cache
@@ -521,7 +520,8 @@ def service_get_scenario_tree_search(
         for breach in breaches:
             scenarios = scenarios | breach.scenario_set.all()
         project_list = project_list.filter(
-            id__in=list(get_projects_by_scenarios(scenarios).values_list('id', flat=True)))
+            id__in=list(get_projects_by_scenarios(scenarios)
+                        .values_list('id', flat=True)))
         scenario_list = scenarios
     if ((project_ids is not None) and (len(project_ids) > 0)):
         project_list = project_list.filter(id__in=project_ids)
@@ -790,8 +790,10 @@ def get_breaches_info(scenario):
     info["ids"] = [v.get("id") for v in breaches_values]
     info["region_names"] = [v.get("region__name") for v in breaches_values]
     info["region_ids"] = [v.get("region__id") for v in breaches_values]
-    info["externalwater_name"] = [v.get("externalwater__name") for v in breaches_values]
-    info["externalwater_type"] = [v.get("externalwater__type") for v in breaches_values]
+    info["externalwater_name"] = [
+        v.get("externalwater__name") for v in breaches_values]
+    info["externalwater_type"] = [
+        v.get("externalwater__type") for v in breaches_values]
     return info
 
 
@@ -805,9 +807,6 @@ def service_get_scenarios_export_list(
     for displaying in the drag and drop window for the export tool.
     """
     project = get_object_or_404(Project, pk=project_id)
-    inputfield_calcmethod = InputField.objects.get(pk=45)
-    inputfield_statesecurity = InputField.objects.get(pk=34)
-    inputfield_shelflife = InputField.objects.get(pk=27)
     if not(permission_manager.check_project_permission(project, permission)):
         raise Http404
     scenarios_export_list = []
@@ -829,7 +828,8 @@ def service_get_scenarios_export_list(
                 'project_name': project.name,
                 'owner_id': s.owner.id,
                 'owner_name': s.owner.username,
-                'extwrepeattime': [sbr.extwrepeattime for sbr in s.scenariobreach_set.all()],
+                'extwrepeattime': [
+                    sbr.extwrepeattime for sbr in s.scenariobreach_set.all()],
                 '_visible': True
             })
     ## Bij ROR project neem te veel tijd, request wordt gekilld
@@ -844,15 +844,19 @@ def service_get_scenarios_export_list(
     #         'region_ids': [br.region.id for br in s.breaches.all()],
     #         'region_names': [br.region.name for br in s.breaches.all()],
     #         'extwname': [br.externalwater.name for br in s.breaches.all()],
-    #         'extwtype': [br.externalwater.get_type_display() for br in s.breaches.all()],
+    #         'extwtype': [br.externalwater.get_type_display()
+    #                      for br in s.breaches.all()],
     #         'project_id': project.id,
     #         'project_name': project.name,
     #         'owner_id': s.owner.id,
     #         'owner_name': s.owner.username,
-    #         'calcmethod': s.string_value_for_inputfield(inputfield_calcmethod),
-    #         'statesecurity': s.string_value_for_inputfield(inputfield_statesecurity),
+    #         'calcmethod': s.string_value_for_inputfield(
+    #             inputfield_calcmethod),
+    #         'statesecurity': s.string_value_for_inputfield(
+    #             inputfield_statesecurity),
     #         'shelflife': s.string_value_for_inputfield(inputfield_shelflife),
-    #         'extwrepeattime': [sbr.extwrepeattime for sbr in s.scenariobreach_set.all()]}
+    #         'extwrepeattime': [sbr.extwrepeattime
+    #                            for sbr in s.scenariobreach_set.all()]}
     #     for s in project.all_scenarios()]
     return JSONResponse(scenarios_export_list)
 
@@ -879,12 +883,13 @@ def service_get_external_waters(
     and return in JSON format."""
     permitted_scenarios = permission_manager.get_scenarios(
         None, permission)
-    breaches_list = Breach.objects.filter(scenario__in=permitted_scenarios).distinct()
+    breaches_list = Breach.objects.filter(
+        scenario__in=permitted_scenarios).distinct()
     external_waters = ExternalWater.objects.filter(
             breach__in=breaches_list).distinct().order_by('name')
-    result_list = [{'id': ew.id, 'name': str(ew.name)} for ew in external_waters]
-    return HttpResponse(
-        simplejson.dumps(result_list), mimetype="application/json")
+    result_list = [
+        {'id': ew.id, 'name': str(ew.name)} for ew in external_waters]
+    return JSONResponse(result_list)
 
 
 @never_cache
@@ -1591,11 +1596,13 @@ def upload_ror_keringen(request):
     if f_upload is not None:
         try:
             unique_name = "{0}_{1}".format(f_prefix, f_upload.name)
-            with open(os.path.join(upload_path, unique_name), 'wb') as f_destination:
+            with open(os.path.join(upload_path, unique_name),
+                      'wb') as f_destination:
                 for chunk in f_upload.chunks():
                     f_destination.write(chunk)
         except:
-            return render_to_response(template, {'message': _('Error on upload.')})
+            return render_to_response(
+                template, {'message': _('Error on upload.')})
     else:
         return render_to_response(template, {'message': _('Error on upload.')})
 
@@ -2153,6 +2160,7 @@ def service(request):
         else:
             raise Http404
 
+
 @never_cache
 @receives_permission_manager
 def service_search_navigation_objects(
@@ -2164,8 +2172,7 @@ def service_search_navigation_objects(
     #for param in params:
     #    if param.get('')
     result_list = [{1: 1}, {2:2}]
-    return HttpResponse(
-        simplejson.dumps(result_list), mimetype="application/json")
+    return JSONResponse(result_list)
 
 
 @receives_permission_manager
