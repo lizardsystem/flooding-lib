@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-3.05 (unreleased)
+3.05 (2013-11-27)
 -----------------
 
 - In exports, for the rise period, if scenario duration is unknown,
