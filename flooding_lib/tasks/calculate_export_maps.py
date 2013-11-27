@@ -811,8 +811,13 @@ def calc_rise_period(tmp_zip_filename, export_run):
         # Scenario duration metadata field is in days, the grid
         # contains values in hours, so we multiply by 24
         scenario_duration_days = gridta['scenario'].value_for_inputfield(
-            scenario_duration_inputfield) or 0.0  # in case of None
-        scenario_duration = int(scenario_duration_days * 24 + 0.5)
+            scenario_duration_inputfield)
+        if not scenario_duration_days or scenario_duration_days < 0:
+            # We have to guess, use the max of both arrays
+            scenario_duration = max(np.amax(array_ta), np.amax(array_td))
+        else:
+            # Translate days into hours
+            scenario_duration = int(scenario_duration_days * 24 + 0.5)
 
         # Fill in missing values
         array_td = array_td.filled(scenario_duration)

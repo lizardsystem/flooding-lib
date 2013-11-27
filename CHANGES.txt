@@ -4,7 +4,8 @@ Changelog of flooding-lib
 3.05 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- In exports, for the rise period, if scenario duration is unknown,
+  use the maximum of gridta and gridtd.
 
 
 3.04 (2013-11-20)
