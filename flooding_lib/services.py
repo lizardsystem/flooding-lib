@@ -255,9 +255,9 @@ def service_get_region_tree_search(
             breach__in=breaches).distinct()
     if ((externalwater_ids is not None) and (len(externalwater_ids) > 0)):
         scenarios = get_scenarios_by_externalwaters(externalwater_ids)
-        projects = get_projects_by_scenarios(scenarios)
+        breaches = Breach.objects.filter(scenario__in=scenarios).distinct()
         region_list_total = region_list_total.filter(
-            project__in=projects)
+            breach__in=breaches).distinct()
 
     object_list = []
     region_list_total = region_list_total.distinct().order_by("name")
