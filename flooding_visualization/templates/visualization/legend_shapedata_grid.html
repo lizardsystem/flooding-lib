@@ -1,15 +1,17 @@
 <link href="{% url root_url %}static_media/style/legend.css" rel="stylesheet" type="text/css">
 
+{% if colormaps %}
 <div class="colormapcontrol">Colormap:<br/>
-  <select class="colormap" id="changecolormap">
-    <option value="PuBu">Blauwtinten</option>
-    <option value="jet">Regenboog</option>
+  <select class="colormap" id="changecolormap" onchange="dynamic_legend.set_colormap(this.value)">
+{% for colormap in colormaps %}
+    <option value="{{ colormap.0 }}" {% if colormap.0 == active_colormap %}selected="selected"{% endif %}>{{ colormap.1 }}</option>
+{% endfor %}
   </select><br/>
 Maximale waarde:<br/>
-<input type="text" class="colormap"/>
-<button>OK</button>
-<button>reset</button>
+<input type="text" class="colormap" value="{{ current_maxvalue }}" onchange="dynamic_legend.set_maxvalue(this.value)"/>
+<input type="submit" value="OK" /> <!-- Dummy so that text input loses focus -->
 </div>
+{% endif %}
 
 <div class="legend-title">{{ title }}</div>
 <div class="legend">

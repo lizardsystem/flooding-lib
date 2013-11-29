@@ -56,7 +56,8 @@ def pyramid_parameters(request):
 
     return JSONResponse({
             'layer': result.raster.layer,
-            'styles': 'PuBu'
+            'default_colormap': 'PuBu',
+            'default_maxvalue': 10
             })
 
 

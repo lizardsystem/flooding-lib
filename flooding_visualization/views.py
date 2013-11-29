@@ -69,31 +69,39 @@ def legend_shapedata(request):
     output: png image of the legend
     """
 
-    shapedatalegend = get_object_or_404(
-        ShapeDataLegend, pk=request.GET['object_id'])
-
+    ## FIRST check if this is a new style grid, with dynamic legend
     presentationlayer_id = request.GET.get('presentationlayer_id')
-    result = None
-    geo_type = shapedatalegend.presentationtype.geo_type
+    # Hack -- object_id really means legend id, but sometimes the
+    # presentationlayer_id is passed in that way (because I do that
+    # explictly in NPyramidOverlay.js, but I don't know why
+    # presentationlayer_id isn't passed in in the first place)
+    if presentationlayer_id is None:
+        presentationlayer_id = request.GET.get('object_id')
+
     if presentationlayer_id:
         try:
             presentationlayer = PresentationLayer.objects.get(
                 pk=presentationlayer_id)
             result = pyramids.get_result_by_presentationlayer(
                 presentationlayer)
+            if result:
+                # Handle these elsewhere, dynamic
+                template_variables = pyramids.result_legend(
+                    result, presentationlayer,
+                    request.GET.get('colormap'), request.GET.get('maxvalue'))
+                return render_to_response(
+                    'visualization/legend_shapedata_grid.html',
+                    template_variables)
         except PresentationLayer.DoesNotExist:
             pass
 
-    if result:
-        # Handle these elsewhere, dynamic
-        template_variables = pyramids.result_legend(
-            result, presentationlayer,
-            request.GET.get('colormap'), request.GET.get('maxvalue'))
-        return render_to_response(
-            'visualization/legend_shapedata_grid.html',
-            template_variables)
+    # No, it's not, continue in the old way
 
-    elif geo_type == PresentationType.GEO_TYPE_POINT:
+    shapedatalegend = get_object_or_404(
+        ShapeDataLegend, pk=request.GET['object_id'])
+    geo_type = shapedatalegend.presentationtype.geo_type
+
+    if geo_type == PresentationType.GEO_TYPE_POINT:
         sm = SymbolManager(settings.SYMBOLS_DIR)
         mpl = MapnikPointLegend(shapedatalegend, sm)
         title, blocks = mpl.get_legend_data()

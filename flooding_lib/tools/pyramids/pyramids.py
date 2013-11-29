@@ -101,10 +101,10 @@ def rgba_to_html(rgba):
 def result_legend(result, presentationlayer, colormap=None, maxvalue=None):
     presentationtype = presentationlayer.presentationtype
 
-    if maxvalue is None or maxvalue <= 0:
-        maxvalue = 10
-    else:
+    try:
         maxvalue = float(maxvalue)
+    except (ValueError, TypeError):
+        maxvalue = 10
 
     if colormap is None:
         colormap = 'PuBu'
@@ -122,5 +122,8 @@ def result_legend(result, presentationlayer, colormap=None, maxvalue=None):
 
     return {
         'title': unicode(presentationtype),
-        'content': legend
+        'content': legend,
+        'colormaps': [('PuBu', 'Blauwtinten'), ('jet', 'Regenboog')],
+        'active_colormap': colormap,
+        'current_maxvalue': maxvalue,
         }
