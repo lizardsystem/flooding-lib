@@ -9,7 +9,15 @@ from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import division
 
+import logging
+
 from . import models
+
+import numpy as np
+from matplotlib import cm
+from matplotlib import colors
+
+logger = logging.getLogger(__name__)
 
 
 def save_dataset_as_pyramid(dataset):
@@ -72,4 +80,47 @@ def settings_for_animation(animation):
             "name": "anim. waterdiepte (fls_h)"
             },
         "legends": [{"id": 21, "name": "anim. waterdiepte (fls_h)"}]
+        }
+
+
+def values_in_range(maxvalue, n):
+    """Divide interval (0, maxvalue) into n equal size subintervals and
+    return values in the middle of each subinterval"""
+    subintervalsize = maxvalue / n
+    return [
+        (i + 0.5) * subintervalsize
+        for i in range(n)]
+
+
+def rgba_to_html(rgba):
+    r, g, b, _ = rgba
+
+    return "#%02x%02x%02x" % rgba[:3]
+
+
+def result_legend(result, presentationlayer, colormap=None, maxvalue=None):
+    presentationtype = presentationlayer.presentationtype
+
+    if maxvalue is None or maxvalue <= 0:
+        maxvalue = 10
+    else:
+        maxvalue = float(maxvalue)
+
+    if colormap is None:
+        colormap = 'PuBu'
+
+    cmap = cm.get_cmap(colormap)
+    arr = np.array(values_in_range(maxvalue, 10))
+    # Color the way that the grids are colored
+    normalize = colors.Normalize(vmin=0, vmax=maxvalue)
+    rgba = cmap(normalize(arr), bytes=True)
+
+    legend = [
+        (arr[i], rgba_to_html(tuple(rgba[i])))
+        for i in range(10)
+        ]
+
+    return {
+        'title': unicode(presentationtype),
+        'content': legend
         }

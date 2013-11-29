@@ -5,6 +5,7 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.http import HttpResponse, Http404
 from django.conf import settings
 
+from flooding_lib.tools.pyramids import pyramids
 from flooding_visualization.symbol_manager import SymbolManager
 from flooding_visualization.mapnik_legend import MapnikPointLegend
 from flooding_visualization.models import ShapeDataLegend
@@ -70,8 +71,29 @@ def legend_shapedata(request):
 
     shapedatalegend = get_object_or_404(
         ShapeDataLegend, pk=request.GET['object_id'])
+
+    presentationlayer_id = request.GET.get('presentationlayer_id')
+    result = None
     geo_type = shapedatalegend.presentationtype.geo_type
-    if geo_type == PresentationType.GEO_TYPE_POINT:
+    if presentationlayer_id:
+        try:
+            presentationlayer = PresentationLayer.objects.get(
+                pk=presentationlayer_id)
+            result = pyramids.get_result_by_presentationlayer(
+                presentationlayer)
+        except PresentationLayer.DoesNotExist:
+            pass
+
+    if result:
+        # Handle these elsewhere, dynamic
+        template_variables = pyramids.result_legend(
+            result, presentationlayer,
+            request.GET.get('colormap'), request.GET.get('maxvalue'))
+        return render_to_response(
+            'visualization/legend_shapedata_grid.html',
+            template_variables)
+
+    elif geo_type == PresentationType.GEO_TYPE_POINT:
         sm = SymbolManager(settings.SYMBOLS_DIR)
         mpl = MapnikPointLegend(shapedatalegend, sm)
         title, blocks = mpl.get_legend_data()

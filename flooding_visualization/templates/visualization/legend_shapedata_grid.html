@@ -1,4 +1,16 @@
 <link href="{% url root_url %}static_media/style/legend.css" rel="stylesheet" type="text/css">
+
+<div class="colormapcontrol">Colormap:<br/>
+  <select class="colormap" id="changecolormap">
+    <option value="PuBu">Blauwtinten</option>
+    <option value="jet">Regenboog</option>
+  </select><br/>
+Maximale waarde:<br/>
+<input type="text" class="colormap"/>
+<button>OK</button>
+<button>reset</button>
+</div>
+
 <div class="legend-title">{{ title }}</div>
 <div class="legend">
   <table class="legend-block">
