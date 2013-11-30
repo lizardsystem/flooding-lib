@@ -47,7 +47,7 @@ def common_generation(scenario_id, source_programs, tmp_dir):
     """
     loop on all results computed for the given scenario_id, unpack
     them into a temporary directory, save as a pyramid, set in the
-    results record the resultpngloc field.
+    results record.
     """
 
     scenario = Scenario.objects.get(pk=scenario_id)
@@ -102,8 +102,14 @@ def common_generation(scenario_id, source_programs, tmp_dir):
                 output_dir)
 
         if hasattr(pyramid_or_animation, 'frames'):
+            if result.animation:
+                result.animation.delete()  # Delete the old object
+                # Doesn't delete the old files, they're already overwritten
             result.animation = pyramid_or_animation
         else:
+            if result.raster:
+                # Delete the old one (and its pyramid!)
+                result.raster.delete()
             result.raster = pyramid_or_animation
         result.save()
 
@@ -203,15 +209,21 @@ def pyramid_from_single_asc(input_file, result_to_correct_gridta):
     dataset = gdal.Open(input_file)
     if dataset is not None:
         pyramid = pyramidmodels.Raster.objects.create()
-        if result_to_correct_gridta is None:
-            pyramid.add(dataset)
-        else:
-            # Correct for startmoment bresgroei
-            fixed_dataset = GDAL_MEM_DRIVER.CreateCopy('', dataset)
-            grid = fixed_dataset.GetRasterBand(1).ReadAsArray()
+
+        # Correct some things
+        fixed_dataset = GDAL_MEM_DRIVER.CreateCopy('', dataset)
+        band = fixed_dataset.GetRasterBand(1)
+        grid = band.ReadAsArray()
+
+        if result_to_correct_gridta is not None:
             correct_gridta(grid, result_to_correct_gridta)
-            fixed_dataset.GetRasterBand(1).WriteArray(grid)
-            pyramid.add(fixed_dataset)
+
+        # Make all values below the LIMIT NoData
+        grid[grid < pyramidmodels.LIMIT] = 0.0
+        band.SetNoDataValue(0.0)
+        band.WriteArray(grid)
+
+        pyramid.add(fixed_dataset)
         return pyramid
 
 

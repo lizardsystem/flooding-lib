@@ -11,12 +11,14 @@ from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import division
 
-import gdal
-import Image
+import os
+import shutil
+
 from matplotlib import cm
 from matplotlib import colors
+import Image
+import gdal
 import numpy as np
-import os
 
 from django.conf import settings
 from django.db import models
@@ -62,6 +64,12 @@ class Raster(models.Model):
         defaults.update(kwargs)
 
         self.pyramid.add(dataset, **defaults)
+
+    def delete(self):
+        super(Raster, self).delete()
+
+        # Delete pyramid
+        shutil.rmtree(self.pyramid_path)
 
 
 class Animation(models.Model):
