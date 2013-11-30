@@ -2,6 +2,8 @@
 from django.utils.translation import ugettext as _
 from django.contrib.gis.db import models
 
+from flooding_lib.tools.pyramids import models as pyramidmodels
+
 
 class PresentationType(models.Model):
     """ Definition of types that can be displayed by presentation module. """
@@ -61,11 +63,22 @@ class PresentationType(models.Model):
     permission_level = models.IntegerField(default=1)
     default_legend_id = models.IntegerField(blank=False)
 
+    # Default colormap, if dynamic colormaps
+    default_colormap = models.ForeignKey(
+        pyramidmodels.Colormap, null=True, blank=True)
+    default_maxvalue = models.FloatField(null=True, blank=True)
+
     class Meta:
         db_table = 'presentation_presentationtype'
 
     def __unicode__(self):
         return self.name
+
+    @property
+    def colormap_info(self):
+        return (
+            (self.default_colormap and self.default_colormap.matplotlib_name)
+            or 'PuBu', self.default_maxvalue or 10.0)
 
 
 class CustomIndicator(models.Model):

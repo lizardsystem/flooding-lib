@@ -52,24 +52,15 @@ def get_result_by_presentationlayer_id(
 @require_GET
 def pyramid_parameters(request):
     presentationlayer_id = request.GET.get('presentationlayer_id')
-    result = get_result_by_presentationlayer_id(presentationlayer_id)
+    result, presentationlayer = get_result_by_presentationlayer_id(
+        presentationlayer_id, return_layer=True)
+
+    colormap_info = presentationlayer.presentationtype.colormap_info
 
     return JSONResponse({
             'layer': result.raster.layer,
-            'default_colormap': 'PuBu',
-            'default_maxvalue': 10
-            })
-
-
-@require_GET
-def animated_pyramid_parameters(request):
-    presentationlayer_id = request.GET.get('presentationlayer_id')
-    result = get_result_by_presentationlayer_id(presentationlayer_id)
-
-    return JSONResponse({
-            'frames': result.animation.frames,
-            'layer': result.animation.layer(frame_nr='FRAME'),
-            'styles': 'PuBu'
+            'default_colormap': colormap_info[0],
+            'default_maxvalue': colormap_info[1]
             })
 
 

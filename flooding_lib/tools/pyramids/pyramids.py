@@ -101,13 +101,15 @@ def rgba_to_html(rgba):
 def result_legend(result, presentationlayer, colormap=None, maxvalue=None):
     presentationtype = presentationlayer.presentationtype
 
+    default_colormap, default_maxvalue = presentationtype.colormap_info
+
     try:
         maxvalue = float(maxvalue)
     except (ValueError, TypeError):
-        maxvalue = 10
+        maxvalue = default_maxvalue
 
     if colormap is None:
-        colormap = 'PuBu'
+        colormap = default_colormap
 
     cmap = cm.get_cmap(colormap)
     arr = np.array(values_in_range(maxvalue, 10))
@@ -123,7 +125,7 @@ def result_legend(result, presentationlayer, colormap=None, maxvalue=None):
     return {
         'title': unicode(presentationtype),
         'content': legend,
-        'colormaps': [('PuBu', 'Blauwtinten'), ('jet', 'Regenboog')],
+        'colormaps': models.Colormap.colormaps(),
         'active_colormap': colormap,
         'current_maxvalue': maxvalue,
         }

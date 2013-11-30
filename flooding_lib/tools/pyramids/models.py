@@ -140,3 +140,22 @@ class Animation(models.Model):
 
     def get_geotransform(self):
         return [float(g) for g in self.geotransform['geotransform']]
+
+
+class Colormap(models.Model):
+    """Available colormaps from matplotlib."""
+
+    matplotlib_name = models.CharField(max_length=20, unique=True)
+    description = models.CharField(max_length=50, unique=True)
+
+    class Meta:
+        ordering = ('description',)
+
+    def __unicode__(self):
+        return "{} ({})".format(self.description, self.matplotlib_name)
+
+    @classmethod
+    def colormaps(cls):
+        return [
+            (colormap.matplotlib_name, colormap.description)
+            for colormap in cls.objects.all()]
