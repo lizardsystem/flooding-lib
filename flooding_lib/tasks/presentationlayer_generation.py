@@ -793,7 +793,7 @@ def get_or_create_pngserie_with_defaultlegend_from_old_results(scenario, pt):
                 pl.delete()
 
 
-def create_presentationlayer(scenario, presentationtype):
+def get_or_create_presentationlayer(scenario, presentationtype):
     """Pyramids don't use presentationtool's functionality, but
     require a simple presentationlayer as a link between
     presentationlayer and result."""
@@ -820,9 +820,11 @@ def perform_presentation_generation(scenario_id, tasktype_id):
 
     for pt in presentation_types:
         if pt.geo_type == PresentationType.GEO_TYPE_GRID:
-            log.debug('type grid')
-            get_or_create_pngserie_with_defaultlegend_from_old_results(
-                scenario, pt)
+            # I think this isn't necessary anymore with the new grids
+            # log.debug('type grid')
+            # get_or_create_pngserie_with_defaultlegend_from_old_results(
+            #    scenario, pt)
+            get_or_create_presentationlayer(scenario, pt)
         elif pt.geo_type in [PresentationType.GEO_TYPE_POLYGON,
                              PresentationType.GEO_TYPE_LINE,
                              PresentationType.GEO_TYPE_POINT]:
@@ -830,7 +832,7 @@ def perform_presentation_generation(scenario_id, tasktype_id):
             get_or_create_shape_layer(scenario, pt, False)
         elif pt.geo_type == PresentationType.GEO_TYPE_PYRAMID:
             log.debug('type pyramid')
-            create_presentationlayer(scenario, pt)
+            get_or_create_presentationlayer(scenario, pt)
         elif pt.geo_type == PresentationType.GEO_TYPE_NO_GEOM:
             log.debug('type no geom')
             log.debug('this is not for this task')
