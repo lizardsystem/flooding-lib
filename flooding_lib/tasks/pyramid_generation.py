@@ -149,10 +149,13 @@ def animation_from_inc(inc_file, output_dir):
     """Save each grid as a geotiff dataset so that images can be
     quickly created on the fly from it."""
     fls = flshinc.Flsh(inc_file, one_per_hour=True, mutate=False)
+    logger.debug("Generating animation from {}".format(inc_file))
 
     geotransform = fls.geo_transform()
 
     maxvalue = None
+
+    gridta_gridtd_recorder = GridtaGridtdRecorder(output_dir, geotransform)
 
     for i, (timestamp, array) in enumerate(fls):
         filename = b'dataset{:04d}.tiff'.format(i)
@@ -162,6 +165,8 @@ def animation_from_inc(inc_file, output_dir):
             maxvalue = np.amax(array)
         else:
             maxvalue = max(maxvalue, np.amax(array))
+
+        gridta_gridtd_recorder.register(i, array)
 
         save_to_tiff(filepath, array, geotransform)
 
@@ -173,11 +178,15 @@ def animation_from_inc(inc_file, output_dir):
         basedir=output_dir,
         maxvalue=maxvalue)
 
+    gridta_gridtd_recorder.save()
+
     return animation
 
 
 def animation_from_ascs(input_files, output_dir):
     maxvalue = None
+
+    gridta_gridtd_recorder = None
 
     for i, input_file in enumerate(input_files):
         filename = b'dataset{:04d}.tiff'.format(i)
@@ -189,6 +198,12 @@ def animation_from_ascs(input_files, output_dir):
         else:
             maxvalue = max(maxvalue, np.amax(array))
         geotransform = dataset.GetGeoTransform()
+
+        if gridta_gridtd_recorder is None:
+            gridta_gridtd_recorder = GridtaGridtdRecorder(
+                output_dir, geotransform)
+        gridta_gridtd_recorder.register(i, array)
+
         save_to_tiff(
             filepath,
             array,
@@ -200,6 +215,7 @@ def animation_from_ascs(input_files, output_dir):
         geotransform={'geotransform': geotransform},
         basedir=output_dir,
         maxvalue=maxvalue)
+    gridta_gridtd_recorder.save()
 
     return animation
 
@@ -260,6 +276,71 @@ def his_ssm(scenario_id, tmp_dir):
     logger.debug("close db connection to avoid an idle process.")
     db.close_connection()
     return success
+
+
+class GridtaGridtdRecorder(object):
+    def __init__(self, output_dir, geotransform):
+        # If they don't exist yet, we also create a
+        # 'computed_arrival_time.tiff' and 'computed_time_of_max.tiff'
+        # in the output dir. If they already exist, this class does
+        # nothing.
+        self.output_dir = output_dir
+        self.geotransform = geotransform
+
+        self.donothing = all(
+            os.path.exists(os.path.join(output_dir, f))
+            for f in ('computed_arrival_time.tiff',
+                      'computed_time_of_max.tiff'))
+
+        self.arrival_time = None
+        self.time_of_max = None
+        self.max_seen = None
+        self.max_timestep = 0
+
+        if self.donothing:
+            return
+
+    def register(self, timestep, grid):
+        # Grid is an array of values. Wherever it is greater than 0.01,
+        # we record its value.
+        if self.donothing:
+            return
+
+        timestep += 1  # 1-based, so that 0 is no data
+
+        self.max_timestep = timestep
+
+        if self.arrival_time is None:
+            self.arrival_time = np.zeros(grid.shape, dtype=np.uint)
+            self.time_of_max = np.zeros(grid.shape, dtype=np.uint)
+            self.max_seen = np.zeros(grid.shape, dtype=np.float)
+
+        copy = grid.copy()
+        copy[grid < 0.01] = 0
+
+        where_greater_than_max = copy > self.max_seen
+        self.max_seen[where_greater_than_max] = copy[where_greater_than_max]
+        self.time_of_max[where_greater_than_max] = timestep
+
+        where_arrival = (copy > 0) & (self.arrival_time == 0)
+        self.arrival_time[where_arrival] = timestep
+
+    def save(self):
+        if self.donothing:
+            return
+
+        save_to_tiff(
+            os.path.join(self.output_dir, 'computed_arrival_time.tiff'),
+            self.arrival_time, self.geotransform)
+
+        save_to_tiff(
+            os.path.join(self.output_dir, 'computed_time_of_max.tiff'),
+            self.time_of_max, self.geotransform)
+
+        save_to_tiff(
+            os.path.join(self.output_dir, 'computed_difference.tiff'),
+            self.time_of_max - self.arrival_time, self.geotransform)
+
 
 if __name__ == '__main__':
     pass
