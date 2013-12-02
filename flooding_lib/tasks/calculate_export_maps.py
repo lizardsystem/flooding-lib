@@ -111,7 +111,8 @@ def remove_mkstemp(fd, path):
 
 def is_valid_zipfile(linux_filename):
     """Check if the passed file is a valid zipfile."""
-    log.debug("is_valid_zipfile({f})".format(f=linux_filename))
+    # log.debug disabled due error
+    #log.debug("is_valid_zipfile({f})".format(f=linux_filename))
     if not os.path.isfile(linux_filename):
         return False
     try:
