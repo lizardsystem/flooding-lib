@@ -798,8 +798,22 @@ def get_or_create_presentationlayer(scenario, presentationtype):
     require a simple presentationlayer as a link between
     presentationlayer and result."""
 
+    log.debug("Getting or creating a layer for {}".format(presentationtype))
     if not scenario.presentationlayer.filter(
         presentationtype=presentationtype).exists():
+        log.debug("It doesn't exist yet")
+        resulttypes = list(presentationtype.resulttype_set.all())
+        if not resulttypes:
+            log.debug("It doesn't have results, skip")
+            return
+
+        if not all(
+            scenario.get_result(resulttype=resulttype).id is not None
+            for resulttype in resulttypes):
+            # Not all results present - do nothing
+            return
+        log.debug("It has results and they are present")
+
         presentationlayer = PresentationLayer.objects.create(
             presentationtype=presentationtype)
         Scenario_PresentationLayer.objects.create(

@@ -1756,9 +1756,11 @@ class Result(models.Model):
     deltat = models.FloatField(null=True, blank=True)  # datetime.timedelta
 
     resultpngloc = models.CharField(max_length=200, null=True, blank=True)
-    raster = models.ForeignKey(pyramidmodels.Raster, null=True, blank=True)
+    raster = models.ForeignKey(
+        pyramidmodels.Raster, null=True, blank=True, on_delete=models.SET_NULL)
     animation = models.ForeignKey(
-        pyramidmodels.Animation, null=True, blank=True)
+        pyramidmodels.Animation, null=True, blank=True,
+        on_delete=models.SET_NULL)
     startnr = models.IntegerField(blank=True, null=True)  # mag weg
     firstnr = models.IntegerField(blank=True, null=True)
     lastnr = models.IntegerField(blank=True, null=True)
