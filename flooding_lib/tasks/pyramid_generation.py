@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import gdal
 import os
 import stat
@@ -18,6 +20,12 @@ import logging
 logger = logging.getLogger(__name__)
 
 INPUTFIELD_STARTMOMENT_BREACHGROWTH_ID = 9
+
+
+def gdal_open(f):
+    if isinstance(f, unicode):
+        f = f.encode('utf8')
+    return gdal.Open(f)
 
 
 def set_broker_logging_handler(broker_handler=None):
@@ -191,7 +199,7 @@ def animation_from_ascs(input_files, output_dir):
     for i, input_file in enumerate(input_files):
         filename = b'dataset{:04d}.tiff'.format(i)
         filepath = os.path.join(output_dir, filename)
-        dataset = gdal.Open(input_file)
+        dataset = gdal_open(input_file)
         array = dataset.GetRasterBand(1).ReadAsArray()
         if i == 0:
             maxvalue = np.amax(array)
@@ -222,7 +230,7 @@ def animation_from_ascs(input_files, output_dir):
 
 def pyramid_from_single_asc(input_file, result_to_correct_gridta):
     logger.debug("Pyramid from {}".format(input_file))
-    dataset = gdal.Open(input_file)
+    dataset = gdal_open(input_file)
     if dataset is not None:
         pyramid = pyramidmodels.Raster.objects.create()
 
