@@ -46,7 +46,9 @@ class Raster(models.Model):
             settings, 'PYRAMIDS_BASE_DIR',
             os.path.join(settings.BUILDOUT_DIR, 'var', 'pyramids'))
 
-        return os.path.join(pyramid_base_dir, *self.uuid_parts())
+        # Ensure bytestring
+        return (
+            os.path.join(pyramid_base_dir, *self.uuid_parts()).encode('utf8'))
 
     @property
     def pyramid(self):
