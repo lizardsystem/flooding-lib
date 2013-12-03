@@ -142,6 +142,8 @@ def compute_pyramids(
 
 def save_to_tiff(filepath, grid, geotransform):
     rows, cols = grid.shape
+    if isinstance(filepath, unicode):
+        filepath = filepath.encode('utf8')
     dataset = GDAL_TIFF_DRIVER.Create(
         filepath,
         cols, rows, 1, gdal.GDT_Float64, [
@@ -235,7 +237,7 @@ def pyramid_from_single_asc(input_file, result_to_correct_gridta):
         pyramid = pyramidmodels.Raster.objects.create()
 
         # Correct some things
-        fixed_dataset = GDAL_MEM_DRIVER.CreateCopy('', dataset)
+        fixed_dataset = GDAL_MEM_DRIVER.CreateCopy(b'', dataset)
         band = fixed_dataset.GetRasterBand(1)
         grid = band.ReadAsArray()
 
