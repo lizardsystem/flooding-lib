@@ -45,24 +45,6 @@ def get_result_by_presentationlayer(presentation_layer):
 
 
 def settings_for_animation(animation):
-    """{
-        "rec": {
-            "width": 841,
-            "gridsize": 50,
-            "bounds": {
-                "west": 185300.0,
-                "east": 227350.0,
-                "north": 539350.0,
-                "projection": 28992,
-                "south": 501200.0},
-            "height": 763
-        },
-        "anim": {},
-        "default_legend": {
-            "id": 11, "name": "max. waterdiepte overstr. gebied"},
-        "legends": [{"id": 11, "name": "max. waterdiepte overstr. gebied"}]}
-    """
-
     return {
         'rec': {
             'bounds': animation.bounds,
@@ -77,9 +59,9 @@ def settings_for_animation(animation):
             },
         "default_legend": {
             "id": 21,
-            "name": "anim. waterdiepte (fls_h)"
+            "name": "Dummy"
             },
-        "legends": [{"id": 21, "name": "anim. waterdiepte (fls_h)"}]
+        "legends": [{"id": 21, "name": "Dummy"}]
         }
 
 
