@@ -518,6 +518,9 @@ def dijkring_arrays_to_zip(
 
     gridtype is used to generate useful arcnames
     """
+    if len(input_files) == 0:
+        return dict()
+
     log.debug(b"dijkring_arrays_to_zip({i}, {z}, {g}, {gs}, {c})"
               .format(i=input_files, z=zip_filename, g=gridtype,
                       gs=gridsize, c=combine_method))
