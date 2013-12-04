@@ -65,7 +65,10 @@ def gdal_open(filepath):
     filepath = fix_path(filepath)
     if filepath.endswith('.zip'):
         filepath = b'/vsizip/' + filepath
-    return gdal.Open(filepath)
+    try:
+        return gdal.Open(filepath)
+    except RuntimeError:
+        return None
 
 
 def maxwaterdepth_geotransform(scenario):

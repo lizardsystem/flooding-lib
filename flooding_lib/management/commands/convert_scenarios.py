@@ -41,7 +41,8 @@ class Command(BaseCommand):
                 with commit_on_success():
                     pyramid_generation.sobek(scenario.id, settings.TMP_DIR)
                     pyramid_generation.his_ssm(scenario.id, settings.TMP_DIR)
-                    presentationlayer_generation(scenario.id, None)
+                    presentationlayer_generation.perform_presentation_generation(
+                        scenario.id, None)
 
                     # Remove old animation PNGs of the presentation layer
                     # A copy is still available in the results dir, if needed
