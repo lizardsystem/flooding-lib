@@ -50,5 +50,6 @@ class Command(BaseCommand):
 
             except Exception as e:
                 log.write(
-                    "{} stopped due to an exception: {}"
+                    "{} stopped due to an exception: {}\n"
                     .format(scenario.id, e))
+                log.write.flush()
