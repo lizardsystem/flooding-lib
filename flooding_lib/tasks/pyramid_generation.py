@@ -25,7 +25,11 @@ INPUTFIELD_STARTMOMENT_BREACHGROWTH_ID = 9
 def gdal_open(f):
     if isinstance(f, unicode):
         f = f.encode('utf8')
-    return gdal.Open(f)
+    try:
+        dataset = gdal.Open(f)
+    except RuntimeError:
+        dataset = None
+    return dataset
 
 
 def set_broker_logging_handler(broker_handler=None):
@@ -202,6 +206,8 @@ def animation_from_ascs(input_files, output_dir):
         filename = b'dataset{:04d}.tiff'.format(i)
         filepath = os.path.join(output_dir, filename)
         dataset = gdal_open(input_file)
+        if dataset is None:
+            continue
         array = dataset.GetRasterBand(1).ReadAsArray()
         if i == 0:
             maxvalue = np.amax(array)
@@ -246,6 +252,10 @@ def pyramid_from_single_asc(input_file, result_to_correct_gridta):
 
         # Make all values below the LIMIT NoData
         grid[grid < pyramidmodels.LIMIT] = 0.0
+
+        if len(np.flatnonzero(grid)) == 0:
+            return  # No nodata values
+
         band.SetNoDataValue(0.0)
         band.WriteArray(grid)
 

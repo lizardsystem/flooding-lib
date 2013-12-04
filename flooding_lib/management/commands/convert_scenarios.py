@@ -1,5 +1,7 @@
 import glob
 import os
+import sys
+import traceback
 
 from django.db.transaction import commit_on_success
 from django.conf import settings
@@ -29,7 +31,12 @@ class Command(BaseCommand):
 
         log = open("logfile.txt", "w")
 
-        for scenario in (s for s in scenarios() if not is_converted(s)):
+        for scenario in scenarios():
+            if is_converted(scenario):
+                log.write("{} is already converted.\n".format(scenario.id))
+                log.flush()
+                continue
+
             try:
                 with commit_on_success():
                     pyramid_generation.sobek(scenario.id, settings.TMP_DIR)
@@ -47,9 +54,12 @@ class Command(BaseCommand):
 
                     for f in files:
                         os.remove(f)
-
+                    log.write("{} converted.\n".format(scenario.id))
+                    log.flush()
             except Exception as e:
                 log.write(
                     "{} stopped due to an exception: {}\n"
                     .format(scenario.id, e))
-                log.write.flush()
+                _, _, tb = sys.exc_info()
+                traceback.print_tb(tb, 10, log)
+                log.flush()
