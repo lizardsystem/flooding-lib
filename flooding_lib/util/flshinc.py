@@ -114,7 +114,12 @@ class Flsh(object):
             except ValueError:
                 pass
 
-        ncols, nrows = ints(self.f)
+        colrowline = splitline(self.f)
+        try:
+            ncols, nrows = [int(c) for c in colrowline]
+        except ValueError:
+            if colrowline[0] == '***':
+                ncols = nrows = int(colrowline[1])
 #        logger.debug("ncols={0} nrows={1}".format(ncols, nrows))
 
         # 2: grid
