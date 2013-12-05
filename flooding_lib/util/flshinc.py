@@ -119,7 +119,9 @@ class Flsh(object):
             ncols, nrows = [int(c) for c in colrowline]
         except ValueError:
             if colrowline[0] == '***':
-                ncols = nrows = int(colrowline[1])
+                nrows = int(colrowline[1])
+                ncols = self.find_max_col() + 1
+
 #        logger.debug("ncols={0} nrows={1}".format(ncols, nrows))
 
         # 2: grid
@@ -165,6 +167,18 @@ class Flsh(object):
             'classes': classes,
             }
         return self._header
+
+    def find_max_col(self):
+        opened = self._open_path()
+        maxcol = 0
+        for line in opened:
+            line = line.strip().decode('utf8').split()
+            if not line or '.' in line[0]:
+                continue
+            row, col, value = line
+            maxcol = max(maxcol, col)
+
+        return maxcol
 
     def __iter__(self):
         header = self._parse_header()
