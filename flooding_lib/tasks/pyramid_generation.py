@@ -201,7 +201,7 @@ def animation_from_ascs(input_files, output_dir):
     maxvalue = None
 
     gridta_gridtd_recorder = None
-
+    array = None
     for i, input_file in enumerate(input_files):
         filename = b'dataset{:04d}.tiff'.format(i)
         filepath = os.path.join(output_dir, filename)
@@ -209,7 +209,7 @@ def animation_from_ascs(input_files, output_dir):
         if dataset is None:
             continue
         array = dataset.GetRasterBand(1).ReadAsArray()
-        if i == 0:
+        if maxvalue is None:
             maxvalue = np.amax(array)
         else:
             maxvalue = max(maxvalue, np.amax(array))
@@ -224,6 +224,10 @@ def animation_from_ascs(input_files, output_dir):
             filepath,
             array,
             geotransform)
+
+    if array is None:
+        # No input files
+        return None
 
     rows, cols = array.shape
     animation = pyramidmodels.Animation.objects.create(
