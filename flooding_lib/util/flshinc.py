@@ -175,8 +175,11 @@ class Flsh(object):
             line = line.strip().decode('utf8').split()
             if not line or '.' in line[0]:
                 continue
-            row, col, value = line
-            maxcol = max(maxcol, int(col))
+            try:
+                row, col, value = [int(elem) for elem in line]
+            except ValueError:
+                continue
+            maxcol = max(maxcol, col)
 
         logger.debug("Found max col: {}".format(maxcol))
         return maxcol
