@@ -55,12 +55,16 @@ class Command(BaseCommand):
                 pngdir = os.path.join(
                     settings.EXTERNAL_PRESENTATION_MOUNTED_DIR,
                     'flooding', 'scenario', str(scenario.id), 'fls')
+                pngdir = pngdir.replace('\\', '/')
                 files = glob.glob(
                     os.path.join(pngdir, "*.png")) + glob.glob(
-                    os.path.join(pngdir, "*.pgw"))
+                    os.path.join(pngdir, "*.pgw")) + glob.glob(
+                        '/tmp/*.aux.xml') + glob.glob(
+                        '/tmp/*.tif')
 
                 for f in files:
                     os.remove(f)
+
                 log.write("{} converted.\n".format(scenario.id))
                 log.flush()
             except Exception as e:
