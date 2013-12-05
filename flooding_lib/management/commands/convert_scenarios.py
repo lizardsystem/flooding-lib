@@ -1,4 +1,5 @@
 import glob
+import mock
 import os
 import sys
 import traceback
@@ -28,6 +29,7 @@ def is_converted(scenario):
 
 
 class Command(BaseCommand):
+    @mock.patch('django.db.close_connection')
     def handle(self, *args, **kwargs):
 
         log = open("logfile.txt", "w")
