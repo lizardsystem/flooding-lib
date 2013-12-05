@@ -116,11 +116,11 @@ class Flsh(object):
 
         colrowline = splitline(self.f)
         try:
-            ncols, nrows = [int(c) for c in colrowline]
+            nrows, ncols = [int(c) for c in colrowline]
+
         except ValueError:
             if colrowline[0] == '***':
-                nrows = int(colrowline[1])
-                ncols = self.find_max_col() + 1
+                ncols, nrows = self.find_max_col()
 
 #        logger.debug("ncols={0} nrows={1}".format(ncols, nrows))
 
@@ -171,6 +171,7 @@ class Flsh(object):
     def find_max_col(self):
         opened = self._open_path()
         maxcol = 0
+        maxrow = 0
         for line in opened:
             line = line.strip().decode('utf8').split()
             if not line or '.' in line[0]:
@@ -180,14 +181,16 @@ class Flsh(object):
             except ValueError:
                 continue
             maxcol = max(maxcol, col)
+            maxrow = max(maxrow, row)
 
         logger.debug("Found max col: {}".format(maxcol))
-        return maxcol
+        logger.debug("Found max row: {}".format(maxrow))
+        return maxcol, maxrow
 
     def __iter__(self):
         header = self._parse_header()
 
-        the_array = numpy.zeros((header['nrows'], header['ncols']))
+        the_array = numpy.zeros((header['ncols'] + 1, header['nrows'] + 1))
         current_timestamp = False
         yield_this_grid = False
         last_yielded_hour = None
@@ -221,7 +224,13 @@ class Flsh(object):
                     value = 0.0
                 else:
                     value = header['classes'][classvalue - 1][class_column]
-                the_array[-col][row - 1] = value
+                try:
+                    the_array[-col, row - 1] = value
+                except IndexError:
+                    print(the_array.shape)
+                    print("col: {}".format(col))
+                    print("row: {}".format(row))
+                    raise
 
         self.f.close()  # When the file is closed, it can be deleted
                         # on Windows
