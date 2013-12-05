@@ -176,8 +176,9 @@ class Flsh(object):
             if not line or '.' in line[0]:
                 continue
             row, col, value = line
-            maxcol = max(maxcol, col)
+            maxcol = max(maxcol, int(col))
 
+        logger.debug("Found max col: {}".format(maxcol))
         return maxcol
 
     def __iter__(self):
