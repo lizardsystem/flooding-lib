@@ -28,24 +28,35 @@ def is_converted(scenario):
         presentationtype__geo_type=PresentationType.GEO_TYPE_PYRAMID).exists()
 
 
+class Log(object):
+    def __init__(self):
+        self.log = open("logfile.txt", "w")
+
+    def message(self, message, *args, **kwargs):
+        localtime = time.localtime()
+        timestring = time.strftime("%d/%m %H:%M:%S", localtime)
+
+        self.log.write(
+            "{time} {message}\n".format(
+                time=timestring, message=message.format(*args, **kwargs)))
+        self.log.flush()
+
+
 class Command(BaseCommand):
     @mock.patch('django.db.close_connection')
     def handle(self, *args, **kwargs):
 
-        log = open("logfile.txt", "w")
+        logger = Log()
 
         for scenario in scenarios():
             if is_converted(scenario):
-                log.write("{} is already converted.\n".format(scenario.id))
-                log.flush()
+                logger.message("{} is already converted.", scenario.id)
                 continue
 
             try:
                 with commit_on_success():
                     pyramid_generation.sobek(scenario.id, settings.TMP_DIR)
                     pyramid_generation.his_ssm(scenario.id, settings.TMP_DIR)
-
-                time.sleep(1)
 
                 presentationlayer_generation.perform_presentation_generation(
                     scenario.id, None)
@@ -65,12 +76,9 @@ class Command(BaseCommand):
                 for f in files:
                     os.remove(f)
 
-                log.write("{} converted.\n".format(scenario.id))
-                log.flush()
+                logger.message("{} converted.", scenario.id)
             except Exception as e:
-                log.write(
-                    "{} stopped due to an exception: {}\n"
-                    .format(scenario.id, e))
+                logger.message(
+                    "{} stopped due to an exception: {}", scenario.id, e)
                 _, _, tb = sys.exc_info()
-                traceback.print_tb(tb, 10, log)
-                log.flush()
+                traceback.print_tb(tb, 10, logger.log)

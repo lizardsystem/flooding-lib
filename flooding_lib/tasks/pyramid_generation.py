@@ -93,6 +93,10 @@ def common_generation(scenario_id, source_programs, tmp_dir):
         logger.debug("Result location: " + result_location)
 
         # Check for empty result file
+        if not os.path.exists(result_location):
+            logger.warning("input file '%s' missing" % result.resultloc)
+            continue
+
         if os.stat(result_location)[stat.ST_SIZE] == 0:
             logger.warning("input file '%s' is empty" % result.resultloc)
             continue
