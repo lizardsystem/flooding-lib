@@ -46,9 +46,8 @@ class Log(object):
                                            # close it
 def convert_scenario(scenario, logger, patched_close_connection):
     try:
-        with commit_on_success():
-            pyramid_generation.sobek(scenario.id, settings.TMP_DIR)
-            pyramid_generation.his_ssm(scenario.id, settings.TMP_DIR)
+        pyramid_generation.sobek(scenario.id, settings.TMP_DIR)
+        pyramid_generation.his_ssm(scenario.id, settings.TMP_DIR)
 
         presentationlayer_generation.perform_presentation_generation(
             scenario.id, None)
