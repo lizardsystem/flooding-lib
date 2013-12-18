@@ -42,8 +42,10 @@ class Command(BaseCommand):
                 try:
                     fls = Flsh(result_location,
                                helper_geotransform=mwgeotransform)
+                    needs_conversion = fls.uses_old_y0()
                 except ValueError:
+                    # Happens if there is more than one file in an fls.zip
                     continue
 
-                if fls.uses_old_y0():
+                if needs_conversion:
                     convert_scenario(scenario, logger)
