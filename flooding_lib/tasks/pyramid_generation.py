@@ -13,6 +13,7 @@ from flooding_base.models import Setting
 from flooding_lib.models import Scenario
 from flooding_lib.tools.importtool.models import InputField
 from flooding_lib.tools.pyramids import models as pyramidmodels
+from flooding_lib.tasks import calculate_export_maps
 from flooding_lib.util import files
 from flooding_lib.util import flshinc
 
@@ -64,6 +65,9 @@ def common_generation(scenario_id, source_programs, tmp_dir):
 
     scenario = Scenario.objects.get(pk=scenario_id)
 
+    maxwaterdepth_geotransform = (
+        calculate_export_maps.maxwaterdepth_geotransform(scenario))
+
     logger.debug("select results relative to scenario %s" % scenario_id)
     results = list(scenario.result_set.filter(
             resulttype__program__in=source_programs,
@@ -110,7 +114,8 @@ def common_generation(scenario_id, source_programs, tmp_dir):
             with files.temporarily_unzipped(
                 result_location, rezip=False, tmp_dir=tmp_dir) as unzipped:
                 pyramid_or_animation = compute_pyramids(
-                    result, unzipped, result_to_correct_gridta, output_dir)
+                    result, unzipped, result_to_correct_gridta, output_dir,
+                    maxwaterdepth_geotransform)
         else:
             # Just use the file itself
             pyramid_or_animation = compute_pyramids(
@@ -133,14 +138,16 @@ def common_generation(scenario_id, source_programs, tmp_dir):
 
 
 def compute_pyramids(
-    result, input_files, result_to_correct_gridta, output_dir):
+    result, input_files, result_to_correct_gridta, output_dir,
+    maxwaterdepth_geotransform):
     # If we have an inc file, use that
     inc_file = next(
         (i for i in input_files if i.lower().endswith('.inc')), None)
 
     if inc_file:
         # amount, basename = generate_from_inc(inc_file)
-        return animation_from_inc(inc_file, output_dir)
+        return animation_from_inc(
+            inc_file, output_dir, maxwaterdepth_geotransform)
     elif len(input_files) == 1:
         return pyramid_from_single_asc(
             input_files[0], result_to_correct_gridta)
@@ -163,10 +170,12 @@ def save_to_tiff(filepath, grid, geotransform):
     band.WriteArray(grid)
 
 
-def animation_from_inc(inc_file, output_dir):
+def animation_from_inc(inc_file, output_dir, maxwaterdepth_geotransform=None):
     """Save each grid as a geotiff dataset so that images can be
     quickly created on the fly from it."""
-    fls = flshinc.Flsh(inc_file, one_per_hour=True, mutate=False)
+    fls = flshinc.Flsh(
+        inc_file, one_per_hour=True, mutate=False,
+        helper_geotransform=maxwaterdepth_geotransform)
     logger.debug("Generating animation from {}".format(inc_file))
 
     geotransform = fls.geo_transform()

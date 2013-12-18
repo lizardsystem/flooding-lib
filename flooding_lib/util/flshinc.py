@@ -31,6 +31,7 @@ from __future__ import print_function, unicode_literals
 from __future__ import absolute_import, division
 
 import logging
+import math
 import numpy
 import numpy.ma
 import zipfile
@@ -53,6 +54,11 @@ def floats(f):
     return [float(fl) for fl in splitline(f)]
 
 
+def distance(p1, p2):
+    return math.sqrt((p1[0] - p2[0]) ** 2 +
+                     (p1[1] - p2[1]) ** 2)
+
+
 def check(line, expected):
     if line[:len(expected)] != expected:
         raise ValueError("line {0} was expected to start with {1}".
@@ -61,19 +67,59 @@ def check(line, expected):
 
 class Flsh(object):
     def __init__(
-        self, path, no_data_value=-999.0, one_per_hour=False, mutate=False):
+        self, path, no_data_value=-999.0, one_per_hour=False,
+        mutate=False, helper_geotransform=None):
         self.path = path
         self.no_data_value = no_data_value
         self.one_per_hour = one_per_hour
         self.mutate = mutate
+        self.helper_geotransform = helper_geotransform
+
+    def uses_old_y0(self):
+        if self.helper_geotransform:
+            header = self._parse_header()
+
+            helper_x0y0 = (self.helper_geotransform[0],
+                           self.helper_geotransform[3])
+
+            # In old FLS files, header['y0'] is the y value of the
+            # northwest corner, in newer ones it's the y of the
+            # southwest corner. We have no way to distinguish it. But
+            # if we have known good geotransform of almost the same
+            # area (of a max water depth grid, say) then we can see
+            # which of both is closer, and then use that.
+
+            # Option 1:
+            corner1 = (header['x0'], header['y0'])
+            distance1 = distance(helper_x0y0, corner1)
+
+            # Option 2:
+            corner2 = (header['x0'],
+                       header['y0'] + header['nrows'] * header['dx'])
+            distance2 = distance(helper_x0y0, corner2)
+
+            logger.debug('distance1: {}'.format(distance1))
+            logger.debug('distance2: {}'.format(distance2))
+
+            if distance1 < distance2:
+                return True
+
+        return False
 
     def geo_transform(self):
         header = self._parse_header()
 
-        return [
-            header['x0'], header['dx'], 0.0,
-            header['y0'] + header['nrows'] * header['dx'], 0.0, -header['dx']
-            ]
+        if self.uses_old_y0():
+            return [
+                header['x0'], header['dx'], 0.0,
+                header['y0'], 0.0, -header['dx']
+                ]
+        else:
+            return [
+                header['x0'], header['dx'], 0.0,
+                header['y0'] + header['nrows'] * header['dx'],
+                0.0, -header['dx']
+                ]
 
     def get_classes(self):
         header = self._parse_header()
@@ -85,7 +131,8 @@ class Flsh(object):
             namelist = zipf.namelist()
             if len(namelist) != 1:
                 raise ValueError(
-                    "Can only open .zip files with 1 file inside.")
+                    "Can only open .zip files with 1 file inside, "
+                    "{p} has {n}.".format(p=self.path, n=len(namelist)))
             return zipf.open(namelist[0], mode='rU')
         else:
             return file(self.path, 'rU')

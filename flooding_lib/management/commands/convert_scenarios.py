@@ -42,43 +42,44 @@ class Log(object):
         self.log.flush()
 
 
-class Command(BaseCommand):
-    @mock.patch('django.db.close_connection')
-    def handle(self, *args, **kwargs):
+def convert_scenario(scenario, logger):
+    try:
+        with commit_on_success():
+            pyramid_generation.sobek(scenario.id, settings.TMP_DIR)
+            pyramid_generation.his_ssm(scenario.id, settings.TMP_DIR)
 
+        presentationlayer_generation.perform_presentation_generation(
+            scenario.id, None)
+
+        # Remove old animation PNGs of the presentation layer
+        # A copy is still available in the results dir, if needed
+        pngdir = os.path.join(
+            settings.EXTERNAL_PRESENTATION_MOUNTED_DIR,
+            'flooding', 'scenario', str(scenario.id), 'fls')
+        pngdir = pngdir.replace('\\', '/')
+        files = glob.glob(
+            os.path.join(pngdir, "*.png")) + glob.glob(
+            os.path.join(pngdir, "*.pgw")) + glob.glob(
+                '/tmp/*.aux.xml') + glob.glob(
+                '/tmp/*.tif')
+
+        for f in files:
+            os.remove(f)
+
+        logger.message("{} converted.", scenario.id)
+    except Exception as e:
+        logger.message(
+            "{} stopped due to an exception: {}", scenario.id, e)
+        _, _, tb = sys.exc_info()
+        traceback.print_tb(tb, 10, logger.log)
+
+
+class Command(BaseCommand):
+    @mock.patch('django.db.close_connection')  # So that subtasks
+                                               # can't close it
+    def handle(self, *args, **kwargs):
         logger = Log()
 
         for scenario in scenarios():
-            if is_converted(scenario):
-                logger.message("{} is already converted.", scenario.id)
-                continue
-
-            try:
-                with commit_on_success():
-                    pyramid_generation.sobek(scenario.id, settings.TMP_DIR)
-                    pyramid_generation.his_ssm(scenario.id, settings.TMP_DIR)
-
-                presentationlayer_generation.perform_presentation_generation(
-                    scenario.id, None)
-
-                # Remove old animation PNGs of the presentation layer
-                # A copy is still available in the results dir, if needed
-                pngdir = os.path.join(
-                    settings.EXTERNAL_PRESENTATION_MOUNTED_DIR,
-                    'flooding', 'scenario', str(scenario.id), 'fls')
-                pngdir = pngdir.replace('\\', '/')
-                files = glob.glob(
-                    os.path.join(pngdir, "*.png")) + glob.glob(
-                    os.path.join(pngdir, "*.pgw")) + glob.glob(
-                        '/tmp/*.aux.xml') + glob.glob(
-                        '/tmp/*.tif')
-
-                for f in files:
-                    os.remove(f)
-
-                logger.message("{} converted.", scenario.id)
-            except Exception as e:
-                logger.message(
-                    "{} stopped due to an exception: {}", scenario.id, e)
-                _, _, tb = sys.exc_info()
-                traceback.print_tb(tb, 10, logger.log)
+            if not is_converted(scenario):
+                convert_scenario(scenario, logger)
