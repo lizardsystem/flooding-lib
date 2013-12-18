@@ -11,6 +11,7 @@ from django import db
 
 from flooding_base.models import Setting
 from flooding_lib.models import Scenario
+from flooding_lib.models import Result
 from flooding_lib.tools.importtool.models import InputField
 from flooding_lib.tools.pyramids import models as pyramidmodels
 from flooding_lib.tasks import calculate_export_maps
@@ -138,11 +139,16 @@ def common_generation(scenario_id, source_programs, tmp_dir):
                 result.raster.delete()
             logger.debug(
                 "Setting new pyramid (result id is {})".format(result.id))
+            result.raster = None
+            result.save()
             result.raster = pyramid_or_animation
 
         logger.debug("Saving result, result has a raster with id {}"
                      .format(result.raster.id))
         result.save()
+
+        logger.debug("Checking to make sure: {}"
+                     .format(Result.objects.get(pk=result.id).raster.id))
 
     return True
 
