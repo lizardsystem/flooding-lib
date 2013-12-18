@@ -31,6 +31,7 @@ class Command(BaseCommand):
         for scenario in scenarios():
             mwgeotransform = (
                 calculate_export_maps.maxwaterdepth_geotransform(scenario))
+            needs_conversion = False
             for result in scenario.result_set.all():
                 if not result.resultloc:
                     continue
@@ -43,9 +44,10 @@ class Command(BaseCommand):
                     fls = Flsh(result_location,
                                helper_geotransform=mwgeotransform)
                     needs_conversion = fls.uses_old_y0()
+                    break
                 except ValueError:
                     # Happens if there is more than one file in an fls.zip
                     continue
 
-                if needs_conversion:
-                    convert_scenario(scenario, logger)
+            if needs_conversion:
+                convert_scenario(scenario, logger)
