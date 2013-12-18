@@ -42,7 +42,9 @@ class Log(object):
         self.log.flush()
 
 
-def convert_scenario(scenario, logger):
+@mock.patch('django.db.close_connection')  # So that subtasks can't
+                                           # close it
+def convert_scenario(scenario, logger, patched_close_connection):
     try:
         with commit_on_success():
             pyramid_generation.sobek(scenario.id, settings.TMP_DIR)
@@ -75,8 +77,6 @@ def convert_scenario(scenario, logger):
 
 
 class Command(BaseCommand):
-    @mock.patch('django.db.close_connection')  # So that subtasks
-                                               # can't close it
     def handle(self, *args, **kwargs):
         logger = Log()
 
