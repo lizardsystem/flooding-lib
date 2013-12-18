@@ -11,6 +11,7 @@ from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import division
 
+import logging
 import os
 import shutil
 
@@ -26,6 +27,8 @@ from django_extensions.db.fields import UUIDField
 from django_extensions.db.fields.json import JSONField
 
 from gislib import pyramids
+
+logger = logging.getLogger(__name__)
 
 SUBDIR_DEPTH = 6  # Number of characters of a UUID to use as directories
 
@@ -71,7 +74,10 @@ class Raster(models.Model):
         super(Raster, self).delete()
 
         # Delete pyramid
-        shutil.rmtree(self.pyramid_path)
+        try:
+            shutil.rmtree(self.pyramid_path)
+        except Exception as e:
+            logger.debug("EXCEPTION IN DELETE: {}".format(e))
 
 
 class Animation(models.Model):
