@@ -127,13 +127,18 @@ class Flsh(object):
 
     def _open_path(self):
         if self.path.endswith('.zip'):
-            zipf = zipfile.ZipFile(self.path)
-            namelist = zipf.namelist()
-            if len(namelist) != 1:
+            try:
+                zipf = zipfile.ZipFile(self.path)
+                namelist = zipf.namelist()
+                if len(namelist) != 1:
+                    raise ValueError(
+                        "Can only open .zip files with 1 file inside, "
+                        "{p} has {n}.".format(p=self.path, n=len(namelist)))
+                return zipf.open(namelist[0], mode='rU')
+            except zipfile.BadZipfile:
                 raise ValueError(
-                    "Can only open .zip files with 1 file inside, "
-                    "{p} has {n}.".format(p=self.path, n=len(namelist)))
-            return zipf.open(namelist[0], mode='rU')
+                    "{} ends in .zip but can't be opened as one."
+                    .format(self.path))
         else:
             return file(self.path, 'rU')
 

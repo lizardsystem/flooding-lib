@@ -123,10 +123,6 @@ def common_generation(scenario_id, source_programs, tmp_dir):
                 result, [result_location], result_to_correct_gridta,
                 output_dir)
 
-        logger.debug(
-            "Resulting pyramid: {} {}".
-            format(pyramid_or_animation, dir(pyramid_or_animation)))
-
         if hasattr(pyramid_or_animation, 'frames'):
             if result.animation:
                 result.animation.delete()  # Delete the old object
@@ -137,19 +133,9 @@ def common_generation(scenario_id, source_programs, tmp_dir):
                 # Delete the old one (and its pyramid!)
                 logger.debug("Deleting old pyramid")
                 result.raster.delete()
-            logger.debug(
-                "Setting new pyramid (result id is {})".format(result.id))
-            result.raster = None
-            result.save()
             result.raster = pyramid_or_animation
 
-        logger.debug("Saving result, result has a raster with id {}"
-                     .format(result.raster.id))
         result.save()
-
-        logger.debug("Checking to make sure: {}"
-                     .format(Result.objects.get(pk=result.id).raster.id))
-
     return True
 
 
