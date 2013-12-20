@@ -143,8 +143,8 @@ def all_files_in(filename):
         process(f)  # Process first file
         break       # Skip rest; files are cleaned up here
     """
-    log.debug("all_files_in({f})".format(f=filename))
     filename = fix_path(filename)
+    log.debug(b"all_files_in({f})".format(f=filename))
 
     if is_valid_zipfile(filename):
         with files.temporarily_unzipped(filename) as files_in_zip:
