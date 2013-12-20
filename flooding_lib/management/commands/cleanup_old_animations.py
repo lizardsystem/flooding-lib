@@ -18,7 +18,7 @@ class Command(BaseCommand):
             basedir = result.animation.basedir
             if os.path.exists(basedir):
                 for filename in os.listdir(basedir):
-                    if (filename.endswith(".pgn") or
+                    if (filename.endswith(".png") or
                         filename.endswith(".pgw")):
                         fullpath = os.path.join(basedir, filename)
                         print("Removing {}.".format(fullpath))
