@@ -204,7 +204,7 @@ def get_or_create_model_shapefile_def(model_loc, output_dir, generate, srid,
             #make shapefile for nodes
             # Create the file object, a layer, and an attribute
             t_srs = osr.SpatialReference()
-            t_srs.SetFromUserInput('900913')
+            t_srs.SetFromUserInput('epsg:900913')
             drv = ogr.GetDriverByName('ESRI Shapefile')
             ds = drv.CreateDataSource(str(shapefile_name['nodes']))
 
@@ -238,7 +238,7 @@ def get_or_create_model_shapefile_def(model_loc, output_dir, generate, srid,
             #make shapefile for branches
             # Create the file object, a layer, and an attribute
             t_srs = osr.SpatialReference()
-            t_srs.SetFromUserInput('900913')
+            t_srs.SetFromUserInput('epsg:900913')
             drv = ogr.GetDriverByName('ESRI Shapefile')
             dsb = drv.CreateDataSource(str(shapefile_name['branches']))
 
@@ -246,6 +246,8 @@ def get_or_create_model_shapefile_def(model_loc, output_dir, generate, srid,
                 dsb.GetName(), geom_type=ogr.wkbLineString, srs=t_srs)
             layerb.CreateField(ogr.FieldDefn('id', ogr.OFTString))
             layerb.CreateField(ogr.FieldDefn('type', ogr.OFTInteger))
+            layerb.CreateField(ogr.FieldDefn('from', ogr.OFTString))
+            layerb.CreateField(ogr.FieldDefn('to', ogr.OFTInteger))
 
             fid = 0
 
@@ -314,7 +316,7 @@ def get_or_create_model_shapefile_def(model_loc, output_dir, generate, srid,
 
         #make shapefile for structures
         t_srs = osr.SpatialReference()
-        t_srs.SetFromUserInput('900913')
+        t_srs.SetFromUserInput('epsg:900913')
         drv = ogr.GetDriverByName('ESRI Shapefile')
         log.info('create shapefile ' + shapefile_name['structures'])
         ds = drv.CreateDataSource(str(shapefile_name['structures']))
@@ -504,7 +506,6 @@ def get_or_create_value_presentation_source(
     dest_dir = Setting.objects.get(key='DESTINATION_DIR').value
     presentation_dir = Setting.objects.get(key='PRESENTATION_DIR').value
     #source_dir = Setting.objects.get(key='SOURCE_DIR').value
-
     try:
         animation = {}
 
@@ -604,7 +605,6 @@ def get_or_create_value_presentation_source(
 
 def get_or_create_shape_layer(scenario, pt, only_geom):
     log.debug('!!!get_or_create_shape_layer')
-
     pl, pl_new = PresentationLayer.objects.get_or_create(
         presentationtype=pt, scenario_presentationlayer__scenario=scenario)
     if pl_new:
@@ -826,7 +826,6 @@ def perform_presentation_generation(scenario_id, tasktype_id):
 
     """
     scenario = Scenario.objects.get(pk=scenario_id)
-
     #get all active presentation_types, made from results of flooding
     presentation_types = PresentationType.objects.filter(
         active=True, custom_indicator__name='flooding_result').exclude(
