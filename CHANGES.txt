@@ -4,7 +4,7 @@ Changelog of flooding-lib
 3.8 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Set result value to presentation layer.
 
 
 3.7 (2013-12-03)

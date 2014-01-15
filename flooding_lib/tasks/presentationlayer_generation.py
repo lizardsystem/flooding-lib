@@ -654,7 +654,7 @@ def get_or_create_shape_layer(scenario, pt, only_geom):
         log.warning(e)
         pl.delete()
         return False
-
+    
     if value_successful and geo_successful or only_geom and geo_successful:
         ps.geo_source = geo_source[pt.generation_geo_source_part.split(',')[0]]
         if (not only_geom):
@@ -669,7 +669,6 @@ def get_or_create_shape_layer(scenario, pt, only_geom):
 
 def get_or_create_pngserie_with_defaultlegend_from_old_results(scenario, pt):
     log.debug('!!!get_or_create_pngserie_with_defaultlegend_from_old_results')
-
     result = Result.objects.filter(
         scenario=scenario,
         resulttype__resulttype_presentationtype__presentationtype=pt)
@@ -798,6 +797,16 @@ def get_or_create_presentationlayer(scenario, presentationtype):
     require a simple presentationlayer as a link between
     presentationlayer and result."""
 
+    result = Result.objects.filter(
+        scenario=scenario,
+        resulttype__resulttype_presentationtype__presentationtype=presentationtype)
+
+    result_value = None
+    if result.count() <= 0:
+        log.info('result not found for {}'.format(presentationtype.name))
+    else:
+        result_value = result[0].value
+
     log.debug("Getting or creating a layer for {}".format(presentationtype))
     if not scenario.presentationlayer.filter(
         presentationtype=presentationtype).exists():
@@ -815,7 +824,8 @@ def get_or_create_presentationlayer(scenario, presentationtype):
         log.debug("It has results and they are present")
 
         presentationlayer = PresentationLayer.objects.create(
-            presentationtype=presentationtype)
+            presentationtype=presentationtype, value=result_value)
+        
         Scenario_PresentationLayer.objects.create(
                 scenario=scenario,
                 presentationlayer=presentationlayer)
