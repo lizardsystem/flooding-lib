@@ -808,8 +808,9 @@ def get_or_create_presentationlayer(scenario, presentationtype):
         result_value = result[0].value
 
     log.debug("Getting or creating a layer for {}".format(presentationtype))
-    if not scenario.presentationlayer.filter(
-        presentationtype=presentationtype).exists():
+    p_layers = scenario.presentationlayer.filter(
+        presentationtype=presentationtype)
+    if not p_layers.exists():
         log.debug("It doesn't exist yet")
         resulttypes = list(presentationtype.resulttype_set.all())
         if not resulttypes:
@@ -829,6 +830,10 @@ def get_or_create_presentationlayer(scenario, presentationtype):
         Scenario_PresentationLayer.objects.create(
                 scenario=scenario,
                 presentationlayer=presentationlayer)
+    else:
+        for p_layer in p_layers:
+            p_layer.value = result_value
+            p_layer.save()
 
 
 def perform_presentation_generation(scenario_id, tasktype_id):
