@@ -204,7 +204,7 @@ def get_or_create_model_shapefile_def(model_loc, output_dir, generate, srid,
             #make shapefile for nodes
             # Create the file object, a layer, and an attribute
             t_srs = osr.SpatialReference()
-            t_srs.SetFromUserInput('900913')
+            t_srs.SetFromUserInput('epsg:900913')
             drv = ogr.GetDriverByName('ESRI Shapefile')
             ds = drv.CreateDataSource(str(shapefile_name['nodes']))
 
@@ -238,7 +238,7 @@ def get_or_create_model_shapefile_def(model_loc, output_dir, generate, srid,
             #make shapefile for branches
             # Create the file object, a layer, and an attribute
             t_srs = osr.SpatialReference()
-            t_srs.SetFromUserInput('900913')
+            t_srs.SetFromUserInput('epsg:900913')
             drv = ogr.GetDriverByName('ESRI Shapefile')
             dsb = drv.CreateDataSource(str(shapefile_name['branches']))
 
@@ -246,6 +246,8 @@ def get_or_create_model_shapefile_def(model_loc, output_dir, generate, srid,
                 dsb.GetName(), geom_type=ogr.wkbLineString, srs=t_srs)
             layerb.CreateField(ogr.FieldDefn('id', ogr.OFTString))
             layerb.CreateField(ogr.FieldDefn('type', ogr.OFTInteger))
+            layerb.CreateField(ogr.FieldDefn('from', ogr.OFTString))
+            layerb.CreateField(ogr.FieldDefn('to', ogr.OFTInteger))
 
             fid = 0
 
@@ -314,7 +316,7 @@ def get_or_create_model_shapefile_def(model_loc, output_dir, generate, srid,
 
         #make shapefile for structures
         t_srs = osr.SpatialReference()
-        t_srs.SetFromUserInput('900913')
+        t_srs.SetFromUserInput('epsg:900913')
         drv = ogr.GetDriverByName('ESRI Shapefile')
         log.info('create shapefile ' + shapefile_name['structures'])
         ds = drv.CreateDataSource(str(shapefile_name['structures']))
@@ -504,7 +506,6 @@ def get_or_create_value_presentation_source(
     dest_dir = Setting.objects.get(key='DESTINATION_DIR').value
     presentation_dir = Setting.objects.get(key='PRESENTATION_DIR').value
     #source_dir = Setting.objects.get(key='SOURCE_DIR').value
-
     try:
         animation = {}
 
@@ -604,7 +605,6 @@ def get_or_create_value_presentation_source(
 
 def get_or_create_shape_layer(scenario, pt, only_geom):
     log.debug('!!!get_or_create_shape_layer')
-
     pl, pl_new = PresentationLayer.objects.get_or_create(
         presentationtype=pt, scenario_presentationlayer__scenario=scenario)
     if pl_new:
@@ -654,7 +654,7 @@ def get_or_create_shape_layer(scenario, pt, only_geom):
         log.warning(e)
         pl.delete()
         return False
-
+    
     if value_successful and geo_successful or only_geom and geo_successful:
         ps.geo_source = geo_source[pt.generation_geo_source_part.split(',')[0]]
         if (not only_geom):
@@ -669,7 +669,6 @@ def get_or_create_shape_layer(scenario, pt, only_geom):
 
 def get_or_create_pngserie_with_defaultlegend_from_old_results(scenario, pt):
     log.debug('!!!get_or_create_pngserie_with_defaultlegend_from_old_results')
-
     result = Result.objects.filter(
         scenario=scenario,
         resulttype__resulttype_presentationtype__presentationtype=pt)
@@ -798,9 +797,20 @@ def get_or_create_presentationlayer(scenario, presentationtype):
     require a simple presentationlayer as a link between
     presentationlayer and result."""
 
+    result = Result.objects.filter(
+        scenario=scenario,
+        resulttype__resulttype_presentationtype__presentationtype=presentationtype)
+
+    result_value = None
+    if result.count() <= 0:
+        log.info('result not found for {}'.format(presentationtype.name))
+    else:
+        result_value = result[0].value
+
     log.debug("Getting or creating a layer for {}".format(presentationtype))
-    if not scenario.presentationlayer.filter(
-        presentationtype=presentationtype).exists():
+    p_layers = scenario.presentationlayer.filter(
+        presentationtype=presentationtype)
+    if not p_layers.exists():
         log.debug("It doesn't exist yet")
         resulttypes = list(presentationtype.resulttype_set.all())
         if not resulttypes:
@@ -815,10 +825,15 @@ def get_or_create_presentationlayer(scenario, presentationtype):
         log.debug("It has results and they are present")
 
         presentationlayer = PresentationLayer.objects.create(
-            presentationtype=presentationtype)
+            presentationtype=presentationtype, value=result_value)
+        
         Scenario_PresentationLayer.objects.create(
                 scenario=scenario,
                 presentationlayer=presentationlayer)
+    else:
+        for p_layer in p_layers:
+            p_layer.value = result_value
+            p_layer.save()
 
 
 def perform_presentation_generation(scenario_id, tasktype_id):
@@ -826,7 +841,6 @@ def perform_presentation_generation(scenario_id, tasktype_id):
 
     """
     scenario = Scenario.objects.get(pk=scenario_id)
-
     #get all active presentation_types, made from results of flooding
     presentation_types = PresentationType.objects.filter(
         active=True, custom_indicator__name='flooding_result').exclude(

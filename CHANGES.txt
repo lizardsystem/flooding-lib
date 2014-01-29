@@ -4,7 +4,10 @@ Changelog of flooding-lib
 3.8 (unreleased)
 ----------------
 
+
 - Fix bugs with Y0 in flshinc files.
+
+- Set result value to presentation layer.
 
 
 3.7 (2013-12-03)
