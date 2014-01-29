@@ -213,6 +213,7 @@ def animation_from_inc(inc_file, output_dir, maxwaterdepth_geotransform=None):
 
 
 def animation_from_ascs(input_files, output_dir):
+    logger.debug("Animation from ascs...")
     maxvalue = None
 
     gridta_gridtd_recorder = None
@@ -220,6 +221,9 @@ def animation_from_ascs(input_files, output_dir):
     for i, input_file in enumerate(input_files):
         filename = b'dataset{:04d}.tiff'.format(i)
         filepath = os.path.join(output_dir, filename)
+
+        logger.debug("- {} -> {}".format(input_file, filepath))
+
         dataset = gdal_open(input_file)
         if dataset is None:
             continue

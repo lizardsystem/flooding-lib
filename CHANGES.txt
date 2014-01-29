@@ -4,7 +4,7 @@ Changelog of flooding-lib
 3.8 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Fix bugs with Y0 in flshinc files.
 
 
 3.7 (2013-12-03)

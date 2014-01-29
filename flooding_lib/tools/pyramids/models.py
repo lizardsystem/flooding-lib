@@ -75,7 +75,8 @@ class Raster(models.Model):
 
         # Delete pyramid
         try:
-            shutil.rmtree(self.pyramid_path)
+            if os.path.exists(self.pyramid_path):
+                shutil.rmtree(self.pyramid_path)
         except Exception as e:
             logger.debug("EXCEPTION IN DELETE: {}".format(e))
 

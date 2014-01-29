@@ -65,6 +65,29 @@ def check(line, expected):
                          format(line, expected))
 
 
+def y0_is_south(header, helper_geotransform):
+    if helper_geotransform:
+        helper_y0 = helper_geotransform[3]
+
+        # In old FLS files, header['y0'] is the y value of the
+        # southwest corner, in newer ones it's the y of the northwest
+        # corner. We have no way to distinguish them based on the FLS
+        # file alone.
+
+        # The helper geotransform's y0 is always at the north of the region.
+        # We check which possible north value it is closest to.
+
+        north_if_y0_is_north = header['y0']
+        north_if_y0_is_south = header['y0'] + header['nrows'] * header['dx']
+
+        if (abs(north_if_y0_is_north - helper_y0) >
+            abs(north_if_y0_is_south - helper_y0)):
+            # South is closest
+            return True
+
+    return False
+
+
 class Flsh(object):
     def __init__(
         self, path, no_data_value=-999.0, one_per_hour=False,
@@ -75,51 +98,16 @@ class Flsh(object):
         self.mutate = mutate
         self.helper_geotransform = helper_geotransform
 
-    def uses_old_y0(self):
-        if self.helper_geotransform:
-            header = self._parse_header()
-
-            helper_x0y0 = (self.helper_geotransform[0],
-                           self.helper_geotransform[3])
-
-            # In old FLS files, header['y0'] is the y value of the
-            # northwest corner, in newer ones it's the y of the
-            # southwest corner. We have no way to distinguish it. But
-            # if we have known good geotransform of almost the same
-            # area (of a max water depth grid, say) then we can see
-            # which of both is closer, and then use that.
-
-            # Option 1:
-            corner1 = (header['x0'], header['y0'])
-            distance1 = distance(helper_x0y0, corner1)
-
-            # Option 2:
-            corner2 = (header['x0'],
-                       header['y0'] + header['nrows'] * header['dx'])
-            distance2 = distance(helper_x0y0, corner2)
-
-            logger.debug('distance1: {}'.format(distance1))
-            logger.debug('distance2: {}'.format(distance2))
-
-            if distance1 < distance2:
-                return True
-
-        return False
-
     def geo_transform(self):
         header = self._parse_header()
 
-        if self.uses_old_y0():
-            return [
-                header['x0'], header['dx'], 0.0,
-                header['y0'], 0.0, -header['dx']
-                ]
-        else:
-            return [
-                header['x0'], header['dx'], 0.0,
-                header['y0'] + header['nrows'] * header['dx'],
-                0.0, -header['dx']
-                ]
+        # y0 can be north or south, dy is positive or negative depending
+        dy = (header['dx']
+              if y0_is_south(header, self.helper_geotransform)
+              else -header['dx'])
+
+        return [header['x0'], header['dx'], 0.0,
+                header['y0'], 0.0, dy]
 
     def get_classes(self):
         header = self._parse_header()
