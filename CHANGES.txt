@@ -4,7 +4,7 @@ Changelog of flooding-lib
 3.9 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Pyramid generation task now replaces the PNG generation task.
 
 
 3.8 (2014-01-29)

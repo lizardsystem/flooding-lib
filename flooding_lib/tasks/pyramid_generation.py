@@ -11,7 +11,6 @@ from django import db
 
 from flooding_base.models import Setting
 from flooding_lib.models import Scenario
-from flooding_lib.models import Result
 from flooding_lib.tools.importtool.models import InputField
 from flooding_lib.tools.pyramids import models as pyramidmodels
 from flooding_lib.tasks import calculate_export_maps
@@ -22,6 +21,8 @@ import logging
 logger = logging.getLogger(__name__)
 
 INPUTFIELD_STARTMOMENT_BREACHGROWTH_ID = 9
+
+__revision__ = "1.0"  # perform_task wants this
 
 
 def gdal_open(f):

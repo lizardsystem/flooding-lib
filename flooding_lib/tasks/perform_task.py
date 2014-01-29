@@ -12,10 +12,10 @@ TASK_COMPUTE_SOBEK_MODEL_120 = 120
 TASK_PERFORM_SOBEK_SIMULATION_130 = 130
 TASK_COMPUTE_RISE_SPEED_132 = 132
 TASK_COMPUTE_MORTALITY_GRID_134 = 134
-TASK_SOBEK_PNG_GENERATION_150 = 150
+TASK_SOBEK_PYRAMID_GENERATION_150 = 150
 TASK_HISSSM_SIMULATION_160 = 160
 TASK_SOBEK_EMBANKMENT_DAMAGE_162 = 162
-TASK_HISSSM_PNG_GENERATION_180 = 180
+TASK_HISSSM_PYRAMID_GENERATION_180 = 180
 TASK_SOBEK_PRESENTATION_GENERATION_155 = 155
 TASK_HISSSM_PRESENTATION_GENERATION_185 = 185
 TASK_CALCULATE_STATISTICS = 190
@@ -89,13 +89,16 @@ def perform_task(
                 sobek_project_directory,
                 sobek_program_root)
 
-        elif tasktype_id == TASK_SOBEK_PNG_GENERATION_150:
-            log.debug("execute TASK_SOBEK_PNG_GENERATION_150")
-            from flooding_lib.tasks import png_generation
-            png_generation.set_broker_logging_handler(broker_logging_handler)
-            remarks = ('png_generation-' + png_generation.__revision__ +
+        elif tasktype_id == TASK_SOBEK_PYRAMID_GENERATION_150:
+            log.debug("execute TASK_SOBEK_PYRAMID_GENERATION_150")
+            from flooding_lib.tasks import pyramid_generation
+            pyramid_generation.set_broker_logging_handler(
+                broker_logging_handler)
+            remarks = ('pyramid_generation-' +
+                       pyramid_generation.__revision__ +
                        ' uitvoerder: %02d/' % worker_nr)
-            success_code = png_generation.sobek(scenario_id, tmp_directory)
+            success_code = pyramid_generation.sobek(
+                scenario_id, tmp_directory)
 
         elif tasktype_id == TASK_COMPUTE_RISE_SPEED_132:
             log.debug("execute TASK_COMPUTE_RISE_SPEED_132")
@@ -152,13 +155,16 @@ def perform_task(
             success_code, error_message = kadeschade_module.calc_damage(
                 scenario_id)
 
-        elif tasktype_id == TASK_HISSSM_PNG_GENERATION_180:
-            log.debug("execute TASK_HISSSM_PNG_GENERATION_180")
-            from flooding_lib.tasks import png_generation
-            png_generation.set_broker_logging_handler(broker_logging_handler)
-            remarks = ('png_generation-' + png_generation.__revision__ +
+        elif tasktype_id == TASK_HISSSM_PYRAMID_GENERATION_180:
+            log.debug("execute TASK_HISSSM_PYRAMID_GENERATION_180")
+            from flooding_lib.tasks import pyramid_generation
+            pyramid_generation.set_broker_logging_handler(
+                broker_logging_handler)
+            remarks = ('pyramid_generation-' +
+                       pyramid_generation.__revision__ +
                        ' uitvoerder: %02d/' % worker_nr)
-            success_code = png_generation.his_ssm(scenario_id, tmp_directory)
+            success_code = pyramid_generation.his_ssm(
+                scenario_id, tmp_directory)
 
         elif tasktype_id == TASK_HISSSM_PRESENTATION_GENERATION_185:
             log.debug("execute TASK_HISSSM_PRESENTATION_GENERATION_185")
