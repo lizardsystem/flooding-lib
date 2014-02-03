@@ -26,11 +26,21 @@ def convert_scenario(scenario):
             resulttype__name='computed_arrival_time')
         for result in arrival_time_results:
             pyramid_generation.standalone_generation_for_result(result)
-            PresentationLayer.objects.get_or_create(
-                scenario=result.scenario,
-                presentationtype=presentationtype_arrival_time, defaults=dict(
+            try:
+                pl = PresentationLayer.objects.get(
+                    scenario=result.scenario,
+                    presentationtype=presentationtype_arrival_time)
+                pl.source_application = 2
+                pl.value = result.value
+                pl.save()
+            except PresentationLayer.DoesNotExist:
+                pl = PresentationLayer.objects.create(
+                    presentationtype=presentationtype_arrival_time,
                     source_application=2,
-                    value=result.value))
+                    value=result.value)
+                models.Scenario_PresentationLayer.objects.create(
+                    scenario=scenario,
+                    presentationlayer=pl)
 
         print("1: Converted successfully.")
     except Exception as e:
