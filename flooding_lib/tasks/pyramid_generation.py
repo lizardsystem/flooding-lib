@@ -219,7 +219,7 @@ def compute_pyramids(
             input_files[0], result_to_correct_gridta)
     else:
         animation = animation_from_ascs(
-            input_files, output_dir, maxwaterdepth_geotransform,
+            input_files, output_dir,
             compute_arrival_times, startmoment_hours)
         if compute_arrival_times:
             generate_arrival_times_results(result.scenario, output_dir)
