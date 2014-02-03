@@ -1732,6 +1732,10 @@ class ResultType(models.Model):
     content_names_re = models.CharField(max_length=256, blank=True, null=True)
     presentationtype = models.ManyToManyField(
         PresentationType, through='ResultType_PresentationType')
+    use_to_compute_arrival_times = models.BooleanField(
+        help_text='Dit is een animatie die geschikt is om er '
+        'aankomsttijden mee te berekenen',
+        default=False)
 
     class Meta:
         verbose_name = _('Result type')

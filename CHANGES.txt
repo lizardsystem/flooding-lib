@@ -4,7 +4,9 @@ Changelog of flooding-lib
 3.10 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Better generation of computed_arrival_time.tiff and related results.
+
+- Script to generate those for old scenarios.
 
 
 3.9 (2014-01-29)
