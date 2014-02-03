@@ -1,8 +1,8 @@
 Changelog of flooding-lib
 ===================================================
 
-3.12 (unreleased)
------------------
+3.11.1 (2014-02-03)
+-------------------
 
 - Small bug fix in convert_arrival_times script.
 
