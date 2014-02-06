@@ -438,6 +438,7 @@ class GridtaGridtdRecorder(object):
         self.arrival_time = None
         self.time_of_max = None
         self.max_seen = None
+        self.first_moment_15m = None
         self.max_timestep = 0
 
     def register(self, timestep, grid):
@@ -452,6 +453,7 @@ class GridtaGridtdRecorder(object):
             self.arrival_time = np.zeros(grid.shape, dtype=np.uint)
             self.time_of_max = np.zeros(grid.shape, dtype=np.uint)
             self.max_seen = np.zeros(grid.shape, dtype=np.float)
+            self.first_moment_15m = np.zeros(grid.shape, dtype=np.float)
 
         copy = grid.copy()
         copy[grid < 0.01] = 0
@@ -460,6 +462,9 @@ class GridtaGridtdRecorder(object):
         self.max_seen[where_greater_than_max] = copy[where_greater_than_max]
         self.time_of_max[where_greater_than_max] = timestep
 
+        self.first_moment_15m[
+            (self.first_moment_15m == 0) & (copy >= 1.5)] = timestep
+
         where_arrival = (copy > 0) & (self.arrival_time == 0)
         self.arrival_time[where_arrival] = timestep
 
@@ -467,6 +472,8 @@ class GridtaGridtdRecorder(object):
         # Fix grids
 
         difference = self.arrival_time - self.time_of_max
+        difference[self.arrival_time > 0] += 1
+
         logger.debug("Saving")
         logger.debug("Startmoment_hours = {}".format(self.startmoment_hours))
 
@@ -478,6 +485,8 @@ class GridtaGridtdRecorder(object):
         self.arrival_time[self.arrival_time > subtract] -= subtract
         self.time_of_max[self.time_of_max <= subtract] = 0
         self.time_of_max[self.time_of_max > subtract] -= subtract
+        self.first_moment_15m[self.first_moment_15m <= subtract] = 0
+        self.first_moment_15m[self.first_moment_15m > subtract] -= subtract
 
         # The arrival time grid functions as a mask -- where it has no data,
         # the other grids must have no data either.
@@ -496,6 +505,9 @@ class GridtaGridtdRecorder(object):
             os.path.join(self.output_dir, 'computed_difference.tiff'),
             difference, self.geotransform)
 
+        save_to_tiff(
+            os.path.join(self.output_dir, 'computed_time_15m.tiff'),
+            self.first_moment_15m, self.geotransform)
 
 if __name__ == '__main__':
     pass
