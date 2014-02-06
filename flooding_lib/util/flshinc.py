@@ -74,15 +74,18 @@ def y0_is_south(header, helper_geotransform):
         # corner. We have no way to distinguish them based on the FLS
         # file alone.
 
-        # The helper geotransform's y0 is always at the north of the region.
-        # We check which possible north value it is closest to.
+        # The helper geotransform's y0 is always at the north of the
+        # region.  If it is sufficiently northwards of the FLS' y0,
+        # the y0 must be to the south. "Sufficient" is defined as at
+        # least 10% of the FLS height -- I'm afraid that without that
+        # margin, we're going to find maxwaterdepth grids that are a
+        # tiny bit to the north of the FLS, that would cause false
+        # souths.
 
-        north_if_y0_is_north = header['y0']
-        north_if_y0_is_south = header['y0'] + header['nrows'] * header['dx']
+        north_of_fls_y0 = (
+            header['y0'] + 0.1 * (header['nrows'] * header['dx']))
 
-        if (abs(north_if_y0_is_north - helper_y0) >
-            abs(north_if_y0_is_south - helper_y0)):
-            # South is closest
+        if helper_y0 > north_of_fls_y0:
             return True
 
     return False
@@ -102,12 +105,13 @@ class Flsh(object):
         header = self._parse_header()
 
         # y0 can be north or south, dy is positive or negative depending
-        dy = (header['dx']
-              if y0_is_south(header, self.helper_geotransform)
-              else -header['dx'])
+        if y0_is_south(header, self.helper_geotransform):
+            y0 = header['y0'] + (header['nrows'] * header['dx'])
+        else:
+            y0 = header['y0']
 
         return [header['x0'], header['dx'], 0.0,
-                header['y0'], 0.0, dy]
+                y0, 0.0, -header['dx']]
 
     def get_classes(self):
         header = self._parse_header()
@@ -131,12 +135,12 @@ class Flsh(object):
             return file(self.path, 'rU')
 
     @property
-    def nrows(self):
-        return self._parse_header()['nrows']
-
-    @property
     def ncols(self):
         return self._parse_header()['ncols']
+
+    @property
+    def nrows(self):
+        return self._parse_header()['nrows']
 
     def _parse_header(self):
         if hasattr(self, '_header'):
@@ -156,13 +160,13 @@ class Flsh(object):
 
         colrowline = splitline(self.f)
         try:
-            nrows, ncols = [int(c) for c in colrowline]
+            ncols, nrows = [int(c) for c in colrowline]
 
         except ValueError:
             if colrowline[0] == '***':
-                ncols, nrows = self.find_max_col()
+                nrows, ncols = self.find_max_col()
 
-#        logger.debug("ncols={0} nrows={1}".format(ncols, nrows))
+#        logger.debug("nrows={0} ncols={1}".format(nrows, ncols))
 
         # 2: grid
         while True:
@@ -199,8 +203,8 @@ class Flsh(object):
 #        logger.debug("classes: {0}".format(classes))
 
         self._header = {
-            'ncols': ncols,
             'nrows': nrows,
+            'ncols': ncols,
             'dx': dx,
             'x0': x0,
             'y0': y0,
@@ -230,7 +234,7 @@ class Flsh(object):
     def __iter__(self):
         header = self._parse_header()
 
-        the_array = numpy.zeros((header['ncols'] + 1, header['nrows'] + 1))
+        the_array = numpy.zeros((header['nrows'] + 1, header['ncols'] + 1))
         current_timestamp = False
         yield_this_grid = False
         last_yielded_hour = None
