@@ -4,7 +4,7 @@ Changelog of flooding-lib
 3.12 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Save resultloc of arrival time grids correctly.
 
 
 3.11.1 (2014-02-03)

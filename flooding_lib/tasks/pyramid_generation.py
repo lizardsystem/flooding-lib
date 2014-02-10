@@ -151,7 +151,7 @@ def generate_for_result(result, results_dir, base_output_dir, tmp_dir,
 
     # Check for empty result file
     if not os.path.exists(result_location):
-        logger.warning("input file '%s' missing" % result.resultloc)
+        logger.warning("input file '%s' missing" % result_location)
         return
 
     if os.stat(result_location)[stat.ST_SIZE] == 0:
@@ -227,12 +227,22 @@ def compute_pyramids(
 
 
 def generate_arrival_times_results(scenario, output_dir):
+    # Destination dir -- same as the old PNGs were saved to
+    destination_dir = (
+        Setting.objects.get(key='DESTINATION_DIR').value.replace('\\', '/'))
+
     names = [
         f for f in (
             'computed_arrival_time',
             'computed_difference',
             'computed_time_of_max')
         if os.path.exists(os.path.join(output_dir, '{}.tiff'.format(f)))]
+
+    if output_dir.startswith(destination_dir):
+        if not destination_dir.endswith('/'):
+            destination_dir += '/'
+
+        output_dir = output_dir[len(destination_dir):]
 
     for name in names:
         try:
