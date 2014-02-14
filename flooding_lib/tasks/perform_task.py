@@ -62,6 +62,9 @@ def perform_task(
     tmp_root = settings.TMP_ROOT
 
     tmp_directory = os.path.join(tmp_root, str(worker_nr))
+    if not os.path.exists(tmp_directory):
+        os.mkdir(tmp_directory)
+
     sobek_project_directory = os.path.join(
          'lzfl_%03d.lit' % worker_nr)
 

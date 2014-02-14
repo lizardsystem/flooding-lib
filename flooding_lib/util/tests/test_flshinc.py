@@ -47,3 +47,16 @@ class TestY0IsSouth(TestCase):
 
         self.assertTrue(flshinc.y0_is_south(
                 flsh_header, maxwaterdepth_geotransform))
+
+    def test_from_scenario_308(self):
+        computed_arrival_gt = (
+            125050.0, 100.0, 0.0, 398050.0, 0.0, -100.0)
+
+        maxwaterdepth_gt = (
+            125000.0, 100.0, 0.0, 429000.0, 0.0, -100.0)
+
+        flsh_header = {
+            'dx': 100.0, 'x0': 125050.0, 'y0': 398050.0, 'nrows': 790}
+
+        self.assertTrue(flshinc.y0_is_south(
+                flsh_header, maxwaterdepth_gt))

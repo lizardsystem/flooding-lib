@@ -1,10 +1,36 @@
 Changelog of flooding-lib
 ===================================================
 
-3.10 (unreleased)
+3.13 (unreleased)
 -----------------
 
 - Add translation.
+
+
+3.12 (2014-02-10)
+-----------------
+
+- Save resultloc of arrival time grids correctly.
+
+
+3.11.1 (2014-02-03)
+-------------------
+
+- Small bug fix in convert_arrival_times script.
+
+
+3.11 (2014-02-03)
+-----------------
+
+- Nothing changed yet.
+
+
+3.10 (2014-02-03)
+-----------------
+
+- Better generation of computed_arrival_time.tiff and related results.
+
+- Script to generate those for old scenarios.
 
 
 3.9 (2014-01-29)
