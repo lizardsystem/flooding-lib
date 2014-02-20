@@ -4,7 +4,7 @@ Changelog of flooding-lib
 3.13 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Let export run task use new arrival time grids if available.
 
 
 3.12 (2014-02-10)

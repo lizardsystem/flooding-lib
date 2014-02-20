@@ -654,8 +654,12 @@ def calc_wavefronts(tmp_zip_filename, export_run):
     log.debug("calc_wavefronts({t}, {e})"
               .format(t=tmp_zip_filename, e=export_run))
     gridtype = 'gridta'
-    input_files = export_run.input_files(gridtype)
 
+    input_files = export_run.input_files('computed_arrival_time')
+    new_input_files = True
+    if not input_files:
+        input_files = export_run.input_files('gridta')
+        new_input_files = False
     if not input_files:
         return {}
 
@@ -668,14 +672,18 @@ def calc_wavefronts(tmp_zip_filename, export_run):
         # HACK. Some gridta files have a wrong extent. The extent of
         # the max waterdepth grid is always correct, and they should
         # be equal. So we take the extent from there.
-        geo_transform = maxwaterdepth_geotransform(input_file['scenario'])
-        log.debug("Maxwaterdepth geotransform for gridta found: {}"
+        # Note: doesn't apply for new files anymore.
+
+        if not new_input_files:
+            geo_transform = maxwaterdepth_geotransform(input_file['scenario'])
+            log.debug("Maxwaterdepth geotransform for gridta found: {}"
                   .format(geo_transform))
 
-        startmoment_days = input_file['scenario'].value_for_inputfield(
-            startmoment_breachgrowth_inputfield)
+            # Does not apply for new input files
+            startmoment_days = input_file['scenario'].value_for_inputfield(
+                startmoment_breachgrowth_inputfield)
 
-        startmoment_hours = int(startmoment_days * 24 + 0.5)
+            startmoment_hours = int(startmoment_days * 24 + 0.5)
 
         for filename in all_files_in(input_file['filename']):
             # Create a new dataset that is a copy of the existing one,
@@ -690,19 +698,21 @@ def calc_wavefronts(tmp_zip_filename, export_run):
             tmpfile = os.path.join(tmpdir, b'temptif.tif')
             new_dataset = TIFDRIVER.CreateCopy(tmpfile, dataset)
 
-            if geo_transform is not None:
+            if not new_input_files and geo_transform is not None:
                 new_dataset.SetGeoTransform(geo_transform)
 
             dataset = None
             array = new_dataset.ReadAsArray()
 
-            # For all places where the value is greater than
-            # startmoment_hours, subtract startmoment_hours
-            log.debug("Correcting for startmoment_hours {i}".
-                      format(i=startmoment_hours))
-            if startmoment_hours > 0:
-                where = (startmoment_hours <= array)
-                array -= where * startmoment_hours  # Use fact that True == 1
+            if not new_input_files:
+                # For all places where the value is greater than
+                # startmoment_hours, subtract startmoment_hours
+                log.debug("Correcting for startmoment_hours {i}".
+                          format(i=startmoment_hours))
+                if startmoment_hours > 0:
+                    where = (startmoment_hours <= array)
+                    # Use fact that True == 1
+                    array -= where * startmoment_hours
 
             # Save the array and start using the new dataset instead
             # of the old one.
