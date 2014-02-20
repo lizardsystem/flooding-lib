@@ -7,7 +7,12 @@ Can apply colors to numpy grids to save as images.
 from __future__ import print_function, unicode_literals
 from __future__ import absolute_import, division
 
+from matplotlib import colors
+import logging
 import numpy
+import os
+
+logger = logging.getLogger(__name__)
 
 
 def to_color_tuple(s):
@@ -94,3 +99,40 @@ class ColorMap(object):
             colorgrid[3] = (min(self.leftbounds) < grid) * opacity_value
 
         return colorgrid
+
+    def to_matplotlib(self):
+        """Return a matplotlib colormap instance."""
+        segmentdata = self._matplotlib_segments_from_list(
+            zip(self.leftbounds, self.colors),
+            scale_factor=max(self.leftbounds))
+
+        logger.debug(segmentdata)
+
+        return colors.LinearSegmentedColormap(
+            name=os.path.basename(self.filename),
+            segmentdata=segmentdata)
+
+    def _matplotlib_segments_from_list(self, values, scale_factor):
+        """Value is a list of (leftbound, (r, g, b)) tuples."""
+        segmentdata = {
+            'red': [],
+            'green': [],
+            'blue': []
+            }
+
+        old_red = old_green = old_blue = 0
+
+        for leftbound, (red, green, blue) in values:
+            leftbound /= scale_factor
+            segmentdata['red'].append((leftbound, old_red, red))
+            segmentdata['green'].append((leftbound, old_green, green))
+            segmentdata['blue'].append((leftbound, old_blue, blue))
+            old_red = red
+            old_green = green
+            old_blue = blue
+
+        segmentdata['red'].append((1.0, old_red, 255))
+        segmentdata['green'].append((1.0, old_green, 255))
+        segmentdata['blue'].append((1.0, old_blue, 255))
+
+        return segmentdata
