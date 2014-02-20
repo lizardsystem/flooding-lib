@@ -78,13 +78,13 @@
             defaultvalue: '{{ breach.region.name }} - {{ breach.name }}'
         }, {
             name: "name",
-            title: "scenario naam",
+            title: ST_SCENARIO_NAME,
             editorType: "TextAreaItem",
             required: true,
             colSpan: 1, width: 150, height: 38, endRow: false
         }, {
             name: "remarks",
-            title: "scenario beschrijving",
+            title: ST_SCENARIO_REMARK,
             editorType: "TextAreaItem",
             //_constructor: "TextAreaItem",
             //showTitle: true,
@@ -92,7 +92,7 @@
             colSpan: 2, width: 300, height: 50, endRow: true
         }, {
             name: "project_fk",
-            title: "project",
+            title: ST_PROJECT,
             type: "select",
             required: true,
             valueMap: {
@@ -102,7 +102,7 @@
             {% endfor %} }
         },  {
             name: "calcpriority",
-            title: "doorreken prioriteit",
+            title: ST_CALC_PRIORITY,
             type: "select",
             required: true,
             valueMap: {
@@ -115,7 +115,7 @@
             endRow: true
         }, {
             name: "tsim",
-            title: "simulatie duur",
+            title: ST_SIMULATION_TIME,
             editorType: "text",
             required: true,
             hint: "dd hh:mm",
@@ -125,12 +125,12 @@
             startRow: true,
             defaultValue: intervalFormatter( {{ breach.externalwater.deftsim }} )
         }, {//***************************************************************//
-            defaultValue: "Buitenwaterstand",
+            defaultValue: ST_EXT_WATER_LAVEL,
             type: "header"
         }, {
             ID: "frmextwmaxlevel",
             name: "extwmaxlevel",
-            title: "maximum peil",
+            title: ST_MAX_LEVEL,
             editorType: "spinner",
             required: true,
             min: {{ breach.externalwater.minlevel }},
@@ -150,7 +150,7 @@
         {
             ID: "frmextwrepeattime",
             name: "extwrepeattime",
-            title: "herhalingstijd",
+            title: ST_REPETITION_TIME,
             editorType: "spinner",
             required: true,
             min: 1,
@@ -172,7 +172,7 @@
         {
             ID: "frmextwbaselevel",
             name: "extwbaselevel",
-            title: "meerpeil",
+            title: ST_LAKE_LEVEL,
             editorType: "spinner",
             required: true,
             defaultValue: {% if breach.defbaselevel %} {{ breach.defbaselevel }} {% else %} {{ breach.levelnormfrequency }} {% endif %} ,
@@ -186,7 +186,7 @@
         {% if sealake  %}
         {
             name: "tstorm",
-            title: "storm duur",
+            title: ST_STORM_DURATION,
             editorType: "text",
             hint: "dd hh:mm",
             required: true,
@@ -196,7 +196,7 @@
             defaultValue: intervalReader( {{ breach.externalwater.deftstorm }} )
         }, {
             name: "tpeak",
-            title: "piek duur",
+            title: ST_STORM_PEAK_DURATION,
             editorType: "text",
             hint: "dd hh:mm",
             required: true,
@@ -209,7 +209,7 @@
         {% if sea   %}
         {
             name: "loctide",
-            title: "Getijdenlocatie",
+            title: ST_TIDES_LOCATION,
             type: "select",
             required: true,
 			valueMap: {
@@ -219,7 +219,7 @@
             width: 150
         }, {
             name: "tdeltaphase",
-            title: "Tijdsverschuiving getij piek tov storm piek",
+            title: ST_TIME_SHIFTING_REL_TO_STORM_PEAK,
             editorType: "text",
             hint: "+/- dd hh:mm",
             defaultValue: intervalReader("0 00:00"),
@@ -229,13 +229,13 @@
         },
         {% endif %}
         {
-            defaultValue: "Bres",
+            defaultValue: ST_BREACH_,
             type: "header"
         },
         {% if sea  %}
         {
             name: "methstartbreach",
-            title: "Moment van doorbreken",
+            title: ST_MOMENT_BREAKING,
             _constructor: "SelectItem",
             prompt: "Methode waarmee het moment van doorbreken wordt bepaald",
             showIf: "form.getValue('extwtype') == (1)",
@@ -257,7 +257,7 @@
 
         {
             name: "tstartbreach",
-            title: "moment van doorbreken",
+            title: ST_MOMENT_BREAKING,
             {% if sealake %}
             	editorType: "text",
             {% else %}
@@ -266,7 +266,7 @@
             hint: "+/- dd hh:mm",
             required: true,
             defaultValue: "00:00",
-            prompt: "tijd tussen doorbreken en maximale waterstand",
+            prompt: ST_TIME_BETWEEN_BREACH_MAX_WATER,
             dateFormatter: intervalFormatter,
             blur: "this.setValue(intervalFormatter(this.getValue()));get_graph();",
             disabled: true,
@@ -275,14 +275,14 @@
         {
             ID: "frmbottomlevelbreach",
             name: "bottomlevelbreach",
-            title: "niveau van de doorbraak",
+            title: ST_BOTTOM_BREACH,
             editorType: "spinner",
             required: true,
-            hint: "m NAP",
+            hint: ST_WATER_LEVEL,
             change: function(form, item, value){
                 if (value < frmpitdepth.getValue()) {
                 	if (!donebottombreachalert) {
-                		alert("'niveau wiel' moet lager zijn dan 'niveau van de doorbraak'.");
+                		alert(ST_BOTTEM_BREACH_LESS_BOTTOM_HOLE);
                 		donebottombreachalert = true;
                 	}
                 	if ( value > frmpitdepth.min && value < frmpitdepth.max) {
@@ -304,12 +304,12 @@
         }, {
             ID: "frmpitdepth",
             name: "pitdepth",
-            title: "niveau wiel",
-            hint: "m NAP",
+            title: ST_BOTTOM_HOLE,
+            hint: ST_WATER_LEVEL,
             change: function(form, item, value){
                 if (value > frmbottomlevelbreach.getValue()) {
                 	if (!donepitalert) {
-                		alert("'niveau wiel' moet lager zijn dan 'niveau van de doorbraak'.");
+                		alert(ST_BOTTEM_BREACH_LESS_BOTTOM_HOLE);
                 		donepitalert = true;
                 	}
                 	if ( value > frmbottomlevelbreach.min && value < frmbottomlevelbreach.max) {
@@ -330,7 +330,7 @@
             width: 100
         }, {
             name: "buttonAdvancedSettings",
-            title: "Geavanceerde settings",
+            title: ST_ADVANCED_SETTINGS,
             _constructor: "ButtonItem",
             showRollOver: false,
             showDown: true,
@@ -350,7 +350,7 @@
             width: 0
         }, {
             name: "ucritical",
-            title: "kritieke stroomsnelheid",
+            title: ST_CRITICAL_VELOCITY,
             editorType: "spinner",
             hint: "m/s",
 
@@ -363,7 +363,7 @@
             width: 100
         }, {
             name: "widthbrinit",
-            title: "initiele bresbreedte",
+            title: ST_INIT_BREACH_WIDTH,
             editorType: "spinner",
             hint: "m",
             required: true,
@@ -375,7 +375,7 @@
             width: 100
         }, {
             name: "tmaxdepth",
-            title: "duur diepte groei",
+            title: ST_TIME_VERTICAL_EROSION,
             editorType: "text",
             hint: "dd hh:mm",
             required: true,
@@ -386,7 +386,7 @@
             width: 100
         }, {
             name: "brf1",
-            title: "bresgroei factor 1 (alpha)",
+            title: ST_CALIBRATION_FACTOR_1,
             editorType: "spinner",
             required: true,
             showIf: "form.getValue('showAdvancedSettings') == true",
@@ -397,7 +397,7 @@
             width: 100
         }, {
             name: "brf2",
-            title: "bresgroei factor 2 (beta)",
+            title: ST_CALIBRATION_FACTOR_2,
             editorType: "spinner",
             required: true,
             showIf: "form.getValue('showAdvancedSettings') == true",
@@ -408,7 +408,7 @@
             width: 100
         }, {
             name: "brdischcoef",
-            title: "afvoer coefficient",
+            title: ST_DISCHARGE_COEFF,
             editorType: "spinner",
             required: true,
             showIf: "form.getValue('showAdvancedSettings') == true",
@@ -421,7 +421,7 @@
         {% if sea %}
         {
             name: "useManualInput",
-            title: "Gebruik handmatige invoer",
+            title: ST_CUST_PREF_MANUALLY,
             type: "checkbox",
             required: true,
             showIf: "form.getValue('showAdvancedSettings') == true",
@@ -442,7 +442,7 @@
         },
         {
             name: "waterlevelInput",
-            title: "invoeren waterlevels (komma gescheiden)",
+            title: ST_INPUT_TIME_WATER_LEVEL,
             editorType: "TextAreaItem",
             //_constructor: "TextAreaItem",
             //showTitle: true,
@@ -452,7 +452,7 @@
         },
         {
             name: "buttonLoadWaterlevels",
-            title: "Download buitenwaterstand",
+            title: ST_DOWNLOAD_EXTERNALWATER_LEVEL,
             _constructor: "ButtonItem",
             showRollOver: false,
             //showDown: true,
@@ -468,7 +468,7 @@
         {% endif %}
         {
             name: "saveStrategy",
-            title: "Sla maatregelen aan keringen op",
+            title: ST_SAVE_MEASURES,
             type: "checkbox",
             required: false,
             endRow: true,
@@ -483,7 +483,7 @@
         },
  		{
             name: "strategyName",
-            title: "Maatregelenset naam",
+            title: ST_MEASURES_NAME,
             editorType: "TextAreaItem",
             showIf: "form.getValue('showAdvancedSettings') == true",
             required: false,
@@ -510,7 +510,7 @@
 
     isc.IButton.create({
         ID: "buttonSubmitSave",
-        title: "Opslaan en in wachtrij plaatsen",
+        title: ST_EXECUTE_SCENARIO,
         showRollOver: false,
         showDown: true,
         showFocused: false,
@@ -652,7 +652,7 @@
 
     isc.IButton.create({
         ID: "buttonGetGraph",
-        title: "Toon grafiek",
+        title: ST_SHOW_GRAPH,
     	showRollOver: false,
     	showDown: true,
     	showFocused: false,
@@ -661,15 +661,14 @@
         click: function() {
 
         		if (this.isSelected()) {
-	        		this.setTitle("Verberg grafiek");
-
+	        		this.setTitle(ST_HIDE_GRAPH);
 	        		//scGraph.setHeight("300");
 	        		scGraph.show();
-	        		scSettingsTotal.redraw();
+	        		scSettingsTotal.redraw(ST_HIDE_GRAPH);
 	        		get_graph();
 
 	        	} else {
-	        		this.setTitle("Toon grafiek");
+	        		this.setTitle(ST_SHOW_GRAPH);
 	        		scGraph.hide();
 	        	}
 

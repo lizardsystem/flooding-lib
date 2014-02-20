@@ -4,7 +4,13 @@ Changelog of flooding-lib
 3.14 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Compile language messages.
+
+
+3.13 (2014-02-14)
+-----------------
+
+- Add translation.
 
 
 3.13 (2014-02-20)
