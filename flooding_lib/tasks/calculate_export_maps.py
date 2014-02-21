@@ -653,230 +653,31 @@ def calc_sources_of_inundation(tmp_zip_filename, export_run):
 def calc_wavefronts(tmp_zip_filename, export_run):
     log.debug("calc_wavefronts({t}, {e})"
               .format(t=tmp_zip_filename, e=export_run))
-    gridtype = 'gridta'
 
     input_files = export_run.input_files('computed_arrival_time')
-    new_input_files = True
-    if not input_files:
-        input_files = export_run.input_files('gridta')
-        new_input_files = False
     if not input_files:
         return {}
 
-    startmoment_breachgrowth_inputfield = InputField.objects.get(
-        pk=INPUTFIELD_STARTMOMENT_BREACHGROWTH_ID)
-    # We need to process the gridta file for each scenario
-    # and do that in a temporary file, that is later removed.
-    temporary_files = []
-    for input_file in input_files:
-        # HACK. Some gridta files have a wrong extent. The extent of
-        # the max waterdepth grid is always correct, and they should
-        # be equal. So we take the extent from there.
-        # Note: doesn't apply for new files anymore.
-
-        if not new_input_files:
-            geo_transform = maxwaterdepth_geotransform(input_file['scenario'])
-            log.debug("Maxwaterdepth geotransform for gridta found: {}"
-                  .format(geo_transform))
-
-            # Does not apply for new input files
-            startmoment_days = input_file['scenario'].value_for_inputfield(
-                startmoment_breachgrowth_inputfield)
-
-            startmoment_hours = int(startmoment_days * 24 + 0.5)
-
-        for filename in all_files_in(input_file['filename']):
-            # Create a new dataset that is a copy of the existing one,
-            # and read it as array.
-            log.debug("Open wavefront dataset {f}".format(f=filename))
-            dataset = gdal_open(filename)
-
-            if dataset is None:
-                # Corrupt?
-                continue
-            tmpdir = tempfile.mkdtemp()
-            tmpfile = os.path.join(tmpdir, b'temptif.tif')
-            new_dataset = TIFDRIVER.CreateCopy(tmpfile, dataset)
-
-            if not new_input_files and geo_transform is not None:
-                new_dataset.SetGeoTransform(geo_transform)
-
-            dataset = None
-            array = new_dataset.ReadAsArray()
-
-            if not new_input_files:
-                # For all places where the value is greater than
-                # startmoment_hours, subtract startmoment_hours
-                log.debug("Correcting for startmoment_hours {i}".
-                          format(i=startmoment_hours))
-                if startmoment_hours > 0:
-                    where = (startmoment_hours <= array)
-                    # Use fact that True == 1
-                    array -= where * startmoment_hours
-
-            # Save the array and start using the new dataset instead
-            # of the old one.
-            new_dataset.GetRasterBand(1).WriteArray(array)
-            new_dataset = None
-            input_file['filename'] = tmpfile
-            temporary_files.append(tmpdir)
-
-            # We only loop over the first file -- there's only supposed to
-            # be one anyway. See the doc string of all_files_in().
-            break
-
     dijkring_datasets = dijkring_arrays_to_zip(
-        input_files, tmp_zip_filename, gridtype,
+        input_files, tmp_zip_filename, 'gridta',
         gridsize=export_run.gridsize, combine_method='min')
-
-    # Remove temporary directories
-    for tmpdir in temporary_files:
-        shutil.rmtree(tmpdir)
 
     return dijkring_datasets
 
 
 def calc_rise_period(tmp_zip_filename, export_run):
-    """Calculate a 'grid_rise_period' and combine them per dijkring,
-    for each scenario/dijkring combination that has both a 'gridta'
-    and a 'gridtd'.
-
-    In principle, rise period is defined as:
-    (time of maximum level - arrival time)
-
-    Time of maximum level is recorded in the 'gridtd' result, arrival
-    time in the 'gridta' result.  We assume that dimensions and
-    geotransform of both grids are exactly the same, otherwise we
-    raise an exception.
-
-    In the gridtd grid, an extra correction must be applied: if the
-    water was still rising at the end of the simulation, no value is
-    recorded. These 'no values' are unwanted and need to be replaced
-    by the duration of the scenario, which is a better default value.
-    This number is found in the scenario's metadata.
-
-    We create completely new TIF files for each scenario, that will be
-    discarded after combining them into files for each dijkring.
-    """
     log.debug("calc_rise_period({t}, {e})"
               .format(t=tmp_zip_filename, e=export_run))
-    gridtype = 'grid_rise_period'  # Result grid name
 
-    scenario_duration_inputfield = InputField.objects.get(
-        pk=INPUTFIELD_SCENARIO_DURATION)
+    input_files = export_run.input_files('computed_difference')
+    if not input_files:
+        return {}
 
-    gridta_input_files = export_run.input_files(
-        ResultType.objects.get(name='gridta'))
-    gridtd_input_files = export_run.input_files(
-        ResultType.objects.get(name='gridtd'))
-
-    created_input_files = []
-
-    for gridta in gridta_input_files:
-        # Find corresponding gridtd
-        gridtd = next(
-            (gridtd for gridtd in gridtd_input_files
-             if gridtd['scenario'] == gridta['scenario'] and
-             gridtd['dijkringnr'] == gridta['dijkringnr']),
-            None)
-        if gridtd is None:
-            # Only a gridta, no gridtd
-            continue
-
-        gridta_geo_transform = None
-        gridtd_geo_transform = None
-
-        array_td = array_ta = None
-        # Open both datasets, check if they are the same
-        # Strange loop structure is because of how all_files_in works
-        for f in all_files_in(gridta['filename']):
-            gridta_ds = gdal_open(f)
-            gridta_geo_transform = gridta_ds.GetGeoTransform()
-            for f in all_files_in(gridtd['filename']):
-                gridtd_ds = gdal_open(f)
-                gridtd_geo_transform = gridtd_ds.GetGeoTransform()
-
-                # Read both into a masked array
-                array_ta = dataset2array(gridta_ds)
-                array_td = dataset2array(gridtd_ds)
-
-                # Check shapes
-                if array_ta.shape != array_td.shape:
-                    raise ValueError(
-                        "shapes not the same: {}, {}"
-                        .format(array_ta.shape, array_td.shape))
-
-                # Close datasets
-                gridta_ds = None
-                gridtd_ds = None
-                break
-            break
-
-        if array_ta is None:
-            log.debug("Scenario {} has no gridta! (should be {})"
-                         .format(gridta['scenario'], gridta['filename']))
-            continue
-        if array_td is None:
-            log.debug("Scenario {} has no gridtd! (should be {})"
-                         .format(gridtd['scenario'], gridtd['filename']))
-            continue
-
-        # Now we have two numpy masked arrays, for td and ta
-        # In td, we're going to fill in the scenario duration as fill-value
-        # for all missing values.
-
-        # Scenario duration metadata field is in days, the grid
-        # contains values in hours, so we multiply by 24
-        scenario_duration_days = gridta['scenario'].value_for_inputfield(
-            scenario_duration_inputfield)
-        if not scenario_duration_days or scenario_duration_days < 0:
-            # We have to guess, use the max of both arrays
-            scenario_duration = max(np.amax(array_ta), np.amax(array_td))
-        else:
-            # Translate days into hours
-            scenario_duration = int(scenario_duration_days * 24 + 0.5)
-
-        # Fill in missing values
-        array_td = array_td.filled(scenario_duration)
-
-        # Now subtract -- this is masked because ta is still masked
-        rise_periods_masked_array = array_td - array_ta
-
-        # Save as new TIF
-        tmpdir = tempfile.mkdtemp()
-        tmpfile = os.path.join(tmpdir, b'grid_rise_periods.tif')
-        ysize, xsize = rise_periods_masked_array.shape
-        dataset = TIFDRIVER.Create(
-            tmpfile, xsize, ysize, 1, gdal.gdalconst.GDT_Float64,
-            options=[b'COMPRESS=DEFLATE', b'BIGTIFF=YES'])
-
-        # We use the geotransform of the max water depth ascii, if
-        # available!  Some geotransforms of the gridta/gridta rasters
-        # have a wrong Y coordinate, but the max waterdepth, if
-        # available, is always correct.
-        geo_transform_maxd = maxwaterdepth_geotransform(
-            gridta['scenario'])
-        dataset.SetGeoTransform(
-            geo_transform_maxd or gridta_geo_transform or gridtd_geo_transform)
-
-        band = dataset.GetRasterBand(1)
-        band.SetNoDataValue(NO_DATA_VALUE)
-        band.WriteArray(rise_periods_masked_array.filled(NO_DATA_VALUE))
-        dataset = None
-
-        created_input_files.append({
-                'scenario': gridta['scenario'],
-                'dijkringnr': gridta['dijkringnr'],
-                'filename': tmpfile})
-
-    # Combine into dijkring rasters
-    dijkring_arrays_to_zip(
-        created_input_files, tmp_zip_filename, gridtype,
+    dijkring_datasets = dijkring_arrays_to_zip(
+        input_files, tmp_zip_filename, 'grid_rise_period',
         gridsize=export_run.gridsize, combine_method='min')
 
-    # Clean up
-    for input_file in created_input_files:
-        shutil.rmtree(os.path.dirname(input_file['filename']))
+    return dijkring_datasets
 
 
 def calc_max_flowvelocity(tmp_zip_filename, export_run):
