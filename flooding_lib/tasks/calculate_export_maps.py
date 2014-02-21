@@ -673,13 +673,14 @@ def calc_rise_period(tmp_zip_filename, export_run):
     if not input_files:
         return {}
 
+    temp_dirs = []
     # Temporarily, re-compute the difference from time_of_max and
     # arrival_time, because it was computed the wrong way.
-    created_input_files = []
     for input_file in input_files:
-        arrival_time = input_file.replace(
+        filename = input_file['filename']
+        arrival_time = filename.replace(
             'computed_difference', 'computed_arrival_time')
-        time_of_max = input_file.replace(
+        time_of_max = filename.replace(
             'computed_difference', 'computed_time_of_max')
 
         if (not os.path.exists(arrival_time) or
@@ -690,6 +691,7 @@ def calc_rise_period(tmp_zip_filename, export_run):
         arrival_time_dataset = gdal_open(arrival_time)
 
         tmpdir = tempfile.mkdtemp()
+        temp_dirs.append(tmpdir)
         tmpfile = os.path.join(tmpdir, b'computed_difference.tiff')
 
         difference_dataset = TIFDRIVER.CreateCopy(
@@ -703,14 +705,14 @@ def calc_rise_period(tmp_zip_filename, export_run):
 
         difference_grid = time_of_max_grid - grid
         difference_dataset.GetRasterBand(1).WriteArray(difference_grid)
-        created_input_files.append(tmpfile)
+        input_file['filename'] = tmpfile
 
     dijkring_datasets = dijkring_arrays_to_zip(
-        created_input_files, tmp_zip_filename, 'grid_rise_period',
+        input_files, tmp_zip_filename, 'grid_rise_period',
         gridsize=export_run.gridsize, combine_method='min')
 
-    for tmpfile in created_input_files:
-        shutil.rmtree(os.path.dirname(tmpfile))
+    for tmpdir in temp_dirs:
+        shutil.rmtree(tmpdir)
 
     return dijkring_datasets
 
