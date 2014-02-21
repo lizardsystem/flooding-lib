@@ -690,19 +690,19 @@ def calc_rise_period(tmp_zip_filename, export_run):
             continue
 
         arrival_time_dataset = gdal_open(arrival_time)
+        grid = arrival_time_dataset.GetRasterBand(1).ReadAsArray()
+        del arrival_time_dataset
 
         tmpdir = tempfile.mkdtemp()
         temp_dirs.append(tmpdir)
         tmpfile = os.path.join(tmpdir, b'computed_difference.tiff')
 
+        time_of_max_dataset = gdal_open(time_of_max)
         difference_dataset = TIFDRIVER.CreateCopy(
-            tmpfile, arrival_time_dataset)
-
-        grid = arrival_time_dataset.GetRasterBand(1).ReadAsArray()
-        del arrival_time_dataset
+            tmpfile, time_of_max_dataset)
 
         time_of_max_grid = (
-            gdal_open(time_of_max).GetRasterBand(1).ReadAsArray())
+            time_of_max_dataset.GetRasterBand(1).ReadAsArray())
 
         difference_grid = time_of_max_grid - grid
         difference_dataset.GetRasterBand(1).WriteArray(difference_grid)
