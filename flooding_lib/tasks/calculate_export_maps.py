@@ -676,6 +676,7 @@ def calc_rise_period(tmp_zip_filename, export_run):
     temp_dirs = []
     # Temporarily, re-compute the difference from time_of_max and
     # arrival_time, because it was computed the wrong way.
+    new_input_files = []
     for input_file in input_files:
         filename = input_file['filename']
         arrival_time = filename.replace(
@@ -706,9 +707,10 @@ def calc_rise_period(tmp_zip_filename, export_run):
         difference_grid = time_of_max_grid - grid
         difference_dataset.GetRasterBand(1).WriteArray(difference_grid)
         input_file['filename'] = tmpfile
+        new_input_files.append(input_file)
 
     dijkring_datasets = dijkring_arrays_to_zip(
-        input_files, tmp_zip_filename, 'grid_rise_period',
+        new_input_files, tmp_zip_filename, 'grid_rise_period',
         gridsize=export_run.gridsize, combine_method='min')
 
     for tmpdir in temp_dirs:
