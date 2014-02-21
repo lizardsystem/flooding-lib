@@ -481,8 +481,7 @@ class GridtaGridtdRecorder(object):
     def save(self):
         # Fix grids
 
-        difference = self.arrival_time - self.time_of_max
-        difference[self.arrival_time > 0] += 1
+        difference = self.time_of_max - self.arrival_time
 
         logger.debug("Saving")
         logger.debug("Startmoment_hours = {}".format(self.startmoment_hours))
