@@ -684,12 +684,10 @@ def calc_rise_period(tmp_zip_filename, export_run):
         time_of_max = filename.replace(
             'computed_difference', 'computed_time_of_max')
 
-        if (not os.path.exists(arrival_time) or
-            not os.path.exists(time_of_max)):
-            # Pech
+        arrival_time_dataset = gdal_open(arrival_time)
+        if not arrival_time_dataset:
             continue
 
-        arrival_time_dataset = gdal_open(arrival_time)
         grid = arrival_time_dataset.GetRasterBand(1).ReadAsArray()
         del arrival_time_dataset
 
@@ -698,6 +696,9 @@ def calc_rise_period(tmp_zip_filename, export_run):
         tmpfile = os.path.join(tmpdir, b'computed_difference.tiff')
 
         time_of_max_dataset = gdal_open(time_of_max)
+        if not time_of_max_dataset:
+            continue
+
         difference_dataset = TIFDRIVER.CreateCopy(
             tmpfile, time_of_max_dataset)
 
