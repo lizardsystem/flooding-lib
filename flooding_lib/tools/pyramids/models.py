@@ -108,16 +108,21 @@ class Animation(models.Model):
 
     @property
     def bounds(self):
+        
         x0, dxx, dxy, y0, dyx, dyy = self.geotransform['geotransform']
 
-        # Note that JSONField returns Decimals, not floats...
-        return {
+        # Note that JSONField returns Decimals, not floats...                   
+        answer = {
             'west': float(x0),
             'east': float(x0 + self.cols * dxx),
             'north': float(y0),
             'south': float(y0 + self.rows * dyy),
             'projection': 28992,
         }
+        if 'projection' in self.geotransform:
+            answer['projection'] = self.geotransform['projection']
+        return answer
+
 
     @property
     def gridsize(self):
