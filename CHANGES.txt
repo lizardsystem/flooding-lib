@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-3.15 (unreleased)
+3.15 (2014-04-04)
 -----------------
 
 - Add google projection for animation.
