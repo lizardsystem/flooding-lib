@@ -995,17 +995,21 @@ class Scenario:
                         self.elev_grid = elev_grid = asc.AscGrid.apply(lambda x, y: x + y, self.elev_grid, adjustment_grid)
                         adjustment_grid = None
 
-
                     else:
-                        target_ds = gdal.Open(str(elev_grid_name))
+                        log.debug('create file of current elevation grid')
+                        current_grid_name = os.path.join(self.tmp_dir, 'current_asc%i.asc' % reference)
+                        current_file = file(current_grid_name, 'w')
+                        log.debug('current_file: {}'.format(current_grid_name))
+                        self.elev_grid.writeToStream(current_file, self.elev_grid.copy())
+                        current_file.close()
+                                            
+                        log.debug('open current grid and adjust with gdal rasterize')
+                        target_ds = gdal.Open(str(current_grid_name))
                         err = gdal.RasterizeLayer(target_ds, [1], layer, options=["ATTRIBUTE=adjustment"])
-                        tmp_asc_filename = os.path.join(self.tmp_dir, 'tmp_asc%i.asc'%reference)
-                        dst_ds = gdal.GetDriverByName('AAIGrid').CreateCopy(str(tmp_asc_filename), target_ds,0)
-                        dst_ds = None
-
-                        self.elev_grid = elev_grid = asc.AscGrid(tmp_asc_filename)
-
-
+                        log.debug("Flush data.")
+                        target_ds = None
+                        target_ds = gdal.Open(str(current_grid_name))
+                        self.elev_grid = elev_grid = asc.AscGrid(current_grid_name)
         finally:
             ds = None
             dst_ds = None
