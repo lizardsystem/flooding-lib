@@ -37,34 +37,44 @@
         $(".map").each(function () {
             var div = $(this);
 
-            var map = new OpenLayers.Map(div.attr("id"));
+            var data_bounds = div.attr("data-bounds");
+            if (data_bounds !== "") {
+                var extent = JSON.parse(data_bounds);
+                var bounds = new OpenLayers.Bounds(
+                    extent.minx, extent.miny,
+                    extent.maxx, extent.maxy);
 
-            map.addLayers([new OpenLayers.Layer.OSM(
-                "OpenStreetMap NL",
-                "http://tile.openstreetmap.nl/tiles/${z}/${x}/${y}.png",
-                {buffer: 0})]);
+                var map = new OpenLayers.Map(div.attr("id"), {
+                    maxExtent: bounds
+                });
 
-            var extent = JSON.parse($(this).attr("data-bounds"));
-            var bounds = new OpenLayers.Bounds(
-                extent.minx, extent.miny,
-                extent.maxx, extent.maxy);
+                map.addLayer(
+                    new OpenLayers.Layer.OSM(
+                        "OpenStreetMap NL",
+                        "http://tile.openstreetmap.nl/tiles/${z}/${x}/${y}.png",
+                        {buffer: 0}));
 
-            var imagelayer = new OpenLayers.Layer.Image(
-                "Maximale waterdiepte",
-                div.attr("data-image-url"),
-                bounds,
-                new OpenLayers.Size(0, 0),
-                {isBaseLayer: false});
+                var url = div.attr("data-url");
+                var layers = div.attr("data-pyramid");
 
-            map.addLayers([imagelayer]);
-            map.addControl(new OpenLayers.Control.LayerSwitcher());
-            map.zoomToExtent(bounds);
+                var params = {
+                    layers: layers,
+                    styles: "PuBu:0:2",
+                };
 
-            // Add map to the list of known maps
-            maps.push(map);
+                map.addLayer(new OpenLayers.Layer.WMS(
+                    "pyramid", url, params, {
+                        singleTile: true,
+                        isBaseLayer: false,
+                        displayInLayerSwitcher: true,
+                        units: 'm'
+                    }));
 
-            // Register synchronizer
-            map.events.register("moveend", map, synchronize_pan_zoom);
+                map.zoomToExtent(bounds);
+                maps.push(map);
+                // Register synchronizer
+                map.events.register("moveend", map, synchronize_pan_zoom);
+            }
         });
     });
 

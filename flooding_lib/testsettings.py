@@ -22,6 +22,8 @@ SETTINGS_DIR = os.path.dirname(os.path.realpath(__file__))
 # to place all collected static files.
 BUILDOUT_DIR = os.path.abspath(os.path.join(SETTINGS_DIR, '..'))
 
+FLOODING_SHARE = os.path.join(BUILDOUT_DIR, 'var')
+
 SITE_ID = 1
 INSTALLED_APPS = [
     'flooding_lib',
