@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Raster Server Demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="stylesheet" 
+          href="{{ url_for('static', filename='leaflet/leaflet.css') }}" />
+    <link rel="stylesheet"
+          href="{{ url_for('wms.static', filename='wms/demo.css') }}" />
+  </head>
+  <body>
+    <script type="text/javascript">
+      var layers = [
+        {% for layer in layers %}
+        '{{ layer }}'{% if not loop.last %},{% endif %}
+        {% endfor %}
+      ];
+      var styles = [
+        {% for style in styles %}
+        '{{ style }}'{% if not loop.last %},{% endif %}
+        {% endfor %}
+      ];
+    </script>
+    <div id="map" />
+    <div id="graphWrapper"><div id="graph" /></div>
+    <script src="{{ url_for('static', filename='jquery/jquery-1.10.2.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='flot/jquery.flot.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='flot/jquery.flot.pie.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='leaflet/leaflet.js') }}"></script>
+    <script src="{{ url_for('static', filename='proj4/proj4js-compressed.js') }}"></script>
+    <script src="{{ url_for('static', filename='proj4/proj4leaflet.js') }}"></script>
+    <script src="{{ url_for('static', filename='dat/dat.gui.min.js') }}"></script>
+    <script src="{{ url_for('wms.static', filename='wms/demo.js') }}"></script>
+  </body>
+</html>
