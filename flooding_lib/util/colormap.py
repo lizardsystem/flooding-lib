@@ -37,8 +37,6 @@ def get_mpl_cmap(colormap, settings_module=settings):
     if colormap.lower().endswith('.csv'):
         colormap_path = os.path.join(
             settings_module.FLOODING_LIB_COLORMAP_DIR, colormap)
-        colormap_path = os.path.join(
-            settings_module.BUILDOUT_DIR, 'colormapping.csv')
 
         return ColorMap(colormap_path).to_matplotlib()
 
