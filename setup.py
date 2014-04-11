@@ -32,7 +32,6 @@ install_requires = [
     'django-excel-response',
     'gislib',
 #    'pyproj', # We do need it, but requiring it doesn't work well
-    'raster-server',
     ],
 
 tests_require = [
