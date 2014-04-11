@@ -3,11 +3,11 @@
 
 """Use AppConf to store sensible defaults for settings. This also documents the
 settings that lizard_damage defines. Each setting name automatically has
-"LIZARD_DAMGE_" prepended to it.
+"FLOODING_LIB_" prepended to it.
 
 By puttng the AppConf in this module and importing the Django settings
-here, it is possible to import Django's settings with `from
-lizard_damage.conf import settings` and be certain that the AppConf
+here, it is possible to import Django's settings with `from flooding_lib.conf
+import settings` and be certain that the AppConf
 stuff has also been loaded."""
 
 # Python 3 is coming
