@@ -84,7 +84,8 @@ def rgba_to_html(rgba):
 def result_legend(result, presentationlayer, colormap=None, maxvalue=None):
     presentationtype = presentationlayer.presentationtype
 
-    default_colormap, default_maxvalue = presentationtype.colormap_info
+    default_colormap, default_maxvalue = presentationtype.colormap_info(
+        project=result.scenario.main_project)
 
     try:
         maxvalue = float(maxvalue)

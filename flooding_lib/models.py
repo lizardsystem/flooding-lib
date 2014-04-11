@@ -2038,3 +2038,16 @@ class ScenarioShareOffer(models.Model):
 
     class Meta:
         unique_together = ('scenario', 'new_project')
+
+
+class ProjectColormap(models.Model):
+    """Set specific colormaps for a presentation type within a project."""
+
+    project = models.ForeignKey(Project)
+    presentationtype = models.ForeignKey(PresentationType)
+    colormap = models.ForeignKey(pyramidmodels.Colormap)
+
+    def __unicode__(self):
+        return (
+            """Project "{}" gebruikt colormap "{}" voor "{}\""""
+            .format(self.project, self.colormap, self.presentationtype))

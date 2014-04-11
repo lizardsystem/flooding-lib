@@ -74,11 +74,26 @@ class PresentationType(models.Model):
     def __unicode__(self):
         return self.name
 
-    @property
-    def colormap_info(self):
-        return (
-            (self.default_colormap and self.default_colormap.matplotlib_name)
-            or 'PuBu', self.default_maxvalue or 10.0)
+    def colormap_info(self, project=None):
+        if self.default_colormap:
+            colormap = self.default_colormap.matplotlib_name
+        else:
+            colormap = 'PuBu'
+
+        maxvalue = self.default_maxvalue or 10.0
+
+        if project is not None:
+            # Avoid circular imports
+            from flooding_lib.models import ProjectColormap
+            try:
+                projectcolormap = ProjectColormap.objects.get(
+                    project=project, presentationtype=self)
+            except ProjectColormap.DoesNotExist:
+                projectcolormap = None
+            if projectcolormap:
+                colormap = projectcolormap.colormap.matplotlib_name
+
+        return colormap, maxvalue
 
 
 class CustomIndicator(models.Model):

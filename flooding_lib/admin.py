@@ -13,7 +13,8 @@ from flooding_lib.models import (
     Task, TaskType,
     ThreediCalculation, ThreediModel,
     UserPermission, Waterlevel, WaterlevelSet, ExternalWater,
-    ExtraInfoField, ExtraScenarioInfo
+    ExtraInfoField, ExtraScenarioInfo,
+    ProjectColormap
 )
 
 
@@ -95,6 +96,7 @@ admin.site.register(ExtraInfoField)
 admin.site.register(ExtraScenarioInfo)
 admin.site.register(Map)
 admin.site.register(Project, ProjectAdmin)
+admin.site.register(ProjectColormap)
 admin.site.register(ProjectGroupPermission, ProjectGroupPermissionAdmin)
 admin.site.register(Region, RegionAdmin)
 admin.site.register(RegionSet)
