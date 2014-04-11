@@ -6,6 +6,20 @@ Changelog of flooding-lib
 
 - Flush data after rasterizing grid for openbreach task.
 
+- The breach info page (the "(i) page") now also uses pyramids
+  to show max water depth. Currently uses a fixed colormap,
+  PuBu between 0 and 2m.
+
+- It is now possible to use old-style CSV colormaps, placed
+  in the 'colormaps' subdirectory of the Flooding share, besides
+  the matplotlib colormaps for Pyramid legends.
+
+- Presentationtypes have a default colormap. It is now also possible
+  to configure a different default colormap for a specific project,
+  per presentationtype, using ProjectColormap in the admin
+  interface. If a scenario has multiple project, only its main project
+  is used to look up default colormaps.
+
 
 3.15 (2014-04-04)
 -----------------

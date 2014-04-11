@@ -11,11 +11,14 @@ from __future__ import division
 
 import logging
 
+import numpy as np
+from matplotlib import colors
+
+from flooding_lib.util.colormap import get_mpl_cmap
+from flooding_lib.util.colormap import ColorMap
+
 from . import models
 
-import numpy as np
-from matplotlib import cm
-from matplotlib import colors
 
 logger = logging.getLogger(__name__)
 
@@ -75,15 +78,14 @@ def values_in_range(maxvalue, n):
 
 
 def rgba_to_html(rgba):
-    r, g, b, _ = rgba
-
     return "#%02x%02x%02x" % rgba[:3]
 
 
 def result_legend(result, presentationlayer, colormap=None, maxvalue=None):
     presentationtype = presentationlayer.presentationtype
 
-    default_colormap, default_maxvalue = presentationtype.colormap_info
+    default_colormap, default_maxvalue = presentationtype.colormap_info(
+        project=result.scenario.main_project)
 
     try:
         maxvalue = float(maxvalue)
@@ -93,16 +95,27 @@ def result_legend(result, presentationlayer, colormap=None, maxvalue=None):
     if colormap is None:
         colormap = default_colormap
 
-    cmap = cm.get_cmap(colormap)
-    arr = np.array(values_in_range(maxvalue, 10))
-    # Color the way that the grids are colored
-    normalize = colors.Normalize(vmin=0, vmax=maxvalue)
-    rgba = cmap(normalize(arr), bytes=True)
+    if not colormap.endswith('.csv'):
+        show_maxvalue = True
+        # Matplotlib colormap -- use given maxvalue, and always do 10 steps
+        cmap = get_mpl_cmap(colormap)
+        arr = np.array(values_in_range(maxvalue, 10))
+        # Color the way that the grids are colored
+        normalize = colors.Normalize(vmin=0, vmax=maxvalue)
+        rgba = cmap(normalize(arr), bytes=True)
 
-    legend = [
-        (arr[i], rgba_to_html(tuple(rgba[i])))
-        for i in range(10)
-        ]
+        legend = [
+            (arr[i], rgba_to_html(tuple(rgba[i])))
+            for i in range(10)
+            ]
+    else:
+        # Our own .csv colormaps.
+        show_maxvalue = False
+        cmap = ColorMap(colormap)
+        legend = [
+            (value, rgba_to_html(cmap.value_to_color(value)))
+            for value in cmap.legend_values()
+            ]
 
     return {
         'title': unicode(presentationtype),
@@ -110,4 +123,5 @@ def result_legend(result, presentationlayer, colormap=None, maxvalue=None):
         'colormaps': models.Colormap.colormaps(),
         'active_colormap': colormap,
         'current_maxvalue': maxvalue,
+        'show_maxvalue': show_maxvalue,
         }

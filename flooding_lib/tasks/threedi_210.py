@@ -1,7 +1,7 @@
 # Start 3Di calculation using 3Di exe
 # Run this under windows.
 # This will produce a .nc file.
-from threedilib.threedi import setup_and_run_3di
+#from threedilib.threedi import setup_and_run_3di
 #from flooding_lib.models import ThreediCalculation
 from flooding_lib.models import Scenario
 from flooding_base.models import Setting

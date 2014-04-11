@@ -55,7 +55,8 @@ def pyramid_parameters(request):
     result, presentationlayer = get_result_by_presentationlayer_id(
         presentationlayer_id, return_layer=True)
 
-    colormap_info = presentationlayer.presentationtype.colormap_info
+    colormap_info = presentationlayer.presentationtype.colormap_info(
+        project=result.scenario.main_project)
 
     return JSONResponse({
             'layer': result.raster.layer,

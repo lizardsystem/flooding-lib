@@ -1,5 +1,5 @@
 import mock
-import numpy
+import numpy as np
 
 from unittest import TestCase
 
@@ -58,8 +58,8 @@ class TestColorMap(TestCase):
         self.assertEquals(self.cm.value_to_color(2.0), (255, 255, 255))
 
     def test_2x2_grid_apply(self):
-        grid = numpy.array([[0.5, -1],
-                            [-1, -1]])
+        grid = np.array([[0.5, -1],
+                         [-1, -1]])
 
         colorgrid = self.cm.apply_to_grid(grid)
 
@@ -73,3 +73,17 @@ class TestColorMap(TestCase):
         self.assertEquals(colorgrid[3, 0, 1], 0)
         self.assertEquals(colorgrid[3, 1, 0], 0)
         self.assertEquals(colorgrid[3, 1, 1], 0)
+
+    def test_matplotlib_colormap(self):
+        mpl_cmap = self.cm.to_matplotlib()
+
+        data = np.array([2.0])
+        data[data > mpl_cmap.csv_max_value] = mpl_cmap.csv_max_value
+        normalized = data / mpl_cmap.csv_max_value
+
+        rgba = mpl_cmap(normalized, bytes=True)
+
+        compare = rgba == np.array([[255, 255, 255, 255]])
+        print(rgba)
+        self.assertTrue(compare.all())
+

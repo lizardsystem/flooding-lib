@@ -1,7 +1,7 @@
 # Task 220: read netcdf (.nc) 3Di result file, output in .png files.
 
-from threedilib.threedi import post_process_3di
-from threedilib.threedi import post_process_detailed_3di
+#from threedilib.threedi import post_process_3di
+#from threedilib.threedi import post_process_detailed_3di
 #from flooding_lib.models import ThreediCalculation
 from flooding_lib.models import Result
 from flooding_lib.models import ResultType
@@ -43,7 +43,7 @@ def process_threedi_nc(
         print 'Something went wrong with getting region extent for scenario %s' % scenario
 
     #full_path = "/home/jack/git/sites/flooding/driedi/Vecht/subgrid_map.nc"
-    
+
     full_base_path = scenario.get_abs_destdir().replace('\\', '/')
     full_path_zip = os.path.join(
         full_base_path, 'threedi', 'subgrid_map.zip')

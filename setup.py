@@ -19,6 +19,7 @@ install_requires = [
     'django-treebeard',
     'django-extensions',
     'django-nose',
+    'django-appconf',
     'nens',
     'GDAL',
     'django-debug-toolbar',
@@ -31,6 +32,7 @@ install_requires = [
     'django-excel-response',
     'gislib',
 #    'pyproj', # We do need it, but requiring it doesn't work well
+    'raster-server',
     ],
 
 tests_require = [
@@ -59,5 +61,6 @@ setup(name='flooding-lib',
       extras_require={'test': tests_require},
       entry_points={
           'console_scripts': [
+              'flask=raster_server.server:run',
           ]},
       )

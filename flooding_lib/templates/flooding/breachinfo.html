@@ -71,14 +71,15 @@ Flooding: {% trans 'Breach information' %}
 
 <p><a href="{% url flooding_breachinfo_page_excel view.project_id view.breach_id %}">Download deze tabel als Excel file</a></p>
 {% for scenario in view.scenarios %}
-{% if scenario.max_waterdepth_image and scenario.max_waterdepth_extent %}
+{% if scenario.max_waterdepth_layer %}
 <div id="mapcontainer-{{scenario.id}}" style="float: left; width: 410px;">
   <h3>{{ scenario.id }}: {{ scenario.name }}</h3>
   <div id="map-{{scenario.id}}"
        class="map"
        style="width: 400px; height: 400px; border: solid black 1px;"
+       data-pyramid="{{ scenario.max_waterdepth_layer }}"
        data-bounds="{{ scenario.max_waterdepth_extent }}"
-       data-image-url="{{ scenario.max_waterdepth_image }}">
+       data-url="{{ view.raster_server_url }}">
   </div>
 </div>
 {% endif %}
