@@ -38,7 +38,12 @@ class GeoImage(object):
     def extent(self):
         """Return extent of the image as a dict with keys minx, maxx,
         miny, maxy, in Google projection."""
-        data = gdal.Open(self.filename)
+
+        filename = str(self.filename)
+        if filename.lower().endswith('.zip'):
+            filename = b'/vsizip/' + filename
+
+        data = gdal.Open(filename)
         pixelsx = data.RasterXSize
         pixelsy = data.RasterYSize
 

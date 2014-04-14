@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<WMS_Capabilities version="1.3.0" updateSequence="2333" xmlns="http://www.opengis.net/wms" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wms http://geoserver5.lizard.net:80/geoserver/schemas/wms/1.3.0/capabilities_1_3_0.xsd">
+  <Service>
+    <Name>WMS</Name>
+    <Title>Raster Server Web Map Service</Title>
+    <Abstract>Tailored server for raster visualization.</Abstract>
+    <KeywordList>
+      <Keyword>WFS</Keyword>
+      <Keyword>WMS</Keyword>
+      <Keyword>GEOSERVER</Keyword>
+    </KeywordList>
+    <OnlineResource xlink:type="simple" xlink:href="http://www.nelen-schuurmans.nl"/>
+    <ContactInformation>
+      <ContactPersonPrimary>
+        <ContactPerson>Claudius Ptolomaeus</ContactPerson>
+        <ContactOrganization>The ancient geographes INC</ContactOrganization>
+      </ContactPersonPrimary>
+      <ContactPosition>Chief geographer</ContactPosition>
+      <ContactAddress>
+        <AddressType>Work</AddressType>
+        <Address/>
+        <City>Alexandria</City>
+        <StateOrProvince/>
+        <PostCode/>
+        <Country>Egypt</Country>
+      </ContactAddress>
+      <ContactVoiceTelephone/>
+      <ContactFacsimileTelephone/>
+      <ContactElectronicMailAddress>claudius.ptolomaeus@gmail.com</ContactElectronicMailAddress>
+    </ContactInformation>
+    <Fees>NONE</Fees>
+    <AccessConstraints>NONE</AccessConstraints>
+  </Service>
+  <Capability>
+    <Request>
+      <GetCapabilities>
+        <Format>text/xml</Format>
+        <DCPType>
+          <HTTP>
+            <Get>
+              <OnlineResource xlink:type="simple" xlink:href="http://{{ site }}/wms?" />
+            </Get>
+            <Post>
+              <OnlineResource xlink:type="simple" xlink:href="http://{{ site }}/wms?" />
+            </Post>
+          </HTTP>
+        </DCPType>
+      </GetCapabilities>
+      <GetMap>
+        <Format>image/png</Format>
+        <DCPType>
+          <HTTP>
+            <Get>
+              <OnlineResource xlink:type="simple" xlink:href="http://{{ site }}/wms?" />
+            </Get>
+          </HTTP>
+        </DCPType>
+      </GetMap>
+      <GetFeatureInfo>
+        <Format>text/plain</Format>
+        <Format>application/vnd.ogc.gml</Format>
+        <Format>text/html</Format>
+        <DCPType>
+          <HTTP>
+            <Get>
+              <OnlineResource xlink:type="simple" xlink:href="http://{{ site }}/wms?" />
+            </Get>
+          </HTTP>
+        </DCPType>
+      </GetFeatureInfo>
+    </Request>
+    <Exception>
+      <Format>XML</Format>
+      <Format>INIMAGE</Format>
+      <Format>BLANK</Format>
+    </Exception>
+    <Layer>
+      <Title>Raster Server</Title>
+      <Abstract>Raster Server for raster pyramids</Abstract>
+      {% for layer in layers %}
+      <Layer queryable="1">
+        <Name>{{ layer.name }}</Name>
+        <Title>2006_2050_ge</Title>
+        <Abstract/>
+        <KeywordList>
+          <Keyword>raster</Keyword>
+          <Keyword>pyramid</Keyword>
+        </KeywordList>
+        {% for crs, bbox in layers.0.bboxes.items() %}
+        <CRS>{{ crs }}</CRS>
+        {% endfor %}
+        {% for crs, bbox in layers.0.bboxes.items() %}
+        {% if crs == 'EPSG:4326' %}
+        <EX_GeographicBoundingBox>
+          <westBoundLongitude>{{ bbox.0 }}</westBoundLongitude>
+          <eastBoundLongitude>{{ bbox.2 }}</eastBoundLongitude>
+          <southBoundLatitude>{{ bbox.1 }}</southBoundLatitude>
+          <northBoundLatitude>{{ bbox.3 }}</northBoundLatitude>
+        </EX_GeographicBoundingBox>
+        {% endif %}
+        {% endfor %}
+        {% for layer in layers %}
+        {% for crs, bbox in layer.bboxes.items() %}
+        <BoundingBox CRS="{{ crs }}" 
+                     minx="{{ bbox.0 }}" 
+                     miny="{{ bbox.1 }}" 
+                     maxx="{{ bbox.2 }}" 
+                     maxy="{{ bbox.3 }}"/>
+        {% endfor %}
+        {% endfor %}
+        {% for style in styles %}
+        <Style>
+          <Name>{{ style }}</Name>
+          <Title>{{ style }}</Title>
+        </Style>
+        {% endfor %}
+      </Layer>
+      {% endfor %}
+    </Layer>
+  </Capability>
+</WMS_Capabilities>

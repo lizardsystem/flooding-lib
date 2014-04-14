@@ -1,7 +1,7 @@
 from setuptools import setup
 import os.path
 
-version = '3.17dev'
+version = '3.17.4dev'
 
 long_description = '\n\n'.join([
     open('README.txt').read(),
@@ -19,6 +19,7 @@ install_requires = [
     'django-treebeard',
     'django-extensions',
     'django-nose',
+    'django-appconf',
     'nens',
     'GDAL',
     'django-debug-toolbar',
@@ -31,6 +32,7 @@ install_requires = [
     'django-excel-response',
     'gislib',
 #    'pyproj', # We do need it, but requiring it doesn't work well
+    'Flask',
     ],
 
 tests_require = [
@@ -51,7 +53,8 @@ setup(name='flooding-lib',
       license='GPL',
       packages=['flooding_lib',
                 'flooding_presentation',
-                'flooding_visualization'],
+                'flooding_visualization',
+                'raster_server'],
       include_package_data=True,
       zip_safe=False,
       install_requires=install_requires,
@@ -59,5 +62,6 @@ setup(name='flooding-lib',
       extras_require={'test': tests_require},
       entry_points={
           'console_scripts': [
+              'flask=raster_server.server:run',
           ]},
       )

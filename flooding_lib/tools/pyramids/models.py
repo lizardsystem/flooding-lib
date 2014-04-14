@@ -15,7 +15,6 @@ import logging
 import os
 import shutil
 
-from matplotlib import cm
 from matplotlib import colors
 import Image
 import gdal
@@ -27,6 +26,9 @@ from django_extensions.db.fields import UUIDField
 from django_extensions.db.fields.json import JSONField
 
 from gislib import pyramids
+
+from flooding_lib.util.colormap import get_mpl_cmap
+
 
 logger = logging.getLogger(__name__)
 
@@ -141,14 +143,18 @@ class Animation(models.Model):
             maxvalue = self.maxvalue
 
         dataset = gdal.Open(self.get_dataset_path(framenr))
-        colormap = cm.get_cmap(colormap)
+        colormap = get_mpl_cmap(colormap)
+
+        # Colormaps from CSVs have a fixed maxvalue, which is in the
+        # attribute 'csv_max_value'.
+        maxvalue = getattr(colormap, 'csv_max_value', maxvalue)
 
         # Get data as masked array
         data = np.ma.masked_less(
             dataset.GetRasterBand(1).ReadAsArray(), LIMIT, copy=False)
 
         # Normalize
-        normalize = colors.Normalize(vmin=0, vmax=maxvalue)
+        normalize = colors.Normalize(vmin=0, vmax=maxvalue, clip=True)
 
         # Apply colormap
         rgba = colormap(normalize(data), bytes=True)

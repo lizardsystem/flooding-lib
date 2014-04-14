@@ -11,20 +11,23 @@ from flooding_presentation.views import external_file_location
 
 from flooding_base import models as basemodels
 from flooding_lib import models
-from flooding_lib.views import classbased
-from flooding_lib.util import geo
+from flooding_lib.conf import settings
 from flooding_lib.permission_manager import receives_permission_manager
 from flooding_lib.templatetags.human import readable
+from flooding_lib.tools.pyramids import pyramids
+from flooding_lib.util import geo
+from flooding_lib.views import classbased
 
 logger = logging.getLogger(__name__)
 
-PRESENTATIONTYPE_MAX_WATERDEPTH = 11
+PRESENTATIONTYPE_MAX_WATERDEPTH = 41
 INUNDATION_PER_HOUR_RESULT_TYPE = 32
 
 
 class BreachInfoView(classbased.BaseView):
     required_permission = models.UserPermission.PERMISSION_SCENARIO_VIEW
     template_name = 'flooding/breachinfo.html'
+    raster_server_url = settings.RASTER_SERVER_URL
 
     @property
     def project(self):
@@ -51,7 +54,7 @@ class BreachInfoView(classbased.BaseView):
             scenario.inundation_volume = scenario.get_result(
                 shortname_dutch="inundatievolume")
             try:
-                scenario.max_waterdepth_image = self._max_water_depth_image(
+                scenario.max_waterdepth_layer = self._max_water_depth_layer(
                     scenario)
                 scenario.max_waterdepth_extent = self._get_water_depth_extent(
                     scenario)
@@ -62,20 +65,22 @@ class BreachInfoView(classbased.BaseView):
 
         return scenarios
 
-    def _max_water_depth_image(self, scenario):
+    def _max_water_depth_layer(self, scenario):
         pl = scenario.presentationlayer.filter(
             presentationtype__id=PRESENTATIONTYPE_MAX_WATERDEPTH)[0]
-        url = reverse('presentation')
-        return '{url}?action=get_gridframe&result_id={id}'.format(
-            url=url, id=pl.id)
+        result = pyramids.get_result_by_presentationlayer(pl)
+        if result is not None and result.raster:
+            return result.raster.layer
 
     def _get_water_depth_extent(self, scenario):
         pl = scenario.presentationlayer.filter(
             presentationtype__id=PRESENTATIONTYPE_MAX_WATERDEPTH)[0]
-        png = pl.presentationgrid.png_default_legend.file_location
-        png = external_file_location(png)
-
-        return json.dumps(geo.GeoImage(png).extent())
+        result = pyramids.get_result_by_presentationlayer(pl)
+        png = external_file_location(result.absolute_resultloc)
+        logger.debug("PGN location:\n{}".format(png))
+        extent = json.dumps(geo.GeoImage(png).extent())
+        logger.debug(extent)
+        return extent
 
     def _get_inundation_statistics_url(self, scenario):
         # 1. Find out whether this scenario has a statistics JSON
