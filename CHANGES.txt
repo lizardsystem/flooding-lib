@@ -1,7 +1,7 @@
 Changelog of flooding-lib
 ===================================================
 
-3.16 (unreleased)
+3.16 (2014-04-14)
 -----------------
 
 - Flush data after rasterizing grid for openbreach task.
