@@ -2,7 +2,7 @@ Changelog of flooding-lib
 ===================================================
 
 
-3.17.4 (unreleased)
+3.17.4 (2014-04-14)
 -------------------
 
 - Nothing changed yet.
