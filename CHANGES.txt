@@ -5,7 +5,7 @@ Changelog of flooding-lib
 3.18 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Order exportruns by creation_date.
 
 
 3.17.4 (2014-04-14)
