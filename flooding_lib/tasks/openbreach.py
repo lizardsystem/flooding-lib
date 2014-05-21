@@ -57,6 +57,8 @@ from zipfile import ZipFile, ZIP_DEFLATED
 import shutil
 from osgeo import osr, ogr, gdal
 
+from django.conf import settings as dj_settings
+
 #TO DO:
 sobek.log.setLevel(logging.INFO)
 asc.log.setLevel(logging.INFO)
@@ -932,46 +934,18 @@ class Scenario:
             for reference in [flooding.models.Measure.TYPE_SEA_LEVEL, flooding.models.Measure.TYPE_EXISTING_LEVEL]:
                 #first sea level
                 if self.scenario.strategy and self.scenario.strategy.measure_set.filter(reference_adjustment=reference).count() > 0:
-                    try:
-                        ds = ogr.Open("PG: host='nens-webontw-01' dbname='flooding_20110128_test' user='postgres' password='postgres' port=5432")
+                    defaultdb = dj_settings.DATABASES.get("default")
+                    conn_str = "PG: host='{0}' dbname='{1}' user='{2}' password='{3}' port={4}"
+                    ds = ogr.Open(conn_str.format(
+                        defaultdb.get("HOST"), defaultdb.get("NAME"), defaultdb.get("USER"), defaultdb.get("PASSWORD"), defaultdb.get("PORT")))
 
-                        sql = """SELECT AsBinary(TRANSFORM(eu.geometry, 28992)) as wkb_geometry, m.adjustment as adjustment
-                                        FROM flooding_strategy s, flooding_measure m, flooding_embankment_unit eu, flooding_measure_strategy ms, flooding_embankment_unit_measure eum
-                                        WHERE s.id = %(strategy_id)i and s.id = ms.strategy_id and ms.measure_id = m.id and m.id = eum.measure_id and eum.embankmentunit_id = eu.id
-                                        and m.reference_adjustment = %(reference)i""" % {'strategy_id': self.scenario.strategy.id, 'reference': reference}
+                    sql = """SELECT AsBinary(TRANSFORM(eu.geometry, 28992)) as wkb_geometry, m.adjustment as adjustment
+                             FROM flooding_strategy s, flooding_measure m, flooding_embankment_unit eu, flooding_measure_strategy ms, flooding_embankment_unit_measure eum
+                             WHERE s.id = %(strategy_id)i and s.id = ms.strategy_id and ms.measure_id = m.id and m.id = eum.measure_id and eum.embankmentunit_id = eu.id
+                             AND m.reference_adjustment = %(reference)i""" % {'strategy_id': self.scenario.strategy.id, 'reference': reference}
 
-                        layer = ds.ExecuteSQL(sql)
-                    except:
-                        log.warning('use alternative way to get layer of adjusted embankments')
-
-                        log.info('generate shapefile for adjustment embankments')
-                        t_srs = osr.SpatialReference()
-                        t_srs.ImportFromProj4("+proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.999908 +x_0=155000 +y_0=463000 +ellps=bessel +towgs84=565.237,50.0087,465.658,-0.406857,0.350733,-1.87035,4.0812 +units=m +no_defs")
-                        drv = ogr.GetDriverByName('ESRI Shapefile')
-                        tmp_shp_filename = os.path.join(self.tmp_dir, 'tmp_asc%i.shp' % reference)
-                        ds = drv.CreateDataSource(str(tmp_shp_filename))
-                        layer = ds.CreateLayer(ds.GetName(),
-                                               geom_type=ogr.wkbLineString,
-                                               srs=t_srs)
-                        layer.CreateField(ogr.FieldDefn('adjustment', ogr.OFTReal))
-
-                        fid = 0
-
-                        for measure in self.scenario.strategy.measure_set.filter(reference_adjustment=reference):
-                            for embankement_unit in measure.embankmentunit_set.all():
-                                feat = ogr.Feature(feature_def=layer.GetLayerDefn())
-                                geom_trans = embankement_unit.geometry.transform(28992, True)
-                                geom = ogr.CreateGeometryFromWkt(geom_trans.ewkt.split(';')[1])
-                                feat.SetGeometry(geom)
-
-                                feat.SetFID(fid)
-                                feat.SetField('adjustment', measure.adjustment)
-                                layer.CreateFeature(feat)
-                                fid = fid + 1
-
-                        log.info('nr of nodes ' + str(fid))
-                        layer.SyncToDisk()
-
+                    layer = ds.ExecuteSQL(sql)
+                    
                     if reference == flooding.models.Measure.TYPE_EXISTING_LEVEL:
                         #leeg grid
                         empty_grid_name = os.path.join(self.tmp_dir, 'empty_asc%i.asc' % reference)
