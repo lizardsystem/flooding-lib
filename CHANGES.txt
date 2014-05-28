@@ -1,7 +1,20 @@
 Changelog of flooding-lib
 ===================================================
 
-3.17.4 (unreleased)
+
+3.19 (unreleased)
+-----------------
+
+- Nothing changed yet.
+
+
+3.18 (2014-05-13)
+-----------------
+
+- Order exportruns by creation_date.
+
+
+3.17.4 (2014-04-14)
 -------------------
 
 - Animations now start at the 'startmoment bresgroei'.
@@ -29,6 +42,7 @@ Changelog of flooding-lib
 -----------------
 
 - Flush data after rasterizing grid for openbreach task.
+- Fix 'Laad Maatregelen' form.
 
 - The breach info page (the "(i) page") now also uses pyramids
   to show max water depth. Currently uses a fixed colormap,

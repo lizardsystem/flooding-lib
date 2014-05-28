@@ -23,6 +23,7 @@ class ExportRun(models.Model):
             ("can_create", "Can create export"),
             ("can_download", "Can download exportresult"),
         )
+        ordering = ["creation_date"]
 
     EXPORT_TYPE_WATER_DEPTH_MAP = 10
 
