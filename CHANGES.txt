@@ -4,7 +4,7 @@ Changelog of flooding-lib
 3.17.4 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Animations now start at the 'startmoment bresgroei'.
 
 
 3.17.3 (2014-04-11)

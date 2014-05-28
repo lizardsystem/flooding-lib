@@ -90,7 +90,11 @@ class Animation(models.Model):
     old .pngs).
 
     This model keeps metadata of the animation. We _assume_ all frames
-    are RD projection (28992)."""
+    are RD projection (28992).
+
+    XXX: This model COULD track the start frame as well, and it should
+    be based on the scenario's "Startmoment bresgroei". But right now
+    it doesn't, so it has to be looked up in the scenario."""
 
     frames = models.IntegerField(default=0)
     cols = models.IntegerField(default=0)
@@ -110,10 +114,10 @@ class Animation(models.Model):
 
     @property
     def bounds(self):
-        
+
         x0, dxx, dxy, y0, dyx, dyy = self.geotransform['geotransform']
 
-        # Note that JSONField returns Decimals, not floats...                   
+        # Note that JSONField returns Decimals, not floats...
         answer = {
             'west': float(x0),
             'east': float(x0 + self.cols * dxx),
@@ -124,7 +128,6 @@ class Animation(models.Model):
         if 'projection' in self.geotransform:
             answer['projection'] = self.geotransform['projection']
         return answer
-
 
     @property
     def gridsize(self):

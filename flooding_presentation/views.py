@@ -107,7 +107,9 @@ def service_get_presentationlayer_settings(
     result = pyramids.get_result_by_presentationlayer(pl)
     if result is not None and result.animation:
         return JSONResponse(
-            pyramids.settings_for_animation(result.animation))
+            pyramids.settings_for_animation(
+                result.animation,
+                result.scenario))
 
     rec = {}
     if pl.presentationtype.geo_type == PresentationType.GEO_TYPE_GRID:

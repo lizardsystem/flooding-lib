@@ -16,9 +16,11 @@ from matplotlib import colors
 
 from flooding_lib.util.colormap import get_mpl_cmap
 from flooding_lib.util.colormap import ColorMap
+from flooding_lib.tools.importtool.models import InputField
 
 from . import models
 
+INPUTFIELD_STARTMOMENT_BREACHGROWTH_ID = 9
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +49,20 @@ def get_result_by_presentationlayer(presentation_layer):
     return result
 
 
-def settings_for_animation(animation):
+def settings_for_animation(animation, scenario=None):
+    startnr = 0
+
+    if scenario is not None:
+        # See if the scenario has a "startmoment bresgroei", use
+        # that as the start frame.
+        inputfield = InputField.objects.get(
+            pk=INPUTFIELD_STARTMOMENT_BREACHGROWTH_ID)
+        startmoment_days = scenario.value_for_inputfield(inputfield)
+        startmoment_hours = int(startmoment_days * 24 + 0.5)
+
+        if startmoment_hours > 0:
+            startnr = startmoment_hours
+
     return {
         'rec': {
             'bounds': animation.bounds,
@@ -58,7 +73,7 @@ def settings_for_animation(animation):
         'anim': {
             'firstnr': 0,
             'lastnr': animation.frames - 1,
-            'options': {'startnr': 0},
+            'options': {'startnr': startnr},
             },
         "default_legend": {
             "id": 21,
