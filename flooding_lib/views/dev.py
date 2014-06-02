@@ -116,7 +116,6 @@ def get_externalwater_csv(
 
 def service_save_new_scenario(request):
     """  """
-
     def to_intervalfloat(value):
         if value == None:
             return None
@@ -142,7 +141,7 @@ def service_save_new_scenario(request):
     scenario.code = '2s_c_%i' % scenario.id
     scenario.save()
 
-    task = scenario.setup_initial_task(request.user)
+    #task = scenario.setup_initial_task(request.user)
 
     useManualInput = query.get("useManualInput", False)
     if useManualInput == 'false' or useManualInput == False:
@@ -273,6 +272,8 @@ def service_save_new_scenario(request):
     else:
         pass
         #Strategy.objects.get(pk=strategy_id).delete()
+
+    task = scenario.setup_initial_task(request.user)
 
     task.tfinished = datetime.datetime.now()
     task.successful = True

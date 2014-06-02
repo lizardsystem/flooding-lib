@@ -83,6 +83,9 @@ DB_INNER_LAKE = 4
 DB_INNER_CANAL = 5
 
 
+TIFDRIVER = gdal.GetDriverByName(b'gtiff')
+AAIGRIDDRIVER = gdal.GetDriverByName(b'aaigrid')
+
 def add_prefix_to_values_of_attributes(obj, prefix, skip_attribs=[]):
     """Adds prefix to values of attributes,
     except those listed in skip_attribute."""
@@ -939,51 +942,38 @@ class Scenario:
                     ds = ogr.Open(conn_str.format(
                         defaultdb.get("HOST"), defaultdb.get("NAME"), defaultdb.get("USER"), defaultdb.get("PASSWORD"), defaultdb.get("PORT")))
 
-                    sql = """SELECT AsBinary(TRANSFORM(eu.geometry, 28992)) as wkb_geometry, m.adjustment as adjustment
+                    sql = """SELECT TRANSFORM(eu.geometry, 28992) as wkb_geometry, m.adjustment as adjustment
                              FROM flooding_strategy s, flooding_measure m, flooding_embankment_unit eu, flooding_measure_strategy ms, flooding_embankment_unit_measure eum
                              WHERE s.id = %(strategy_id)i and s.id = ms.strategy_id and ms.measure_id = m.id and m.id = eum.measure_id and eum.embankmentunit_id = eu.id
                              AND m.reference_adjustment = %(reference)i""" % {'strategy_id': self.scenario.strategy.id, 'reference': reference}
 
                     layer = ds.ExecuteSQL(sql)
-                    
+                    filename = os.path.join(self.tmp_dir, 'current_asc%i.asc' % reference)
+                    size_y, size_x = self.elev_grid.values.shape
+                    num_bands = 1
+                    ds_tif = TIFDRIVER.Create(filename, size_x, size_y, num_bands,
+                                              gdal.GDT_Float32)
+                    ds_tif.SetGeoTransform((
+                        self.elev_grid.xllcorner,
+                        self.elev_grid.cellsize,
+                        0,
+                        self.elev_grid.yllcorner + self.elev_grid.nrows * self.elev_grid.cellsize,
+                        0,
+                        -self.elev_grid.cellsize))
+
+                    band = ds_tif.GetRasterBand(1)
+                    band.SetNoDataValue(self.elev_grid.nodata_value)
+                    band.Fill(self.elev_grid.nodata_value)
+                    band.WriteArray(self.elev_grid.values)
+                    err = gdal.RasterizeLayer(ds_tif, [1], layer, options=["ATTRIBUTE=adjustment",])
+                    AAIGRIDDRIVER.CreateCopy(filename, ds_tif)
+                    ds_tif = None
                     if reference == flooding.models.Measure.TYPE_EXISTING_LEVEL:
-                        #leeg grid
-                        empty_grid_name = os.path.join(self.tmp_dir, 'empty_asc%i.asc' % reference)
-                        empty_grid = self.elev_grid.copy()
-                        #asc.AscGrid.apply(lambda x: 0, self.elev_grid)
-                        for col in range(1, empty_grid.ncols + 1):
-                            for row in range(1, empty_grid.nrows + 1):
-
-                                empty_grid[col, row] = 0
-
-                        empty_file = file(empty_grid_name, 'w')
-                        empty_grid.writeToStream(empty_file, empty_grid)
-                        empty_file.close()
-                        target_ds = gdal.Open(str(empty_grid_name))
-                        err = gdal.RasterizeLayer(target_ds, [1], layer, options=["ATTRIBUTE=adjustment"])
-                        tmp_asc_filename = os.path.join(self.tmp_dir, 'tmp_asc%i.asc' % reference)
-                        dst_ds = gdal.GetDriverByName('AAIGrid').CreateCopy(str(tmp_asc_filename), target_ds, 0)
-                        dst_ds = None
-
-                        adjustment_grid = asc.AscGrid(tmp_asc_filename)
+                        adjustment_grid = asc.AscGrid(filename)
                         self.elev_grid = elev_grid = asc.AscGrid.apply(lambda x, y: x + y, self.elev_grid, adjustment_grid)
                         adjustment_grid = None
-
                     else:
-                        log.debug('create file of current elevation grid')
-                        current_grid_name = os.path.join(self.tmp_dir, 'current_asc%i.asc' % reference)
-                        current_file = file(current_grid_name, 'w')
-                        log.debug('current_file: {}'.format(current_grid_name))
-                        self.elev_grid.writeToStream(current_file, self.elev_grid.copy())
-                        current_file.close()
-                                            
-                        log.debug('open current grid and adjust with gdal rasterize')
-                        target_ds = gdal.Open(str(current_grid_name))
-                        err = gdal.RasterizeLayer(target_ds, [1], layer, options=["ATTRIBUTE=adjustment"])
-                        log.debug("Flush data.")
-                        target_ds = None
-                        target_ds = gdal.Open(str(current_grid_name))
-                        self.elev_grid = elev_grid = asc.AscGrid(current_grid_name)
+                        self.elev_grid = elev_grid = asc.AscGrid(filename)
         finally:
             ds = None
             dst_ds = None
