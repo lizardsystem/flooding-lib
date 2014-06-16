@@ -48,6 +48,7 @@ import logging
 import math
 import os
 import datetime
+import numpy as np
 from nens import sobek, asc
 from django import db
 
@@ -968,12 +969,20 @@ class Scenario:
                     err = gdal.RasterizeLayer(ds_tif, [1], layer, options=["ATTRIBUTE=adjustment",])
                     AAIGRIDDRIVER.CreateCopy(filename, ds_tif)
                     ds_tif = None
+                    adjustment_grid = asc.AscGrid(filename)
                     if reference == flooding.models.Measure.TYPE_EXISTING_LEVEL:
-                        adjustment_grid = asc.AscGrid(filename)
-                        self.elev_grid = elev_grid = asc.AscGrid.apply(lambda x, y: x + y, self.elev_grid, adjustment_grid)
-                        adjustment_grid = None
+                        # relative to current heigth, calculate.
+                        self.elev_grid.values = np.where(
+                            self.elev_grid.values == self.elev_grid.nodata_value,
+                            self.elev_grid.values,
+                            self.elev_grid.values + adjustment_grid.values)
                     else:
-                        self.elev_grid = elev_grid = asc.AscGrid(filename)
+                        #relative to NAP, replace
+                        self.elev_grid.values = np.where(
+                            self.elev_grid.values == self.elev_grid.nodata_value,
+                            self.elev_grid.values,
+                            adjustment_grid.values)
+                    adjustment_grid = None
         finally:
             ds = None
             dst_ds = None
