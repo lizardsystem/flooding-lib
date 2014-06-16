@@ -967,22 +967,21 @@ class Scenario:
                     band.Fill(self.elev_grid.nodata_value)
                     band.WriteArray(self.elev_grid.values)
                     err = gdal.RasterizeLayer(ds_tif, [1], layer, options=["ATTRIBUTE=adjustment",])
-                    AAIGRIDDRIVER.CreateCopy(filename, ds_tif)
-                    ds_tif = None
-                    adjustment_grid = asc.AscGrid(filename)
+                    adjustment_grid = ds_tif.ReadAsArray()
                     if reference == flooding.models.Measure.TYPE_EXISTING_LEVEL:
                         # relative to current heigth, calculate.
                         self.elev_grid.values = np.where(
                             self.elev_grid.values == self.elev_grid.nodata_value,
                             self.elev_grid.values,
-                            self.elev_grid.values + adjustment_grid.values)
+                            self.elev_grid.values + adjustment_grid)
                     else:
                         #relative to NAP, replace
                         self.elev_grid.values = np.where(
                             self.elev_grid.values == self.elev_grid.nodata_value,
                             self.elev_grid.values,
-                            adjustment_grid.values)
+                            adjustment_grid)
                     adjustment_grid = None
+                    ds_tif = None
         finally:
             ds = None
             dst_ds = None
