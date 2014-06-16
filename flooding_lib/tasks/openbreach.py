@@ -969,7 +969,7 @@ class Scenario:
                     err = gdal.RasterizeLayer(ds_tif, [1], layer, options=["ATTRIBUTE=adjustment",])
                     adjustment_grid = ds_tif.ReadAsArray()
                     if reference == flooding.models.Measure.TYPE_EXISTING_LEVEL:
-                        # relative to current heigth, calculate.
+                        # relative to current height, calculate.
                         self.elev_grid.values = np.where(
                             self.elev_grid.values == self.elev_grid.nodata_value,
                             self.elev_grid.values,
