@@ -5,13 +5,13 @@ Changelog of flooding-lib
 3.20 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Repaire starting scenario.
 
 
 3.19 (2014-05-28)
 -----------------
 
-- Nothing changed yet.
+- Repaire compute_sobek_model task by using the measures.
 
 
 3.18 (2014-05-13)
