@@ -982,6 +982,8 @@ class Scenario:
                             adjustment_grid)
                     adjustment_grid = None
                     ds_tif = None
+        except Exception as e:
+            log.exception(e)
         finally:
             ds = None
             dst_ds = None
