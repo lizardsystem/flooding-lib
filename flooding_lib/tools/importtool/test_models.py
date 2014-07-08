@@ -59,10 +59,10 @@ class RORKeringF(factory.DjangoModelFactory):
 
     title = 'dummy'
     uploaded_at = datetime.datetime.today()
-    owner = UserF.create(username='alex')
+    owner = factory.SubFactory(UserF)
     file_name = 'wateren.zip'
     status = models.RORKering.NOT_APPLIEND
-    type_kering= models.RORKering.PRIMARE
+    type_kering = models.RORKering.PRIMARE
     description = ''
 
 
