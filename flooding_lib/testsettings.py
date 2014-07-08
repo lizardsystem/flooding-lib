@@ -64,6 +64,10 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.contrib.staticfiles.context_processors.static_url',
     )
 
+SECRET_KEY = '!*8^643&bd5ltic(laa6!mt&9$e7#!p)v7m^$0c%3%wx8zs-_-'
+
+RASTER_SERVER_URL = 'http://dummy/'
+
 try:
     from flooding_lib.localsettings import *
 except ImportError:
