@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django_extensions',
     'django_nose',
     'flooding_base',
-    'staticfiles',
+    'django.contrib.staticfiles',
     'django.contrib.gis',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -61,7 +61,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.core.context_processors.media",
     # Needs to be added for django-staticfiles to allow you to use
     # {{ STATIC_URL }}myapp/my.css in your templates.
-    'staticfiles.context_processors.static_url',
+    'django.contrib.staticfiles.context_processors.static_url',
     )
 
 try:
