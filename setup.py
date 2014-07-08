@@ -12,14 +12,14 @@ long_description = '\n\n'.join([
     ])
 
 install_requires = [
-    'Django',
-    'django-staticfiles',
+    'Django >= 1.4, < 1.7',
+    'django-nose',
     'flooding-base >= 1.34',
     'lizard-worker >= 0.10',
     'django-treebeard',
     'django-extensions',
-    'django-nose',
     'django-appconf',
+    'matplotlib',
     'nens',
     'GDAL',
     'django-debug-toolbar',
@@ -28,10 +28,9 @@ install_requires = [
     'xlrd',
     'xlwt',
     'lizard_ui',
-    #'threedilib',
     'django-excel-response',
     'gislib',
-#    'pyproj', # We do need it, but requiring it doesn't work well
+    'pyproj',
     'Flask',
     ],
 
