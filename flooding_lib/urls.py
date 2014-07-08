@@ -1,6 +1,5 @@
 from django.conf.urls import patterns, url, include
 from django.conf import settings
-from django.contrib import databrowse
 
 from flooding_lib import views
 from flooding_lib.views import pages
@@ -212,11 +211,3 @@ urlpatterns = patterns(
         'flooding_lib.views.views.preload_scenario_redirect',
         name="preload_scenario_redirect"),
 )
-
-
-if settings.DEBUG:
-    #databrowse is for debugging purposes, so it is disabled in production
-    urlpatterns += patterns(
-        '',
-        (r'^databrowse/(.*)', databrowse.site.root),
-        )
