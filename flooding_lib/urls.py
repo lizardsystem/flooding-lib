@@ -1,4 +1,4 @@
-from django.conf.urls.defaults import patterns, url, include
+from django.conf.urls import patterns, url, include
 from django.conf import settings
 from django.contrib import databrowse
 
@@ -185,7 +185,7 @@ urlpatterns = patterns(
     url(r'^excel/(?P<project_id>\d+)/',
         'flooding_lib.views.excel_download',
         name='flooding_excel_download'),
-    
+
     url(r'^ror_keringen_zip/applied/(?P<filename>[a-zA-Z0-9\._\-]+)',
         'flooding_lib.views.ror_keringen_download',
         name='flooding_ror_keringen_download'),
