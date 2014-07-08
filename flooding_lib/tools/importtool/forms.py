@@ -7,7 +7,7 @@ class GroupImportForm(forms.ModelForm):
     """import form for group imports"""
     class Meta:
         model = GroupImport
-        exclude = ('upload_successful')
+        exclude = ('upload_successful',)
 
 
 class ImportScenarioFileUploadForm(forms.Form):
@@ -32,4 +32,4 @@ class RORKeringForm(forms.ModelForm):
     """import form for group imports"""
     class Meta:
         model = RORKering
-        exclude = ('upload_successful')
+        exclude = ('upload_successful',)
