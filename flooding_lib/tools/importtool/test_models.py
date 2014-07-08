@@ -12,28 +12,32 @@ from django.contrib.auth.models import User
 from flooding_lib.tools.importtool import models
 
 
-class UserF(factory.Factory):
-    FACTORY_FOR = User
+class UserF(factory.DjangoModelFactory):
+    class Meta:
+        model = User
 
     username = 'remco'
 
 
-class ImportScenarioF(factory.Factory):
-    FACTORY_FOR = models.ImportScenario
+class ImportScenarioF(factory.DjangoModelFactory):
+    class Meta:
+        model = models.ImportScenario
 
     name = 'test'
-    owner = UserF.create()
+    owner = factory.SubFactory(UserF)
 
 
-class ImportScenarioInputFieldF(factory.Factory):
-    FACTORY_FOR = models.ImportScenarioInputField
+class ImportScenarioInputFieldF(factory.DjangoModelFactory):
+    class Meta:
+        model = models.ImportScenarioInputField
 
     importscenario = factory.LazyAttribute(lambda a: ImportScenarioF.build())
     validation_remarks = ''
 
 
-class InputFieldF(factory.Factory):
-    FACTORY_FOR = models.InputField
+class InputFieldF(factory.DjangoModelFactory):
+    class Meta:
+        model = models.InputField
 
     name = 'dummy'
     header = models.InputField.HEADER_SCENARIO
@@ -49,9 +53,10 @@ class InputFieldF(factory.Factory):
     required = False
 
 
-class RORKeringF(factory.Factory):
-    FACTORY_FOR = models.RORKering
-    
+class RORKeringF(factory.DjangoModelFactory):
+    class Meta:
+        model = models.RORKering
+
     title = 'dummy'
     uploaded_at = datetime.datetime.today()
     owner = UserF.create(username='alex')

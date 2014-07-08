@@ -10,28 +10,32 @@ from flooding_lib.tests.test_models import ScenarioF, ProjectF
 from flooding_lib.tools.approvaltool import models
 
 
-class ApprovalObjectTypeF(factory.Factory):
-    FACTORY_FOR = models.ApprovalObjectType
+class ApprovalObjectTypeF(factory.DjangoModelFactory):
+    class Meta:
+        model = models.ApprovalObjectType
 
     name = "approval object type"
     type = models.ApprovalObjectType.TYPE_PROJECT
 
 
-class ApprovalRuleF(factory.Factory):
-    FACTORY_FOR = models.ApprovalRule
+class ApprovalRuleF(factory.DjangoModelFactory):
+    class Meta:
+        model = models.ApprovalRule
 
     name = "approval rule"
     description = "approval rule description"
 
 
-class ApprovalObjectF(factory.Factory):
-    FACTORY_FOR = models.ApprovalObject
+class ApprovalObjectF(factory.DjangoModelFactory):
+    class Meta:
+        model = models.ApprovalObject
 
     name = "approval object"
 
 
-class ApprovalObjectStateF(factory.Factory):
-    FACTORY_FOR = models.ApprovalObjectState
+class ApprovalObjectStateF(factory.DjangoModelFactory):
+    class Meta:
+        model = models.ApprovalObjectState
 
     approvalobject = factory.LazyAttribute(
         lambda obj: ApprovalObjectF())
