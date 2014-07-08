@@ -1497,12 +1497,12 @@ class Scenario(models.Model):
         return pls[0] if pls else None
 
     def casualties(self):
-        CASUALTIES_TYPE_ID = 20
+        CASUALTIES_TYPE_ID = 45
         pl = self.presentation_layer_of_type(CASUALTIES_TYPE_ID)
         return int(pl.value) if pl else None
 
     def financial_damage(self):
-        DAMAGE_AREA_TYPE_ID = 21
+        DAMAGE_AREA_TYPE_ID = 43
         pl = self.presentation_layer_of_type(DAMAGE_AREA_TYPE_ID)
         return pl.value if pl else None
 
