@@ -9,14 +9,14 @@ from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
 from django.views.generic import TemplateView
 
-import lizard_ui.views
-
 from flooding_lib import excel_import_export
 from flooding_lib import forms
 from flooding_lib import permission_manager
 from flooding_lib import scenario_sharing
 from flooding_lib.sharedproject import models
 from flooding_lib.util import viewutil
+from flooding_lib.views.classbased import ViewContextMixin
+
 import flooding_lib.models
 
 logger = logging.getLogger(__name__)
@@ -42,7 +42,7 @@ class ParameterMixin(object):
 
 
 class View(
-    lizard_ui.views.ViewContextMixin, ParameterMixin, TemplateView):
+    ViewContextMixin, ParameterMixin, TemplateView):
     pass
 
 
