@@ -7,14 +7,14 @@ Flooding: Metadata update
 {% endblock %}
 
 {% block content %}
-<script type="text/javascript" src="{% url root_url %}static_media/weblib/jquery/jquery-1.3.2.min.js"></script>
-<script type="text/javascript" src="{% url root_url %}static_media/flooding_lib/share_scenarios.js"></script>
+<script type="text/javascript" src="{% url "root_url" %}static_media/weblib/jquery/jquery-1.3.2.min.js"></script>
+<script type="text/javascript" src="{% url "root_url" %}static_media/flooding_lib/share_scenarios.js"></script>
 
 <h2>{{ view.project.name }}</h2>
 {% if view.project.excel_generation_too_slow %}
 <p style="max-width: 600px;">Het bestand dat u hier kunt downloaden werd gegenereerd op: <strong>{{ view.last_changed }}</strong>. Momenteel worden de te downloaden bestanden nachtelijk ververst, aanpassingen zijn dus pas de volgende dag zichtbaar in de Excel files. Aanpassingen zijn wel direct zichtbaar op de rest van de site.</p>
 {% endif %}
-<p><a href="{% url flooding_excel_download view.project_id %}{{ view.project.excel_filename }}">Download Excel file met de huidige metadata</a></p>
+<p><a href="{% url "flooding_excel_download" view.project_id %}{{ view.project.excel_filename }}">Download Excel file met de huidige metadata</a></p>
 
 {% if view.excel_errors %}
 Er zijn fouten bij het inlezen van het Excel bestand, waardoor het niet ingelezen is:
@@ -25,7 +25,7 @@ Er zijn fouten bij het inlezen van het Excel bestand, waardoor het niet ingeleze
 </ul>
 {% endif %}
 <form
-   action="{% url flooding_excel_import_export_project view.project_id %}"
+   action="{% url "flooding_excel_import_export_project" view.project_id %}"
    enctype="multipart/form-data"
    method="post">
 {% csrf_token %}

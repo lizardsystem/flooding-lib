@@ -23,7 +23,7 @@ Lizard-flooding: {% trans 'Project list' %}
 
 {% filter_form owner_choices 'filter_owner' fields.filter_owner fields %}
 
-<a href="{% url flooding_project_add %}"><img src="{% url root_url %}static_media/images/icons/add.png" title="{% trans 'create project' %}"/></a>
+<a href="{% url "flooding_project_add" %}"><img src="{% url "root_url" %}static_media/images/icons/add.png" title="{% trans 'create project' %}"/></a>
 
 {% objecttable name table_columns table_data fields.sort fields %}
 {% digg_paginator fields %}

@@ -29,7 +29,7 @@
 		    		<td>{{attachment.uploaded_date|date:"d-m-Y"}}</td>
 		    		<td>{{attachment.uploaded_by}}</td>
 		    		<td>{{attachment.name}}</td>
-		    		<td><a href="{% url flooding_service %}?action=get_attachment&scenario_id={{scenario_id}}&path={{attachment.file.name}}">{{attachment.file}}</td>
+		    		<td><a href="{% url "flooding_service" %}?action=get_attachment&scenario_id={{scenario_id}}&path={{attachment.file.name}}">{{attachment.file}}</td>
 		    		<td>{{attachment.remarks}}</td>
 		    	</tr>	     
 	    	{% endfor %}

@@ -33,7 +33,7 @@
 	    	<td>{{ attachment_type.description }}</td>
                 {% for attachment in attachment_type.attachments %}
 
-	    	<td><a href="{% url flooding_service %}?action=get_attachment&scenario_id={{scenario_id}}&path={{ attachment.file }}">{{ attachment.filename }}</a><br>
+	    	<td><a href="{% url "flooding_service" %}?action=get_attachment&scenario_id={{scenario_id}}&path={{ attachment.file }}">{{ attachment.filename }}</a><br>
                 {% endfor %}
 		</td>
 	    </tr>

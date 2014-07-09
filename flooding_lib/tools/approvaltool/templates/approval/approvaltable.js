@@ -12,7 +12,7 @@ isc.ListGrid.create({
     width:380, alternateRecordStyles:true, cellHeight:22, wrapCells: true, fixedRecordHeights: false,
 
     fields:[
-        {name:"successful", title:"Status", width:60, type:"image",valueMap:["true", "false", "-"], imageURLPrefix:"{% url root_url %}static_media/images/", imageURLSuffix:".gif", canEdit:true},
+        {name:"successful", title:"Status", width:60, type:"image",valueMap:["true", "false", "-"], imageURLPrefix:"{% url "root_url" %}static_media/images/", imageURLSuffix:".gif", canEdit:true},
         {name:"name", title: "Controle", width: 120, showHover: true, canEdit:false, hoverHTML:"return record.description"},
         {name:"creatorlog",title: "Door", width:70, canEdit:false,showHover: true,hoverHTML:"return record.date"},
         {name:"remarks", title: "Keurings opmerkingen", editorProperties:{height:60}}

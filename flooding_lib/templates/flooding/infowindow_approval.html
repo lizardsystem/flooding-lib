@@ -25,12 +25,12 @@
 	    		<td>{{task.creatorlog}}</td>
 	    		<td>
 		    		{% ifequal task.successful None %}
-		    			<img src="{% url root_url %}static_media/images/question.png" />
+		    			<img src="{% url "root_url" %}static_media/images/question.png" />
 		    		{% else %}
 			    		{% if task.successful %}
-				    		<img src="{% url root_url %}static_media/images/icons/checked.png" />
+				    		<img src="{% url "root_url" %}static_media/images/icons/checked.png" />
 				    	{% else %}
-				    		<img src="{% url root_url %}static_media/images/false.gif" />
+				    		<img src="{% url "root_url" %}static_media/images/false.gif" />
 		    			{% endif %}
 		    		{% endifequal %}		    			
 	    		</td>

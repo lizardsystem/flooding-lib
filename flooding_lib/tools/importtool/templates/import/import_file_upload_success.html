@@ -7,8 +7,8 @@
 
 {% block stylesheets %}
 <link rel="shortcut icon" href="{{ url_favicon }}">
-<link href="{% url root_url %}static_media/style/style.css" media="screen" type="text/css" rel="stylesheet">
-<link href="{% url root_url %}static_media/style/forms.css" media="screen" type="text/css" rel="stylesheet">
+<link href="{% url "root_url" %}static_media/style/style.css" media="screen" type="text/css" rel="stylesheet">
+<link href="{% url "root_url" %}static_media/style/forms.css" media="screen" type="text/css" rel="stylesheet">
 {% endblock stylesheets %}
 
 {% block content %}

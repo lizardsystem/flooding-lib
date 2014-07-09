@@ -10,8 +10,8 @@
 
         <!-- Load styles -->
         <link rel="shortcut icon" href="{{ url_favicon }}">
-        <!-- link href="{% url root_url %}static_media/style/style.css" media="screen" type="text/css" rel="stylesheet"-->
-        <link href="{% url root_url %}static_media/Isomorphic_NenS_skin/skin_styles.css" media="screen" type="text/css" rel="stylesheet">
+        <!-- link href="{% url "root_url" %}static_media/style/style.css" media="screen" type="text/css" rel="stylesheet"-->
+        <link href="{% url "root_url" %}static_media/Isomorphic_NenS_skin/skin_styles.css" media="screen" type="text/css" rel="stylesheet">
     <style type="text/css" >
         html, body {
             overflow: hidden;
@@ -26,18 +26,18 @@
         }
     </style>
     <script>
-      var isomorphicDir="{% url root_url %}static_media/weblib/smartclient/9.0/isomorphic/"; // abs path to isomorphic, needed to locate SmartClient CSS
+      var isomorphicDir="{% url "root_url" %}static_media/weblib/smartclient/9.0/isomorphic/"; // abs path to isomorphic, needed to locate SmartClient CSS
     </script>
 
-    <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/weblib/smartclient/9.0/isomorphic/system/modules/ISC_Core.js"></SCRIPT>
-    <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/weblib/smartclient/9.0/isomorphic/system/modules/ISC_Foundation.js"></SCRIPT>
-    <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/weblib/smartclient/9.0/isomorphic/system/modules/ISC_Containers.js"></SCRIPT>
-    <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/weblib/smartclient/9.0/isomorphic/system/modules/ISC_Grids.js"></SCRIPT>
-    <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/weblib/smartclient/9.0/isomorphic/system/modules/ISC_Forms.js"></SCRIPT>
-    <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/weblib/smartclient/9.0/isomorphic/system/modules/ISC_DataBinding.js"></SCRIPT>
-    <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/Isomorphic_NenS_skin/load_skin.js"></SCRIPT>
-    <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/scripts/shared/SCpatch.js"></SCRIPT>
-    <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/scripts/shared/lib/NGeneral.js"></SCRIPT>
+    <SCRIPT type="text/javascript" SRC="{% url "root_url" %}static_media/weblib/smartclient/9.0/isomorphic/system/modules/ISC_Core.js"></SCRIPT>
+    <SCRIPT type="text/javascript" SRC="{% url "root_url" %}static_media/weblib/smartclient/9.0/isomorphic/system/modules/ISC_Foundation.js"></SCRIPT>
+    <SCRIPT type="text/javascript" SRC="{% url "root_url" %}static_media/weblib/smartclient/9.0/isomorphic/system/modules/ISC_Containers.js"></SCRIPT>
+    <SCRIPT type="text/javascript" SRC="{% url "root_url" %}static_media/weblib/smartclient/9.0/isomorphic/system/modules/ISC_Grids.js"></SCRIPT>
+    <SCRIPT type="text/javascript" SRC="{% url "root_url" %}static_media/weblib/smartclient/9.0/isomorphic/system/modules/ISC_Forms.js"></SCRIPT>
+    <SCRIPT type="text/javascript" SRC="{% url "root_url" %}static_media/weblib/smartclient/9.0/isomorphic/system/modules/ISC_DataBinding.js"></SCRIPT>
+    <SCRIPT type="text/javascript" SRC="{% url "root_url" %}static_media/Isomorphic_NenS_skin/load_skin.js"></SCRIPT>
+    <SCRIPT type="text/javascript" SRC="{% url "root_url" %}static_media/scripts/shared/SCpatch.js"></SCRIPT>
+    <SCRIPT type="text/javascript" SRC="{% url "root_url" %}static_media/scripts/shared/lib/NGeneral.js"></SCRIPT>
     </head>
     <body>
 
@@ -135,7 +135,7 @@
                         if (data.successful == "true") {
                             // use 123456789 as a dummy import_scenario_id, so we can replace it
                             // with the real one in Javascript
-                            window.location="{% url flooding_tools_upload_files 123456789%}".replace('123456789', data.id);
+                            window.location="{% url "flooding_tools_upload_files" 123456789%}".replace('123456789', data.id);
                         } else {
                             alert('error saving: ' + data.remarks)
                         }
@@ -184,7 +184,7 @@
     isc.DataSource.create({
         ID: "dsRegion",
         dataFormat: "json",
-        dataURL: '{% url flooding_service %}',
+        dataURL: '{% url "flooding_service" %}',
         transformRequest : function (dsRequest) {
             if (dsRequest.operationType == "fetch") {
                    var params = {action : 'get_all_regions'};
@@ -198,7 +198,7 @@
     isc.DataSource.create({
         ID: "dsBreach",
         dataFormat: "json",
-        dataURL:  '{% url flooding_service %}',
+        dataURL:  '{% url "flooding_service" %}',
         transformRequest : function (dsRequest) {
             if (dsRequest.operationType == "fetch") {
 
@@ -223,7 +223,7 @@
             }
         },
         dataFormat: "json",
-        dataURL:  '{% url flooding_service %}',
+        dataURL:  '{% url "flooding_service" %}',
         autoDraw: false
     });
 
