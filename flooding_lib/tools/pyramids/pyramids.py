@@ -16,7 +16,6 @@ from matplotlib import colors
 
 from flooding_lib.util.colormap import get_mpl_cmap
 from flooding_lib.util.colormap import ColorMap
-from flooding_lib.tools.importtool.models import InputField
 
 from . import models
 
@@ -55,6 +54,9 @@ def settings_for_animation(animation, scenario=None):
     if scenario is not None:
         # See if the scenario has a "startmoment bresgroei", use
         # that as the start frame.
+
+        # import here due circular import
+        from flooding_lib.tools.importtool.models import InputField
         inputfield = InputField.objects.get(
             pk=INPUTFIELD_STARTMOMENT_BREACHGROWTH_ID)
         startmoment_days = scenario.value_for_inputfield(inputfield)
