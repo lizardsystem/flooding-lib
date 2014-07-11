@@ -129,8 +129,8 @@ def inundation_based_on_flsh(scenario):
         if scenario.result_set.filter(resulttype__id=result_type_id).exists():
             use_result_type_id = result_type_id
             break
-        else:
-            raise AssertionError("Neither resulttype for fls_h.inc found!")
+    else:
+        raise AssertionError("Neither resulttype for fls_h.inc found!")
 
     with files.temporarily_unzipped(
         result_zip(scenario, use_result_type_id)) as names:
