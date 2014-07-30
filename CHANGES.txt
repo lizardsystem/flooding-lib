@@ -2,7 +2,7 @@ Changelog of flooding-lib
 ===================================================
 
 
-3.21 (unreleased)
+3.21 (2014-07-30)
 -----------------
 
 - Fix breach overview.
