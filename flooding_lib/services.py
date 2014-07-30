@@ -921,9 +921,9 @@ def service_get_externalwatermodels(
     breach = get_object_or_404(Breach, pk=breach_id)
 
     if only_active:
-        models = breach.externalwater.sobekmodels.filter(active=True)
+        models = breach.sobekmodels.filter(active=True)
     else:
-        models = breach.externalwater.sobekmodels.all()
+        models = breach.sobekmodels.all()
 
     resp = [{
             'id':obj.id,
