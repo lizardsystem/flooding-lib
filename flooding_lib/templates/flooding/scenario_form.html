@@ -21,17 +21,17 @@ Scenario details
 <h3>Cutofflocations</h3>
 <ul>
 {% for scl in scenario.scenariocutofflocation_set.all %}
-<li>{{ scl.cutofflocation }}&nbsp;<a href="{% url flooding_scenario_cutofflocation_delete object_id=scl.id %}">delete</a></li>
+<li>{{ scl.cutofflocation }}&nbsp;<a href="{% url "flooding_scenario_cutofflocation_delete" object_id=scl.id %}">delete</a></li>
 {% endfor %}
-<li><a href="{% url flooding_scenario_cutofflocation_add scenario_id=scenario.id %}">add</a></li>
+<li><a href="{% url "flooding_scenario_cutofflocation_add" scenario_id=scenario.id %}">add</a></li>
 </ul>
 
 <h3>Breaches</h3>
 <ul>
 {% for sb in scenario.scenariobreach_set.all %}
-<li>{{ sb.breach }}&nbsp;<a href="{% url flooding_scenario_breach_delete object_id=sb.id %}">delete</a></li>
+<li>{{ sb.breach }}&nbsp;<a href="{% url "flooding_scenario_breach_delete" object_id=sb.id %}">delete</a></li>
 {% endfor %}
-<li><a href="{% url flooding_scenario_breach_add scenario_id=scenario.id %}">add</a></li>
+<li><a href="{% url "flooding_scenario_breach_add" scenario_id=scenario.id %}">add</a></li>
 </ul>
 {% endif %}
 

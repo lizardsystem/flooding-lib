@@ -9,13 +9,22 @@ class Migration(DataMigration):
     def forwards(self, orm):
         "Write your forwards methods here."
 
+        try:
+            sobek = orm.Program.objects.get(name="sobek")
+        except orm.Program.DoesNotExist:
+            # This situation occurs when creating an entire Flooding
+            # database from scratch, like when running bin/test in the
+            # Flooding site.
+            sobek = orm.Program.objects.create(
+                name="sobek")
+
         orm.ResultType.objects.create(
             name="Total inundated area",
             shortname_dutch="overstroomd gebied",
             overlaytype=None,
             unit="m2",
             color_mapping_name=None,
-            program=orm.Program.objects.get(name="sobek"),
+            program=sobek,
             content_names_re='dm1maxd0.asc')
 
         orm.ResultType.objects.create(
@@ -24,7 +33,7 @@ class Migration(DataMigration):
             overlaytype=None,
             unit="m3",
             color_mapping_name=None,
-            program=orm.Program.objects.get(name="sobek"),
+            program=sobek,
             content_names_re='dm1maxd0.asc')
 
     def backwards(self, orm):

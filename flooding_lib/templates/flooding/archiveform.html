@@ -1,5 +1,5 @@
 {% load i18n %}
-<form id="archiveForm" action="{% url infowindow %}" target="archivePostFrame" method="POST">
+<form id="archiveForm" action="{% url "infowindow" %}" target="archivePostFrame" method="POST">
     {{ form.scenarioid }}
     {{ form.action }}
     <table>

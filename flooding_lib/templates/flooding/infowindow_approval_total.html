@@ -30,7 +30,7 @@
             }
 
             RPCManager.sendRequest({
-               actionURL: '{% url infowindow %}{{ url_args|safe}}',
+               actionURL: '{% url "infowindow" %}{{ url_args|safe}}',
                useSimpleHttp: true,
                httpMethod: "POST",
                params: postParams,

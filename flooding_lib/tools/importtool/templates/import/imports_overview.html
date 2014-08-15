@@ -3,17 +3,17 @@
 {% block title %}Lizard import tool{% endblock %}
 {% block stylesheets %}
 		<link rel="shortcut icon" href="{{ url_favicon }}">
-		<link href="{% url root_url %}static_media/style/style.css" media="screen" type="text/css" rel="stylesheet">
-		<link href="{% url root_url %}static_media/style/forms.css" media="screen" type="text/css" rel="stylesheet">
-		<link href="{% url root_url %}static_media/Isomorphic_NenS_skin/skin_styles.css" media="screen" type="text/css" rel="stylesheet">
+		<link href="{% url "root_url" %}static_media/style/style.css" media="screen" type="text/css" rel="stylesheet">
+		<link href="{% url "root_url" %}static_media/style/forms.css" media="screen" type="text/css" rel="stylesheet">
+		<link href="{% url "root_url" %}static_media/Isomorphic_NenS_skin/skin_styles.css" media="screen" type="text/css" rel="stylesheet">
 
 {% endblock stylesheets %}
 {% block bodyarguments %} class="scrollable" {% endblock %}
 {% block content %}
 <p>
-<a href="{% url flooding_excel_import_export %}">Down- en upload hier een overzicht van alle metadata van een project.</a>
+<a href="{% url "flooding_excel_import_export" %}">Down- en upload hier een overzicht van alle metadata van een project.</a>
 <br>
-<a href="{% url flooding_tools_ror_keringen_page %}">Down- en upload hier het bestand van de ROR-keringen en -wateren.</a>
+<a href="{% url "flooding_tools_ror_keringen_page" %}">Down- en upload hier het bestand van de ROR-keringen en -wateren.</a>
 </p>
 		<h1>
 		{% trans "Overview" %}
@@ -37,13 +37,13 @@
 			 		{% for import_scenario in import_scenarios_list %}
 					    <tr class="{% cycle 'cellDark' 'cell'%}">
 				    		<td>{{import_scenario.0|date:"d-m-Y"}}</td>
-				    		<td><a href="{% url flooding_tools_import_verify import_scenario.1%}" >{{import_scenario.2}}</a></td>
+				    		<td><a href="{% url "flooding_tools_import_verify" import_scenario.1%}" >{{import_scenario.2}}</a></td>
 				    		<td>{{import_scenario.3}}</td>
 				    		<td>{{import_scenario.4}}</td>
 				    		<td>{{import_scenario.5}}</td>
 				    		<td>{{import_scenario.6}}</td>
 				    		{% if has_approve_rights %}
-				    			<td><a href="{% url flooding_tools_import_approve import_scenario.1%}" >keuren</a></td>
+				    			<td><a href="{% url "flooding_tools_import_approve" import_scenario.1%}" >keuren</a></td>
 				    		{% endif %}
 				    	</tr>
 			    	{% endfor %}

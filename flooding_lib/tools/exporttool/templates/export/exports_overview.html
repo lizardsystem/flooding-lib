@@ -3,9 +3,9 @@
 {% block title %}Lizard export tool{% endblock %}
 {% block stylesheets %}
 		<link rel="shortcut icon" href="{{ url_favicon }}">
-		<link href="{% url root_url %}static_media/style/style.css" media="screen" type="text/css" rel="stylesheet">
-		<link href="{% url root_url %}static_media/style/forms.css" media="screen" type="text/css" rel="stylesheet">
-		<link href="{% url root_url %}static_media/Isomorphic_NenS_skin/skin_styles.css" media="screen" type="text/css" rel="stylesheet">
+		<link href="{% url "root_url" %}static_media/style/style.css" media="screen" type="text/css" rel="stylesheet">
+		<link href="{% url "root_url" %}static_media/style/forms.css" media="screen" type="text/css" rel="stylesheet">
+		<link href="{% url "root_url" %}static_media/Isomorphic_NenS_skin/skin_styles.css" media="screen" type="text/css" rel="stylesheet">
 {% endblock stylesheets %}
 
 {% block bodyarguments %} class="scrollable" {% endblock %}
@@ -37,12 +37,12 @@
 				    		<td>{{export_run.5}}</td>
 				    		<td>
 				    			{% if export_run.3 %}
-				    				<a href="{% url flooding_tools_export_index %}?action=get_attachment&path={{export_run.3}}">{% trans "Result file" %}</a>
+				    				<a href="{% url "flooding_tools_export_index" %}?action=get_attachment&path={{export_run.3}}">{% trans "Result file" %}</a>
 				    			{% else %}
 				    				-
 				    			{% endif %}
 				    		</td>
-						<td><a href="{% url flooding_tools_reuse_export export_run.6 %}">{% trans "Edit" %}</a></td>
+						<td><a href="{% url "flooding_tools_reuse_export" export_run.6 %}">{% trans "Edit" %}</a></td>
 				    	</tr>
 			    	{% endfor %}
 			    {% else %}

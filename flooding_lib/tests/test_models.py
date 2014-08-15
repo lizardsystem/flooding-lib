@@ -43,43 +43,50 @@ class UnicodeTester(object):
 ## Model factories
 
 
-class UserF(factory.Factory):
-    FACTORY_FOR = User
+class UserF(factory.DjangoModelFactory):
+    class Meta:
+        model = User
 
     username = factory.Sequence(lambda n: 'testuser{0}'.format(n))
 
 
-class GroupF(factory.Factory):
-    FACTORY_FOR = Group
+class GroupF(factory.DjangoModelFactory):
+    class Meta:
+        model = Group
 
     name = 'some group'
 
 
-class ContentTypeF(factory.Factory):
-    FACTORY_FOR = ContentType
+class ContentTypeF(factory.DjangoModelFactory):
+    class Meta:
+        model = ContentType
 
 
-class ExportRunF(factory.Factory):
-    FACTORY_FOR = exportmodels.ExportRun
+class ExportRunF(factory.DjangoModelFactory):
+    class Meta:
+        model = exportmodels.ExportRun
 
     name = "test export"
     owner = factory.SubFactory(UserF)
     creation_date = datetime.datetime.today()
 
 
-class AttachmentF(factory.Factory):
-    FACTORY_FOR = models.Attachment
+class AttachmentF(factory.DjangoModelFactory):
+    class Meta:
+        model = models.Attachment
 
     content_type = factory.SubFactory(ContentTypeF)
     object_id = 1
 
 
-class SobekVersionF(factory.Factory):
-    FACTORY_FOR = models.SobekVersion
+class SobekVersionF(factory.DjangoModelFactory):
+    class Meta:
+        model = models.SobekVersion
 
 
-class SobekModelF(factory.Factory):
-    FACTORY_FOR = models.SobekModel
+class SobekModelF(factory.DjangoModelFactory):
+    class Meta:
+        model = models.SobekModel
 
     sobekversion = factory.SubFactory(SobekVersionF)
     sobekmodeltype = 1
@@ -87,8 +94,9 @@ class SobekModelF(factory.Factory):
     model_srid = 28992
 
 
-class CutoffLocationF(factory.Factory):
-    FACTORY_FOR = models.CutoffLocation
+class CutoffLocationF(factory.DjangoModelFactory):
+    class Meta:
+        model = models.CutoffLocation
 
     name = "some cutoff location"
     bottomlevel = 0.0
@@ -97,12 +105,14 @@ class CutoffLocationF(factory.Factory):
     geom = POINT
 
 
-class DikeF(factory.Factory):
-    FACTORY_FOR = models.Dike
+class DikeF(factory.DjangoModelFactory):
+    class Meta:
+        model = models.Dike
 
 
-class ExtraInfoFieldF(factory.Factory):
-    FACTORY_FOR = models.ExtraInfoField
+class ExtraInfoFieldF(factory.DjangoModelFactory):
+    class Meta:
+        model = models.ExtraInfoField
 
     name = 'dummy'
     use_in_scenario_overview = True
@@ -110,15 +120,17 @@ class ExtraInfoFieldF(factory.Factory):
     position = 0
 
 
-class ScenarioF(factory.Factory):
-    FACTORY_FOR = models.Scenario
+class ScenarioF(factory.DjangoModelFactory):
+    class Meta:
+        model = models.Scenario
 
     owner = factory.SubFactory(UserF)
     tsim = 0.0
 
 
-class ExtraScenarioInfoF(factory.Factory):
-    FACTORY_FOR = models.ExtraScenarioInfo
+class ExtraScenarioInfoF(factory.DjangoModelFactory):
+    class Meta:
+        model = models.ExtraScenarioInfo
 
     extrainfofield = factory.SubFactory(
         ExtraInfoFieldF, name='forextrascenarioinfo')
@@ -126,32 +138,36 @@ class ExtraScenarioInfoF(factory.Factory):
     value = None
 
 
-class ProjectF(factory.Factory):
-    FACTORY_FOR = models.Project
+class ProjectF(factory.DjangoModelFactory):
+    class Meta:
+        model = models.Project
 
     owner = factory.SubFactory(UserF)
     friendlyname = "friendly name of ProjectF"
 
 
-class ScenarioProjectF(factory.Factory):
-    FACTORY_FOR = models.ScenarioProject
+class ScenarioProjectF(factory.DjangoModelFactory):
+    class Meta:
+        model = models.ScenarioProject
 
     scenario = factory.SubFactory(ScenarioF)
     project = factory.SubFactory(ProjectF)
     is_main_project = True
 
 
-class UserPermissionF(factory.Factory):
+class UserPermissionF(factory.DjangoModelFactory):
     """Factory for UserPermission."""
-    FACTORY_FOR = models.UserPermission
+    class Meta:
+        model = models.UserPermission
 
     user = factory.SubFactory(UserF)
     permission = models.UserPermission.PERMISSION_SCENARIO_VIEW
 
 
-class ProjectGroupPermissionF(factory.Factory):
+class ProjectGroupPermissionF(factory.DjangoModelFactory):
     """Factory for ProjectGroupPermission."""
-    FACTORY_FOR = models.ProjectGroupPermission
+    class Meta:
+        model = models.ProjectGroupPermission
 
     group = factory.SubFactory(GroupF, name="some group")
     project = factory.SubFactory(ProjectF)
@@ -159,8 +175,9 @@ class ProjectGroupPermissionF(factory.Factory):
     permission = models.UserPermission.PERMISSION_SCENARIO_VIEW
 
 
-class ExternalWaterF(factory.Factory):
-    FACTORY_FOR = models.ExternalWater
+class ExternalWaterF(factory.DjangoModelFactory):
+    class Meta:
+        model = models.ExternalWater
 
     name = 'dewoeligebaren'
     type = models.ExternalWater.TYPE_SEA
@@ -168,34 +185,39 @@ class ExternalWaterF(factory.Factory):
     deftsim = 0.0
 
 
-class RegionF(factory.Factory):
-    FACTORY_FOR = models.Region
+class RegionF(factory.DjangoModelFactory):
+    class Meta:
+        model = models.Region
 
     name = 'Utrecht'
     longname = 'Uuuuuuutrecht'
     geom = MULTIPOLYGON
 
 
-class RegionSetF(factory.Factory):
-    FACTORY_FOR = models.RegionSet
+class RegionSetF(factory.DjangoModelFactory):
+    class Meta:
+        model = models.RegionSet
 
     name = "testregionset"
 
 
-class DikeF(factory.Factory):
-    FACTORY_FOR = models.Dike
+class DikeF(factory.DjangoModelFactory):
+    class Meta:
+        model = models.Dike
 
     name = "Een dijk"
 
 
-class WaterlevelSetF(factory.Factory):
-    FACTORY_FOR = models.WaterlevelSet
+class WaterlevelSetF(factory.DjangoModelFactory):
+    class Meta:
+        model = models.WaterlevelSet
 
     type = models.WaterlevelSet.WATERLEVELSETTYPE_UNDEFINED
 
 
-class BreachF(factory.Factory):
-    FACTORY_FOR = models.Breach
+class BreachF(factory.DjangoModelFactory):
+    class Meta:
+        model = models.Breach
 
     name = 'testname'
 
@@ -213,22 +235,25 @@ class BreachF(factory.Factory):
     geom = 'POINT(0 0)'
 
 
-class BreachSobekModelF(factory.Factory):
+class BreachSobekModelF(factory.DjangoModelFactory):
     """Factory for BreachSobekModel."""
-    FACTORY_FOR = models.BreachSobekModel
+    class Meta:
+        model = models.BreachSobekModel
 
     sobekid = "some sobek id"
 
 
-class CutoffLocationSetF(factory.Factory):
+class CutoffLocationSetF(factory.DjangoModelFactory):
     """Factory for CutoffLocationSet."""
-    FACTORY_FOR = models.CutoffLocationSet
+    class Meta:
+        model = models.CutoffLocationSet
 
     name = "some cutofflocationset"
 
 
-class ScenarioBreachF(factory.Factory):
-    FACTORY_FOR = models.ScenarioBreach
+class ScenarioBreachF(factory.DjangoModelFactory):
+    class Meta:
+        model = models.ScenarioBreach
 
     scenario = factory.SubFactory(ScenarioF)
     breach = factory.SubFactory(BreachF)
@@ -248,31 +273,35 @@ class ScenarioBreachF(factory.Factory):
     extwmaxlevel = 1
 
 
-class ScenarioCutoffLocationF(factory.Factory):
+class ScenarioCutoffLocationF(factory.DjangoModelFactory):
     """Factory for ScenarioCutoffLocation."""
-    FACTORY_FOR = models.ScenarioCutoffLocation
+    class Meta:
+        model = models.ScenarioCutoffLocation
 
     scenario = factory.SubFactory(ScenarioF)
     cutofflocation = factory.SubFactory(CutoffLocationF)
 
 
-class ProgramF(factory.Factory):
+class ProgramF(factory.DjangoModelFactory):
     """Factory for Program."""
-    FACTORY_FOR = models.Program
+    class Meta:
+        model = models.Program
 
     name = "some program"
 
 
-class ResultTypeF(factory.Factory):
+class ResultTypeF(factory.DjangoModelFactory):
     """Factory for ResultType."""
-    FACTORY_FOR = models.ResultType
+    class Meta:
+        model = models.ResultType
 
     name = "result type name"
 
 
-class CutoffLocationSobekModelSettingF(factory.Factory):
+class CutoffLocationSobekModelSettingF(factory.DjangoModelFactory):
     """Factory for CutoffLocationSobekModelSetting."""
-    FACTORY_FOR = models.CutoffLocationSobekModelSetting
+    class Meta:
+        model = models.CutoffLocationSobekModelSetting
 
     cutofflocation = factory.SubFactory(CutoffLocationF)
     sobekmodel = factory.SubFactory(SobekModelF)
@@ -280,17 +309,19 @@ class CutoffLocationSobekModelSettingF(factory.Factory):
     sobekid = "some sobekid"
 
 
-class TaskTypeF(factory.Factory):
+class TaskTypeF(factory.DjangoModelFactory):
     """Factory for TaskType."""
-    FACTORY_FOR = models.TaskType
+    class Meta:
+        model = models.TaskType
 
     id = 150
     name = "PNG creation"
 
 
-class TaskF(factory.Factory):
+class TaskF(factory.DjangoModelFactory):
     """Factory for Task."""
-    FACTORY_FOR = models.Task
+    class Meta:
+        model = models.Task
 
     scenario = factory.SubFactory(ScenarioF)
     remarks = ''
@@ -299,45 +330,52 @@ class TaskF(factory.Factory):
     creatorlog = "test"
 
 
-class WaterlevelF(factory.Factory):
-    FACTORY_FOR = models.Waterlevel
+class WaterlevelF(factory.DjangoModelFactory):
+    class Meta:
+        model = models.Waterlevel
 
     time = 0
     value = 0
 
 
-class MapF(factory.Factory):
-    FACTORY_FOR = models.Map
+class MapF(factory.DjangoModelFactory):
+    class Meta:
+        model = models.Map
 
     name = "testmap"
 
 
-class TaskExecutorF(factory.Factory):
-    FACTORY_FOR = models.TaskExecutor
+class TaskExecutorF(factory.DjangoModelFactory):
+    class Meta:
+        model = models.TaskExecutor
 
     name = "testtaskexecutor"
 
 
-class ResultTypePresentationTypeF(factory.Factory):
-    FACTORY_FOR = models.ResultType_PresentationType
+class ResultTypePresentationTypeF(factory.DjangoModelFactory):
+    class Meta:
+        model = models.ResultType_PresentationType
 
     remarks = "testremarks"
 
 
-class StrategyF(factory.Factory):
-    FACTORY_FOR = models.Strategy
+class StrategyF(factory.DjangoModelFactory):
+    class Meta:
+        model = models.Strategy
 
     name = "teststrategy"
 
 
-class MeasureF(factory.Factory):
-    FACTORY_FOR = models.Measure
+class MeasureF(factory.DjangoModelFactory):
+    class Meta:
+        model = models.Measure
 
     name = "testmeasure"
 
 
-class EmbankmentUnitF(factory.Factory):
-    FACTORY_FOR = models.EmbankmentUnit
+class EmbankmentUnitF(factory.DjangoModelFactory):
+    class Meta:
+        model = models.EmbankmentUnit
 
     unit_id = "test"
 

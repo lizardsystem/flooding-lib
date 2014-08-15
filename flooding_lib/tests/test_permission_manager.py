@@ -18,8 +18,9 @@ from flooding_lib.tests.test_models import ProjectF
 from flooding_lib.tools.approvaltool.models import ApprovalObjectType
 
 
-class UserF(factory.Factory):
-    FACTORY_FOR = User
+class UserF(factory.DjangoModelFactory):
+    class Meta:
+        model = User
 
     username = 'remco'
 

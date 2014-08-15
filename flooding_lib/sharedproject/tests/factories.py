@@ -14,15 +14,17 @@ import factory
 from flooding_lib.sharedproject import models
 
 
-class ProvinceFactory(factory.Factory):
-    FACTORY_FOR = models.Province
+class ProvinceFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = models.Province
 
     name = "Overijssel"
     statistics = None
 
 
-class OwnerFactory(factory.Factory):
-    FACTORY_FOR = models.Owner
+class OwnerFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = models.Owner
 
     # Let's say that WGS is an owner, and its province is Overijssel
     name = "Waterschap Groot Salland"

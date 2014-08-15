@@ -190,12 +190,12 @@ isc.ScenariosListGrid.create({
 
 isc.Img.create({
     ID:"arrowRight",
-    src:"{% url root_url %}static_media/images/icons/arrow_right.png", width:32, height:32,overflow:"visible",
+    src:"{% url "root_url" %}static_media/images/icons/arrow_right.png", width:32, height:32,overflow:"visible",
     click:"scenariosToExportListGrid.transferSelectedData(scenariosAllListGrid)"
 })
 isc.Img.create({
     ID:"arrowLeft",
-    src:"{% url root_url %}static_media/images/icons/arrow_left.png", width:32, height:32,overflow:"visible",
+    src:"{% url "root_url" %}static_media/images/icons/arrow_left.png", width:32, height:32,overflow:"visible",
     click:"scenariosAllListGrid.transferSelectedData(scenariosToExportListGrid)"
 })
 

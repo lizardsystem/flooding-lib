@@ -15,8 +15,9 @@ from matplotlib import colors
 from matplotlib import cm
 
 settings = None
+
 try:
-    from flooding_lib.conf import settings
+    from django.conf import settings
 except ImportError:
     # Raster server calls this module as well, and it runs in Flask,
     # not Django!

@@ -15,7 +15,7 @@ Lizard-flooding: Project {{ object.name }}
 <h2>{{ object.name }}</h2>
 <ul>
   {% for s in object.all_scenarios %}
-  <li><a href="{% url flooding_scenario_detail object_id=s.id %}">{{ s.name }}</a></li>
+  <li><a href="{% url "flooding_scenario_detail" object_id=s.id %}">{{ s.name }}</a></li>
   {% endfor %}
 </ul>
 {% endblock %}

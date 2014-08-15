@@ -140,7 +140,7 @@ class SobekModel(models.Model):
         max_length=200, null=True, blank=True)
 
     code = models.CharField(max_length=15, null=True, blank=True)
-    keep_initial_level = models.BooleanField()
+    keep_initial_level = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = _('Sobek model')

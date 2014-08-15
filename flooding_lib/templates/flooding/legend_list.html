@@ -13,7 +13,7 @@ Legend list
 <h3>all legends</h3>
 <ul>
   {% for l in legends_all %}
-  <li>{{ l }}&nbsp;<a href="{% url flooding_legend_edit object_id=l.id %}">edit</a>&nbsp;<a href="{% url flooding_legend_delete object_id=l.id %}">delete</a></li>
+  <li>{{ l }}&nbsp;<a href="{% url "flooding_legend_edit" object_id=l.id %}">edit</a>&nbsp;<a href="{% url "flooding_legend_delete" object_id=l.id %}">delete</a></li>
   {% endfor %}
 </ul>
 <h3>own legends</h3>
@@ -23,13 +23,13 @@ Legend list
 <ul>
   {% if object %}
   {% for l in object %}
-  <li>{{ l.name }}&nbsp;<a href="{% url flooding_legend_edit object_id=l.id %}">edit</a>&nbsp;<a href="{% url flooding_legend_delete object_id=l.id %}">delete</a></li>
+  <li>{{ l.name }}&nbsp;<a href="{% url "flooding_legend_edit" object_id=l.id %}">edit</a>&nbsp;<a href="{% url "flooding_legend_delete" object_id=l.id %}">delete</a></li>
   {% endfor %}
   {% else %}
   No legends!
   {% endif %}
   {% if has_edit_permission %}
-  <li><a href="{% url flooding_legend_add %}?next={# url flooding_legend_list #}">add</a></li>
+  <li><a href="{% url "flooding_legend_add" %}?next={# url flooding_legend_list #}">add</a></li>
   {% endif %}
 </ul>
 {% endblock %}

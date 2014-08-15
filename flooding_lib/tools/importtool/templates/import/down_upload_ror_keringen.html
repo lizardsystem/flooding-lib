@@ -8,15 +8,15 @@
     <title>Lizard import tool</title>
     <!-- Load styles -->
     <link rel="shortcut icon" href="{{ url_favicon }}">
-    <link href="{% url root_url %}static_media/style/style.css" media="screen" type="text/css" rel="stylesheet">	
-    <link href="{% url root_url %}static_media/style/forms.css" media="screen" type="text/css" rel="stylesheet">
-    <link href="{% url root_url %}static_media/Isomorphic_NenS_skin/skin_styles.css" media="screen" type="text/css" rel="stylesheet">
+    <link href="{% url "root_url" %}static_media/style/style.css" media="screen" type="text/css" rel="stylesheet">	
+    <link href="{% url "root_url" %}static_media/style/forms.css" media="screen" type="text/css" rel="stylesheet">
+    <link href="{% url "root_url" %}static_media/Isomorphic_NenS_skin/skin_styles.css" media="screen" type="text/css" rel="stylesheet">
     <script> 
-      var isomorphicDir="{% url root_url %}static_media/weblib/smartclient/9.0/isomorphic/"; // abs path to isomorphic, needed to locate SmartClient CSS
+      var isomorphicDir="{% url "root_url" %}static_media/weblib/smartclient/9.0/isomorphic/"; // abs path to isomorphic, needed to locate SmartClient CSS
       var ror_config = {};
       var ror_files = new Array();
       ror_config.files = '{{ keringen_file_names|escape }}';
-      ror_config.root_url = '{% url root_url %}';
+      ror_config.root_url = '{% url "root_url" %}';
       
       ror_config.breadcrumbs = '<div class="breadcrumbs">{% if breadcrumbs %}&rsaquo;{% endif %}{% for blitem in breadcrumbs %}{% if blitem.url %}<a href="{{ blitem.url }}"> {{ blitem.name }} </a>{% else %} {{ blitem.name }} {% endif %}{% ifnotequal forloop.revcounter0 0 %}&rsaquo;{% endifnotequal %}{% endfor %}</div>';
 
@@ -28,20 +28,20 @@
       {% endfor %}
     </script>
 
-    <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/weblib/smartclient/9.0/isomorphic/system/modules/ISC_Core.js"></SCRIPT>
-    <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/weblib/smartclient/9.0/isomorphic/system/modules/ISC_Foundation.js"></SCRIPT>
-    <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/weblib/smartclient/9.0/isomorphic/system/modules/ISC_Containers.js"></SCRIPT>
-    <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/weblib/smartclient/9.0/isomorphic/system/modules/ISC_Grids.js"></SCRIPT>
-    <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/weblib/smartclient/9.0/isomorphic/system/modules/ISC_Forms.js"></SCRIPT>
-    <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/weblib/smartclient/9.0/isomorphic/system/modules/ISC_DataBinding.js"></SCRIPT>
-    <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/Isomorphic_NenS_skin/load_skin.js"></SCRIPT>
-    <SCRIPT type="text/javascript" SRC="{% url root_url %}static_media/scripts/shared/SCpatch.js"></SCRIPT>	
-    <SCRIPT type="text/javascript" SRC="{% url root_url %}get_config.js"></SCRIPT>  
+    <SCRIPT type="text/javascript" SRC="{% url "root_url" %}static_media/weblib/smartclient/9.0/isomorphic/system/modules/ISC_Core.js"></SCRIPT>
+    <SCRIPT type="text/javascript" SRC="{% url "root_url" %}static_media/weblib/smartclient/9.0/isomorphic/system/modules/ISC_Foundation.js"></SCRIPT>
+    <SCRIPT type="text/javascript" SRC="{% url "root_url" %}static_media/weblib/smartclient/9.0/isomorphic/system/modules/ISC_Containers.js"></SCRIPT>
+    <SCRIPT type="text/javascript" SRC="{% url "root_url" %}static_media/weblib/smartclient/9.0/isomorphic/system/modules/ISC_Grids.js"></SCRIPT>
+    <SCRIPT type="text/javascript" SRC="{% url "root_url" %}static_media/weblib/smartclient/9.0/isomorphic/system/modules/ISC_Forms.js"></SCRIPT>
+    <SCRIPT type="text/javascript" SRC="{% url "root_url" %}static_media/weblib/smartclient/9.0/isomorphic/system/modules/ISC_DataBinding.js"></SCRIPT>
+    <SCRIPT type="text/javascript" SRC="{% url "root_url" %}static_media/Isomorphic_NenS_skin/load_skin.js"></SCRIPT>
+    <SCRIPT type="text/javascript" SRC="{% url "root_url" %}static_media/scripts/shared/SCpatch.js"></SCRIPT>	
+    <SCRIPT type="text/javascript" SRC="{% url "root_url" %}get_config.js"></SCRIPT>  
 	
   </head>
   <body>
     
     <!-- Javascript for the screen Framework -->
-    <script type="text/javascript" src="{% url root_url %}static_media/import/screen_keringen.js" type="text/javascript"> </script>
+    <script type="text/javascript" src="{% url "root_url" %}static_media/import/screen_keringen.js" type="text/javascript"> </script>
   </body>
 </html>

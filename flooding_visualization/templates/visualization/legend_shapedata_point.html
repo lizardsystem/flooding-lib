@@ -1,4 +1,4 @@
-<link href="{% url root_url %}static_media/style/legend.css" rel="stylesheet" type="text/css">
+<link href="{% url "root_url" %}static_media/style/legend.css" rel="stylesheet" type="text/css">
 <div class="legend-title">{{ title }}</div>
 <div class="legend">
 {% for block in blocks %}
@@ -8,7 +8,7 @@
   {% for row in block.content %}
       <tr>
 	<td class="legend-row-left">
-<img src="{% url visualization_symbol symbol=row.symbol_properties.symbol.0 %}.png?rotate={{ row.symbol_properties.rotate.0 }}&color={{ row.symbol_properties.color.0 }},{{ row.symbol_properties.color.1 }},{{ row.symbol_properties.color.2 }},{{ row.symbol_properties.color.3 }}&size={{ row.symbol_properties.size.0 }},{{ row.symbol_properties.size.1 }}"/>
+<img src="{% url "visualization_symbol" symbol=row.symbol_properties.symbol.0 %}.png?rotate={{ row.symbol_properties.rotate.0 }}&color={{ row.symbol_properties.color.0 }},{{ row.symbol_properties.color.1 }},{{ row.symbol_properties.color.2 }},{{ row.symbol_properties.color.3 }}&size={{ row.symbol_properties.size.0 }},{{ row.symbol_properties.size.1 }}"/>
 	</td>
 	<td>
 	  {{ row.text }}
