@@ -1,0 +1,9 @@
+{# 20090226 k.k.ha template for json result file #}
+{% spaceless %}
+{items:[
+  {% for d in data %}
+  {time:'{{ d.time|date:"Y-m-d H:i:s" }}',value:'{{ d.value }}',flag:'{{ d.flag }}',detection:'{{ d.detection }}',comment:'{{ d.comment }}'}
+  {% ifequal forloop.last 0 %},{% endifequal %}
+  {% endfor %}
+]}
+{% endspaceless %}

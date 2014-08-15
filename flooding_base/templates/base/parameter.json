@@ -1,0 +1,9 @@
+{# 20090224 k.k.ha template for json result file #}
+{% spaceless %}
+{items:[
+  {% for d in data %}
+  {id:'{{ d.parameterid }}',name:'{{ d.parameter }}'}
+  {% ifequal forloop.last 0 %},{% endifequal %}
+  {% endfor %}
+]}
+{% endspaceless %}

@@ -1,0 +1,157 @@
+{% load i18n %}
+<!DOCTYPE html "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html style ="overflow:hidden">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7">
+    <title>Lizard Flooding</title>
+
+    <!-- CSS -->
+    <link rel="shortcut icon" href="{{ url_favicon }}">
+    <link href="{{ STATIC_URL }}style/style.css" media="screen" type="text/css" rel="stylesheet">
+    <link href="{{ STATIC_URL }}style/forms.css" media="screen" type="text/css" rel="stylesheet">
+    <link href="{{ STATIC_URL }}style/legend.css" rel="stylesheet" type="text/css">
+    <style type="text/css">
+    .imageheader {
+      background-image: url('{{ url_topbar }}');
+      background-repeat: repeat-x;
+      background-position:top right;
+    }
+    </style>
+
+    <!-- Javascript -->
+    <script type="text/javascript">
+      var languageButton = function() {
+      isc.MenuButton.create({
+    ID: "menuButton",
+    title: "File",
+    width: 100,
+    left: 150,
+    menu: menu
+});}
+    {% comment %}Set Django variables as flooding_config global.{% endcomment %}
+
+    var flooding_config = {{ javascript_parameters|safe }};
+    flooding_config.static_url = '{{ STATIC_URL }}';
+    flooding_config.next_language = '{{ next_language }}';   
+    {% comment %}For direct links to scenarios. See the preload code in
+    scripts/flooding/results/navigation.js.{% endcomment %}
+    flooding_config.preload_scenario = {{ preload_scenario|safe }};
+
+    flooding_config.user_block_contents = '<table id="userControls" align="right"><tr><td><div id="user-tools" class="normal" style="background-color:#FFFFFF; opacity:0.75; height:17;font-color:#000000" width="content"  >\
+    {% if user.is_authenticated %}\
+           <strong>{% firstof user.first_name user.username %}</strong> | \
+     {% block userlinks %}\
+	   <a href="{% url "help_url" %}" onclick="popupwindow=window.open(\'{%url help_url %}\', \'popupwindow\',\'height=600,width=800,top=10,left=10,resizable\');return false;">{% trans 'help' %}</a> | <a href="{% url "userconfiguration_url" %}" onclick="popupwindow=window.open(\'{% url "userconfiguration_url" %}\', \'popupwindow\',\'height=600,width=800,top=10,left=10,resizable\');return false;">{% trans 'settings' %}</a> | <a href="{% url "logout_url" %}?next={% url "root_url" %}">{% trans 'Log out' %}</a>\
+     {% endblock %}\
+    {% else %}\
+     <a href="{% url "login_url" %}?next={% url "root_url" %}">{% trans 'Log in' %}</a>\
+    {% endif %} | \
+    </div></td></tr></table>';
+
+    </script>
+
+{% if USE_GOOGLEMAPS %}
+    <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key={{ GOOGLEMAPS_KEY }}" type="text/javascript"> </script>
+{% endif %}
+
+    <script src="{{ STATIC_URL }}scripts/flooding/startup.js" type="text/javascript"> </script>
+ </head>
+
+ <body  overflow= "hidden" onload="afterLoad()" onunload="onUnload()" onresize="onResize()" >
+
+   <noscript>
+     <div class="bodyText">
+     <span class="bigText">JavaScript is currently disabled.</span>
+     <p>This website requires JavaScript to be enabled in your web browser.
+     please enable JavaScript.</p>
+     </div>
+   </noscript>
+
+   <div id='load'></div>
+
+   <script type="text/javascript" src="{{ STATIC_URL }}weblib/OpenLayers-2.12-rc7/OpenLayers.js" type="text/javascript"> </script>
+
+   <script type="text/javascript" src="{{ URL }}get_translated_strings.js" type="text/javascript"> </script>
+   <script type="text/javascript" src="{{ URL }}get_config.js" type="text/javascript"> </script>
+
+   <script type="text/javascript" src="{{ STATIC_URL }}weblib/smartclient/9.0/isomorphic/system/modules/ISC_Core.js" type="text/javascript"> </script>
+   <script type="text/javascript" src="{{ STATIC_URL }}weblib/smartclient/9.0/isomorphic/system/modules/ISC_Foundation.js" type="text/javascript"> </script>
+   <script type="text/javascript" src="{{ STATIC_URL }}weblib/smartclient/9.0/isomorphic/system/modules/ISC_Containers.js" type="text/javascript"> </script>
+   <script type="text/javascript" src="{{ STATIC_URL }}weblib/smartclient/9.0/isomorphic/system/modules/ISC_Grids.js" type="text/javascript"> </script>
+   <script type="text/javascript" src="{{ STATIC_URL }}weblib/smartclient/9.0/isomorphic/system/modules/ISC_Forms.js" type="text/javascript"> </script>
+   <script type="text/javascript" src="{{ STATIC_URL }}weblib/smartclient/9.0/isomorphic/system/modules/ISC_DataBinding.js" type="text/javascript"> </script>
+   <script type="text/javascript" src="{{ STATIC_URL }}Isomorphic_NenS_skin/load_skin.js" type="text/javascript"> </script>
+   <script type="text/javascript" src="{{ STATIC_URL }}scripts/shared/SCpatch.js" type="text/javascript"> </script>
+   <script type="text/javascript" src="{{ STATIC_URL }}scripts/shared/JSONparser.js" type="text/javascript"> </script>
+   <script type="text/javascript" src="{{ STATIC_URL }}scripts/shared/overlaymanager.js" type="text/javascript"> </script>
+   <script type="text/javascript" src="{{ STATIC_URL }}scripts/shared/maptools.js" type="text/javascript"> </script>
+   <script type="text/javascript" src="{{ STATIC_URL }}scripts/shared/rd2wgs.js" type="text/javascript"> </script>
+   <script type="text/javascript" src="{{ STATIC_URL }}scripts/shared/lib/NGeneral.js" type="text/javascript"> </script>
+   <script type="text/javascript" src="{{ STATIC_URL }}scripts/shared/lib/NApp.js" type="text/javascript"> </script>
+   <script type="text/javascript" src="{{ STATIC_URL }}scripts/shared/lib/NAppManager.js" type="text/javascript"> </script>
+   <script type="text/javascript" src="{{ STATIC_URL }}scripts/shared/lib/NBlock.js" type="text/javascript"> </script>
+   <script type="text/javascript" src="{{ STATIC_URL }}scripts/shared/lib/NToolbar.js" type="text/javascript"> </script>
+   <script type="text/javascript" src="{{ STATIC_URL }}scripts/shared/lib/NToolbarManager.js" type="text/javascript"> </script>
+   <script type="text/javascript" src="{{ STATIC_URL }}scripts/shared/lib/hover.js" type="text/javascript"> </script>
+   <script type="text/javascript" src="{{ STATIC_URL }}scripts/shared/lib/dynamic_legends.js" type="text/javascript"> </script>
+   <script type="text/javascript" src="{{ STATIC_URL }}scripts/shared/lib/NMainScreenManager.js" type="text/javascript"> </script>
+   <script type="text/javascript" src="{{ STATIC_URL }}scripts/shared/lib/NInfoWindow.js" type="text/javascript"> </script>
+   <script type="text/javascript" src="{{ STATIC_URL }}scripts/shared/lib/NInfoWindowManager.js" type="text/javascript"> </script>
+   <script type="text/javascript" src="{{ STATIC_URL }}scripts/shared/lib/NNavigation.js" type="text/javascript"> </script>
+   <script type="text/javascript" src="{{ STATIC_URL }}scripts/shared/lib/NAnimationControl.js" type="text/javascript"> </script>
+   <script type="text/javascript" src="{{ STATIC_URL }}scripts/shared/lib/NOverlayContainer.js" type="text/javascript"> </script>
+   <script type="text/javascript" src="{{ STATIC_URL }}scripts/shared/lib/NInfoWindowContainer.js" type="text/javascript"> </script>
+   <script type="text/javascript" src="{{ STATIC_URL }}scripts/shared/lib/NLegendSection.js" type="text/javascript"> </script>
+   <script type="text/javascript" src="{{ STATIC_URL }}scripts/shared/lib/NLegendInfoWindow.js" type="text/javascript"> </script>
+   <script type="text/javascript" src="{{ STATIC_URL }}scripts/shared/lib/geo/NCloudManager.js" type="text/javascript"> </script>
+   <script type="text/javascript" src="{{ STATIC_URL }}scripts/shared/lib/geo/NOverlay.js" type="text/javascript"> </script>
+   <script type="text/javascript" src="{{ STATIC_URL }}scripts/shared/lib/geo/NAnimation.js" type="text/javascript"> </script>
+   <script type="text/javascript" src="{{ STATIC_URL }}scripts/shared/lib/geo/NGeoFunctions.js" type="text/javascript"> </script>
+   <script type="text/javascript" src="{{ STATIC_URL }}scripts/shared/lib/geo/NMarkerSymbology.js" type="text/javascript"> </script>
+   <script type="text/javascript" src="{{ STATIC_URL }}scripts/shared/lib/geo/NMapOverlay.js" type="text/javascript"> </script>
+   <script type="text/javascript" src="{{ STATIC_URL }}scripts/shared/lib/geo/NAnimatedMapOverlay.js" type="text/javascript"> </script>
+   <script type="text/javascript" src="{{ STATIC_URL }}scripts/shared/lib/geo/NMarkerOverlay.js" type="text/javascript"> </script>
+   <script type="text/javascript" src="{{ STATIC_URL }}scripts/shared/lib/geo/NWMSOverlay.js" type="text/javascript"> </script>
+   <script type="text/javascript" src="{{ STATIC_URL }}scripts/shared/lib/geo/NPyramidOverlay.js" type="text/javascript"> </script>
+   <script type="text/javascript" src="{{ STATIC_URL }}scripts/shared/lib/geo/NAnimatedPyramidOverlay.js" type="text/javascript"> </script>
+   <script type="text/javascript" src="{{ STATIC_URL }}scripts/shared/lib/geo/NAnimatedWMSOverlay.js" type="text/javascript"> </script>
+
+   <script type="text/javascript" src="{{ STATIC_URL }}scripts/flooding/app.js" type="text/javascript"> </script>
+   <script type="text/javascript" src="{{ STATIC_URL }}scripts/flooding/new/infoWindow.js" type="text/javascript"> </script>
+   <script type="text/javascript" src="{{ STATIC_URL }}scripts/flooding/new/navigation.js" type="text/javascript"> </script>
+   <script type="text/javascript" src="{{ STATIC_URL }}scripts/flooding/new/overlaySettings.js" type="text/javascript"> </script>
+   <script type="text/javascript" src="{{ STATIC_URL }}scripts/flooding/new/toolbar.js" type="text/javascript"> </script>
+   <script type="text/javascript" src="{{ STATIC_URL }}scripts/flooding/results/infoWindow.js" type="text/javascript"> </script>
+   <script type="text/javascript" src="{{ STATIC_URL }}scripts/flooding/results/navigation.js" type="text/javascript"> </script>
+   <script type="text/javascript" src="{{ STATIC_URL }}scripts/flooding/results/overlaySettings.js" type="text/javascript"> </script>
+   <script type="text/javascript" src="{{ STATIC_URL }}scripts/flooding/results/toolbar.js" type="text/javascript"> </script>
+   <script type="text/javascript" src="{{ STATIC_URL }}scripts/flooding/results/search.js" type="text/javascript"> </script>
+
+   <script type="text/javascript" src="{{ STATIC_URL }}scripts/shared/LoadIconSet.js">
+   icons = LoadIconSet();
+   </script>
+
+   <!-- Javascript for the screen Framework -->
+   <script type="text/javascript" src="{{ STATIC_URL }}scripts/flooding/screen_framework.js"> </script>
+
+{% comment %}
+Joep wil de Flooding site tracken. --Remco 20121120
+{% endcomment %}
+<script type="text/javascript">
+  var _gauges = _gauges || [];
+  (function() {
+    var t   = document.createElement('script');
+    t.type  = 'text/javascript';
+    t.async = true;
+    t.id    = 'gauges-tracker';
+    t.setAttribute('data-site-id', '50ab557f613f5d2c0d00001e');
+    t.src = '//secure.gaug.es/track.js';
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(t, s);
+  })();
+</script>
+
+ </body>
+</html>

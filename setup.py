@@ -13,12 +13,14 @@ long_description = '\n\n'.join([
 
 install_requires = [
     'Django >= 1.4, < 1.7',
+    'iso8601',
     'django-nose',
-    'flooding-base >= 1.34',
+    'django-markdown-deux',
     'lizard-worker >= 0.10',
     'django-treebeard',
     'django-extensions',
     'django-appconf',
+    'south',
     'matplotlib',
     'nens',
     'GDAL',

@@ -5,7 +5,10 @@ Changelog of flooding-lib
 3.22 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Incorporated flooding-base, because there was no reason why it was
+  separate module.
+
+- Made everything compatible with Django 1.6.5.
 
 
 3.21 (2014-07-30)

@@ -5,4 +5,5 @@ include *.txt
 graft flooding_lib
 graft flooding_presentation
 graft flooding_visualization
+graft flooding_base
 graft raster_server

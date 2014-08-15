@@ -1,0 +1,52 @@
+{% extends "lizard/base.html" %}
+{% load i18n %}
+{% comment %}
+ir. K.K. Ha 20090120
+
+Displays the server connectivity (only Jdbc2Ei supported)
+
+{% endcomment %}
+
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+{% block title %}
+Status Jdbc2Ei verbinding
+{% endblock %}
+
+{% block content %}
+<h1>{% trans 'Status database connection:' %}&nbsp;{{ configuration.name }}</h1>
+
+<ul>
+
+<li>{% trans 'Connector name' %}: {{configuration.name}}</li>
+<li>{% trans 'Connector description' %}: {{configuration.description}}</li>
+<li>{% trans 'Connector type' %}: {{configuration.datasourcetype}}</li>
+
+{% if errormessage %}
+<FONT COLOR="#FF0000">
+<li>{% trans 'Error message' %}: {{ errormessage }}</li>
+</FONT>
+
+{% endif %}
+
+<li>{% trans 'Connector address (Jdbc2Ei)' %}: {{configuration.datasourceei.connectorurl}}</li>
+<li>{% trans 'Data source specific' %}: {{configuration.datasourceei.getSpecificData}}</li>
+
+{% ifequal isAlive -1 %}
+<li>{% trans 'Jdbc2Ei server is alive!' %}</li>
+{% else %}
+<li>{% trans 'Jdbc2Ei server is NOT alive... errorcode:' %} {{isAlive}}</li>
+{% endifequal %}
+
+{% if canExecuteQuery %}
+<font color="#00FF00">
+{% else %}
+<font color="#FF0000">
+{% endif %}
+<li>{% trans 'canExecuteQuery' %}: {{canExecuteQuery}}</li>
+</font>
+<li>{% trans 'dataCount (with samplequery)' %}: {{dataCount}}</li>
+
+
+</ul>
+{% endblock %}

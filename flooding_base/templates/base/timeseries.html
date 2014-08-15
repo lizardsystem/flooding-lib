@@ -1,0 +1,73 @@
+{# {% extends 'lizard/base.html' %} #}
+{# kan eventueel weg worden gelaten #}
+
+{% load i18n %}
+{% load utils %}
+
+{% comment %}
+ir. K.K. Ha 20090226
+
+timeseries weergeven in een html formaat
+{% endcomment %}
+
+<link rel="stylesheet" type="text/css" media="screen" href="{{ STATIC_URL }}style/style.css"/>
+<link rel="stylesheet" type="text/css" href="{% block stylesheet %}{% load adminmedia %}{% admin_media_prefix %}css/base.css{% endblock %}" /
+
+
+{% block content %}
+
+{% if error_message %}
+<p>
+  <strong>{{ error_message }}
+  </strong>
+</p>{% endif %}
+
+
+<h2>{{ title }}
+</h2>
+
+
+<table class="timeseriesWrapper"><tr><td>
+<table class="timeseries" summary="timeseries">
+
+{% autoescape off %}
+<caption>
+{% comment %}Hier kan eventueel een titel van de tabel{% endcomment %}
+</caption>
+<thead>
+  <tr>
+  {% for c in datacolumns %}
+
+  {% ifequal forloop.counter 1 %}
+  <th>{{ c }}
+  </th>
+  {% else %}
+  <th>{{ c }}
+  </th>
+  {% endifequal %}
+
+  {% endfor %}
+  </tr>
+</thead>
+
+<tbody>
+  {% for datarow in page.object_list %}
+  <tr class="{% cycle 'row1' 'row2'%}">
+    <td>{{ datarow.time|date:"Y-m-d H:i:s" }}</td>
+    <td>{{ datarow.value }}</td>
+    <td>{{ datarow.flag }}</td>
+    <td>{{ datarow.detection }}</td>
+    <td>{% firstof datarow.comment '' %}</td>
+  {% endfor %}
+</tr>
+</tbody>
+{% endautoescape %}
+
+<tfoot>
+</tfoot>
+
+</table>
+
+</td></tr></table>
+{% digg_paginator %}
+{% endblock %}

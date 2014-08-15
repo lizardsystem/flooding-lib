@@ -1,0 +1,34 @@
+{% load markdown_deux_tags %}
+<div class="module">
+  <table>
+    <caption>{{ name }}</caption>
+    <tbody>
+      <tr>
+	{% for column in columns %}
+	<td{% if column.width %} width="{{ column.width }}"{% endif %}>
+	  <strong><a href="?sort={% ifequal sort column.sort %}{{ column.sort_rev }}{% else %}{% ifnotequal sort column.sort_rev %}{{ column.sort }}{% endifnotequal %}{% endifequal %}">{{ column.name }}&nbsp;{% ifequal sort column.sort %}<img src="/static_media/images/icons/sort_up.png"/>{% endifequal %}{% ifequal sort column.sort_rev %}<img src="/static_media/images/icons/sort_down.png"/>{% endifequal %}</a></strong>
+	</td>
+	{% endfor %}
+      </tr>
+      {% for row in data %}
+      <tr>
+	{% for field in row %}
+	<td>
+	  {% if field.url %}<a href="{{ field.url }}" {% if field.target %} target="{{ field.target }}" {% endif %}>{% endif %}
+	    {{ field.value|markdown }}
+	    {% if not field.urlpost %}{% if field.icon %}
+	    <img src="{{ field.icon }}.png"{% if field.icontitle %} title="{{ field.icontitle }}"{% endif %}/>
+	    {% endif %}{% endif %}
+	  {% if field.url %}</a>{% endif %}
+	  {% if field.urlpost %}
+	  <form action="{{ field.urlpost }}" method="POST">
+	    <input type="image" src="{{ field.icon }}.png"{% if field.icontitle %} title="{{ field.icontitle }}"{% endif %}{% if field.postclickmessage %} onclick="javascript:confirm(&quot;{{ field.postclickmessage }}&quot;)"{% endif %}/>
+	  </form>
+	  {% endif %}
+	</td>
+	{% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

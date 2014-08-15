@@ -1,0 +1,13 @@
+{# 20090408 kkh template for clean page (for embedding) #}
+{% load i18n %}
+<html>
+  <head>
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" type="text/css" media="screen" href="{{ STATIC_URL }}style/style.css"/>
+    <link rel="stylesheet" type="text/css" href="{% block stylesheet %}{% load adminmedia %}{% admin_media_prefix %}css/base.css{% endblock %}" />
+  </head>
+
+  <body>
+    {% block content %}{% endblock %}
+  </body>
+</html>

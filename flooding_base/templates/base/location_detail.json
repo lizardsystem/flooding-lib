@@ -1,0 +1,12 @@
+{# 20090224 k.k.ha template for json result file #}
+{% spaceless %}
+{identifier:'id',label:'name',items:[
+  {% for d in data %}
+  {id:'{{ d.id }}',name:'{{ d.name }}',parentid:'{{ d.parentid }}',
+  description:'{{ d.description }}',shortname:'{{ d.shortname }}', 
+  tooltiptext:'{{ d.tooltiptext }}',x:{{ d.x }},y:{{ d.y }},z:{{ d.z }},
+  longitude:{{ d.longitude }},latitude:{{ d.latitude }},icon: {{ d.icon }}}
+  {% ifequal forloop.last 0 %},{% endifequal %}
+  {% endfor %}
+]}
+{% endspaceless %}

@@ -1,0 +1,246 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2012-06-12 14:41+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+
+#: models.py:14 models.py:98
+msgid "DataSourceEI"
+msgstr ""
+
+#: models.py:15 models.py:128
+msgid "DataSourceDummy"
+msgstr ""
+
+#: models.py:37
+msgid "Configuration"
+msgstr ""
+
+#: models.py:38
+msgid "Configurations"
+msgstr ""
+
+#: models.py:99
+msgid "Data sources EI"
+msgstr ""
+
+#: models.py:129
+msgid "Data sources dummy"
+msgstr ""
+
+#: models.py:272
+msgid "VIEW"
+msgstr ""
+
+#: models.py:344
+msgid "The size is 280x45 pixels"
+msgstr ""
+
+#: models.py:347
+msgid "The size is 600x70 pixels (width can vary)"
+msgstr ""
+
+#: views.py:85
+msgid ""
+"No DataSource could be found for this configuration, please configure a "
+"DataSource."
+msgstr ""
+
+#: views.py:114 views.py:129
+msgid "Database connection list"
+msgstr ""
+
+#: views.py:116
+msgid "Test database connection"
+msgstr ""
+
+#: views.py:295 views.py:317
+msgid "datasource offline"
+msgstr ""
+
+#: views.py:820
+msgid "Lizard-report"
+msgstr ""
+
+#: views.py:829
+msgid "Lizard-flooding"
+msgstr ""
+
+#: templates/admin/base_site.html:4 templates/admin/base_site.html.py:7
+msgid "Lizard admin"
+msgstr ""
+
+#: templates/admin/base_site_user.html:4 templates/admin/base_site_user.html:7
+#: templates/lizard/base.html:27 templates/lizard/profile.html:5
+msgid "Lizard"
+msgstr ""
+
+#: templates/base/configuration_list.html:29
+msgid "No connections are available"
+msgstr ""
+
+#: templates/base/digg_paginator.html:8
+msgid "Previous Page"
+msgstr ""
+
+#: templates/base/digg_paginator.html:8
+msgid "Previous"
+msgstr ""
+
+#: templates/base/digg_paginator.html:32
+msgid "Next Page"
+msgstr ""
+
+#: templates/base/digg_paginator.html:32
+msgid "Next"
+msgstr ""
+
+#: templates/base/filters_form.html:18
+msgid "Send"
+msgstr ""
+
+#: templates/base/search_form.html:12 templates/base/tag_search.html:29
+msgid "Search"
+msgstr ""
+
+#: templates/base/tag_search.html:26
+msgid "Reset"
+msgstr ""
+
+#: templates/base/testdatabase.html:17
+msgid "Status database connection:"
+msgstr ""
+
+#: templates/base/testdatabase.html:21
+msgid "Connector name"
+msgstr ""
+
+#: templates/base/testdatabase.html:22
+msgid "Connector description"
+msgstr ""
+
+#: templates/base/testdatabase.html:23
+msgid "Connector type"
+msgstr ""
+
+#: templates/base/testdatabase.html:27
+msgid "Error message"
+msgstr ""
+
+#: templates/base/testdatabase.html:32
+msgid "Connector address (Jdbc2Ei)"
+msgstr ""
+
+#: templates/base/testdatabase.html:33
+msgid "Data source specific"
+msgstr ""
+
+#: templates/base/testdatabase.html:36
+msgid "Jdbc2Ei server is alive!"
+msgstr ""
+
+#: templates/base/testdatabase.html:38
+msgid "Jdbc2Ei server is NOT alive... errorcode:"
+msgstr ""
+
+#: templates/base/testdatabase.html:46
+msgid "canExecuteQuery"
+msgstr ""
+
+#: templates/base/testdatabase.html:48
+msgid "dataCount (with samplequery)"
+msgstr ""
+
+#: templates/gui/configuration.html:10 templates/gui/configuration.html:14
+msgid "user settings"
+msgstr ""
+
+#: templates/gui/configuration.html:19
+msgid "Part"
+msgstr ""
+
+#: templates/gui/configuration.html:20
+msgid "Setting"
+msgstr ""
+
+#: templates/gui/configuration.html:21
+msgid "Remarks"
+msgstr ""
+
+#: templates/gui/configuration.html:25 templates/lizard/base.html:31
+msgid "Change password"
+msgstr ""
+
+#: templates/gui/index.html:278
+msgid "help"
+msgstr ""
+
+#: templates/gui/index.html:278
+msgid "settings"
+msgstr ""
+
+#: templates/gui/index.html:278 templates/lizard/base.html:31
+msgid "Log out"
+msgstr ""
+
+#: templates/gui/index.html:281 templates/lizard/base.html:33
+msgid "Log in"
+msgstr ""
+
+#: templates/lizard/base.html:31
+msgid "Welcome,"
+msgstr ""
+
+#: templates/lizard/base.html:31
+msgid "Documentation"
+msgstr ""
+
+#: templates/lizard/profile.html:5
+msgid "profile page"
+msgstr ""
+
+#: templates/lizard/profile.html:9
+msgid "Welcome"
+msgstr ""
+
+#: templates/lizard/profile.html:12
+msgid "Welcome to Lizard. Click on any apps below."
+msgstr ""
+
+#: templates/lizard/profile.html:14
+msgid "Available apps"
+msgstr ""
+
+#: templates/lizard/profile.html:22
+msgid "No apps are available"
+msgstr ""
+
+#: templates/lizard/profile.html:26
+msgid "Staff options"
+msgstr ""
+
+#: templates/lizard/profile.html:28
+msgid "admin"
+msgstr ""
+
+#: templates/lizard/profile.html:29
+msgid "Test database"
+msgstr ""
+
+#: templates/lizard/profile.html:30
+msgid "Location/parameter helper"
+msgstr ""

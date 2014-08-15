@@ -1,0 +1,66 @@
+{% load i18n %}
+{% load adminmedia %}
+{% comment %}
+options (incomplete):
+   is_embedded: if True, removes header
+{% endcomment %}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <title>{% block title %}Base template{% endblock %}</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7">
+    {% block stylesheets %}
+    <link rel="stylesheet" type="text/css" href="{% admin_media_prefix %}css/base.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="{{ STATIC_URL }}style/style.css"/>
+    <link rel="stylesheet" type="text/css" media="print" href="{{ STATIC_URL }}style/print.css"/>
+    {% endblock stylesheets %}
+    {% block javascripts %}
+    {% endblock javascripts%}
+</head>
+
+<body {% block bodyarguments %} class="dashboard" {% endblock %}>
+    <!-- Header -->
+    {% if is_standalone %}
+    <div id="header">
+        <div id="branding">
+        {% block branding %}<h1>{% trans 'Lizard' %}</h1>{% endblock %}
+        </div>
+        <div id="user-tools">
+	{% if user.is_authenticated %}
+        {% trans 'Welcome,' %} <a href="{% url "root_url" %}"><strong>{% firstof user.first_name user.username %}</strong></a>. {% block userlinks %}{% url "django"-admindocs-docroot as docsroot %}{% if docsroot %}<a href="{{ docsroot }}">{% trans 'Documentation' %}</a> / {% endif %}<a href="{% url "password_change_url" %}?next={% url "root_url" %}">{% trans 'Change password' %}</a> / <a href="{% url "logout_url" %}?next={% url "root_url" %}">{% trans 'Log out' %}</a>{% endblock %}
+	{% else %}
+	<a href="{% url "login_url" %}?next={% url "root_url" %}">{% trans 'Log in' %}</a>
+	{% endif %}
+	{% for lang in LANGUAGES %}
+	<div class="language_form">
+	  <form action="{% url "root_url" %}language/{{ lang.0 }}/" method="post">
+	    <input type="image" src="{{ STATIC_URL }}images/language_{{ lang.0 }}.gif" value="{{ lang.1 }}" />
+	  </form>
+	</div>
+        {% endfor %}
+
+	</div>
+
+        {% block nav-global %}{% endblock %}
+    </div>
+    {% endif %}
+    <!-- END Header -->
+
+    {% block breadcrumbs %}
+    <div class="breadcrumbs">
+      {% if breadcrumbs %}&rsaquo;{% endif %}
+      {% for blitem in breadcrumbs %}
+      {% if blitem.url %}<a href="{{ blitem.url }}">{{ blitem.name }}</a>
+      {% else %}{{ blitem.name }}{% endif %}
+      {% ifnotequal forloop.revcounter0 0 %}&rsaquo;{% endifnotequal %}
+      {% endfor %}
+    </div>
+    {% endblock %}
+
+    <div id="maincontent">
+      {% block content %}{% endblock %}
+
+    </div>
+</body>
+</html>

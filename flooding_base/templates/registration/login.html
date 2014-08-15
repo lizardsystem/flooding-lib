@@ -1,0 +1,25 @@
+{% extends "admin/base_site.html" %}
+
+{% block branding %}
+    <h1 id="site-name">Lizard
+    </h1>
+{% endblock %}
+
+{% block content %}
+
+  {% if form.errors %}
+    <p class="error">Sorry, geen geldige username of password</p>
+  {% endif %}
+
+  <form action='.' method='post'>
+      {%  csrf_token %}
+    <label for="username">User name:</label>
+    <input type="text" name="username" value="" id="username">
+    <label for="password">Password:</label>
+    <input type="password" name="password" value="" id="password">
+
+    <input type="submit" value="login" />
+    <input type="hidden" name="next" value="{{ next }}" />
+  <form action='.' method='post'>
+
+{% endblock %}

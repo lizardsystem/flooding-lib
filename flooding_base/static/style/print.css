@@ -1,0 +1,25 @@
+//20091130 kkh css for printing
+div#report_navigation {
+    display: none;
+}
+
+div.breadcrumbs {
+    display: none;
+}
+
+div#header {
+    display: none;
+}
+
+a.report_edit_re {
+    display: none;
+}
+
+div.noprint {
+    display: none;
+}
+
+img.print_logo {
+    margin: 0cm 0cm 1cm 0cm;
+}
+

@@ -1,0 +1,36 @@
+{#modified 20090318 kkh, input: see templatetags/digg_paginator.py #}
+
+{% load i18n %}
+{% spaceless %}
+ 
+{% if is_paginated %}
+<div class="paginator">
+{% if page.has_previous %}<span class="prev"><a href="{{ base_url }}?page_nr={{ page.previous_page_number }}&items_per_page={{ paginator.per_page }}{% for key,value in extra_fields.items %}&{{ key }}={{ value }}{% endfor %}" title="{% trans 'Previous Page' %}">&laquo; Previous</a></span>{% else %}<span class="prev-na">&laquo; {% trans 'Previous' %}</span>{% endif %}
+ 
+{% if not in_leading_range %}
+	{% for num in pages_outside_trailing_range %}
+		<span class="page"><a href="{{ base_url }}?page_nr={{ num }}&items_per_page={{ results_per_page }}{% for key,value in extra_fields.items %}&{{ key }}={{ value }}{% endfor %}" >{{ num }}</a></span>
+	{% endfor %}
+	...
+{% endif %}
+ 
+{% for num in page_numbers %}
+  {% ifequal num page.number %}
+    <span class="curr" title="Current Page">{{ num }}</span>
+  {% else %}
+  	<span class="page"><a href="{{ base_url }}?page_nr={{ num }}&items_per_page={{ paginator.per_page }}{% for key,value in extra_fields.items %}&{{ key }}={{ value }}{% endfor %}" title="Page {{ num }}">{{ num }}</a></span>
+  {% endifequal %}
+{% endfor %}
+ 
+{% if not in_trailing_range %}
+	...
+	{% for num in pages_outside_leading_range reversed %}
+		<span class="page"><a href="{{ base_url }}?page_nr={{ num }}&items_per_page={{ paginator.per_page }}{% for key,value in extra_fields.items %}&{{ key }}={{ value }}{% endfor %}" >{{ num }}</a></span>
+	{% endfor %}
+{% endif %}
+ 
+{% if page.has_next %}<span class="next"><a href="{{ base_url }}?page_nr={{ page.next_page_number }}&items_per_page={{ paginator.per_page }}{% for key,value in extra_fields.items %}&{{ key }}={{ value }}{% endfor %}" title="{% trans 'Next Page' %}">{% trans 'Next' %} &raquo;</a></span>{% else %}<span class="next-na">Next &raquo;</span>{% endif %}
+</div> 
+{% endif %}
+ 
+{% endspaceless %}

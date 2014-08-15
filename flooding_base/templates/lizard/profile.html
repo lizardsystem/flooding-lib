@@ -1,0 +1,34 @@
+{% extends "lizard/base.html" %}
+{% load i18n %}
+
+{% block title %}
+{% trans 'Lizard' %}: {% trans 'profile page' %}
+{% endblock %}
+
+{% block content %}
+<h1>{% trans 'Welcome' %}</h1>
+{% url "login_url" as login_url %}
+<p>
+{% blocktrans %}Welcome to Lizard. Click on any apps below.{% endblocktrans %}
+</p>
+<h2>{% trans 'Available apps' %}</h2>
+{% if apps %}
+<ul>
+{% for app in apps %}
+<li><a href="{{ app.url }}">{{ app.name }}</a></li>
+{% endfor %}
+</ul>
+{% else %}
+<p>{% trans 'No apps are available' %}.</p>
+{% endif %}
+
+{% if user.is_staff %}
+<h2>{% trans 'Staff options' %}</h2>
+<ul>
+<li><a href="/admin/">{% trans 'admin' %}</a></li>
+<li><a href="{% url "testdatabase_list" %}">{% trans 'Test database' %}</a></li>
+<li><a href="{% url "locationparameterhelper_list" %}">{% trans 'Location/parameter helper' %}</a></li>
+</ul>
+{% endif %}
+
+{% endblock %}

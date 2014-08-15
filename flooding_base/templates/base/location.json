@@ -1,0 +1,9 @@
+{# 20090224 k.k.ha template for json result file #}
+{% spaceless %}
+{identifier:'id',label:'name',items:[
+  {% for d in data %}
+  {id:'{{ d.id }}',name:'{{ d.name }}',lat:{{ d.latitude }},lon: {{ d.longitude }}, parentid:{% ifnotequal d.parentid None %}'{{ d.parentid }}'{% else %}{{ d.parentid }}{% endifnotequal %}, in_filter: {{ d.in_filter }}}
+  {% ifequal forloop.last 0 %},{% endifequal %}
+  {% endfor %}
+]}
+{% endspaceless %}

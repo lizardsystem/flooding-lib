@@ -1,0 +1,38 @@
+{% extends "lizard/base.html" %}
+{% load i18n %}
+
+{% comment %}
+ir. K.K. Ha 20090114
+Displays a list of all connections
+{% endcomment %}
+
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+{% block title %}
+Status database verbindingen
+{% endblock %}
+
+{% block content %}
+<h1>Status database verbindingen</h1>
+
+Klik op een verbinding om de status te bekijken.
+
+{% if object_list %}
+
+<ul>
+{% for connection in object_list %}
+<li><a href="{{connection.id}}/">{{connection.name}}</a></li>
+{% endfor %}
+</ul>
+
+{% else %}
+{% trans 'No connections are available' %}.
+{% endif %}
+
+<h1>Staff helpers</h1>
+<ul>
+<li><a href="{% url "report" %}{% if is_standalone %}?is_standalone=1{% endif %}">report</li>
+<li><a href="/admin/">admin</a></li>
+</ul>
+
+{% endblock %}

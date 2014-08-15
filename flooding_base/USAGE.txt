@@ -1,0 +1,9 @@
+Usage of flooding-base
+=============================================
+
+
+Usage:
+
+    >>> import flooding_base
+
+Show how to import the main classes and how to use them.

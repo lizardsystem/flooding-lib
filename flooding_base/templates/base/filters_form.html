@@ -1,0 +1,19 @@
+{# 20090408 kkh filter form, used by templatetag filters #}
+
+{% load i18n %}
+
+<form>
+  {% for entry in entries %}
+  <select name="{{ entry.output_name }}">
+    {% for value,name in entry.choices %}
+    <option{% ifequal value entry.current_value %} selected{% endifequal %} value="{{ value }}">{{ name }}</option>
+    {% endfor %}
+  </select>
+  {% endfor %}
+
+  {% for key,value in extra_fields.items %}
+  <input type="hidden" name="{{ key }}" value="{{ value }}"/>
+  {% endfor %}
+
+  <input type="submit" value="{% trans 'Send' %}"/>
+</form>

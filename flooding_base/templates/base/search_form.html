@@ -1,0 +1,13 @@
+{# 20090317 kkh search form, used by templatetag search_form #}
+
+{% load i18n %}
+<form action="." method="GET">
+  <label for="{{ search_field }}">{% if name %}{{ name }}: {% endif %}</label>
+  <input class="search" type="text" name="{{ search_field }}" value="{{ search_value|escape }}">
+  {% if hidden_fields %}
+  {% for key,value in hidden_fields.items %}
+  <input type="hidden" name="{{ key }}" value="{{ value }}">
+  {% endfor %}
+  {% endif %}
+  <input type="submit" value="{% trans 'Search' %}">
+</form>

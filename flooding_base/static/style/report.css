@@ -1,0 +1,46 @@
+/* Report specifieke layout */
+
+#report_navigation {
+    float: left;
+    width: 280px;
+    background-color: #eeeeee;
+    height: 350px;
+}
+
+#report_navigation_location, #report_navigation_date, #report_navigation_edit {
+    float: top;
+    width: 280px;
+}
+
+#report_navigation_location {
+    height: 60px;
+}
+
+#report_navigation_date {
+    height: 180px;
+}
+
+#report_navigation_other {
+    height: 100px;
+}
+
+#report_content {
+    position: absolute;
+    left: 290px;
+    background-color: #ffffff;
+    margin: 10px 10px 10px 10px;
+    padding: 10px 10px 10px 10px;
+}
+
+body {
+    background-color: #eeeeee;
+}
+
+select.report_select_location, select.report_select_period {
+    width: 260px;
+}
+
+img.print_logo {
+    display: none;
+}
+

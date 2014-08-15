@@ -1,0 +1,33 @@
+{# 20090511 kkh search form, used by templatetag search #}
+{% load i18n %}
+<form action="." method="GET">
+  <table>
+    {% for row in search_fields %}
+    <tr>
+      {% ifequal row.type 'checkbox' %}
+      <td width="100px">{{ row.name }}</td><td>{% for name,value,checked in row.fields %}{{ name }}<input type="checkbox" name="{{ row.output_field }}" value="{{ value }}"{% if checked  %}checked{% endif %}/>&nbsp;{% endfor %}</td>
+      {% endifequal %}
+      {% ifequal row.type 'option' %}
+      <td>{{ row.name }}</td><td><select {% if row.id %}id="{{ row.id }}"{% endif %}name="{{ row.output_field }}"{% if row.options.disabled %} disabled="{{ row.options.disabled }}"{% endif %}{% if row.options.onChange %} onChange={{ row.options.onChange }}{% endif %}>{% for id,name,selected in row.fields %}<option value="{{ id }}"{% if selected %} selected{% endif %}>{{ name }}</option>{% endfor %}</select></td>
+      {% endifequal %}
+      {% ifequal row.type 'text' %}
+      <td>{{ row.name }}</td><td>{% for value in row.fields %}<input type="text" name="{{ row.output_field }}" value="{{ value }}"/>{% endfor %}</td>
+      {% endifequal %}
+      {% ifequal row.type 'multitext' %}
+      <td>{{ row.name }}</td>
+      <td>
+	{% for field in row.fields %}{{ field.label }}<input class="search_small" type="text" name="{{ row.output_field }}{{ field.field_postfix }}" value="{{ field.value }}">{% endfor %}
+      </td>
+      {% endifequal %}
+    </tr>
+    {% endfor %}
+    <tr>
+      <td>
+	<input type="submit" name="clear_search" value="{% trans 'Reset' %}"/>
+      </td>
+      <td>
+	<input type="submit" name="search" value="{% trans 'Search' %}"/>
+      </td>
+    </tr>
+  </table>
+</form>
