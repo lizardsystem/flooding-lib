@@ -2,8 +2,8 @@ Changelog of flooding-lib
 ===================================================
 
 
-3.23 (unreleased)
------------------
+3.22.1 (2014-08-21)
+-------------------
 
 - Fix: now providing flooding_base package.
 
