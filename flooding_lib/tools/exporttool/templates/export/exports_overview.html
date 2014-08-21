@@ -53,6 +53,6 @@
 		</table>
 		<BR>
 		{% if has_create_rights %}
-			<a href="{%url flooding_tools_export_new_export_index %}" >{% trans "New export run" %}</a>
+			<a href="{% url 'flooding_tools_export_new_export_index' %}" >{% trans "New export run" %}</a>
 		{% endif %}
 {% endblock %}

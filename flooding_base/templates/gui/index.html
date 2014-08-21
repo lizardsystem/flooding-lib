@@ -43,7 +43,7 @@
     {% if user.is_authenticated %}\
            <strong>{% firstof user.first_name user.username %}</strong> | \
      {% block userlinks %}\
-	   <a href="{% url 'help_url' %}" onclick="popupwindow=window.open(\'{%url 'help_url' %}\', \'popupwindow\',\'height=600,width=800,top=10,left=10,resizable\');return false;">{% trans 'help' %}</a> | <a href="{% url 'userconfiguration_url' %}" onclick="popupwindow=window.open(\'{% url "userconfiguration_url" %}\', \'popupwindow\',\'height=600,width=800,top=10,left=10,resizable\');return false;">{% trans 'settings' %}</a> | <a href="{% url 'logout_url' %}?next={% url 'root_url' %}">{% trans 'Log out' %}</a>\
+	   <a href="{% url 'help_url' %}" onclick="popupwindow=window.open(\'{% url 'help_url' %}\', \'popupwindow\',\'height=600,width=800,top=10,left=10,resizable\');return false;">{% trans 'help' %}</a> | <a href="{% url 'userconfiguration_url' %}" onclick="popupwindow=window.open(\'{% url "userconfiguration_url" %}\', \'popupwindow\',\'height=600,width=800,top=10,left=10,resizable\');return false;">{% trans 'settings' %}</a> | <a href="{% url 'logout_url' %}?next={% url 'root_url' %}">{% trans 'Log out' %}</a>\
      {% endblock %}\
     {% else %}\
      <a href="{% url 'login_url' %}?next={% url 'root_url' %}">{% trans 'Log in' %}</a>\
