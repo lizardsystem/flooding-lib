@@ -16,7 +16,7 @@ install_requires = [
     'iso8601',
     'django-nose',
     'django-markdown-deux',
-    'lizard-worker >= 0.10',
+    'lizard-worker >= 0.11',
     'django-treebeard',
     'django-extensions',
     'django-appconf',
