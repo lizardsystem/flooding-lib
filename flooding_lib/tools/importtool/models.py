@@ -1,5 +1,6 @@
 import ast
 import datetime
+import json
 import logging
 import os
 import os.path
@@ -10,7 +11,6 @@ from shutil import copyfile
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.gis.db import models
-from django.utils import simplejson
 from django.utils.translation import ugettext_lazy as _
 
 from flooding_base.models import Setting
@@ -379,12 +379,12 @@ class ImportScenarioInputField(models.Model):
         return item
 
     def get_editor_json(self):
-        return simplejson.dumps(self.get_editor_dict())
+        return json.dumps(self.get_editor_dict())
 
     def get_static_editor_json(self):
         item = self.get_editor_dict()
         item["disabled"] = True
-        return simplejson.dumps(item)
+        return json.dumps(item)
 
     def get_statestring_json(self):
         item = {
@@ -405,7 +405,7 @@ class ImportScenarioInputField(models.Model):
                 "].contains(form.getValue('" +
                 self.inputfield.visibility_dependency_field.name + "'))")
 
-        return simplejson.dumps(item)
+        return json.dumps(item)
 
     def get_approve_remarkeditor_dict(self):
         item = self.inputfield.get_approve_remarkeditor_dict()
@@ -418,7 +418,7 @@ class ImportScenarioInputField(models.Model):
         return item
 
     def get_approve_remarkeditor_json(self):
-        return simplejson.dumps(self.get_approve_remarkeditor_dict())
+        return json.dumps(self.get_approve_remarkeditor_dict())
 
     def get_approve_statuseditor_dict(self):
         item = self.inputfield.get_approve_statuseditor_dict()
@@ -431,7 +431,7 @@ class ImportScenarioInputField(models.Model):
         return item
 
     def get_approve_statuseditor_json(self):
-        return simplejson.dumps(self.get_approve_statuseditor_dict())
+        return json.dumps(self.get_approve_statuseditor_dict())
 
 
 class StringValue(models.Model):
@@ -911,12 +911,12 @@ class InputField(models.Model):
         return item
 
     def get_editor_json(self):
-        return simplejson.dumps(self.get_editor_dict())
+        return json.dumps(self.get_editor_dict())
 
     def get_static_editor_json(self):
         item = self.get_editor_dict()
         item["disabled"] = True
-        return simplejson.dumps(item)
+        return json.dumps(item)
 
     def get_approve_remarkeditor_dict(self):
         item = {
@@ -936,7 +936,7 @@ class InputField(models.Model):
         return item
 
     def get_approve_remarkeditor_json(self):
-        return simplejson.dumps(self.get_approve_remarkeditor_dict())
+        return json.dumps(self.get_approve_remarkeditor_dict())
 
     def get_approve_statuseditor_dict(self):
         valuemap = {}
@@ -961,7 +961,7 @@ class InputField(models.Model):
         return item
 
     def get_approve_statuseditor_json(self):
-        return simplejson.dumps(self.get_approve_statuseditor_dict())
+        return json.dumps(self.get_approve_statuseditor_dict())
 
     @classmethod
     def grouped_input_fields(cls):
@@ -1006,7 +1006,7 @@ class InputField(models.Model):
 
 
 class RORKering(models.Model):
-    
+
     # NOT_APPLIEND =  _('not applied')
     # APPLIED = _('applied')
     # PRIMARE = _('primary kering')
@@ -1028,7 +1028,7 @@ class RORKering(models.Model):
         (REGIONAL, _('regional kering')),
         (WATER, _('waters'))
     )
-    
+
     title = models.CharField(max_length=100,
                              null=True, blank=True,
                              verbose_name=_('Title'))
@@ -1043,15 +1043,15 @@ class RORKering(models.Model):
                                    verbose_name=_('Type'))
     description = models.TextField(null=True, blank=True,
                                    verbose_name=_('Description'))
-    
+
     def get_state(self):
-        for i in RORKering.STATE:   
+        for i in RORKering.STATE:
             if i[0] == self.status:
                 return unicode(i[1])
         return self.status
-          
+
     def get_type(self):
-        for i in RORKering.TYPE_KERING:   
+        for i in RORKering.TYPE_KERING:
             if i[0] == self.type_kering:
                 return unicode(i[1])
         return self.type_kering

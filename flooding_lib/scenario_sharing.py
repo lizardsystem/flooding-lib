@@ -28,12 +28,12 @@ The functions in here use a model named ScenarioShareOffer from
 flooding_lib.models, that presumably won't be used anywhere else.
 """
 
+import json
 import logging
 
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
-from django.utils import simplejson
 from django.utils.translation import ugettext as _
 from django.views.decorators.http import require_GET, require_POST
 
@@ -286,8 +286,8 @@ def action_view(request, permission_manager):
                 "Set automatically while adding to project {0}."
                 .format(project)))
 
-        return HttpResponse(simplejson.dumps({'message': ''}))
+        return HttpResponse(json.dumps({'message': ''}))
 
     field = project_field(scenario, project.id)
 
-    return HttpResponse(simplejson.dumps(field))
+    return HttpResponse(json.dumps(field))

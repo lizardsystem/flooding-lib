@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 import datetime
+import json
 
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import render_to_response, get_object_or_404
-from django.utils import simplejson
 
 from flooding_lib import calc
 from flooding_lib.models import Breach, WaterlevelSet, Measure, Region
@@ -31,7 +31,7 @@ def service_result(request, object_id, location_nr, parameter_nr):
 
 
 def get_externalwater_graph_infowindow(
-    request, width, height, scenario_breach_id):
+        request, width, height, scenario_breach_id):
     """  """
     scenario_breach = get_object_or_404(ScenarioBreach, pk=scenario_breach_id)
     if not scenario_breach.tstartbreach:
@@ -44,7 +44,7 @@ def get_externalwater_graph_infowindow(
     if scenario_breach.manualwaterlevelinput:
         waterlevels = (
             scenario_breach.waterlevelset.waterlevel_set.all().order_by(
-            'time'))
+                'time'))
         time_values = []
         for wl in waterlevels:
             time_values += [','.join([str(wl.time), str(wl.value)])]
@@ -63,9 +63,9 @@ def get_externalwater_graph_infowindow(
 
 
 def get_externalwater_graph(
-    request, width, height, breach_id, extwmaxlevel, tpeak, tstorm, tsim,
-    tstartbreach=0, tdeltaphase=None, tide_id=None, extwbaselevel=None,
-    useManualInput=False, manualTimeserie="", save_in_session=True):
+        request, width, height, breach_id, extwmaxlevel, tpeak, tstorm, tsim,
+        tstartbreach=0, tdeltaphase=None, tide_id=None, extwbaselevel=None,
+        useManualInput=False, manualTimeserie="", save_in_session=True):
     """  """
     breach = get_object_or_404(Breach, pk=breach_id)
     if not useManualInput:
@@ -92,9 +92,9 @@ def get_externalwater_graph_session(request):
 
 
 def get_externalwater_csv(
-    request, width, height, breach_id, extwmaxlevel, tpeak, tstorm, tsim,
-    tstartbreach=0, tdeltaphase=None, tide_id=None, extwbaselevel=None,
-    useManualInput=False, manualTimeserie=""):
+        request, width, height, breach_id, extwmaxlevel, tpeak, tstorm, tsim,
+        tstartbreach=0, tdeltaphase=None, tide_id=None, extwbaselevel=None,
+        useManualInput=False, manualTimeserie=""):
     """  """
     breach = get_object_or_404(Breach, pk=breach_id)
     if not useManualInput:
@@ -108,16 +108,16 @@ def get_externalwater_csv(
         waterlevel.set_waterlevels(manualTimeserie)
 
     answer = '\n'.join([
-            "%s,%.3f" %
-            (a['time'], a['waterlevel'])
-            for a in waterlevel.get_waterlevels()])
+        "%s,%.3f" %
+        (a['time'], a['waterlevel'])
+        for a in waterlevel.get_waterlevels()])
     return HttpResponse(answer, mimetype="application/csv", content_type='csv')
 
 
 def service_save_new_scenario(request):
     """  """
     def to_intervalfloat(value):
-        if value == None:
+        if value is None:
             return None
         else:
             return float(value) / (24 * 60 * 60 * 1000)
@@ -144,14 +144,13 @@ def service_save_new_scenario(request):
     #task = scenario.setup_initial_task(request.user)
 
     useManualInput = query.get("useManualInput", False)
-    if useManualInput == 'false' or useManualInput == False:
+    if useManualInput == 'false' or useManualInput is False:
         useManualInput = False
     else:
         useManualInput = True
 
     waterlevel_list = []
     if useManualInput:
-
         js_waterlevel_set = query.get("waterlevelInput").split('|')
         for js_wl in js_waterlevel_set:
             js_waterlevel_props = js_wl.split(',')
@@ -284,7 +283,7 @@ def service_save_new_scenario(request):
         'successful': True,
         'save_log': 'opgeslagen. scenario id is: %i' % scenario.id}
 
-    return HttpResponse(simplejson.dumps(answer), mimetype="application/json")
+    return HttpResponse(json.dumps(answer), mimetype="application/json")
 
 
 @never_cache
@@ -298,10 +297,10 @@ def service_select_strategy(request, region_id):
     return render_to_response(
         'flooding/select_strategy.html',
         {
-         'region': region,
-         'strategies': strategies,
-         'current_strategy': 12,
-         })
+            'region': region,
+            'strategies': strategies,
+            'current_strategy': 12,
+        })
 
 
 @receives_permission_manager
@@ -311,8 +310,8 @@ def service_compose_scenario(request, permission_manager, breach_id):
     #data[0].tdeltaphase = intervalFormatter(intervalReader("0 00:00"));
     bottomlevelbreach = {}
     pitdepth = {}
-    if not breach.groundlevel == None:
-        if not breach.canalbottomlevel == None:
+    if breach.groundlevel is not None:
+        if breach.canalbottomlevel is not None:
             bottomlevelbreach['defaultvalue'] = max(
                 breach.groundlevel, breach.canalbottomlevel) + 0.01
             pitdepth['defaultvalue'] = breach.groundlevel - 0.01
@@ -347,22 +346,22 @@ def service_compose_scenario(request, permission_manager, breach_id):
     return render_to_response(
         'flooding/compose_scenario.html',
         {
-         'projects': projects,
-         'sealake': sealake,
-         'lake': lake,
-         'sea': sea,
-         'loctide': loctide,
-         'pitdepth': pitdepth,
-         'bottomlevelbreach': bottomlevelbreach,
-         'breach': breach
-         })
+            'projects': projects,
+            'sealake': sealake,
+            'lake': lake,
+            'sea': sea,
+            'loctide': loctide,
+            'pitdepth': pitdepth,
+            'bottomlevelbreach': bottomlevelbreach,
+            'breach': breach
+        })
 
 
 def service_save_new_3di_scenario(request):
     """  """
 
     def to_intervalfloat(value):
-        if value == None:
+        if value is None:
             return None
         else:
             return float(value) / (24 * 60 * 60 * 1000)
@@ -387,7 +386,7 @@ def service_save_new_3di_scenario(request):
     scenario.save()
 
     # Save breach: needed for visualization parts
-    sb = ScenarioBreach.objects.create(
+    ScenarioBreach.objects.create(
         scenario=scenario,
         breach=breach,
         waterlevelset=WaterlevelSet.objects.all()[0],  # some random
@@ -407,7 +406,7 @@ def service_save_new_3di_scenario(request):
         'successful': True,
         'save_log': 'opgeslagen. scenario id is: %i' % scenario.id}
 
-    return HttpResponse(simplejson.dumps(answer), mimetype="application/json")
+    return HttpResponse(json.dumps(answer), mimetype="application/json")
 
 
 @receives_permission_manager
@@ -416,8 +415,8 @@ def service_compose_3di_scenario(request, permission_manager, breach_id):
     breach = Breach.objects.get(pk=breach_id)
     bottomlevelbreach = {}
     pitdepth = {}
-    if not breach.groundlevel == None:
-        if not breach.canalbottomlevel == None:
+    if breach.groundlevel is not None:
+        if breach.canalbottomlevel is not None:
             bottomlevelbreach['defaultvalue'] = max(
                 breach.groundlevel, breach.canalbottomlevel) + 0.01
             pitdepth['defaultvalue'] = breach.groundlevel - 0.01
@@ -451,12 +450,12 @@ def service_compose_3di_scenario(request, permission_manager, breach_id):
     return render_to_response(
         'flooding/compose_3di_scenario.html',
         {
-         'projects': projects,
-         'sealake': None,
-         'lake': None,
-         'sea': None,
-         'loctide': loctide,
-         'pitdepth': pitdepth,
-         'bottomlevelbreach': bottomlevelbreach,
-         'breach': breach
-         })
+            'projects': projects,
+            'sealake': sealake,
+            'lake': lake,
+            'sea': sea,
+            'loctide': loctide,
+            'pitdepth': pitdepth,
+            'bottomlevelbreach': bottomlevelbreach,
+            'breach': breach
+        })

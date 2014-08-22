@@ -2,10 +2,11 @@
 from __future__ import print_function, unicode_literals
 from __future__ import absolute_import, division
 
+import json
+
 from django.contrib.auth.models import User
 from django.http import Http404
 from django.test import TestCase, client
-from django.utils import simplejson
 
 from flooding_lib import services
 from flooding_lib import models
@@ -57,8 +58,8 @@ class TestServiceGetResultsFromScenario(UserTestCase):
 
         self.assertEquals(response.status_code, 200)
         # Check if correct JSON - but it isn't...
-#        json = simplejson.loads(response.content)
-#        self.assertEquals(json, '')
+#        j = json.loads(response.content)
+#        self.assertEquals(j, '')
 
 
 class TestServiceGetScenarioTree(UserTestCase):
@@ -90,14 +91,14 @@ class TestServiceGetScenarioTree(UserTestCase):
                 models.Scenario.STATUS_CALCULATED])
         self.assertEquals(response.status_code, 200)
 
-        json = simplejson.loads(response.content)
+        j = json.loads(response.content)
 
         # Check that each root element (parentid None) has children,
         # and each child has a parent.
         projectids = set()
         parentprojects = set()
         names = set()
-        for node in json:
+        for node in j:
             if 'pid' in node:
                 projectids.add(node['pid'])
                 names.add(node['name'])

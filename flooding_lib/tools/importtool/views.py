@@ -2,6 +2,7 @@ from cStringIO import StringIO
 from zipfile import ZipFile, ZIP_DEFLATED, BadZipfile
 import datetime
 import functools
+import json
 import logging
 import operator
 import os
@@ -13,7 +14,6 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.shortcuts import get_object_or_404
-from django.utils import simplejson
 from django.conf import settings
 from django.utils.translation import ugettext as _
 
@@ -31,7 +31,6 @@ from flooding_lib.tools.importtool.models import GroupImport
 from flooding_lib.tools.importtool.models import ImportScenario
 from flooding_lib.tools.importtool.models import ImportScenarioInputField
 from flooding_lib.tools.importtool.models import InputField
-from flooding_lib.tools.importtool.models import RORKering
 from flooding_lib.util.files import remove_comments_from_asc_files
 
 logger = logging.getLogger(__name__)
@@ -185,7 +184,7 @@ def approve_import(request, import_scenario_id):
             'id': importscenario.id
             }
         return HttpResponse(
-            simplejson.dumps(answer),
+            json.dumps(answer),
             mimetype="application/json")
 
     else:
@@ -195,9 +194,9 @@ def approve_import(request, import_scenario_id):
         for header in InputField.HEADER_CHOICES:
             k[header[0]] = len(f)
             f.append({
-                    'id': header[0],
-                    'title': unicode(header[1]),
-                    'fields': []})
+                'id': header[0],
+                'title': unicode(header[1]),
+                'fields': []})
 
         fields = InputField.objects.all().order_by('-position')
 
@@ -220,7 +219,7 @@ def approve_import(request, import_scenario_id):
     for option in ImportScenario.IMPORT_STATE_CHOICES:
         state_valuemap[option[0]] = unicode(option[1])
 
-    state_valuemap = simplejson.dumps(state_valuemap, sort_keys=True)
+    state_valuemap = json.dumps(state_valuemap, sort_keys=True)
 
     post_url = reverse(
         'flooding_tools_import_approve',
@@ -230,12 +229,6 @@ def approve_import(request, import_scenario_id):
         {'name': _('Import tool'),
          'url': reverse('flooding_tools_import_overview')},
         {'name': _('Approve import')}]
-
-#    '''
-#    'region':
-#    'breach;
-#    'project'
-#    '''
 
     return render_to_response(
         'import/import_scenario.html',
@@ -284,7 +277,7 @@ def verify_import(request, import_scenario_id):
             'remarks': 'opgeslagen',
             'id': importscenario.id}
         return HttpResponse(
-            simplejson.dumps(answer), mimetype="application/json")
+            json.dumps(answer), mimetype="application/json")
 
     else:
         f = []
@@ -293,9 +286,9 @@ def verify_import(request, import_scenario_id):
         for header in InputField.HEADER_CHOICES:
             k[header[0]] = len(f)
             f.append({
-                    'id': header[0],
-                    'title': unicode(header[1]),
-                    'fields': []})
+                'id': header[0],
+                'title': unicode(header[1]),
+                'fields': []})
 
         fields = InputField.objects.all().order_by('-position')
 
@@ -350,7 +343,7 @@ def new_import(request):
 
     post_url = reverse('flooding_tools_import_new')
 
-    legend_html_json = simplejson.dumps(
+    legend_html_json = json.dumps(
         Text.get('importnewscenario', request=request))
 
     breadcrumbs = [
@@ -389,13 +382,13 @@ def post_new_import(posted_values, owner):
         'id': importscenario.id}
 
     return HttpResponse(
-        simplejson.dumps(answer),
+        json.dumps(answer),
         mimetype="application/json")
 
 
 def get_new_filename(filename, dest_filename):
     new_filename = filename
-    if dest_filename != None:
+    if dest_filename is not None:
         if filename[-3:].lower() == dest_filename[-3:].lower():
             # change filename in case extension is the same. other file
             # names stay untouched
@@ -804,9 +797,9 @@ def import_scenario_into_flooding(request, importscenario):
     username = request.user.get_full_name()
     success, save_log = importscenario.import_into_flooding(username)
 
-    return HttpResponse(simplejson.dumps({
-                'successful': success,
-                'save_log': save_log}))
+    return HttpResponse(json.dumps({
+        'successful': success,
+        'save_log': save_log}))
 
 
 def ror_keringen_page(request):
@@ -814,7 +807,7 @@ def ror_keringen_page(request):
     if not (request.user.is_authenticated()):
         return HttpResponse(_("Not authenticated."))
 
-    
+
     files = os.listdir(settings.ROR_KERINGEN_APPLIED_PATH)
     keringen_file_names = [
         {'id': files.index(f),
