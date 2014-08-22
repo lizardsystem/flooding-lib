@@ -1,4 +1,4 @@
-console.log('loading screaan_exports ..');
+console.log('loading screen_exports ..');
 
 /********************************************************************/
 /**** script: 		screen_exports
