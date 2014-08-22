@@ -813,7 +813,7 @@ def service_get_scenarios_export_list(
     scenarios_export_list = []
     approved_scenario_ids = ScenarioProject.objects.filter(
         project=project,
-        approved=True).values_list('id', flat=True)
+        approved=True).values_list('scenario', flat=True)
     for s in project.all_active_scenarios():
         breaches_values = get_breaches_info(s)
         scenarios_export_list.append(
