@@ -29,6 +29,7 @@ from flooding_lib.models import Region
 from flooding_lib.models import RegionSet
 from flooding_lib.models import Result
 from flooding_lib.models import Scenario
+from flooding_lib.models import ScenarioProject
 from flooding_lib.models import SobekModel
 from flooding_lib.models import Strategy
 from flooding_lib.models import UserPermission
@@ -810,12 +811,16 @@ def service_get_scenarios_export_list(
     if not(permission_manager.check_project_permission(project, permission)):
         raise Http404
     scenarios_export_list = []
+    approved_scenario_ids = ScenarioProject.objects.filter(
+        project=project,
+        approved=True).values_list('id', flat=True)
     for s in project.all_active_scenarios():
         breaches_values = get_breaches_info(s)
         scenarios_export_list.append(
             {
                 'scenario_id': s.id,
                 'scenario_name': s.name,
+                'scenario_approved': s.id in approved_scenario_ids,
                 'breach_ids': breaches_values.get("ids"),
                 'breach_names': breaches_values.get("names"),
                 'region_ids': breaches_values.get("region_ids"),
@@ -1508,7 +1513,7 @@ def service_get_extra_grid_shapes(request, width, height, bbox, region_id):
 
 
 def service_save_drawn_embankment(geometries, strategy_id, region_id):
-    
+
     selected_strategy = Strategy.objects.get(pk=strategy_id)
     selected_measure = selected_strategy.measure_set.create(name='Ingetekend')
 
