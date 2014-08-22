@@ -7,8 +7,8 @@ Changelog of flooding-lib
 
 - Added filtering on 'approved y/n' for scenarios on the export page. Note:
   due to the boolean nature of booleans, the filtering in the user interface
-  only really works to show only *approved* scenarios. (If you want the
-  non-approved scenarios, you could sort on the column.)
+  is slightly weird. Clicking the filter gives you true/false/filter_off, but
+  false and filter_off look the same...
 
 
 3.22.1 (2014-08-21)
