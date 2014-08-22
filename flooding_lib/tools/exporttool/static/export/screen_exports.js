@@ -57,6 +57,7 @@ isc.DataSource.create({
     fields:[
 	{name:"scenario_id", primaryKey:true, hidden:false, type:"int"},
 	{name:"scenario_name", hidden: false, type:"text"},
+        {name: "scenario_approved", title: "Goedgekeurd", type: "boolean"},
 	{name:"breach_ids", hidden: false, type:"text"},
 	{name:"breach_names", hidden: false, type:"text"},
 	{name:"region_ids", hidden: false, type:"text"},
