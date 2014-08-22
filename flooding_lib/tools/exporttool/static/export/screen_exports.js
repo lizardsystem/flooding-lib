@@ -2,7 +2,7 @@ console.log('loading screen_exports ..');
 
 /********************************************************************/
 /**** script: 		screen_exports
-/**** description: 	This script provides the functionaly to export
+/**** description: 	This script provides the functionality to export
                         'waterdieptekaart'
 /********************************************************************/
 
