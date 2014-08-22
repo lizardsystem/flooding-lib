@@ -38,12 +38,8 @@ class ExportRun(models.Model):
     EXPORT_STATE_DONE = 50
 
     EXPORT_STATE_CHOICES = (
-         (EXPORT_STATE_WAITING, _('Waiting')),
-         #(EXPORT_STATE_ACTION_REQUIRED, _('Action required')),
-         #(EXPORT_STATE_APPROVED, _('Approved')),
-         #(EXPORT_STATE_DISAPPROVED, _('Disapproved')),
-         (EXPORT_STATE_DONE, _('Klaar')),
-        )
+        (EXPORT_STATE_WAITING, _('Waiting')),
+        (EXPORT_STATE_DONE, _('Klaar')))
 
     name = models.CharField(max_length=200, verbose_name=_('Name'))
     description = models.TextField(blank=True, verbose_name=_('Description'))
@@ -91,7 +87,7 @@ class ExportRun(models.Model):
             'export_arrival_times',
             'export_period_of_increasing_waterlevel',
             'export_inundation_sources'
-            ):
+        ):
             if getattr(self, fieldname):
                 maps.append(
                     ExportRun._meta.get_field_by_name(fieldname)[0]
@@ -105,9 +101,9 @@ class ExportRun(models.Model):
         scenarios_meta = []
         for scenario in self.scenarios.all():
             scenarios_meta.append({
-                    'id': scenario.id,
-                    'name': scenario.name,
-                    'project': scenario.main_project.name})
+                'id': scenario.id,
+                'name': scenario.name,
+                'project': scenario.main_project.name})
         return scenarios_meta
 
     def get_main_result(self):
@@ -128,7 +124,7 @@ class ExportRun(models.Model):
         return self.name
 
     def create_csv_file_for_gis_operation(
-        self, export_result_type, csv_file_location):
+            self, export_result_type, csv_file_location):
         """
         Obsolete, replaced with input_files
 
@@ -164,8 +160,7 @@ class ExportRun(models.Model):
         writer.writerow(['dijkring', 'bestandslocatie'])
         writer.writerows(information)
 
-    def input_files(
-        self, export_result_type):
+    def input_files(self, export_result_type):
         """
         Return a list of dictionaries, containing:
             'scenario': a scenario object,
@@ -190,13 +185,12 @@ class ExportRun(models.Model):
             for r in Region.objects.filter(breach__scenario=s):
                 for rs in s.result_set.filter(**resulttype_filter):
                     result.append({
-                            'scenario': s,
-                            'dijkringnr': r.dijkringnr,
-                            'filename': os.path.join(dest_dir, rs.resultloc)
-                            })
+                        'scenario': s,
+                        'dijkringnr': r.dijkringnr,
+                        'filename': os.path.join(dest_dir, rs.resultloc)
+                    })
 
         return result
-
 
     def create_general_file_for_gis_operation(self, file_location):
         """" Create a file with general information
@@ -241,14 +235,6 @@ class Result(models.Model):
 
     def __unicode__(self):
         return self.name
-
-    # def delete(self, *args, **kwargs):
-    #     logger.info('Deleting Result object')
-    #     try:
-    #         os.remove(self.file_location + 'asdf')
-    #     except:
-    #         logger.error('Could not delete %s while deleting Result object' % self.file_location)
-    #     return super(Result, self).delete(*args, **kwargs)
 
 
 class Setting(models.Model):

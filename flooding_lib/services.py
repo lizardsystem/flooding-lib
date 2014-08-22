@@ -1109,8 +1109,7 @@ def service_get_presentations_of_scenario(
 
 
 @never_cache
-def service_get_raw_result(
-    request, presentationlayer):
+def service_get_raw_result(request, presentationlayer):
     '''
 
     '''
@@ -1508,7 +1507,7 @@ def service_get_extra_grid_shapes(request, width, height, bbox, region_id):
 
 
 def service_save_drawn_embankment(geometries, strategy_id, region_id):
-    
+
     selected_strategy = Strategy.objects.get(pk=strategy_id)
     selected_measure = selected_strategy.measure_set.create(name='Ingetekend')
 
