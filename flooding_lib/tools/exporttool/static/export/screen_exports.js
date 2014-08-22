@@ -2,7 +2,7 @@ console.log('loading screaan_exports ..');
 
 /********************************************************************/
 /**** script: 		screen_exports
-/**** description: 	This script provides the functionaly to export 
+/**** description: 	This script provides the functionaly to export
                         'waterdieptekaart'
 /********************************************************************/
 
@@ -90,12 +90,12 @@ var LoadScenariosForProject = function(projectId){
     };
 
     dsScenariosExport.fetchData({}, function(response, data, request){
-	// call fetchData on list grid to 
+	// call fetchData on list grid to
 	// prepare the local store for filtering
-	scenariosAllListGrid.setData(data);	
+	scenariosAllListGrid.setData(data);
     	scenariosAllListGrid.fetchData();
 	msg.animateHide();
-    });  
+    });
 };
 
 /***
@@ -294,7 +294,7 @@ isc.ScenariosListGrid.create({
 var getExportForm = function() {
     var contentsURL = ""
     if (exporttool_config.export_run_id != '' && exporttool_config.export_run_id != null) {
-	contentsURL = exporttool_config.url_export_edit; 
+	contentsURL = exporttool_config.url_export_edit;
     } else {
 	contentsURL = exporttool_config.root_url + "flooding/tools/export/newexport";
     }
@@ -373,7 +373,7 @@ var createExportRunDs = function(export_run_id){
 	    {name: "_visible", hidden: true, type: "text"}
 	]
     });
-    return ds; 
+    return ds;
 }
 
 
@@ -385,7 +385,7 @@ if (exporttool_config.export_run_id != '' && exporttool_config.export_run_id != 
     var dsExport = createExportRunDs(exporttool_config.export_run_id);
     msg.animateShow();
     dsExport.fetchData({}, function(response, data, request){
-	// call fetchData on list grid to 
+	// call fetchData on list grid to
 	// prepare the local store for filtering
 	scenariosToExportListGrid.setData(data);
 	scenariosToExportListGrid.redraw();
