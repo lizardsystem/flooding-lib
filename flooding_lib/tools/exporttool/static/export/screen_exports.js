@@ -57,7 +57,7 @@ isc.DataSource.create({
     fields:[
 	{name:"scenario_id", primaryKey:true, hidden:false, type:"int"},
 	{name:"scenario_name", hidden: false, type:"text"},
-        {name: "scenario_approved", title: "Goedgekeurd", type: "boolean"},
+        {name:"scenario_approved", hidden: false, type: "boolean"},
 	{name:"breach_ids", hidden: false, type:"text"},
 	{name:"breach_names", hidden: false, type:"text"},
 	{name:"region_ids", hidden: false, type:"text"},
@@ -200,6 +200,7 @@ isc.ScenariosListGrid.create({
     fields:[
 	{name: "scenario_id", title:"ID", type:"int"},
 	{name: "scenario_name", title: "Scenario naam", type: "text"},
+        {name: "scenario_approved", title: "Goedgekeurd", type: "boolean"},
 	{name: "extwrepeattime", title: "Overschrijdings frequentie", type: "text"},
 	{name:"extwname", title: "Naam buitenwater", type:"text"},
 	{name:"extwtype", title: "Buitenwater type", type:"text"},
