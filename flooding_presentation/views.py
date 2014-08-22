@@ -2,6 +2,7 @@
 from zipfile import ZipFile
 import StringIO
 import datetime
+import json
 import logging
 import math
 import os
@@ -12,7 +13,6 @@ from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response, get_object_or_404
-from django.utils import simplejson
 from django.views.decorators.cache import never_cache
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.ticker import Formatter
@@ -175,12 +175,13 @@ def service_get_presentationlayer_settings(
         pass
 
     log.debug('json dump van info')
-    log.debug(simplejson.dumps(info))
+    log.debug(json.dumps(info))
     return JSONResponse(info)
 
 
 def service_get_wms_of_shape(
-    request, width, height, bbox, presentationlayer_id, legend_id, timestep):
+        request, width, height, bbox, presentationlayer_id,
+        legend_id, timestep):
     """
     width = int
     height = int

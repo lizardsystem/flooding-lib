@@ -1,5 +1,5 @@
 # Run under linux
-# Task 200 (sorry that I didn't put that in the filename)
+# Task 200
 
 # TODO: Instead of unzipping zipfiles to get to the datasets inside,
 #       it's possible to use /vsizip/ gdal paths. We didn't do that for
@@ -15,9 +15,9 @@ from __future__ import print_function
 
 from collections import namedtuple
 
+import json
 import tempfile
 import os
-from django.utils import simplejson as json
 from StringIO import StringIO
 
 from flooding_lib.models import ResultType

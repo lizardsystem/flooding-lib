@@ -1,10 +1,10 @@
 import datetime
+import json
 import os.path
 
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.shortcuts import render_to_response, get_object_or_404
-from django.utils import simplejson
 from django.utils.translation import ugettext as _
 
 from flooding_lib.models import Scenario
@@ -178,7 +178,7 @@ def new_export(request):
         form = ExportRunForm(request.POST)
         # necessary to call 'is_valid()' before adding custom errors
         valid = form.is_valid()
-        scenario_ids = simplejson.loads(request.REQUEST.get('scenarioIds'))
+        scenario_ids = json.loads(request.REQUEST.get('scenarioIds'))
         if not scenario_ids:
             form._errors['scenarios'] = form.error_class(
                 [u"U heeft geen scenario's geselecteerd."])
@@ -238,7 +238,7 @@ def service_get_max_water_depth_result(request, path):
     response['Content-Disposition'] = (
         'attachment; filename="' + file_name + '"')
     file_object.close()
-    return  response
+    return response
 
 
 def get_breaches_info(scenario):
@@ -249,8 +249,10 @@ def get_breaches_info(scenario):
         "externalwater__type")
     info["names"] = [v.get("name") for v in breaches_values]
     info["region_names"] = [v.get("region__name") for v in breaches_values]
-    info["externalwater_name"] = [v.get("externalwater__name") for v in breaches_values]
-    info["externalwater_type"] = [v.get("externalwater__type") for v in breaches_values]
+    info["externalwater_name"] = [
+        v.get("externalwater__name") for v in breaches_values]
+    info["externalwater_type"] = [
+        v.get("externalwater__type") for v in breaches_values]
     return info
 
 
@@ -272,10 +274,11 @@ def export_run_scenarios(request, export_run_id):
                 'extwtype': breaches_values.get("externalwater_type"),
                 'project_id': s.main_project.id,
                 'project_name': s.main_project.name,
-                'extwrepeattime': [sbr.extwrepeattime for sbr in s.scenariobreach_set.all()]
+                'extwrepeattime': [
+                    sbr.extwrepeattime for sbr in s.scenariobreach_set.all()]
             })
     return HttpResponse(
-        simplejson.dumps(scenarios_export_list), mimetype="application/json")
+        json.dumps(scenarios_export_list), mimetype="application/json")
 
 
 def reuse_export(request, export_run_id):
