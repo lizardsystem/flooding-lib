@@ -46,7 +46,7 @@ def index(request):
     else:
         has_create_rights = False
 
-    export_run_list = list()
+    export_run_list = []
     for export_run in ExportRun.objects.all():
         main_result = export_run.get_main_result()
         path = main_result.file_basename if main_result else None
