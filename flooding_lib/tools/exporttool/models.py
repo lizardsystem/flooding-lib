@@ -61,6 +61,10 @@ class ExportRun(models.Model):
     export_inundation_sources = models.BooleanField(
         default=True, verbose_name=_('The sources of inundation'))
 
+    export_everything_as_zip = models.BooleanField(
+        default=False,
+        verbose_name=_('Export as zipfile, including metadata'))
+
     owner = models.ForeignKey(User, verbose_name=_('Owner'))
     creation_date = models.DateTimeField(
         blank=True, null=True, verbose_name=_('Creation date'))
