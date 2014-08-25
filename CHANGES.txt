@@ -10,7 +10,7 @@ Changelog of flooding-lib
   is slightly weird. Clicking the filter gives you true/false/filter_off, but
   false and filter_off look the same...
 
-- ExportRuns now have an 'export everything as zip' option.
+- ExportRuns now have an 'export scenario data' option.
 
 
 3.22.1 (2014-08-21)
