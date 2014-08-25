@@ -7,6 +7,7 @@ import os
 from django.test import TestCase
 from flooding_lib.tests import test_models
 
+
 class TestCalculateExportMapsTask(TestCase):
     def test_generate_dst_filename(self):
         test_models.ExporttoolSettingF.create(
