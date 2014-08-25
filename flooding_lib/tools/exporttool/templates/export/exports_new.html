@@ -23,10 +23,8 @@
 	<td width="50%" valign="top">
           {% trans 'Select export maps' %}:
 	  <hr>
-	  <br>
 	      {{form.export_max_waterdepth}}
 	      {{form.export_max_waterdepth.label_tag}}
-
 	  <br>
 	      {{form.export_max_flowvelocity}}
 	      {{form.export_max_flowvelocity.label_tag}}
@@ -42,7 +40,9 @@
 	  <br>
               {{form.export_inundation_sources}}
               {{form.export_inundation_sources.label_tag}}
-          <br>
+	  <hr>
+              {{form.export_scenario_data}}
+              {{form.export_scenario_data.label_tag}}
 	</td>
       </tr>
       <tr>

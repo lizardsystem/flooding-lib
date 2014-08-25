@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-08-29 03:33-0500\n"
+"POT-Creation-Date: 2014-08-25 07:11-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -26,83 +26,95 @@ msgstr ""
 msgid "Export runs"
 msgstr ""
 
-#: models.py:30
+#: models.py:31
 msgid "Water depth map"
-msgstr ""
+msgstr "Waterdieptekaart"
 
-#: models.py:40
+#: models.py:41
 msgid "Waiting"
-msgstr ""
+msgstr "Wachten"
 
-#: models.py:44
+#: models.py:42
 msgid "Klaar"
 msgstr ""
 
-#: models.py:47 templates/export/exports_overview.html:20
+#: models.py:44 templates/export/exports_overview.html:22
 msgid "Name"
-msgstr ""
+msgstr "Naam"
 
-#: models.py:48 templates/export/exports_overview.html:22
+#: models.py:45 templates/export/exports_overview.html:24
 msgid "Description"
-msgstr ""
+msgstr "Omschrijving"
 
-#: models.py:55
+#: models.py:52
 msgid "The maximal waterdepth"
-msgstr ""
+msgstr "De maximale waterdiepte"
 
-#: models.py:57
-msgid "The maximal flowvelicity"
-msgstr ""
+#: models.py:54
+msgid "The maximal flowvelocity"
+msgstr "De maximale stromingssnelheid"
 
-#: models.py:59
+#: models.py:56
 msgid "The flooded area"
-msgstr ""
+msgstr "Het ondergelopen oppervlak"
 
-#: models.py:61
+#: models.py:58
+msgid "The arrival times"
+msgstr "De arriveringstijden"
+
+#: models.py:60
+msgid "The period of increasing waterlevel"
+msgstr "De periode van verhoogd waterniveau"
+
+#: models.py:62
+msgid "The sources of inundation"
+msgstr "De bronnen van inundatie"
+
+#: models.py:68
 msgid "Owner"
-msgstr ""
+msgstr "Eigenaar"
 
-#: models.py:63 templates/export/exports_overview.html:21
+#: models.py:70 templates/export/exports_overview.html:23
 msgid "Creation date"
-msgstr ""
+msgstr "Aangemaakt op"
 
-#: models.py:65
+#: models.py:72
 msgid "Run date"
-msgstr ""
+msgstr "Berekend op"
 
-#: models.py:67
+#: models.py:74
 msgid "Approved date"
-msgstr ""
+msgstr "Goedgekeurd op"
 
-#: models.py:69
+#: models.py:77
 msgid "Gridsize"
-msgstr ""
+msgstr "Gridgrootte"
 
-#: models.py:210
+#: models.py:185
 msgid "Result"
-msgstr ""
+msgstr "Resultaat"
 
-#: models.py:211
+#: models.py:186
 msgid "Results"
-msgstr ""
+msgstr "Resultaten"
 
-#: models.py:218
+#: models.py:193
 msgid "Diked area"
-msgstr ""
+msgstr "Bedijkt gebied"
 
-#: models.py:219
+#: models.py:194
 msgid "Province"
-msgstr ""
+msgstr "Provincie"
 
-#: models.py:220
+#: models.py:195
 msgid "Country"
-msgstr ""
+msgstr "Land"
 
-#: views.py:43 views.py:80 views.py:113 views.py:223 views.py:255 views.py:279
+#: views.py:43 views.py:80 views.py:113 views.py:227 views.py:261 views.py:286
 msgid "No permission to download export"
-msgstr ""
+msgstr "Geen rechten om exports te downloaden"
 
-#: views.py:65 views.py:93 views.py:119 views.py:143 views.py:293
+#: views.py:65 views.py:93 views.py:119 views.py:143 views.py:300
 msgid "Export tool"
 msgstr ""
 
@@ -116,64 +128,64 @@ msgstr ""
 
 #: views.py:140 views.py:155 views.py:175
 msgid "No permission to create export"
-msgstr ""
+msgstr "Geen rechten om een export aan te maken"
 
 #: views.py:145
 msgid "New export"
-msgstr ""
+msgstr "Nieuwe export"
 
-#: views.py:295
+#: views.py:302
 msgid "Edit export"
 msgstr "Bewerk export"
 
 #: templates/export/exports_new.html:24
 msgid "Select export maps"
-msgstr ""
+msgstr "Selecteer te exporteren kaarten"
 
-#: templates/export/exports_new.html:41
+#: templates/export/exports_new.html:50
 msgid "Submit"
-msgstr ""
+msgstr "Verzenden"
 
 #: templates/export/exports_overview.html:14
 msgid "Export run overview"
-msgstr ""
-
-#: templates/export/exports_overview.html:23
-msgid "State"
-msgstr ""
-
-#: templates/export/exports_overview.html:24
-#: templates/export/exports_overview.html:40
-#: templates/export/exports_run_detail.html:64
-#: templates/export/exports_run_detail.html:67
-msgid "Result file"
-msgstr ""
+msgstr "Overzicht exportruns"
 
 #: templates/export/exports_overview.html:25
-#: templates/export/exports_overview.html:45
-msgid "Edit"
-msgstr ""
+msgid "State"
+msgstr "Status"
 
-#: templates/export/exports_overview.html:56
+#: templates/export/exports_overview.html:26
+#: templates/export/exports_overview.html:44
+#: templates/export/exports_run_detail.html:73
+#: templates/export/exports_run_detail.html:76
+msgid "Result file"
+msgstr "Resultaatbestand"
+
+#: templates/export/exports_overview.html:27
+#: templates/export/exports_overview.html:51
+msgid "Edit"
+msgstr "Bewerk"
+
+#: templates/export/exports_overview.html:70
 msgid "New export run"
-msgstr ""
+msgstr "Nieuwe exportrun"
 
 #: templates/export/exports_run_detail.html:16
 #: templates/export/exports_run_detail_scenarios_and_projects.html:14
 msgid "Export run details"
-msgstr ""
+msgstr "Details van de exportrun"
 
 #: templates/export/exports_run_detail.html:39
 msgid "Selected maps"
-msgstr ""
+msgstr "Geselecteerde kaarten"
 
-#: templates/export/exports_run_detail.html:54
+#: templates/export/exports_run_detail.html:63
 msgid "Used scenarios and projects (x out of y)"
-msgstr ""
+msgstr "Gebrukte scenario's en projecten (x v/d y)"
 
-#: templates/export/exports_run_detail.html:56
+#: templates/export/exports_run_detail.html:65
 msgid "out of"
-msgstr ""
+msgstr "v/d"
 
 #: templates/export/exports_run_detail_scenarios_and_projects.html:20
 msgid "Scenario ID"
