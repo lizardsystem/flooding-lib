@@ -12,6 +12,9 @@ Changelog of flooding-lib
 
 - ExportRuns now have an 'export scenario data' option.
 
+- Added an "export scenario data" export run type that can export
+  scenario data (result files, metadata in .csv files).
+
 
 3.22.1 (2014-08-21)
 -------------------

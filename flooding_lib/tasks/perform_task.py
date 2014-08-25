@@ -201,6 +201,8 @@ def perform_task(body, tasktype_id, worker_nr, broker_logging_handler=None):
         elif tasktype_id == TASK_GENERATE_DATA_EXPORT:
             if scenario_type == 'flooding_exportrun':
                 from flooding_lib.tasks import calculate_export_data
+                calculate_export_data.set_broker_logging_handler(
+                    broker_logging_handler)
                 # Here scenario_id is an exportrun_id
                 calculate_export_data.calculate_export_data(scenario_id)
                 success_code = True

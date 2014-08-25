@@ -18,8 +18,23 @@ from flooding_lib.conf import settings
 
 from flooding_lib.tools.exporttool.models import ExportRun
 
+import logging
+logger = logging.getLogger(__name__)
+
+__revision__ = "1.0"  # perform_task wants this
+
+
+def set_broker_logging_handler(broker_handler=None):
+    if broker_handler is not None:
+        logger.addHandler(broker_handler)
+    else:
+        logger.warning("Broker logging handler does not set.")
+
 
 def calculate_export_data(export_run_id):
+    logger.info("Calculating export data for export run {}"
+                .format(export_run_id))
+
     # Get export scenarios
     export_run = ExportRun.objects.get(pk=export_run_id)
     scenarios = export_run.scenarios.all()
@@ -31,17 +46,21 @@ def calculate_export_data(export_run_id):
     zipf = dirs_into_zipfile(tempdir, export_run.generate_dst_path())
 
     # Record this zipfile as the result of the export run
+    logger.info("Storing zip file as export run result.")
     export_run.save_result_file(zipf)
 
     # Cleanup
+    logger.info("Cleanup.")
     shutil.rmtree(tempdir)
 
     # Done
+    logger.info("Marking export run as done.")
     export_run.done()
 
 
 def create_data_directories(scenarios):
     directory = tempfile.mkdtemp()
+    logger.info("Gathering data in {}.".format(directory))
 
     create_main_csv_file(scenarios, directory)
 
@@ -52,9 +71,19 @@ def create_data_directories(scenarios):
 
 
 def create_main_csv_file(scenarios, directory):
+    logger.info("Creating scenarios.csv.")
+
     csvpath = os.path.join(directory, 'scenarios.csv')
     with open(csvpath, 'wb') as csvfile:
         writer = csv.writer(csvfile, delimiter=b"|")
+
+        # Choosing to leave the header in Dutch and not translated,
+        # because this is a background task that runs without knowing
+        # what the user's preferred language is.
+        writer.writerow([
+            "Scenario ID", "Scenarionaam", "Overschrijdingsfrequentie",
+            "Buitenwater", "Buitenwatertype #", "Buitenwatertype",
+            "Regio", "Bres"])
 
         for scenario in scenarios:
             # A scenario will almost always have a single breach, but the
@@ -107,6 +136,9 @@ def create_scenario_dir(scenario, directory):
 
 
 def create_scenario_csv_file(scenario, directory):
+    logger.info("Creating metadata.csv for scenario {}."
+                .format(scenario.id))
+
     csvpath = os.path.join(directory, 'metadata.csv')
 
     data = scenario.grouped_scenario_information()
@@ -121,13 +153,16 @@ def create_scenario_csv_file(scenario, directory):
 
 
 def copy_scenario_files(scenario, directory):
+    logger.info("Copying result files for scenario {}."
+                .format(scenario.id))
+
     for result in scenario.result_set.all():
         resultloc = result.resultloc.replace('\\', '/')
         file_path = os.path.join(
             settings.EXTERNAL_RESULT_MOUNTED_DIR, resultloc)
         if not os.path.exists(file_path):
             # Skip
-            print("Does not exist: {}".format(file_path))
+            logger.info("Result file does not exist: {}".format(file_path))
             continue
 
         shutil.copy(file_path, directory)
@@ -136,7 +171,7 @@ def copy_scenario_files(scenario, directory):
 def dirs_into_zipfile(tempdir, zipfile_path):
     # Zipfile_path should end with ".zip", but shutil.make_archive wants
     # to add that itself.
-    print("Zip {} into {}".format(tempdir, zipfile_path))
+    logger.info("Zipping {} into {}".format(tempdir, zipfile_path))
     if zipfile_path.endswith(".zip"):
         zipfile_path = zipfile_path[:-4]
 
