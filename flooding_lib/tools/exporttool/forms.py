@@ -15,5 +15,5 @@ class ExportRunForm(forms.ModelForm):
                   'export_arrival_times',
                   'export_period_of_increasing_waterlevel',
                   'export_inundation_sources',
-                  'export_everything_as_zip',
+                  'export_scenario_data',
                   )
