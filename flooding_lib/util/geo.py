@@ -2,7 +2,7 @@
 
 from pyproj import Proj, transform
 
-import gdal
+from osgeo import gdal
 
 # Some projections
 

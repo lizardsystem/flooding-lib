@@ -37,8 +37,7 @@ def update_scenario_status_cache(scenario_id):
     scenario.update_status()
 
 
-def perform_task(
-    body, tasktype_id, worker_nr, broker_logging_handler=None):
+def perform_task(body, tasktype_id, worker_nr, broker_logging_handler=None):
     """
     execute specific task
     scenario_id  = id of scenario
