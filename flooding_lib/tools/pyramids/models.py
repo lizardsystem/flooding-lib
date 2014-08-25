@@ -17,7 +17,7 @@ import shutil
 
 from matplotlib import colors
 import Image
-import gdal
+from osgeo import gdal
 import numpy as np
 
 from django.conf import settings

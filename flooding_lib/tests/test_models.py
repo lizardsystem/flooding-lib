@@ -71,6 +71,15 @@ class ExportRunF(factory.DjangoModelFactory):
     creation_date = datetime.datetime.today()
 
 
+class ExporttoolSettingF(factory.DjangoModelFactory):
+    class Meta:
+        model = exportmodels.Setting
+
+    key = 'setting'
+    value = 'value'
+    remarks = 'test'
+
+
 class AttachmentF(factory.DjangoModelFactory):
     class Meta:
         model = models.Attachment

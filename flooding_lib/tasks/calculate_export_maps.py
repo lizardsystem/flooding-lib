@@ -23,7 +23,6 @@ from StringIO import StringIO
 from flooding_lib.models import ResultType
 from flooding_lib.tools.importtool.models import InputField
 from flooding_lib.tools.exporttool.models import ExportRun
-from flooding_lib.tools.exporttool.models import Setting
 from flooding_lib.models import Result as FloodingResult
 from flooding_lib.tools.exporttool.models import Result
 from flooding_lib.util import files
@@ -155,29 +154,6 @@ def all_files_in(filename):
             yield filename
         # If it's not a file, or a bad zip, just return without
         # yielding anything.
-
-
-def generate_dst_filename(export_run):
-    """Create filename like
-    [export name]_ddmmyyyy_hhMM.zip.
-
-    Replace all ' ' with '_' in export name
-    Cat export name to 20 chars."""
-    log.debug("generate_dst_filename({e})".format(e=export_run))
-    max_length = 20
-    export_name = ""
-    if export_run.name is not None:
-        export_name = export_run.name[:max_length]
-        export_name = export_name.strip()
-        export_name = export_name.replace(' ', '_')
-
-    c_date = export_run.creation_date
-
-    dst_basename = "{0}_{1:02}{2:02}{3:04}_{4:02}{5:02}.zip".format(
-        export_name, c_date.day, c_date.month,
-        c_date.year, c_date.hour, c_date.minute)
-
-    return dst_basename
 
 
 def generate_export_meta(export_run, dst_filename):
@@ -788,7 +764,6 @@ def calculate_export_maps(exportrun_id):
     """
     log.debug("calculate_export_maps({e})".format(e=exportrun_id))
     export_run = ExportRun.objects.get(id=exportrun_id)
-    export_folder = Setting.objects.get(key='EXPORT_FOLDER').value
     max_waterdepths = {}
     max_flowvelocity = {}
 
@@ -816,26 +791,19 @@ def calculate_export_maps(exportrun_id):
     if export_run.export_inundation_sources:
         calc_sources_of_inundation(tmp_zip_filename, export_run)
 
-    dst_basename = generate_dst_filename(export_run)
-    dst_filename = os.path.join(export_folder, dst_basename)
+    dst_path = export_run.generate_dst_path()
 
-    create_json_meta_file(tmp_zip_filename, export_run, dst_filename)
+    create_json_meta_file(tmp_zip_filename, export_run, dst_path)
 
-    shutil.move(tmp_zip_filename, dst_filename)
+    shutil.move(tmp_zip_filename, dst_path)
 
     result_count = Result.objects.filter(export_run=export_run).count()
     if result_count > 0:
         log.warn('Warning: deleting old Result objects for this export run...')
         Result.objects.filter(export_run=export_run).delete()
 
-    result = Result(
-        name=export_run.name,
-        file_basename=dst_basename,
-        area=Result.RESULT_AREA_DIKED_AREA, export_run=export_run)
-    result.save()
-
-    export_run.state = ExportRun.EXPORT_STATE_DONE
-    export_run.save()
+    export_run.save_result_file(dst_path)
+    export_run.done()
 
     # remove tmp files
     if os.path.isfile(tmp_zip_filename):

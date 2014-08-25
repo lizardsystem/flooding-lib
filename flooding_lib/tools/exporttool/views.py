@@ -11,9 +11,6 @@ from flooding_lib.models import Scenario
 from flooding_lib.tools.exporttool.forms import ExportRunForm
 from flooding_lib.tools.exporttool.models import ExportRun, Setting
 
-from lizard_worker.executor import start_workflow
-from lizard_worker.models import WorkflowTemplate
-
 
 def get_result_path_location(result):
     result_folder = Setting.objects.get(
@@ -203,13 +200,7 @@ def new_export(request):
             new_export_run.save()
             new_export_run.scenarios = Scenario.objects.filter(
                 pk__in=scenario_ids)
-
-            # Make a workflow for the export and run it
-            workflow_template = WorkflowTemplate.objects.get(code='4')
-            start_workflow(
-                new_export_run.id,
-                workflow_template.id, log_level='INFO',
-                scenario_type='flooding_exportrun')
+            new_export_run.start()
 
             return HttpResponse(
                 'redirect_in_js_to_' + reverse('flooding_tools_export_index'))

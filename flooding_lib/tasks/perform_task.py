@@ -20,6 +20,7 @@ TASK_SOBEK_PRESENTATION_GENERATION_155 = 155
 TASK_HISSSM_PRESENTATION_GENERATION_185 = 185
 TASK_CALCULATE_STATISTICS = 190
 TASK_GENERATE_EXPORT = 200  # See README.txt
+TASK_GENERATE_DATA_EXPORT = 201  # See README.txt
 TASK_PERFORM_3DI_SIMULATION_210 = 210  # See README.txt
 TASK_3DI_PNG_GENERATION_220 = 220  # See README.txt
 TASK_3DI_PNG_GENERATION_221 = 221
@@ -187,8 +188,6 @@ def perform_task(
             success_code = True  # In case of problems, an exception is raised
 
         elif tasktype_id == TASK_GENERATE_EXPORT:
-            #exportrun_id = body['exportrun_id']
-            log.debug("execute TASK_GENERATE_EXPORT_200 %s=%r" % (scenario_type, scenario_id))
             if scenario_type == 'flooding_exportrun':
                 from flooding_lib.tasks import calculate_export_maps
                 # Here scenario_id is an exportrun_id
@@ -196,7 +195,20 @@ def perform_task(
                 success_code = True  # In case of problems, an exception is raised
             else:
                 log.error(
-                    'Task not performed, because scenario_type is "%s" (and not "flooding_exportrun")' %
+                    ('Task not performed, because scenario_type is "%s"'
+                     ' (and not "flooding_exportrun")') %
+                    scenario_type)
+                success_code = False
+        elif tasktype_id == TASK_GENERATE_DATA_EXPORT:
+            if scenario_type == 'flooding_exportrun':
+                from flooding_lib.tasks import calculate_export_data
+                # Here scenario_id is an exportrun_id
+                calculate_export_data.calculate_export_data(scenario_id)
+                success_code = True
+            else:
+                log.error(
+                    ('Task not performed, because scenario_type is "%s"'
+                     ' (and not "flooding_exportrun")') %
                     scenario_type)
                 success_code = False
         elif tasktype_id == TASK_PERFORM_3DI_SIMULATION_210:
