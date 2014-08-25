@@ -1707,8 +1707,8 @@ def get_raw_result_scenario(request, scenarioid):
             continue
 
         view_url = reverse('result_download', kwargs={
-                'result_id': result.id,
-                })
+            'result_id': result.id,
+        })
 
         # Add filename at the end of the URL so that the browser knows
         # what to call the file it is served. This part of the URL is
@@ -1716,13 +1716,13 @@ def get_raw_result_scenario(request, scenarioid):
         url = view_url + os.path.basename(file_path)
 
         results.append({
-                "url": url,
-                "result": result,
-                })
+            "url": url,
+            "result": result,
+        })
 
     return render_to_response("flooding/results_scenario.html", {
-            "results": results
-            })
+        "results": results
+    })
 
 
 def get_ror_keringen_types():

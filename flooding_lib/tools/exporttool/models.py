@@ -1,7 +1,9 @@
+import datetime
+import os.path
+
 from django.contrib.auth.models import User
 from django.contrib.gis.db import models
 from django.utils.translation import ugettext_lazy as _
-import os.path
 
 from lizard_worker.executor import start_workflow
 from lizard_worker.models import WorkflowTemplate
@@ -204,7 +206,7 @@ class ExportRun(models.Model):
             export_name = export_name.strip()
             export_name = export_name.replace(' ', '_')
 
-        c_date = self.creation_date
+        c_date = self.creation_date or datetime.datetime.now()
 
         dst_basename = "{0}_{1:02}{2:02}{3:04}_{4:02}{5:02}.zip".format(
             export_name, c_date.day, c_date.month,
