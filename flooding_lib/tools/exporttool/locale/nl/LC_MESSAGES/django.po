@@ -70,10 +70,6 @@ msgstr "De periode van verhoogd waterniveau"
 msgid "The sources of inundation"
 msgstr "De bronnen van inundatie"
 
-#: models.py:66
-msgid "Export as zipfile, including metadata"
-msgstr "Exporteer als zipfile, inclusief alle metadata"
-
 #: models.py:68
 msgid "Owner"
 msgstr "Eigenaar"
