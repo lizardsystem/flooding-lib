@@ -1,6 +1,13 @@
 <link href="{% url "root_url" %}static_media/style/legend.css" rel="stylesheet" type="text/css">
 
 {% if colormaps %}
+  {% if active_colormap %}
+  <script type="text/javascript">
+      if (dynamic_legend !== undefined) {
+          dynamic_legend.set_colormap("{{ active_colormap }}");
+      }
+  </script>
+  {% endif %}
   <div class="colormapcontrol">Colormap:<br/>
     <select class="colormap" id="changecolormap" onchange="dynamic_legend.set_colormap(this.value)">
       {% for colormap in colormaps %}
