@@ -389,7 +389,7 @@ class ExternalWater(models.Model):
         db_table = 'flooding_externalwater'
 
     def type_str(self):
-        return ExternalWater.TYPE_CHOICES.get(self.type, _('Unknown'))
+        return ExternalWater.TYPE_CHOICES.get(self.type, _('unknown'))
 
     def __unicode__(self):
         return unicode(self.name)
@@ -946,11 +946,11 @@ def find_imported_value(fieldobject, data_objects):
                 except ValueError:
                     pass  # Keep the string version of value
             elif value_type in (
-                InputField.TYPE_FLOAT, InputField.TYPE_INTERVAL):
+                    InputField.TYPE_FLOAT, InputField.TYPE_INTERVAL):
                 value = float(value)
             elif value_type in (
-                InputField.TYPE_STRING, InputField.TYPE_TEXT,
-                InputField.TYPE_DATE):
+                    InputField.TYPE_STRING, InputField.TYPE_TEXT,
+                    InputField.TYPE_DATE):
                 pass  # Already a string
             elif value_type in (InputField.TYPE_BOOLEAN,):
                 # Value is a string like "1" or "0"
@@ -1413,7 +1413,7 @@ class Scenario(models.Model):
 
         if data_objects is not None:
             return find_imported_value(
-                inputfield, self.gather_data_objects())
+                inputfield, data_objects)
 
     def string_value_for_inputfield(self, inputfield):
         """Retrieve a value for inputfield from ExtraScenarioInfo model,

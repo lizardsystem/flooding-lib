@@ -25,6 +25,7 @@ __revision__ = "1.0"  # perform_task wants this
 
 
 def set_broker_logging_handler(broker_handler=None):
+    """perform_task.py sets the logging handler using this."""
     if broker_handler is not None:
         logger.addHandler(broker_handler)
     else:
@@ -32,6 +33,7 @@ def set_broker_logging_handler(broker_handler=None):
 
 
 def calculate_export_data(export_run_id):
+    """Main function of this task."""
     logger.info("Calculating export data for export run {}"
                 .format(export_run_id))
 
@@ -39,8 +41,8 @@ def calculate_export_data(export_run_id):
     export_run = ExportRun.objects.get(pk=export_run_id)
     scenarios = export_run.scenarios.all()
 
-    # Create export data in directory structure
-    tempdir = create_data_directories(scenarios)
+    tempdir = tempfile.mkdtemp()
+    create_data_directories(scenarios, tempdir)
 
     # Put data into a zipfile
     zipf = dirs_into_zipfile(tempdir, export_run.generate_dst_path())
@@ -58,8 +60,11 @@ def calculate_export_data(export_run_id):
     export_run.done()
 
 
-def create_data_directories(scenarios):
-    directory = tempfile.mkdtemp()
+def create_data_directories(scenarios, directory):
+    """Create the required data in a directory structure. We have
+    one main CSV file containg a list of scenarios, and one subdirectory
+    for each scenario containing a metadata CSV file and all the result
+    files."""
     logger.info("Gathering data in {}.".format(directory))
 
     create_main_csv_file(scenarios, directory)
@@ -67,14 +72,15 @@ def create_data_directories(scenarios):
     for scenario in scenarios:
         create_scenario_dir(scenario, directory)
 
-    return directory
-
 
 def create_main_csv_file(scenarios, directory):
     logger.info("Creating scenarios.csv.")
 
     csvpath = os.path.join(directory, 'scenarios.csv')
+    # Create export data in directory structure
     with open(csvpath, 'wb') as csvfile:
+        # Use '|' as delimiter because we need ',' below, and '|'
+        # is less likely to occur in the data.
         writer = csv.writer(csvfile, delimiter=b"|")
 
         # Choosing to leave the header in Dutch and not translated,
@@ -101,33 +107,33 @@ def create_main_csv_file(scenarios, directory):
                 scenario.name,
 
                 # Repeat time
-                ", ".join(str(scenariobreach.extwrepeattime)
-                          for scenariobreach in
-                          scenario.scenariobreach_set.all()),
+                ",".join(str(scenariobreach.extwrepeattime)
+                         for scenariobreach in
+                         scenario.scenariobreach_set.all()),
 
                 # External water name
-                ", ".join(breach.externalwater.name
-                          for breach in breaches),
+                ",".join(breach.externalwater.name
+                         for breach in breaches),
 
                 # External water type #
-                ", ".join(str(breach.externalwater.type)
-                          for breach in breaches),
+                ",".join(str(breach.externalwater.type)
+                         for breach in breaches),
 
                 # External water type string
-                ", ".join(breach.externalwater.type_str()
-                          for breach in breaches),
+                ",".join(breach.externalwater.type_str()
+                         for breach in breaches),
 
                 # Region name
-                ", ".join(breach.region.name
-                          for breach in breaches),
+                ",".join(breach.region.name for breach in breaches),
 
                 # Breach name
-                ", ".join(breach.name
-                          for breach in breaches)
+                ",".join(breach.name for breach in breaches)
                 ])
 
 
 def create_scenario_dir(scenario, directory):
+    """Each scenario gets a subdirectory, with the scenario ID as name.
+    In it we create one CSV file with metadata, and all the result files."""
     scenario_path = os.path.join(directory, str(scenario.id))
     os.mkdir(scenario_path)
 
@@ -169,9 +175,11 @@ def copy_scenario_files(scenario, directory):
 
 
 def dirs_into_zipfile(tempdir, zipfile_path):
+    """Pack the created subdirectory structure into a zipfile."""
+    logger.info("Zipping {} into {}".format(tempdir, zipfile_path))
+
     # Zipfile_path should end with ".zip", but shutil.make_archive wants
     # to add that itself.
-    logger.info("Zipping {} into {}".format(tempdir, zipfile_path))
     if zipfile_path.endswith(".zip"):
         zipfile_path = zipfile_path[:-4]
 

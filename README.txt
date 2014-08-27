@@ -57,6 +57,13 @@ Task 200
 - export-zip contains .asc files per selected map per 'dijkring'
 
 
+Task 201
+========
+
+Create a zip file that contains all metadata of a list of scenarios in
+CSV files, plus all result files.
+
+
 Task 210
 ========
 
@@ -179,4 +186,3 @@ Commented-> the settings in the admin interface (like 'presentation_dir') are us
 
 Settings:
 # Use the different settings in localsettings.py if you need them.
-
