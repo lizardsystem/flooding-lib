@@ -96,7 +96,7 @@ def create_main_csv_file(scenarios, directory):
             # data model allows multiple breaches. Therefore most of the
             # fields below have to consider the possibility where multiple
             # values occur, and join them with a "," in that case. Which
-            # is why the CSV file is ";" separated.
+            # is why the CSV file is "|" separated.
 
             breaches = scenario.breaches.all()
             writer.writerow([
