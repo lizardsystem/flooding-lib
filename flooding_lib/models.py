@@ -1554,14 +1554,14 @@ class Scenario(models.Model):
         grouped_input_fields = InputField.grouped_input_fields()
 
         for header in grouped_input_fields:
-            for inputfield in header['fields']:
-                value = self.value_for_inputfield(inputfield)
-                value_str = inputfield.display_unicode(
+            for input_field in header['fields']:
+                value = self.value_for_inputfield(input_field)
+                value_str = input_field.display_unicode(
                     value, for_viewing_only=True)
 
                 # Set the value_str on the inputfield object for easy
                 # use in the template.
-                inputfield.value_str = value_str
+                input_field.value_str = value_str
 
             # Only keep fields with a value
             header['fields'] = [f for f in header['fields'] if f.value_str]
@@ -1575,26 +1575,26 @@ class Scenario(models.Model):
             # The scenario id is added at the front, a waterlevel graph
             # URL at the end of its section.
             if header['title'] in ('Scenario', _('Scenario')):
-                scenarioid = dummy_field()
-                scenarioid.name = _('Scenario ID')
-                scenarioid.value_str = str(self.id)
-                header['fields'][0:0] = [scenarioid]
+                scenario_id = dummy_field()
+                scenario_id.name = _('Scenario ID')
+                scenario_id.value_str = str(self.id)
+                header['fields'][0:0] = [scenario_id]
             elif header['title'] in ('External Water', _('External Water')):
-                graphurl = dummy_field()
+                graph_url = dummy_field()
                 breach = self.breaches.all()[0]
-                scenariobreach = self.scenariobreach_set.get(breach=breach)
+                scenario_breach = self.scenariobreach_set.get(breach=breach)
 
-                if len(scenariobreach.
+                if len(scenario_breach.
                        waterlevelset.waterlevel_set.all()) > 0:
                     image_src = (
                         reverse('flooding_service') +
                         "?action=get_externalwater_graph_infowindow&" +
                         "width=350&height=400&scenariobreach_id=" +
-                        str(scenariobreach.id))
-                    graphurl.name = _('External water graph')
-                    graphurl.value_str = SafeString(
+                        str(scenario_breach.id))
+                    graph_url.name = _('External water graph')
+                    graph_url.value_str = SafeString(
                         '<img src="' + image_src + ' " width=350 height=400/>')
-                    header['fields'].append(graphurl)
+                    header['fields'].append(graph_url)
 
         # Only return headers with fields
         return [h for h in grouped_input_fields if h['fields']]
