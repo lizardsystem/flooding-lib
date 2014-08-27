@@ -1,7 +1,12 @@
+import datetime
+import os.path
+
 from django.contrib.auth.models import User
 from django.contrib.gis.db import models
 from django.utils.translation import ugettext_lazy as _
-import os.path
+
+from lizard_worker.executor import start_workflow
+from lizard_worker.models import WorkflowTemplate
 
 from flooding_lib.models import Region, Scenario
 from flooding_base.models import Setting as BaseSetting
@@ -24,6 +29,9 @@ class ExportRun(models.Model):
             ("can_download", "Can download exportresult"),
         )
         ordering = ["creation_date"]
+
+    WORKFLOW_TEMPLATE_MAP_EXPORT = 4
+    WORKFLOW_TEMPLATE_DATA_EXPORT = 200
 
     EXPORT_TYPE_WATER_DEPTH_MAP = 10
 
@@ -60,6 +68,8 @@ class ExportRun(models.Model):
         default=True, verbose_name=_('The period of increasing waterlevel'))
     export_inundation_sources = models.BooleanField(
         default=True, verbose_name=_('The sources of inundation'))
+    export_scenario_data = models.BooleanField(
+        default=False, verbose_name=_('All scenario data'))
 
     owner = models.ForeignKey(User, verbose_name=_('Owner'))
     creation_date = models.DateTimeField(
@@ -105,6 +115,27 @@ class ExportRun(models.Model):
                 'name': scenario.name,
                 'project': scenario.main_project.name})
         return scenarios_meta
+
+    def start(self):
+        # Make a workflow for the export and run it
+        if self.export_scenario_data:
+            # Run the corresponding template
+            workflow_template_code = ExportRun.WORKFLOW_TEMPLATE_DATA_EXPORT
+        else:
+            workflow_template_code = ExportRun.WORKFLOW_TEMPLATE_MAP_EXPORT
+
+        workflow_template = WorkflowTemplate.objects.get(
+            code=workflow_template_code)
+
+        start_workflow(
+            self.id,
+            workflow_template.id, log_level='INFO',
+            scenario_type='flooding_exportrun')
+
+    def done(self):
+        """Set status to DONE and save."""
+        self.state = ExportRun.EXPORT_STATE_DONE
+        self.save()
 
     def get_main_result(self):
         # Why RESULT_AREA_COUNTRY only?
@@ -154,6 +185,35 @@ class ExportRun(models.Model):
                     })
 
         return result
+
+    def save_result_file(self, filepath):
+        Result.objects.create(
+            name=self.name,
+            file_basename=os.path.basename(filepath),
+            area=Result.RESULT_AREA_DIKED_AREA,
+            export_run=self)
+
+    def generate_dst_path(self):
+        """Create filename like
+        [export name]_ddmmyyyy_hhMM.zip.
+
+        Replace all ' ' with '_' in export name
+        Cat export name to 20 chars."""
+        max_length = 20
+        export_name = ""
+        if self.name is not None:
+            export_name = self.name[:max_length]
+            export_name = export_name.strip()
+            export_name = export_name.replace(' ', '_')
+
+        c_date = self.creation_date or datetime.datetime.now()
+
+        dst_basename = "{0}_{1:02}{2:02}{3:04}_{4:02}{5:02}.zip".format(
+            export_name, c_date.day, c_date.month,
+            c_date.year, c_date.hour, c_date.minute)
+
+        export_folder = Setting.objects.get(key='EXPORT_FOLDER').value
+        return os.path.join(export_folder, dst_basename)
 
     def create_general_file_for_gis_operation(self, file_location):
         """" Create a file with general information

@@ -13,7 +13,7 @@ import os
 import shutil
 import tempfile
 
-import gdal
+from osgeo import gdal
 
 from django.test import TestCase
 

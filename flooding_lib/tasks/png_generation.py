@@ -25,13 +25,14 @@
 
 __revision__ = "$Rev$"[6:-2]
 
-import gdal
 import os
 import stat
 import shutil
 import sys
 
 from django import db
+
+from osgeo import gdal
 
 from flooding_base.models import Setting
 from flooding_lib.models import Scenario

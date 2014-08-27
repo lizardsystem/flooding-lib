@@ -8,12 +8,10 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.files.base import ContentFile
 from django.contrib.auth.models import User
 
-from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render_to_response
-from django.utils.safestring import SafeString
-from django.utils.translation import ugettext_lazy as _, ungettext, ugettext
+from django.utils.translation import ugettext_lazy as _, ungettext
 
 from flooding_lib.forms import AttachmentForm
 from flooding_lib.forms import ScenarioArchiveForm
@@ -27,7 +25,6 @@ from flooding_lib.models import UserPermission
 from flooding_lib.permission_manager import receives_permission_manager
 from flooding_lib.permission_manager import \
     receives_loggedin_permission_manager
-from flooding_lib.tools.importtool.models import InputField
 from flooding_presentation.models import Animation
 from flooding_lib.tools.approvaltool.views import approvaltable
 
@@ -103,7 +100,7 @@ def archive_scenario(request, permission_manager, scenario_id):
         UserPermission.PERMISSION_SCENARIO_EDIT):
         can_edit = True
 
-    succeeded = False    
+    succeeded = False
     user = User.objects.get(username=request.user)
     template = ""
     if request.method == 'POST':
@@ -136,95 +133,10 @@ def archive_scenario(request, permission_manager, scenario_id):
         template, {'form': form, 'succeeded': succeeded})
 
 
-def extra_infowindow_information_fields(header_title, scenario):
-    class dummy_field(object):
-        pass
-
-    # It is somewhat ridiculous that we need to test for both the
-    # translated and the untranslated versions, but I can't get it to
-    # work on both my development machine (which wants translated, as
-    # seems most logical) and staging (which doesn't work with
-    # translated) right now - RG20120723.
-
-    if header_title in ('Scenario', ugettext('Scenario')):
-        scenarioid = dummy_field()
-        scenarioid.name = _('Scenario ID')
-        scenarioid.value_str = str(scenario.id)
-        return (scenarioid,)
-
-    if header_title in ('External Water', ugettext('External Water')):
-        graphurl = dummy_field()
-        breach = scenario.breaches.all()[0]
-        scenariobreach = scenario.scenariobreach_set.get(breach=breach)
-
-        if len(scenariobreach.
-               waterlevelset.waterlevel_set.all()) > 0:
-            image_src = (
-                reverse('flooding_service') +
-                "?action=get_externalwater_graph_infowindow&width=350&" +
-                "height=400&scenariobreach_id=" +
-                str(scenariobreach.id))
-            graphurl.name = _('External water graph')
-            graphurl.value_str = SafeString('<img src="' + image_src +
-                                            ' " width=350 height=400/>')
-            return (graphurl,)
-
-    return ()
-
-
 def infowindow_information(scenario):
-    """
-    - Get the list of headers and fields that the importtool has
-    - If the importtool field says that the data is stored in a
-      ExtraInfoField, use that to show the data
-    - Otherwise, if it's a known field on a known object, getattr it
-      from that
-    - Only keep fields with a value, only keep headers with fields
-
-    We need to add some fields that the importtool doesn't have;
-    scenario.id and attachments come to mind. So we're going to
-    manually add some fields to the start and end.
-
-    Some hacks needed:
-    - Don't show things from Results
-    - Show the old Attachments list instead (more complete)
-    - Split Breach's geom field into x and y based on the field name
-    - Add in the waterlevel picture that the old version could show
-    """
-
-    grouped_input_fields = InputField.grouped_input_fields()
-
-    for header in grouped_input_fields:
-        for inputfield in header['fields']:
-            value = scenario.value_for_inputfield(inputfield)
-            value_str = inputfield.display_unicode(
-                value, for_viewing_only=True)
-
-            # Set the value_str on the inputfield object for easy
-            # use in the template.
-            inputfield.value_str = value_str
-
-        # Only keep fields with a value
-        header['fields'] = [f for f in header['fields'] if f.value_str]
-
-    # Hack in some extra fields that aren't in the importtool but
-    # belong to "the old way of doing things"
-    for header in grouped_input_fields:
-        extra_fields = extra_infowindow_information_fields(
-            header['title'], scenario)
-        # Scenario fields (well, the scenario id) are added at the
-        # front, others at the end...
-        if header['title'] in ('Scenario', ugettext('Scenario')):
-            header['fields'][0:0] = extra_fields
-        else:
-            header['fields'] += extra_fields
-
-    # Only keep headers with fields
-    grouped_input_fields = [h for h in grouped_input_fields if h['fields']]
-
     return render_to_response(
         'flooding/infowindow_information.html',
-        {'grouped_fields': grouped_input_fields,
+        {'grouped_fields': scenario.grouped_scenario_information(),
          'attachment_list': scenario.get_attachment_list(),
          'scenario_id': scenario.id})
 

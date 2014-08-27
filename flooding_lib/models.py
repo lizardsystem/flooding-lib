@@ -15,6 +15,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.gis.db import models
 from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext as _
+from django.utils.safestring import SafeString
 
 from flooding_base.models import Setting
 from flooding_presentation.models import PresentationLayer, PresentationType
@@ -332,16 +333,16 @@ class ExternalWater(models.Model):
     - is related to 0 or more cutofflocations
 
     """
-    TYPE_CHOICES = (
-        (1, _('sea')),
-        (2, _('lake')),
-        (3, _('canal')),
-        (4, _('internal_lake')),
-        (5, _('internal_canal')),
-        (6, _('river')),
-        (7, _('unknown')),
-        (8, _('lower_river')),
-    )
+    TYPE_CHOICES = {
+        1: _('sea'),
+        2: _('lake'),
+        3: _('canal'),
+        4: _('internal_lake'),
+        5: _('internal_canal'),
+        6: _('river'),
+        7: _('unknown'),
+        8: _('lower_river'),
+    }
     TYPE_SEA = 1
     TYPE_LAKE = 2
     TYPE_CANAL = 3
@@ -368,7 +369,7 @@ class ExternalWater(models.Model):
     sobekmodels = models.ManyToManyField(SobekModel, blank=True)
     cutofflocations = models.ManyToManyField(CutoffLocation, blank=True)
 
-    type = models.IntegerField(choices=TYPE_CHOICES)
+    type = models.IntegerField(choices=sorted(TYPE_CHOICES.items()))
     liztype = models.IntegerField(choices=LIZ_TYPE_CHOICES,
                                   null=True, blank=True)
     area = models.IntegerField(blank=True, null=True)
@@ -386,6 +387,9 @@ class ExternalWater(models.Model):
         verbose_name = _('External water')
         verbose_name_plural = _('External waters')
         db_table = 'flooding_externalwater'
+
+    def type_str(self):
+        return ExternalWater.TYPE_CHOICES.get(self.type, _('unknown'))
 
     def __unicode__(self):
         return unicode(self.name)
@@ -942,11 +946,11 @@ def find_imported_value(fieldobject, data_objects):
                 except ValueError:
                     pass  # Keep the string version of value
             elif value_type in (
-                InputField.TYPE_FLOAT, InputField.TYPE_INTERVAL):
+                    InputField.TYPE_FLOAT, InputField.TYPE_INTERVAL):
                 value = float(value)
             elif value_type in (
-                InputField.TYPE_STRING, InputField.TYPE_TEXT,
-                InputField.TYPE_DATE):
+                    InputField.TYPE_STRING, InputField.TYPE_TEXT,
+                    InputField.TYPE_DATE):
                 pass  # Already a string
             elif value_type in (InputField.TYPE_BOOLEAN,):
                 # Value is a string like "1" or "0"
@@ -1409,7 +1413,7 @@ class Scenario(models.Model):
 
         if data_objects is not None:
             return find_imported_value(
-                inputfield, self.gather_data_objects())
+                inputfield, data_objects)
 
     def string_value_for_inputfield(self, inputfield):
         """Retrieve a value for inputfield from ExtraScenarioInfo model,
@@ -1520,6 +1524,80 @@ class Scenario(models.Model):
             return Result.objects.get(scenario=self, resulttype=resulttype)
         except Result.DoesNotExist:
             return Result(scenario=self, resulttype=resulttype)
+
+    def grouped_scenario_information(self):
+        """The information shown in the "Scenario details" infowindow.
+        Collecting all of it is somewhat complicated. Also used for the
+        data export.
+
+        - Get the list of headers and fields that the importtool has
+          (the configuration of the importtool is leading for the fields
+          shown by this function)
+        - If the importtool field says that the data is stored in a
+          ExtraInfoField, use that to show the data
+        - Otherwise, if it's a known field on a known object, getattr it
+          from that
+        - Only keep fields with a value, only keep headers with fields
+
+        We need to add some fields that the importtool doesn't have,
+        namely scenario.id and a graph of external water level in
+        time. We will manually add some fields to the start and end.
+
+        Some hacks needed:
+        - Don't show things from Results
+        - Split Breach's geom field into x and y based on the field name
+        - Add in the waterlevel picture that the old version could show
+
+        """
+
+        from flooding_lib.tools.importtool.models import InputField
+        grouped_input_fields = InputField.grouped_input_fields()
+
+        for header in grouped_input_fields:
+            for input_field in header['fields']:
+                value = self.value_for_inputfield(input_field)
+                value_str = input_field.display_unicode(
+                    value, for_viewing_only=True)
+
+                # Set the value_str on the inputfield object for easy
+                # use in the template.
+                input_field.value_str = value_str
+
+            # Only keep fields with a value
+            header['fields'] = [f for f in header['fields'] if f.value_str]
+
+        # Hack in some extra fields that aren't in the importtool but
+        # belong to "the old way of doing things"
+        class dummy_field(object):
+            pass
+
+        for header in grouped_input_fields:
+            # The scenario id is added at the front, a waterlevel graph
+            # URL at the end of its section.
+            if header['title'] in ('Scenario', _('Scenario')):
+                scenario_id = dummy_field()
+                scenario_id.name = _('Scenario ID')
+                scenario_id.value_str = str(self.id)
+                header['fields'][0:0] = [scenario_id]
+            elif header['title'] in ('External Water', _('External Water')):
+                graph_url = dummy_field()
+                breach = self.breaches.all()[0]
+                scenario_breach = self.scenariobreach_set.get(breach=breach)
+
+                if len(scenario_breach.
+                       waterlevelset.waterlevel_set.all()) > 0:
+                    image_src = (
+                        reverse('flooding_service') +
+                        "?action=get_externalwater_graph_infowindow&" +
+                        "width=350&height=400&scenariobreach_id=" +
+                        str(scenario_breach.id))
+                    graph_url.name = _('External water graph')
+                    graph_url.value_str = SafeString(
+                        '<img src="' + image_src + ' " width=350 height=400/>')
+                    header['fields'].append(graph_url)
+
+        # Only return headers with fields
+        return [h for h in grouped_input_fields if h['fields']]
 
     def get_abs_destdir(self):
         """

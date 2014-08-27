@@ -1,11 +1,11 @@
 from __future__ import unicode_literals
 
-import gdal
 import os
 import stat
 import sys
 
 import numpy as np
+from osgeo import gdal
 
 from django.conf import settings
 from django import db
