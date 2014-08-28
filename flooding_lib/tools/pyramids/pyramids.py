@@ -10,12 +10,14 @@ from __future__ import absolute_import
 from __future__ import division
 
 import logging
+import os
 
 import numpy as np
 from matplotlib import colors
 
 from flooding_lib.util.colormap import get_mpl_cmap
 from flooding_lib.util.colormap import ColorMap
+from flooding_lib.conf import settings
 
 from . import models
 
@@ -128,7 +130,8 @@ def result_legend(result, presentationlayer, colormap=None, maxvalue=None):
     else:
         # Our own .csv colormaps.
         show_maxvalue = False
-        cmap = ColorMap(colormap)
+        cmap = ColorMap(os.path.join(
+            settings.FLOODING_LIB_COLORMAP_DIR, colormap))
         legend = [
             (value, rgba_to_html(cmap.value_to_color(value)))
             for value in cmap.legend_values()
