@@ -54,9 +54,9 @@
 			</table>
 		</table>
 		<br>
-		<a href="{%url flooding_tools_import_new %}" >{% trans "Import new scenario" %}</a>
+		<a href="{% url "flooding_tools_import_new" %}" >{% trans "Import new scenario" %}</a>
 		<br>
-		<a href="{%url flooding_tools_import_group %}" >{% trans "Import groep scenario's" %}</a>
+		<a href="{% url "flooding_tools_import_group" %}" >{% trans "Import groep scenario's" %}</a>
                 <br>
-{% comment %}		<a href="{%url flooding_excel_import_export %}">Exporteer of importeer metadata update bestaande scenario's</a> {% endcomment %}
+{% comment %}		<a href="{% url "flooding_excel_import_export" %}">Exporteer of importeer metadata update bestaande scenario's</a> {% endcomment %}
 {% endblock content %}
