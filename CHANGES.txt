@@ -2,8 +2,8 @@ Changelog of flooding-lib
 ===================================================
 
 
-3.22.2 (unreleased)
--------------------
+3.23 (2014-08-28)
+-----------------
 
 - Added filtering on 'approved y/n' for scenarios on the export page. Note:
   due to the boolean nature of booleans, the filtering in the user interface
