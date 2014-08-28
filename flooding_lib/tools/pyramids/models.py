@@ -138,8 +138,8 @@ class Animation(models.Model):
         return "{} frames in {}".format(self.frames, self.basedir)
 
     def save_image_to_response(
-        self, response, framenr=0,
-        colormap=None, maxvalue=None):
+            self, response, framenr=0,
+            colormap=None, maxvalue=None):
         if colormap is None:
             colormap = 'PuBu'
         if maxvalue is None:

@@ -2,11 +2,11 @@
 
 {% if colormaps %}
   {% if active_colormap %}
-  <script type="text/javascript">
-      if (dynamic_legend !== undefined) {
+    <script type="text/javascript">
+      if (dynamic_legend !== undefined && dynamic_legend.colormap === undefined) {
           dynamic_legend.set_colormap("{{ active_colormap }}");
       }
-  </script>
+    </script>
   {% endif %}
   <div class="colormapcontrol">Colormap:<br/>
     <select class="colormap" id="changecolormap" onchange="dynamic_legend.set_colormap(this.value)">
