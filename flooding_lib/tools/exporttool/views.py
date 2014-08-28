@@ -195,7 +195,8 @@ def new_export(request):
                 export_arrival_times=form.cleaned_data['export_arrival_times'],
                 export_period_of_increasing_waterlevel=
                 form.cleaned_data['export_period_of_increasing_waterlevel'],
-                export_inundation_sources=form.cleaned_data['export_inundation_sources']
+                export_inundation_sources=form.cleaned_data['export_inundation_sources'],
+                export_scenario_data=form.cleaned_data['export_scenario_data']
             )
             new_export_run.save()
             new_export_run.scenarios = Scenario.objects.filter(

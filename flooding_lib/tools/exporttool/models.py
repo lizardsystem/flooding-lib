@@ -96,7 +96,8 @@ class ExportRun(models.Model):
             'export_possibly_flooded',
             'export_arrival_times',
             'export_period_of_increasing_waterlevel',
-            'export_inundation_sources'
+            'export_inundation_sources',
+            'export_scenario_data'
         ):
             if getattr(self, fieldname):
                 maps.append(
