@@ -5,7 +5,11 @@ Changelog of flooding-lib
 3.24 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Exporttool changes:
+
+  - See only your own exports, or ones that have been marked "public"
+  - Move your own exports to an archive page
+  - Delete your own exports from the archive page
 
 
 3.23 (2014-08-28)

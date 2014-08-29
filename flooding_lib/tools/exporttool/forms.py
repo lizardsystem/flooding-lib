@@ -9,6 +9,7 @@ class ExportRunForm(forms.ModelForm):
         fields = ('name',
                   'description',
                   'gridsize',
+                  'public',
                   'export_max_waterdepth',
                   'export_max_flowvelocity',
                   'export_possibly_flooded',

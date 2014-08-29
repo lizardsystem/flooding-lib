@@ -3,7 +3,9 @@ import json
 import os.path
 
 from django.core.urlresolvers import reverse
+from django.db.models import Q
 from django.http import HttpResponse
+from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.utils.translation import ugettext as _
 
@@ -37,15 +39,32 @@ def index(request):
     else:
         has_create_rights = False
 
-    export_run_list = ExportRun.objects.all()
+    show_archived = False
+    if 'show_archived' in request.GET:
+        show_archived = bool(request.GET['show_archived'])
+
+    if show_archived:
+        # Show user's own archived exports
+        export_run_list = ExportRun.objects.filter(
+            owner=request.user, archived=True)
+    else:
+        # Show user's own and public non-archived exports
+        export_run_list = ExportRun.objects.filter(
+            Q(owner=request.user) | Q(public=True)).filter(
+            archived=False)
 
     breadcrumbs = [
         {'name': _('Export tool')}]
 
-    return render_to_response('export/exports_overview.html',
-                              {'export_run_list': export_run_list,
-                               'breadcrumbs': breadcrumbs,
-                               'has_create_rights': has_create_rights})
+    return render_to_response(
+        'export/exports_overview.html',
+        {
+            'export_run_list': export_run_list,
+            'breadcrumbs': breadcrumbs,
+            'has_create_rights': has_create_rights,
+            'show_archived': show_archived,
+            'request': request
+        })
 
 
 def export_detail(request, export_run_id):
@@ -177,7 +196,8 @@ def new_export(request):
                 export_period_of_increasing_waterlevel=
                 form.cleaned_data['export_period_of_increasing_waterlevel'],
                 export_inundation_sources=form.cleaned_data['export_inundation_sources'],
-                export_scenario_data=form.cleaned_data['export_scenario_data']
+                export_scenario_data=form.cleaned_data['export_scenario_data'],
+                public=form.cleaned_data['public']
             )
             new_export_run.save()
             new_export_run.scenarios = Scenario.objects.filter(
@@ -284,3 +304,32 @@ def reuse_export(request, export_run_id):
                               {'breadcrumbs': breadcrumbs,
                                'export_run': export_run,
                                'project': project})
+
+
+def toggle_archived_export(request, export_run_id):
+    if not request.user.has_perm('exporttool.can_create'):
+        return HttpResponse(_("No permission to download export"))
+
+    export_run = get_object_or_404(ExportRun, pk=export_run_id)
+
+    if request.user != export_run.owner:
+        return HttpResponse(_("Only the export run's owner can archive it."))
+
+    export_run.archived = True
+    export_run.save()
+
+    return HttpResponseRedirect(reverse('flooding_tools_export_index'))
+
+
+def delete_archived_export(request, export_run_id):
+    if not request.user.has_perm('exporttool.can_create'):
+        return HttpResponse(_("No permission to delete export"))
+
+    export_run = get_object_or_404(ExportRun, pk=export_run_id)
+
+    if request.user != export_run.owner:
+        return HttpResponse(_("Only the export run's owner can delete it."))
+
+    export_run.delete()
+
+    return HttpResponseRedirect(reverse('flooding_tools_export_index'))
