@@ -34,6 +34,10 @@ def serve_file(request, dirname, filename, nginx_dirname, debug=None):
     # to determine it.
     response['Content-Type'] = ''
 
+    # Set filename
+    response['Content-Disposition'] = (
+        'attachment; filename="{}"'.format(filename))
+
     # Apache
     response['X-Sendfile'] = os.path.join(dirname, filename)
 
