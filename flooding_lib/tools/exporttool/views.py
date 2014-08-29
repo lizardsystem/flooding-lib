@@ -9,6 +9,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.utils.translation import ugettext as _
 
+from flooding_lib.util import viewutil
 from flooding_lib.models import Scenario
 from flooding_lib.tools.exporttool.forms import ExportRunForm
 from flooding_lib.tools.exporttool.models import ExportRun, Setting
@@ -243,17 +244,14 @@ def exportrun_resultfile(request, export_run_id):
 
     result_folder = Setting.objects.get(
         key='MAXIMAL_WATERDEPTH_RESULTS_FOLDER').value
+
     file_path = os.path.join(result_folder, main_result.file_basename)
     if not os.path.isfile(file_path):
         return HttpResponse('Het opgevraagde bestand bestaat niet.')
 
-    file_name = main_result.file_basename
-    file_object = open(file_path, 'rb')
-    response = HttpResponse(file_object.read())
-    response['Content-Disposition'] = (
-        'attachment; filename="' + file_name + '"')
-    file_object.close()
-    return response
+    return viewutil.serve_file(
+        request, result_folder, main_result.file_basename,
+        '/download_export_run_results/')
 
 
 def get_breaches_info(scenario):
