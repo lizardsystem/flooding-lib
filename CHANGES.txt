@@ -2,7 +2,7 @@ Changelog of flooding-lib
 ===================================================
 
 
-3.24 (unreleased)
+3.24 (2014-08-29)
 -----------------
 
 - Exporttool changes:
