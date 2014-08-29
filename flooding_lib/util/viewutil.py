@@ -5,6 +5,7 @@ from __future__ import print_function, unicode_literals
 from __future__ import absolute_import, division
 
 import os
+import mimetypes
 import platform
 
 from django.conf import settings
@@ -30,13 +31,16 @@ def serve_file(request, dirname, filename, nginx_dirname, debug=None):
 
     response = http.HttpResponse()
 
-    # Unset the Content-Type as to allow for the webserver
-    # to determine it.
-    response['Content-Type'] = ''
+    # Guess content type, set filename
+    contenttype, encoding = mimetypes.guess_type(filename)
 
-    # Set filename
+    response['Content-Type'] = contenttype
+    response['Content-Length'] = str(
+        os.stat(os.path.join(dirname, filename).st_size))
     response['Content-Disposition'] = (
         'attachment; filename="{}"'.format(filename))
+    if encoding is not None:
+        response['Content-Encoding'] = encoding
 
     # Apache
     response['X-Sendfile'] = os.path.join(dirname, filename)
