@@ -28,12 +28,6 @@ def index(request):
     Optionally provide
     "?action=get_attachment&path=3090850/zipfiles/totaal.zip"
     """
-    if request.method == 'GET':
-        action = request.GET.get('action', '')
-        path = request.GET.get('path', '')
-        if action and path:
-            return service_get_max_water_depth_result(request, path)
-
     if (not (request.user.is_authenticated() and
              (request.user.has_perm('exporttool.can_download') or
               request.user.has_perm('exporttool.can_create')))):
@@ -43,20 +37,7 @@ def index(request):
     else:
         has_create_rights = False
 
-    export_run_list = []
-    for export_run in ExportRun.objects.all():
-        main_result = export_run.get_main_result()
-        path = main_result.file_basename if main_result else None
-        detail_url = reverse(
-            'flooding_tools_export_detail', args=[export_run.id])
-        export_run_list.append(
-            (export_run.name,
-             export_run.creation_date,
-             export_run.description,
-             path,
-             detail_url,
-             export_run.get_state_display(),
-             export_run.id,))
+    export_run_list = ExportRun.objects.all()
 
     breadcrumbs = [
         {'name': _('Export tool')}]
@@ -212,19 +193,25 @@ def new_export(request):
                               {'form': form})
 
 
-def service_get_max_water_depth_result(request, path):
+def exportrun_resultfile(request, export_run_id):
     if not (request.user.is_authenticated() and
             (request.user.has_perm('exporttool.can_download') or
              request.user.has_perm('exporttool.can_create'))):
         return HttpResponse(_("No permission to download export"))
 
+    export_run = get_object_or_404(ExportRun, pk=export_run_id)
+    main_result = export_run.get_main_result()
+
+    if main_result is None:
+        return HttpResponse(_("Export run has no result."))
+
     result_folder = Setting.objects.get(
         key='MAXIMAL_WATERDEPTH_RESULTS_FOLDER').value
-    file_path = os.path.join(result_folder, path)
+    file_path = os.path.join(result_folder, main_result.file_basename)
     if not os.path.isfile(file_path):
         return HttpResponse('Het opgevraagde bestand bestaat niet.')
 
-    file_name = os.path.split(path)[1]
+    file_name = main_result.file_basename
     file_object = open(file_path, 'rb')
     response = HttpResponse(file_object.read())
     response['Content-Disposition'] = (

@@ -30,17 +30,16 @@
             {% if export_run_list %}
 
               {% for export_run in export_run_list %}
-                {# 0: name, 1: creation_date, 2: description, 3: path, 4: detail_url, 5: state, 6: id #}
                 <tr class="{% cycle 'cellDark' 'cell'%}">
                   <td>
-                    <a href="{{export_run.4}}">{{export_run.0}}</a>
+                    <a href="{% url "flooding_tools_export_detail" export_run.id %}">{{ export_run.name }}</a>
                   </td>
-                  <td>{{export_run.1|date:"d-m-Y"}}</td>
-                  <td>{{export_run.2}}</td>
-                  <td>{{export_run.5}}</td>
+                  <td>{{export_run.creation_date|date:"d-m-Y"}}</td>
+                  <td>{{export_run.description}}</td>
+                  <td>{{export_run.get_state_display}}</td>
                   <td>
-                    {% if export_run.3 %}
-                      <a href="{% url 'flooding_tools_export_index' %}?action=get_attachment&path={{export_run.3}}">
+                    {% if export_run.get_main_result %}
+                      <a href="{% url 'flooding_tools_export_resultfile' export_run.id %}">
                         {% trans "Result file" %}
                       </a>
                     {% else %}
@@ -48,7 +47,7 @@
                     {% endif %}
                   </td>
                   <td>
-                    <a href="{% url "flooding_tools_reuse_export" export_run.6 %}">{% trans "Edit" %}</a>
+                    <a href="{% url "flooding_tools_reuse_export" export_run.id %}">{% trans "Edit" %}</a>
                   </td>
                 </tr>
               {% endfor %}

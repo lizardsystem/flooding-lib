@@ -7,6 +7,10 @@ urlpatterns = patterns(
         'flooding_lib.tools.exporttool.views.index',
         name='flooding_tools_export_index'),
 
+    url(r'^exportdetail/(?P<export_run_id>\d+)/resultfile/$',
+        'flooding_lib.tools.exporttool.views.exportrun_resultfile',
+        name='flooding_tools_export_resultfile'),
+
     url(r'^exportdetail/(?P<export_run_id>\d+)$',
         'flooding_lib.tools.exporttool.views.export_detail',
         name='flooding_tools_export_detail'),
