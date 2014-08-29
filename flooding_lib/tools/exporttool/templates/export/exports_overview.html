@@ -45,7 +45,7 @@
                   <td>{{export_run.get_state_display}}</td>
                   <td>
                     {% if export_run.get_main_result %}
-                      <a href="{% url 'flooding_tools_export_resultfile' export_run.id %}">
+                      <a href="{% url 'flooding_tools_export_resultfile' export_run.id %}{{ export_run.get_main_result.file_basename }}">
                         {% trans "Result file" %}
                       </a>
                     {% else %}
