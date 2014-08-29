@@ -13,6 +13,9 @@ from flooding_lib.models import Scenario
 from flooding_lib.tools.exporttool.forms import ExportRunForm
 from flooding_lib.tools.exporttool.models import ExportRun, Setting
 
+# Default, in case it's not set with a Setting
+DEFAULT_MAX_SCENARIOS_PER_EXPORT = 300
+
 
 def get_result_path_location(result):
     result_folder = Setting.objects.get(
@@ -176,9 +179,22 @@ def new_export(request):
         # necessary to call 'is_valid()' before adding custom errors
         valid = form.is_valid()
         scenario_ids = json.loads(request.REQUEST.get('scenarioIds'))
+
+        try:
+            setting_max_scenarios = Setting.objects.get(
+                key='MAX_SCENARIOS_PER_EXPORT')
+            max_scenarios = int(setting_max_scenarios)
+        except Setting.DoesNotExist:
+            max_scenarios = DEFAULT_MAX_SCENARIOS_PER_EXPORT
+
         if not scenario_ids:
             form._errors['scenarios'] = form.error_class(
                 [u"U heeft geen scenario's geselecteerd."])
+            valid = False
+        elif len(scenario_ids) > max_scenarios:
+            form._errors['scenarios'] = form.error_class(
+                [u"Er zijn maximaal {} scenario's per export toegestaan."
+                 .format(max_scenarios)])
             valid = False
 
         if valid:
