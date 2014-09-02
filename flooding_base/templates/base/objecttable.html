@@ -15,7 +15,7 @@
 	{% for field in row %}
 	<td>
 	  {% if field.url %}<a href="{{ field.url }}" {% if field.target %} target="{{ field.target }}" {% endif %}>{% endif %}
-	    {{ field.value|markdown }}
+	    {{ field.value|safe|markdown }}
 	    {% if not field.urlpost %}{% if field.icon %}
 	    <img src="{{ field.icon }}.png"{% if field.icontitle %} title="{{ field.icontitle }}"{% endif %}/>
 	    {% endif %}{% endif %}

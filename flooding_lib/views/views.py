@@ -836,7 +836,7 @@ def scenario_list(request, permission_manager):
         scenarios = scenarios.exclude(
            scenariobreach__extwrepeattime__lt=search_session['repeattime_gte'])
     
-    scenarios = scenarios.distinct('id')
+    scenarios = scenarios.order_by('id').distinct('id')
 
     #order the object list
     order_dict = {
