@@ -183,7 +183,7 @@ def new_export(request):
 
         try:
             setting_max_scenarios = Setting.objects.get(
-                key='MAX_SCENARIOS_PER_EXPORT')
+                key='MAX_SCENARIOS_PER_EXPORT').value
             max_scenarios = int(setting_max_scenarios)
         except Setting.DoesNotExist:
             max_scenarios = DEFAULT_MAX_SCENARIOS_PER_EXPORT
