@@ -73,7 +73,7 @@
 					<td><b>{% trans "Result file" %}</b></td>
 					<td>
 						{% if path %}
-							<a href="{% url "flooding_tools_export_index" %}?action=get_attachment&path={{path}}">{% trans "Result file" %}</a>
+							<a href="{% url 'flooding_tools_export_resultfile' export_run.id %}{{ path }}">{% trans "Result file" %}</a>
 						{% else %}
 							-
 						{% endif %}

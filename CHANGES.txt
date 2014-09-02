@@ -2,10 +2,27 @@ Changelog of flooding-lib
 ===================================================
 
 
-3.24 (unreleased)
+3.26 (unreleased)
 -----------------
 
 - Nothing changed yet.
+
+
+3.25.1 (2014-09-02)
+-------------------
+
+- Nothing changed yet.
+
+
+3.24 (2014-08-29)
+-----------------
+
+- Exporttool changes:
+
+  - See only your own exports, or ones that have been marked "public"
+  - Move your own exports to an archive page
+  - Delete your own exports from the archive page
+  - Max 300 scenarios per export
 
 
 3.23 (2014-08-28)

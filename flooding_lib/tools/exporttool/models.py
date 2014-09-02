@@ -85,6 +85,11 @@ class ExportRun(models.Model):
         choices=EXPORT_STATE_CHOICES,
         default=EXPORT_STATE_WAITING)
 
+    public = models.BooleanField(
+        default=False, verbose_name=_("Publicly visible"))
+    archived = models.BooleanField(
+        default=False, verbose_name=_("Moved to the archive"))
+
     @property
     def selected_maps(self):
         """Return list with verbose_names of selected maps."""
@@ -96,7 +101,8 @@ class ExportRun(models.Model):
             'export_possibly_flooded',
             'export_arrival_times',
             'export_period_of_increasing_waterlevel',
-            'export_inundation_sources'
+            'export_inundation_sources',
+            'export_scenario_data'
         ):
             if getattr(self, fieldname):
                 maps.append(
@@ -230,6 +236,12 @@ class ExportRun(models.Model):
 
         text_file.close()
 
+    def delete(self):
+        """Make sure the stored files are also deleted."""
+        for result in self.result_set.all():
+            result.delete()
+        return super(ExportRun, self).delete()
+
 
 class Result(models.Model):
     """ A result from an export run.
@@ -255,6 +267,16 @@ class Result(models.Model):
     file_basename = models.CharField(max_length=100)
     area = models.IntegerField(choices=RESULT_AREA_CHOICES)
     export_run = models.ForeignKey(ExportRun)
+
+    def delete(self):
+        """Delete the file on disk as well as this instance."""
+        export_folder = Setting.objects.get(key='EXPORT_FOLDER').value
+        path = os.path.join(export_folder, self.file_basename)
+
+        if os.path.exists(path):
+            os.remove(path)
+
+        return super(Result, self).delete()
 
     def __unicode__(self):
         return self.name
