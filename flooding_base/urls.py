@@ -89,10 +89,9 @@ urlpatterns = patterns(
         'django.contrib.auth.views.password_change',
         name='password_change_url'),
 
-    url(r'^accounts/password_change_done/$',
-        'django.contrib.auth.views.password_change_done'),
-
-
+    url(r'^accounts/password_change/done/$',
+        'django.contrib.auth.views.password_change_done',
+        name='password_change_done'),
     )
 
 
