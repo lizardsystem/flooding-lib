@@ -1,6 +1,6 @@
 {% extends "lizard/base.html" %}
 {% load i18n %}
-{% block title %}Lizard import tool{% endblock %}
+{% block title %}{% trans 'Lizard import tool' %}){% endblock %}
 {% block stylesheets %}
 		<link rel="shortcut icon" href="{{ url_favicon }}">
 		<link href="{% url "root_url" %}static_media/style/style.css" media="screen" type="text/css" rel="stylesheet">
@@ -11,9 +11,9 @@
 {% block bodyarguments %} class="scrollable" {% endblock %}
 {% block content %}
 <p>
-<a href="{% url "flooding_excel_import_export" %}">Down- en upload hier een overzicht van alle metadata van een project.</a>
+<a href="{% url "flooding_excel_import_export" %}">{% trans 'Download and upload all metadata of a project here' %}</a>
 <br>
-<a href="{% url "flooding_tools_ror_keringen_page" %}">Down- en upload hier het bestand van de ROR-keringen en -wateren.</a>
+<a href="{% url "flooding_tools_ror_keringen_page" %}">{% trans  'Download and upload here the file of the ROR defenses and waters.' %}</a>
 </p>
 		<h1>
 		{% trans "Overview" %}
@@ -26,7 +26,7 @@
 					<td width="100"><b>{% trans "Scenario name" %}</b></td>
 					<td width="50"><b>{% trans "Owner name" %}</b></td>
 					<td width="70"><b>{% trans "Group import" %}</b></td>
-					<td width="323"><b>{% trans "Opmerkingen keuring" %}</b></td>
+					<td width="323"><b>{% trans "Remarks" %}</b></td>
 					<td width="100"><b>{% trans "State" %}</b></td>
 					{% if has_approve_rights %}
 						<td width="100"><b>{% trans "Approve" %}</b></td>
@@ -43,7 +43,7 @@
 				    		<td>{{import_scenario.5}}</td>
 				    		<td>{{import_scenario.6}}</td>
 				    		{% if has_approve_rights %}
-				    			<td><a href="{% url "flooding_tools_import_approve" import_scenario.1%}" >keuren</a></td>
+				    			<td><a href="{% url "flooding_tools_import_approve" import_scenario.1%}" >{% trans 'approve' %}</a></td>
 				    		{% endif %}
 				    	</tr>
 			    	{% endfor %}
@@ -56,7 +56,7 @@
 		<br>
 		<a href="{% url "flooding_tools_import_new" %}" >{% trans "Import new scenario" %}</a>
 		<br>
-		<a href="{% url "flooding_tools_import_group" %}" >{% trans "Import groep scenario's" %}</a>
+		<a href="{% url "flooding_tools_import_group" %}" >{% trans "Import group scenarios" %}</a>
                 <br>
-{% comment %}		<a href="{% url "flooding_excel_import_export" %}">Exporteer of importeer metadata update bestaande scenario's</a> {% endcomment %}
+{% comment %}		<a href="{% url "flooding_excel_import_export" %}">{% trans "Export or import metadata update existing scenarios" %} </a> {% endcomment %}
 {% endblock content %}

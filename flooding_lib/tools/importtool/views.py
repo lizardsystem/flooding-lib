@@ -817,7 +817,7 @@ def ror_keringen_page(request):
     breadcrumbs = [
         {'name': _('Importtool'),
          'url': reverse('flooding_tools_import_overview')},
-        {'name': _('Down- en upload ROR-keringen en -wateren')}]
+        {'name': _('Download and upload ROR defenses and waters')}]
     return render_to_response('import/down_upload_ror_keringen.html',
                               {'breadcrumbs': breadcrumbs,
                                'keringen_file_names': keringen_file_names})

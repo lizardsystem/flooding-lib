@@ -746,7 +746,7 @@ class InputField(models.Model):
     header = models.IntegerField(
         choices=HEADER_CHOICES, default=HEADER_REMAINING)
     position = models.IntegerField(
-        default=0, help_text=_('Hoe hoger hoe eerder in rij'))
+        default=0, help_text=_('The higher the sooner in row'))
     import_table_field = models.CharField(
         max_length=100, help_text=_('Name of col. in import csv-file'))
     destination_table = models.CharField(

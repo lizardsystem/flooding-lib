@@ -47,7 +47,7 @@ class ExportRun(models.Model):
 
     EXPORT_STATE_CHOICES = (
         (EXPORT_STATE_WAITING, _('Waiting')),
-        (EXPORT_STATE_DONE, _('Klaar')))
+        (EXPORT_STATE_DONE, _('Ready')))
 
     name = models.CharField(max_length=200, verbose_name=_('Name'))
     description = models.TextField(blank=True, verbose_name=_('Description'))
@@ -86,7 +86,7 @@ class ExportRun(models.Model):
         default=EXPORT_STATE_WAITING)
 
     public = models.BooleanField(
-        default=False, verbose_name=_("Publicly visible"))
+        default=True, verbose_name=_("Publicly visible"))
     archived = models.BooleanField(
         default=False, verbose_name=_("Moved to the archive"))
 

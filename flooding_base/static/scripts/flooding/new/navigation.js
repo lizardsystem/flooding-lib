@@ -315,8 +315,8 @@ function fnNavigation() {
 		    fnLoccutoffsLayer.deselect(record.cuttofflocation[i]);
 		}
 	    }
-    	}
-
+    	},
+	emptyMessage: ST_NO_ITEM_TO_SHOW
     });
 
     isc.DataSource.create({
@@ -385,7 +385,8 @@ function fnNavigation() {
        	    {name: "tclose",title: ST_ACTION_AFTER,type: "text",canEdit: true,formatCellValue:"intervalFormatter(intervalReader(value));",width:60}//interval editor!
         ],
     	autoDraw:false,
-    	recordClick: function(viewer, record, recordNum) {  	}
+    	recordClick: function(viewer, record, recordNum) {  	},
+	emptyMessage: ST_NO_ITEM_TO_SHOW
     });
 
     isc.IButton.create({
@@ -449,7 +450,8 @@ function fnNavigation() {
        	     defaultValue:"tov NAP", canEdit: true,width:60, editorProperties:{width:80}},
        	    {name: "adjustment",title: ST_ADJUSTMENT,type: "float", canEdit: true,width:50}
         ],
-    	autoDraw:false
+    	autoDraw:false,
+	emptyMessage: ST_NO_ITEM_TO_SHOW
     });
 
 

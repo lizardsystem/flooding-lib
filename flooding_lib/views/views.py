@@ -90,7 +90,7 @@ scenario_list_search_table_columns = (
      'sort': 'sobekmodelinundation',
      'sort_rev': 'sobekmodelinundation_rev',
      'width': '12%'},
-    {'name': _('breseigenschappen'),
+    {'name': _('breach properties'),
      'width': '13%'},
     {'name': _('cutofflocations'),
      'width': '10%'},

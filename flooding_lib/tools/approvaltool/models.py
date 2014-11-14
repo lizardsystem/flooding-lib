@@ -13,7 +13,7 @@ class ApprovalObjectType(models.Model):
     TYPE_CHOICES = (
          (TYPE_PROJECT, _('Project')),
          (TYPE_ROR, _('ROR')),
-         (TYPE_LANDELIJK, _('Landelijk gebruik')),
+         (TYPE_LANDELIJK, _('Rural use')),
     )
 
     name = models.CharField(max_length=200, unique=True)

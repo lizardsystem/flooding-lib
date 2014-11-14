@@ -13,7 +13,7 @@
 {
 {% block content %}
 {% if succeeded %}
-     {% trans 'Het opslaan is gelukt. U kunt een nieuw bestand toevoegen of dit venster sluiten.' %}
+     {% trans 'The file saved successful. You kan add a new one or close the window.' %}
 {% endif %}
 
 <form action="{% url "flooding_tools_upload_files" import_scenario_id %}" enctype="multipart/form-data" method="post">
@@ -29,7 +29,7 @@
 
     <table>
         {{ form.as_table }}
-       	<tr><td><FORM><INPUT TYPE="button" value="Terug naar gegevens" onClick="history.go(-1);"></FORM>         <input type="submit" value="{% trans 'Submit' %}" /></td></tr>
+       	<tr><td><FORM><INPUT TYPE="button" value={% trans 'Back to details'%} onClick="history.go(-1);"></FORM>         <input type="submit" value="{% trans 'Submit' %}" /></td></tr>
     </table>
 </form>
 {% endblock content %}
