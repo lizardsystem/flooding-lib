@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-11-17 08:01-0600\n"
+"POT-Creation-Date: 2014-11-17 07:46-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1335,7 +1335,7 @@ msgstr "Goedkeuren"
 
 #: tools/importtool/templates/import/imports_overview.html:46
 msgid "approve"
-msgstr "goedgekeurd"
+msgstr "keuren"
 
 #: tools/importtool/templates/import/imports_overview.html:57
 msgid "Import new scenario"
