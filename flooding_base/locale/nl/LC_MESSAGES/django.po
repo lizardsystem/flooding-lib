@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-06-12 14:41+0200\n"
+"POT-Creation-Date: 2014-11-17 08:03-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,65 +18,65 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 
-#: models.py:14 models.py:98
+#: models.py:17 models.py:101
 msgid "DataSourceEI"
 msgstr ""
 
-#: models.py:15 models.py:128
+#: models.py:18 models.py:131
 msgid "DataSourceDummy"
 msgstr ""
 
-#: models.py:37
+#: models.py:40
 msgid "Configuration"
 msgstr ""
 
-#: models.py:38
+#: models.py:41
 msgid "Configurations"
 msgstr ""
 
-#: models.py:99
+#: models.py:102
 msgid "Data sources EI"
 msgstr ""
 
-#: models.py:129
+#: models.py:132
 msgid "Data sources dummy"
 msgstr ""
 
-#: models.py:272
+#: models.py:275
 msgid "VIEW"
 msgstr ""
 
-#: models.py:344
+#: models.py:347
 msgid "The size is 280x45 pixels"
 msgstr ""
 
-#: models.py:347
+#: models.py:350
 msgid "The size is 600x70 pixels (width can vary)"
 msgstr ""
 
-#: views.py:85
+#: views.py:86
 msgid ""
 "No DataSource could be found for this configuration, please configure a "
 "DataSource."
 msgstr ""
 
-#: views.py:114 views.py:129
+#: views.py:115 views.py:130
 msgid "Database connection list"
 msgstr ""
 
-#: views.py:116
+#: views.py:117
 msgid "Test database connection"
 msgstr ""
 
-#: views.py:295 views.py:317
+#: views.py:296 views.py:318
 msgid "datasource offline"
 msgstr ""
 
-#: views.py:820
+#: views.py:821
 msgid "Lizard-report"
 msgstr ""
 
-#: views.py:829
+#: views.py:830
 msgid "Lizard-flooding"
 msgstr ""
 
@@ -85,7 +85,7 @@ msgid "Lizard admin"
 msgstr ""
 
 #: templates/admin/base_site_user.html:4 templates/admin/base_site_user.html:7
-#: templates/lizard/base.html:27 templates/lizard/profile.html:5
+#: templates/lizard/base.html:26 templates/lizard/profile.html:5
 msgid "Lizard"
 msgstr ""
 
@@ -181,33 +181,41 @@ msgstr ""
 msgid "Remarks"
 msgstr ""
 
-#: templates/gui/configuration.html:25 templates/lizard/base.html:31
+#: templates/gui/configuration.html:25 templates/lizard/base.html:30
 msgid "Change password"
 msgstr ""
 
-#: templates/gui/index.html:278
+#: templates/gui/index.html:48
 msgid "help"
 msgstr ""
 
-#: templates/gui/index.html:278
+#: templates/gui/index.html:48
 msgid "settings"
 msgstr ""
 
-#: templates/gui/index.html:278 templates/lizard/base.html:31
-msgid "Log out"
-msgstr ""
+#: templates/gui/index.html:48
+msgid "log out"
+msgstr "afmelden"
 
-#: templates/gui/index.html:281 templates/lizard/base.html:33
-msgid "Log in"
-msgstr ""
+#: templates/gui/index.html:51
+msgid "log in"
+msgstr "aanmelden"
 
-#: templates/lizard/base.html:31
+#: templates/lizard/base.html:30
 msgid "Welcome,"
-msgstr ""
+msgstr "Welkom"
 
-#: templates/lizard/base.html:31
+#: templates/lizard/base.html:30
 msgid "Documentation"
-msgstr ""
+msgstr "Documentatie"
+
+#: templates/lizard/base.html:30
+msgid "Log out"
+msgstr "Afmelden"
+
+#: templates/lizard/base.html:32
+msgid "Log in"
+msgstr "Aanmelden"
 
 #: templates/lizard/profile.html:5
 msgid "profile page"
@@ -223,7 +231,7 @@ msgstr ""
 
 #: templates/lizard/profile.html:14
 msgid "Available apps"
-msgstr ""
+msgstr "Beschikbare app's"
 
 #: templates/lizard/profile.html:22
 msgid "No apps are available"

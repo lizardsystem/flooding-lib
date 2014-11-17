@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-11-13 10:25-0600\n"
+"POT-Creation-Date: 2014-11-17 08:01-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1300,7 +1300,7 @@ msgid "Lizard import tool"
 msgstr ""
 
 #: tools/importtool/templates/import/imports_overview.html:14
-msgid "Download and upload all metadata of a project here"
+msgid "Download and upload all metadata of a project here."
 msgstr ""
 
 #: tools/importtool/templates/import/imports_overview.html:16

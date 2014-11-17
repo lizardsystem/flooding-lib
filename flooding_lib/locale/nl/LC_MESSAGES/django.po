@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-11-13 10:25-0600\n"
+"POT-Creation-Date: 2014-11-17 08:01-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1283,7 +1283,7 @@ msgstr "Importtool"
 
 #: tools/importtool/views.py:820
 msgid "Download and upload ROR defenses and waters"
-msgstr "Down- en upload ROR-keringen en -wateren"
+msgstr "Down- en upload hier het bestand van de ROR-keringen en -wateren."
 
 #: tools/importtool/templates/import/import_file_upload.html:22
 msgid "Already uploaded files"
@@ -1306,19 +1306,16 @@ msgid "Go back to the import overview page."
 msgstr "Ga terug naar de import overzichtspagina."
 
 #: tools/importtool/templates/import/imports_overview.html:3
-#, fuzzy
 msgid "Lizard import tool"
 msgstr "Impoort tool"
 
 #: tools/importtool/templates/import/imports_overview.html:14
-#, fuzzy
-msgid "Download and upload all metadata of a project here"
-msgstr "Down- en upload ROR-keringen en -wateren"
+msgid "Download and upload all metadata of a project here."
+msgstr "Down- en upload hier een overzicht van alle metadata van een project."
 
 #: tools/importtool/templates/import/imports_overview.html:16
-#, fuzzy
 msgid "Download and upload here the file of the ROR defenses and waters."
-msgstr "Down- en upload ROR-keringen en -wateren"
+msgstr "Down- en upload hier het bestand van de ROR-keringen en -wateren."
 
 #: tools/importtool/templates/import/imports_overview.html:19
 msgid "Overview"
@@ -1337,7 +1334,6 @@ msgid "Approve"
 msgstr "Goedkeuren"
 
 #: tools/importtool/templates/import/imports_overview.html:46
-#, fuzzy
 msgid "approve"
 msgstr "goedgekeurd"
 
