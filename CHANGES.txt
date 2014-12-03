@@ -2,7 +2,7 @@ Changelog of flooding-lib
 ===================================================
 
 
-3.29 (unreleased)
+3.29 (2014-12-03)
 -----------------
 
 - Encode unicode on write to csv.
