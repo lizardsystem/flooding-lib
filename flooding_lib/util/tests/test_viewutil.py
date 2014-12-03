@@ -23,8 +23,8 @@ class TestServeFile(TestCase):
         response = viewutil.serve_file(
             request, '/dirname', 'file.txt', '/nginx/', debug=False)
 
-        # Empty content type
-        self.assertEquals('', response['Content-Type'])
+        # Content type for 'file.txt' is guesses as 'text/plain'
+        self.assertEquals('text/plain', response['Content-Type'])
         # Apache URL
         self.assertEquals('/dirname/file.txt', response['X-Sendfile'])
         # Nginx URL
