@@ -35,15 +35,20 @@ def serve_file(request, dirname, filename, nginx_dirname, debug=None):
     contenttype, encoding = mimetypes.guess_type(filename)
 
     response['Content-Type'] = contenttype
-    response['Content-Length'] = str(
-        os.stat(os.path.join(dirname, filename).st_size))
+    # If the file doesn't exist, we still want to return correct
+    # headers so that Nginx can generate a 404. Also for testing...
+    filepath = os.path.join(dirname, filename)
+    if os.path.exists(filepath):
+        # But we can only set content length if it exists.
+        response['Content-Length'] = str(
+            os.stat(os.path.join(dirname, filename)).st_size)
     response['Content-Disposition'] = (
         'attachment; filename="{}"'.format(filename))
     if encoding is not None:
         response['Content-Encoding'] = encoding
 
     # Apache
-    response['X-Sendfile'] = os.path.join(dirname, filename)
+    response['X-Sendfile'] = filepath
 
     # Nginx
     nginx_path = os.path.join(nginx_dirname, filename)
