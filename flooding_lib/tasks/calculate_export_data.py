@@ -24,6 +24,16 @@ logger = logging.getLogger(__name__)
 __revision__ = "1.0"  # perform_task wants this
 
 
+def utf8ify(s):
+    if isinstance(s, unicode):
+        s = s.encode('utf8')
+    return s
+
+
+def writerow(csvwriter, row):
+    csvwriter.writerow([utf8ify(s) for s in row])
+
+
 def set_broker_logging_handler(broker_handler=None):
     """perform_task.py sets the logging handler using this."""
     if broker_handler is not None:
@@ -86,7 +96,7 @@ def create_main_csv_file(scenarios, directory):
         # Choosing to leave the header in Dutch and not translated,
         # because this is a background task that runs without knowing
         # what the user's preferred language is.
-        writer.writerow([
+        writerow(writer, [
             "Scenario ID", "Scenarionaam", "Overschrijdingsfrequentie",
             "Buitenwater", "Buitenwatertype #", "Buitenwatertype",
             "Regio", "Bres"])
@@ -99,7 +109,7 @@ def create_main_csv_file(scenarios, directory):
             # is why the CSV file is "|" separated.
 
             breaches = scenario.breaches.all()
-            writer.writerow([
+            writerow(writer, [
                 # Scenario id
                 str(scenario.id),
 
@@ -153,9 +163,9 @@ def create_scenario_csv_file(scenario, directory):
         csvwriter = csv.writer(csvfile, delimiter=b"|")
 
         for header in data:
-            csvwriter.writerow([header['title']])
+            writerow(csvwriter, [header['title']])
             for field in header['fields']:
-                csvwriter.writerow([field.name, field.value_str])
+                writerow(csvwriter, [field.name, field.value_str])
 
 
 def copy_scenario_files(scenario, directory):
