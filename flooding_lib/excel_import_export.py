@@ -331,11 +331,16 @@ def create_approval_worksheet(project, worksheet, scenarios):
 
 
 def create_excel_file(
-    project, scenarios, filename=None, include_approval=False):
+        project, scenarios, filename=None, include_approval=False):
     """Create an Excel file containing the data of this project."""
 
-    logger.debug(("Starting create_excel_file. Project id is {0}, "
-                 "filename is '{1}'.").format(project.id, filename))
+    if project:
+        # Task 201 calls this without project.
+        logger.debug(("Starting create_excel_file. Project id is {0}, "
+                      "filename is '{1}'.").format(project.id, filename))
+    else:
+        logger.debug("Starting create excel_file without project, "
+                     "filename is '{}'.".format(filename))
 
     scenarios = list(scenarios)
 
@@ -352,7 +357,7 @@ def create_excel_file(
     worksheet = workbook.add_sheet("Domeinlijst definities")
     create_domeinlijst_worksheet(worksheet, fieldinfo)
 
-    if include_approval:
+    if include_approval and project:
         worksheet = workbook.add_sheet(SCENARIO_APPROVAL_WORKSHEET)
         create_approval_worksheet(project, worksheet, scenarios)
 

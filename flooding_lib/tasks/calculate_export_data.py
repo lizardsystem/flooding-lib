@@ -17,6 +17,7 @@ import tempfile
 from flooding_lib.conf import settings
 
 from flooding_lib.tools.exporttool.models import ExportRun
+from flooding_lib import excel_import_export
 
 import logging
 logger = logging.getLogger(__name__)
@@ -53,6 +54,10 @@ def calculate_export_data(export_run_id):
 
     tempdir = tempfile.mkdtemp(dir=settings.TMP_DIR)
     create_data_directories(scenarios, tempdir)
+
+    # Generate Excel file
+    excel_import_export.create_excel_file(
+        None, scenarios, os.path.join(tempdir, 'scenario_metadata.xls'), False)
 
     # Put data into a zipfile
     zipf = dirs_into_zipfile(tempdir, export_run.generate_dst_path())
