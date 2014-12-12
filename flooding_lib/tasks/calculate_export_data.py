@@ -51,7 +51,7 @@ def calculate_export_data(export_run_id):
     export_run = ExportRun.objects.get(pk=export_run_id)
     scenarios = export_run.scenarios.all()
 
-    tempdir = tempfile.mkdtemp()
+    tempdir = tempfile.mkdtemp(dir=settings.TMP_DIR)
     create_data_directories(scenarios, tempdir)
 
     # Put data into a zipfile
