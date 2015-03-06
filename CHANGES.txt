@@ -5,7 +5,7 @@ Changelog of flooding-lib
 3.30 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Fix import page.
 
 
 3.29 (2014-12-03)

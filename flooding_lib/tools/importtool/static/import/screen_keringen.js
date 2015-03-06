@@ -99,12 +99,12 @@ isc.ListGrid.create({
 	{name:"status", title: "Status", type:"text", width: 100},
 	{name:"description", title: "Opmerking", type:"text"}
     ],
-    emptyMessage: ST_KERING_EMPTY_MSG
+    emptyMessage: "<br><br>Geen shape is beschikbaar." //ST_KERING_EMPTY_MSG
 });
 
 isc.IButton.create({
     ID: "btUpload",
-    title: ST_UPLOAD,
+    title: "Upload", //ST_UPLOAD,
     autoFit: true,
     icon: ror_config.root_url + "static_media/Isomorphic_NenS_skin/images/actions/upload.png",
     radioGroup: "views",
@@ -128,7 +128,7 @@ isc.Label.create({
 
 isc.IButton.create({
     ID: "btSubmit",
-    title: ST_SUBMIT,
+    title: "Verzenden", //ST_SUBMIT,
     autoFit: true,
     click : function () {
 	var val = uploadForm.validate();
@@ -147,7 +147,7 @@ isc.IButton.create({
 
 isc.IButton.create({
     ID: "btClose",
-    title: ST_CLOSE,
+    title: "Afsluiten", //ST_CLOSE,
     autoFit: true,
     click : function () { 
 	uploadWindow.hide();
@@ -193,7 +193,7 @@ isc.HLayout.create({
 
 isc.Window.create({
     ID: "uploadWindow",
-    title: ST_UPLOAD,
+    title: "Upload", //ST_UPLOAD,
     autoSize:true,
     autoCenter: true,
     isModal: true,
@@ -235,7 +235,7 @@ var downloadButtons = function() {
 	console.log(i + " " + fileName);
  	dButtons[i] = isc.IButton.create({
 	    ID: fileName.split(".")[0] + i,
-	    title: ST_DOWNLOAD + " " + fileName.split(".")[0],
+	    title: "Download  " + fileName.split(".")[0],
 	    path: path,
 	    autoFit: true,
 	    icon: isomorphicDir + "skins/SmartClient/images/actions/download.png",
