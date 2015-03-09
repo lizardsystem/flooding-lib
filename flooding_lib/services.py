@@ -380,7 +380,7 @@ def breach_info_url(breach, permission_manager):
         project = Project.objects.get(pk=project_id)
         if not permission_manager.check_project_permission(
             project=project,
-            permission=UserPermission.PERMISSION_SCENARIO_APPROVE):
+            permission=UserPermission.PERMISSION_SCENARIO_VIEW):
             continue
 
         if permission_manager.get_scenarios(breach=breach).filter(
