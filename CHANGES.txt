@@ -2,7 +2,7 @@ Changelog of flooding-lib
 ===================================================
 
 
-3.31 (unreleased)
+3.31 (2015-03-09)
 -----------------
 
 - Change permission for info button.
