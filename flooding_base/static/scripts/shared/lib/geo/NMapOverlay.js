@@ -244,7 +244,7 @@ NMapOverlay.prototype.deactivateEvents = function() {
 
 NMapOverlay.prototype.show = function(timestep, opacity) {
     console.log("In NMapOverlay.show, opacity is "+opacity);
-    if (opacity == null) { opacity = 1; }
+    if (opacity == null || typeof(opacity) == 'undefined') { opacity = 1; }
     if (this.layer) {
         try {
             if (this.overlayManager !== null) {
@@ -260,7 +260,7 @@ NMapOverlay.prototype.show = function(timestep, opacity) {
             this._map.addLayer(this.layer);
             this._map.reorder_layers();
 
-            if (timestep !== null) {
+            if (timestep !== null && typeof(timestep) !== 'undefined') {
                 this.setParams({timestep:timestep});
             }
             this.activateEvents();
