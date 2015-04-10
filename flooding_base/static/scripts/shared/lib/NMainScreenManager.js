@@ -281,12 +281,12 @@ NMainScreenManager.prototype.initMap = function() {
             // Add pdok layers
             try {
                 layers = [
-                    new OpenLayers.Layer.WMS("Top10NL", "http://geoserver6.lizard.net/geoserver/ipo_ror_flooding/wms", {layers: 'ipo_ror_flooding:pdok_top10_50', format: 'image/png'}, { minResolution: 0.42, numZoomLevels: 7 })
-                ];
-                this.map.addLayers(layers);
-            } catch (e) {
-                console.log("kan PDOK lagen niet laden.");
-            }
+                   new OpenLayers.Layer.WMS("Top10", "http://geoserver6/geoserver/bg-flooding/wms", {layers: 'bg-flooding:Top10plaatsen', format: 'image/png'}, { minResolution: 0.42, numZoomLevels: 7 }) // 
+                 ];
+                 this.map.addLayers(layers);
+             } catch (e) {
+                 console.log("kan PDOK lagen niet laden.");
+             }
 
             this.map.addLayers(this.customLayers);
 

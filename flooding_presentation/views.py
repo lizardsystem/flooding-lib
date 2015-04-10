@@ -265,7 +265,12 @@ def service_get_wms_of_shape(
     #################### read data ###################################
     #read source and attach values
     lyr = mapnik.Layer('points', spherical_mercator)
-    lyr.datasource = mapnik.PointDatasource()
+    #lyr.datasource = mapnik.PointDatasource()
+    lyr.datasource = mapnik.MemoryDatasource()
+    context = mapnik.Context()
+    #context.push("")
+    feature = mapnik.Feature(context, 0)
+    lyr.datasource.add_feature(feature)
     log.debug('ready setting up map ' + str(datetime.datetime.now()))
     log.debug('start reading point cache ' + str(datetime.datetime.now()))
     points = cache.get('model_nodes_' + str(presentationlayer_id) +
@@ -385,7 +390,14 @@ def service_get_wms_of_shape(
 
     log.debug('start making memory datasource ' + str(datetime.datetime.now()))
     for x, y, name, rule_name in points:
-        lyr.datasource.add_point(x, y, name, rule_name)
+        if context is None:
+            contex = mapnik.Context()
+        context.push(name)
+        feature = mapnik.Feature(context, 0)
+        feature[name] = ""
+        feature.add_geometries_from_wkt(' POINT(%s %s)' % (x, y))
+        lyr.datasource.add_feature(feature)
+        #lyr.datasource.add_point(x, y, name, rule_name)
 
     log.debug('finish making memory datasource ' +
               str(datetime.datetime.now()))

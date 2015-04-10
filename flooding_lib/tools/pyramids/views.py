@@ -71,7 +71,6 @@ def pyramid_value(request):
     presentationlayer_id = request.GET.get('presentationlayer_id')
     x = request.GET.get('lon')  # In Google
     y = request.GET.get('lat')
-
     rd_x, rd_y = geo.google_to_rd(x, y)
 
     result, presentation_layer = get_result_by_presentationlayer_id(

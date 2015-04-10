@@ -48,7 +48,7 @@ logger = logging.getLogger(__name__)
 # Hardcode some project IDs
 PROJECT_ROR = 99
 PROJECT_LANDELIJK_GEBRUIK = 100
-PROJECT_IDS = (PROJECT_ROR, PROJECT_LANDELIJK_GEBRUIK)
+PROJECT_IDS = () # (PROJECT_ROR, PROJECT_LANDELIJK_GEBRUIK)
 
 
 def project_field(scenario, project_id):

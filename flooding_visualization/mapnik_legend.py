@@ -235,9 +235,13 @@ class MapnikPointLegend:
             filename_abs = str(self.sm.get_symbol_transformed(
                     symbol_out, **symbol_kwargs))
             mapnik_rule = mapnik.Rule()
-            ps = mapnik.PointSymbolizer(
-                filename_abs, "png", size_out_x, size_out_y)
-            mapnik_rule.symbols.append(ps)
+            point_looks = mapnik.PointSymbolizer()
+            point_looks.filename = filename_abs
+            point_looks.allow_overlap = True
+            
+            #ps = mapnik.PointSymbolizer(
+            #    filename_abs, "png", size_out_x, size_out_y)
+            mapnik_rule.symbols.append(point_looks)
             mapnik_rule.filter = mapnik.Filter(
                 str("[NAME] = '%s'" % (rule_name)))
 
