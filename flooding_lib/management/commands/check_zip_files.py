@@ -37,7 +37,6 @@ class Command(BaseCommand):
                 print("Corrupted zip: '%s'." % zippath)
                     
     def walk_zips(self, path):
-        
         if os.path.isdir(path):
             walk = os.walk(path)
 
