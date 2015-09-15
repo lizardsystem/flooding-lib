@@ -41,7 +41,6 @@ class Command(BaseCommand):
         return count
 
     def walk_zips(self, path):
-        
         if os.path.isdir(path):
             walk = os.walk(path)
         print("Start test.")
