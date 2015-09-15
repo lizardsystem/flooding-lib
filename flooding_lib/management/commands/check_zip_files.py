@@ -25,24 +25,32 @@ class Command(BaseCommand):
         self.walk_zips(path)
 
     def test_zips(self, zippathes):
+        count = 0
         for zippath in zippathes:
             try:
                 result = ''
                 with zipfile.ZipFile(zippath) as zip:
                     result = zip.testzip()
                 if result:
+                    count += 1
                     print('First corrupted file "%s" in zip "%s"' % (
                         result, zipzippzth))
             except:
+                count += 1
                 print("Corrupted zip: '%s'." % zippath)
-                    
+        return count
+
     def walk_zips(self, path):
         
         if os.path.isdir(path):
             walk = os.walk(path)
-
+        print("Start test.")
+        count = 0
+        count_corrupted = 0
         for root, dirs, files in walk:
             for dir in dirs:
-                zips = glob.glob(os.path.join(root, dir, '*.zip'))
-                self.test_zips(zips)
-
+                path_patern = os.path.join(root, dir, '*.zip')
+                zips = glob.glob(os.path.join(path_patern))
+                count += len(zips)
+                count_corrupted += self.test_zips(zips)
+        print("End test, total: %d, corrupted: %d" % (count, count_corrupted))
