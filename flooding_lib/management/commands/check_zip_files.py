@@ -48,7 +48,7 @@ class Command(BaseCommand):
         count_corrupted = 0
         for root, dirs, files in walk:
             for dir in dirs:
-                path_patern = os.path.join(root, dir, '*.zip')
+                path_patern = os.path.join(root, dir, '*.zip'.encode('UTF-8'))
                 zips = glob.glob(os.path.join(path_patern))
                 count += len(zips)
                 count_corrupted += self.test_zips(zips)
