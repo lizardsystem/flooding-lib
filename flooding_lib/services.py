@@ -1203,7 +1203,6 @@ def service_get_existing_embankments_shape(
     height = int
     bbox = tuple
     """
-
     #################### set up map ###################################
     m = mapnik.Map(width, height)
 
@@ -1268,6 +1267,7 @@ def service_get_existing_embankments_shape(
     database = settings.DATABASES['default']
 
     lyr_region.datasource = mapnik.PostGIS(host=database['HOST'],
+                                           port=database['PORT'],
                                            user=database['USER'],
                                            password=database['PASSWORD'],
                                            dbname=database['NAME'],
@@ -1288,6 +1288,7 @@ def service_get_existing_embankments_shape(
         region_id)
     lyr_specific_region.datasource = mapnik.PostGIS(
         host=database['HOST'],
+        port=database['PORT'],
         user=database['USER'],
         password=database['PASSWORD'],
         dbname=database['NAME'],
@@ -1315,6 +1316,7 @@ def service_get_existing_embankments_shape(
          polygon_new_embankements''' % strategy_id
     lyr_new_embankments.datasource = mapnik.PostGIS(
         host=database['HOST'],
+        port=database['PORT'],
         user=database['USER'],
         password=database['PASSWORD'],
         dbname=database['NAME'],
@@ -1340,9 +1342,9 @@ def service_get_existing_embankments_shape(
          AND fe.type=0
          AND fs.id=%i)
          polygon_selected_embankements''' % strategy_id
-
     lyr_polygon_selected_embankments.datasource = mapnik.PostGIS(
         host=database['HOST'],
+        port=database['PORT'],
         user=database['USER'],
         password=database['PASSWORD'],
         dbname=database['NAME'],
@@ -1543,6 +1545,7 @@ def service_save_drawn_embankment(geometries, strategy_id, region_id):
 
 
 def select_existing_embankments_by_polygon(geometries, strategy_id, region_id):
+
     if len(geometries) > 0:
         geometries = geometries.split(';')
 
