@@ -2,7 +2,7 @@ Changelog of flooding-lib
 ===================================================
 
 
-3.32 (unreleased)
+3.32 (2016-03-08)
 -----------------
 
 - Add PointSymbolizer to show start end end point of embankments.
