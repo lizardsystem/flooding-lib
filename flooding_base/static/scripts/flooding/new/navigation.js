@@ -117,7 +117,7 @@ function fnNavigation() {
 				    getFramesFromRequest:true,
 				    frameUrl:map.url,
 				    app: 'flooding',
-				    visible: false
+				    visible: map.visible
 				});
 				region_layers.addOverlayToContainer(layer);
 			    }

@@ -362,7 +362,8 @@ def service_get_region_maps(request,
                             'layers': map.layers,
                             'transparent': map.transparent,
                             'tiled': map.tiled,
-                            'srs': map.srs
+                            'srs': map.srs,
+                            'visible': map.visible
                             })
 
     response = JSONResponse(object_list)

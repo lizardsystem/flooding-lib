@@ -7,7 +7,7 @@ Changelog of flooding-lib
 
 - Add PointSymbolizer to show start end end point of embankments.
 - Disable Hoogkaart and Bestande keringen layers by default.
-
+- Add the field visible to flooding_lib.models.Map for the overlays.
 
 3.31 (2015-03-09)
 -----------------

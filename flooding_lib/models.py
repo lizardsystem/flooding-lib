@@ -477,6 +477,7 @@ class Map(models.Model):
     transparent = models.NullBooleanField(default=None)
     tiled = models.NullBooleanField(default=None)
     srs = models.CharField(max_length=50, default='EPSG:900913')
+    visible = models.BooleanField()
 
     class Meta:
         db_table = 'flooding_map'
