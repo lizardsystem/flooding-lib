@@ -45,6 +45,7 @@ NOverlayContainer.prototype.addOverlayToContainer = function(layer) {
 	this.overlays[this.overlays.length-1].addToMap(map);
 	this.overlays[this.overlays.length-1].show();
 	var layersList = map.getLayersByName(layer.name);
+	layersList[0].setVisibility(layer.visible);
 	layersList[0].show();
     }
 }

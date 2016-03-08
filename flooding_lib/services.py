@@ -837,32 +837,6 @@ def service_get_scenarios_export_list(
                     sbr.extwrepeattime for sbr in s.scenariobreach_set.all()],
                 '_visible': True
             })
-    ## Bij ROR project neem te veel tijd, request wordt gekilld
-    ## Niet verwijderen totdat er een definitief oplossing komt.
-
-    # scenarios_export_list = [
-    #     {
-    #         'scenario_id': s.id,
-    #         'scenario_name': s.name,
-    #         'breach_ids': [br.id for br in s.breaches.all()],
-    #         'breach_names': [br.name for br in s.breaches.all()],
-    #         'region_ids': [br.region.id for br in s.breaches.all()],
-    #         'region_names': [br.region.name for br in s.breaches.all()],
-    #         'extwname': [br.externalwater.name for br in s.breaches.all()],
-    #         'extwtype': [br.externalwater.get_type_display()
-    #                      for br in s.breaches.all()],
-    #         'project_id': project.id,
-    #         'project_name': project.name,
-    #         'owner_id': s.owner.id,
-    #         'owner_name': s.owner.username,
-    #         'calcmethod': s.string_value_for_inputfield(
-    #             inputfield_calcmethod),
-    #         'statesecurity': s.string_value_for_inputfield(
-    #             inputfield_statesecurity),
-    #         'shelflife': s.string_value_for_inputfield(inputfield_shelflife),
-    #         'extwrepeattime': [sbr.extwrepeattime
-    #                            for sbr in s.scenariobreach_set.all()]}
-    #     for s in project.all_scenarios()]
     return JSONResponse(scenarios_export_list)
 
 
@@ -1209,10 +1183,20 @@ def service_get_existing_embankments_shape(
     m.srs = SPHERICAL_MERCATOR
     m.background = mapnik.Color('transparent')
 
+    #### Point style
+    p_style = mapnik.Style()
+    p_rule = mapnik.Rule()
+    mark_symb = mapnik.MarkersSymbolizer();
+    mark_symb.marker_type="ellipse"
+    mark_symb.fill=mapnik.Color("blue")
+    mark_symb.allow_overlap=True
+    p_rule.symbols.append(mark_symb)
+    p_style.rules.append(p_rule)
+    m.append_style('LinePoints Style Specific Region', p_style)
+
     #### Line style for new embankments
     s2 = mapnik.Style()
     rule_2 = mapnik.Rule()
-
     rule_stk = mapnik.Stroke()
     rule_stk.color = mapnik.Color(128, 0, 128)
     rule_stk.line_cap = mapnik.line_cap.ROUND_CAP
@@ -1324,6 +1308,24 @@ def service_get_existing_embankments_shape(
     lyr_new_embankments.styles.append('Line Style New Embankment')
     m.layers.append(lyr_new_embankments)
 
+    #### Get point to show ends of the lines for a region
+    lyr_linepoints_specific_region = mapnik.Layer('Geometry from PostGIS')
+    lyr_linepoints_specific_region.srs = '+proj=latlong +datum=WGS84'
+    BUFFERED_TABLE = (
+        '''(SELECT pointgeometry As geometry
+            FROM (SELECT ST_EndPoint(geometry) AS pointgeometry FROM flooding_embankment_unit WHERE type=0 AND region_id=%i 
+            UNION ALL
+            SELECT ST_StartPoint(geometry) AS pointgeometry FROM flooding_embankment_unit WHERE type=0 AND region_id=%i ) As foo) As foo2''' % (region_id, region_id))
+    lyr_linepoints_specific_region.datasource = mapnik.PostGIS(
+        host=database['HOST'],
+        port=database['PORT'],
+        user=database['USER'],
+        password=database['PASSWORD'],
+        dbname=database['NAME'],
+        table=str(BUFFERED_TABLE))
+    lyr_linepoints_specific_region.styles.append('LinePoints Style Specific Region')
+    m.layers.append(lyr_linepoints_specific_region)
+
     #### Get layer for polygon selected embankments
     lyr_polygon_selected_embankments = mapnik.Layer('Geometry from PostGIS')
     lyr_polygon_selected_embankments.srs = '+proj=latlong +datum=WGS84'
@@ -1351,6 +1353,7 @@ def service_get_existing_embankments_shape(
         table=str(BUFFERED_TABLE))
     lyr_polygon_selected_embankments.styles.append(
         'Line Style Polygon Selection')
+
     m.layers.append(lyr_polygon_selected_embankments)
 
     ##################### render map #############################
