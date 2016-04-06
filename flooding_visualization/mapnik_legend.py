@@ -235,7 +235,7 @@ class MapnikPointLegend:
             filename_abs = str(self.sm.get_symbol_transformed(
                     symbol_out, **symbol_kwargs))
             mapnik_rule = mapnik.Rule()
-            logger.debug("SYMBOL transformaed %s", filename_abs)
+            log.debug("SYMBOL transformaed %s", filename_abs)
             ps = mapnik.PointSymbolizer(
                 filename_abs, size_out_x, size_out_y)
             mapnik_rule.symbols.append(ps)
