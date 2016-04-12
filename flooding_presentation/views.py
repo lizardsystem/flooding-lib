@@ -218,9 +218,8 @@ def service_get_wms_of_shape(
             mpl = MapnikPointLegend(sdl, sm)
             cache.set('legend_' + str(legend_id), mpl, 300)
 
-    mapnik_style = mpl.get_style()  # get mapnik style with a set of rules.
+
     fields = mpl.get_presentationtype_fields()
-    m.append_style('1', mapnik_style)
 
     log.debug('start setting up lijntje ' + str(datetime.datetime.now()))
     #################### supportive layers ###################################
@@ -264,8 +263,6 @@ def service_get_wms_of_shape(
 
     #################### read data ###################################
     #read source and attach values
-    lyr = mapnik.Layer('points', spherical_mercator)
-    lyr.datasource = mapnik.PointDatasource()
     log.debug('ready setting up map ' + str(datetime.datetime.now()))
     log.debug('start reading point cache ' + str(datetime.datetime.now()))
     points = cache.get('model_nodes_' + str(presentationlayer_id) +
@@ -384,13 +381,25 @@ def service_get_wms_of_shape(
                   points, 300)
 
     log.debug('start making memory datasource ' + str(datetime.datetime.now()))
-    for x, y, name, rule_name in points:
-        lyr.datasource.add_point(x, y, name, rule_name)
+    
+    lyr = mapnik.Layer('Points', spherical_mercator)  
+    m.append_style('Points legend', mpl.get_style())  
 
+    memory_ds = mapnik.MemoryDatasource() #lyr.datasource
+    context = mapnik.Context()
+    context.push("name")
+    next_id = 1
+    for x, y, name, rule_name in points:
+	wkt = "POINT(%0.1f %0.1f)" % (x, y)
+        feature = mapnik.Feature(context, next_id)
+        feature[name] = rule_name
+	feature.add_geometries_from_wkt(wkt)
+	memory_ds.add_feature(feature)
+        next_id += 1
+    lyr.datasource = memory_ds
     log.debug('finish making memory datasource ' +
               str(datetime.datetime.now()))
-
-    lyr.styles.append('1')
+    lyr.styles.append('Points legend')
     m.layers.append(lyr)
 
     if presentationlayer_id in [62007, 62008]:
