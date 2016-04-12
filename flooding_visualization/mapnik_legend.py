@@ -235,8 +235,8 @@ class MapnikPointLegend:
             filename_abs = str(self.sm.get_symbol_transformed(
                     symbol_out, **symbol_kwargs))
             mapnik_rule = mapnik.Rule()
-            ps = mapnik.PointSymbolizer(
-                filename_abs, "png", size_out_x, size_out_y)
+            ps = mapnik.PointSymbolizer()
+            ps.filename = filename_abs
             mapnik_rule.symbols.append(ps)
             mapnik_rule.filter = mapnik.Filter(
                 str("[NAME] = '%s'" % (rule_name)))
