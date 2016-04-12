@@ -390,11 +390,11 @@ def service_get_wms_of_shape(
     context.push("name")
     next_id = 1
     for x, y, name, rule_name in points:
-	wkt = "POINT(%0.1f %0.1f)" % (x, y)
+        wkt = "POINT(%0.1f %0.1f)" % (x, y)
         feature = mapnik.Feature(context, next_id)
         feature[name] = rule_name
-	feature.add_geometries_from_wkt(wkt)
-	memory_ds.add_feature(feature)
+        feature.add_geometries_from_wkt(wkt)
+        memory_ds.add_feature(feature)
         next_id += 1
     lyr.datasource = memory_ds
     log.debug('finish making memory datasource ' +
