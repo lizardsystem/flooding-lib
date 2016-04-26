@@ -5,7 +5,7 @@ Changelog of flooding-lib
 4.1 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Update sql statement due postgis upgrade.
 
 
 4.0 (2016-04-12)
