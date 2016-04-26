@@ -943,7 +943,7 @@ class Scenario:
                     ds = ogr.Open(conn_str.format(
                         defaultdb.get("HOST"), defaultdb.get("NAME"), defaultdb.get("USER"), defaultdb.get("PASSWORD"), defaultdb.get("PORT")))
 
-                    sql = """SELECT TRANSFORM(eu.geometry, 28992) as wkb_geometry, m.adjustment as adjustment
+                    sql = """SELECT ST_TRANSFORM(eu.geometry, 28992) as wkb_geometry, m.adjustment as adjustment
                              FROM flooding_strategy s, flooding_measure m, flooding_embankment_unit eu, flooding_measure_strategy ms, flooding_embankment_unit_measure eum
                              WHERE s.id = %(strategy_id)i and s.id = ms.strategy_id and ms.measure_id = m.id and m.id = eum.measure_id and eum.embankmentunit_id = eu.id
                              AND m.reference_adjustment = %(reference)i""" % {'strategy_id': self.scenario.strategy.id, 'reference': reference}
