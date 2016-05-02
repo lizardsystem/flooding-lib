@@ -2,7 +2,7 @@ Changelog of flooding-lib
 ===================================================
 
 
-4.2 (unreleased)
+4.2 (2016-05-02)
 ----------------
 
 - Set map projection to 3857
