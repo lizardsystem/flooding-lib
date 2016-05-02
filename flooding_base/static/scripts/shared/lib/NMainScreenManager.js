@@ -217,7 +217,7 @@ NMainScreenManager.prototype.initMap = function() {
             var hover_control = new hover.MapHoverControl();
 
             var options = {
-                projection: new OpenLayers.Projection("EPSG:900913"),
+                projection: new OpenLayers.Projection("EPSG:3857"),
                 displayProjection: new OpenLayers.Projection("EPSG:4326"),
                 units: "m",
                 numZoomLevels: 18,
