@@ -45,7 +45,8 @@
                     extent.maxx, extent.maxy);
 
                 var map = new OpenLayers.Map(div.attr("id"), {
-                    maxExtent: bounds
+                    maxExtent: bounds,
+                    projection: new OpenLayers.Projection("EPSG:3857")
                 });
 
                 map.addLayer(
