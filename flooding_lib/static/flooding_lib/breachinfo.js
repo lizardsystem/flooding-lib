@@ -53,7 +53,7 @@
                     new OpenLayers.Layer.OSM(
                         "OpenStreetMap NL",
                         "http://tile.openstreetmap.nl/tiles/${z}/${x}/${y}.png",
-                        {buffer: 0}));
+                        {buffer: 0, tileOptions: {crossOriginKeyword: null}}));
 
                 var url = div.attr("data-url");
                 var layers = div.attr("data-pyramid");
