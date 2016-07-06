@@ -2,7 +2,7 @@ Changelog of flooding-lib
 ===================================================
 
 
-4.3 (unreleased)
+4.3 (2016-07-06)
 ----------------
 
 - Set map projection to 3857 for i-tool
