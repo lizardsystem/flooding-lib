@@ -5,7 +5,8 @@ Changelog of flooding-lib
 4.3 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Set map projection to 3857 for i-tool
+- Set crossOriginKeyword to null in OSM to prevent CORS error.
 
 
 4.2 (2016-05-02)
