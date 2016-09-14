@@ -958,7 +958,7 @@ def find_imported_value(fieldobject, data_objects):
                     value = None
             except ValueError as e:
                 logger.error("Error on parsing value '%s' of field '%s', table '%s', value_type '%s'. %s" % (
-                    value, field, table, fieldobject.type, value_type, e.message))
+                    value, field, table, fieldobject.type, e.message))
                 # Don't know what to do
                 value = None
                 raise Exception("Value error")
