@@ -2,7 +2,7 @@ Changelog of flooding-lib
 ===================================================
 
 
-4.4 (unreleased)
+4.4 (2016-09-14)
 ----------------
 
 - Add log bij retrieving input-fields for infowindow.
