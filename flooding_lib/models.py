@@ -956,11 +956,11 @@ def find_imported_value(fieldobject, data_objects):
                 elif value_type in (InputField.TYPE_FILE,):
                     # Don't know what to do
                     value = None
-             except ValueError as e:
-                 logger.error("Error on parsing value '%s' of field '%s', table '%s'. %s" % (
-                     value, field, table, e.message))
-                 # Don't know what to do
-                 value = None
+            except ValueError as e:
+                logger.error("Error on parsing value '%s' of field '%s', table '%s'. %s" % (
+                    value, field, table, e.message))
+                # Don't know what to do
+                value = None
 
     elif table in data_objects:
         value = getattr(data_objects[table], field, None)
