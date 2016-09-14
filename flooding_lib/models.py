@@ -942,7 +942,10 @@ def find_imported_value(fieldobject, data_objects):
                 if value_type in (InputField.TYPE_INTEGER,):
                     value = int(value)
                 if value_type in (InputField.TYPE_SELECT,):
-                    value = int(value)
+                    try:
+                        value = int(value)
+                    except ValueError:
+                        pass # Keep the string version of value
                 elif value_type in (
                         InputField.TYPE_FLOAT, InputField.TYPE_INTERVAL):
                     value = float(value)
