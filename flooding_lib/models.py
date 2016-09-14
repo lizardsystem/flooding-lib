@@ -936,29 +936,31 @@ def find_imported_value(fieldobject, data_objects):
             scenario=data_objects['scenario'], fieldname=field)
         if info is not None:
             value = info.value
-
         if value is not None:
-            value_type = fieldobject.type
-            if value_type in (InputField.TYPE_INTEGER,):
-                value = int(value)
-            if value_type in (InputField.TYPE_SELECT,):
-                try:
+            try:
+                value_type = fieldobject.type
+                if value_type in (InputField.TYPE_INTEGER,):
                     value = int(value)
-                except ValueError:
-                    pass  # Keep the string version of value
-            elif value_type in (
-                    InputField.TYPE_FLOAT, InputField.TYPE_INTERVAL):
-                value = float(value)
-            elif value_type in (
-                    InputField.TYPE_STRING, InputField.TYPE_TEXT,
-                    InputField.TYPE_DATE):
-                pass  # Already a string
-            elif value_type in (InputField.TYPE_BOOLEAN,):
-                # Value is a string like "1" or "0"
-                value = bool(int(value))
-            elif value_type in (InputField.TYPE_FILE,):
-                # Don't know what to do
-                value = None
+                if value_type in (InputField.TYPE_SELECT,):
+                    value = int(value)
+                elif value_type in (
+                        InputField.TYPE_FLOAT, InputField.TYPE_INTERVAL):
+                    value = float(value)
+                elif value_type in (
+                        InputField.TYPE_STRING, InputField.TYPE_TEXT,
+                        InputField.TYPE_DATE):
+                    pass  # Already a string
+                elif value_type in (InputField.TYPE_BOOLEAN,):
+                    # Value is a string like "1" or "0"
+                    value = bool(int(value))
+                elif value_type in (InputField.TYPE_FILE,):
+                    # Don't know what to do
+                    value = None
+             except ValueError as e:
+                 logger.error("Error on parsing value '%s' of field '%s', table '%s'. %s" % (
+                     value, field, table, e.message))
+                 # Don't know what to do
+                 value = None
 
     elif table in data_objects:
         value = getattr(data_objects[table], field, None)
