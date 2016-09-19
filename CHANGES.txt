@@ -2,7 +2,7 @@ Changelog of flooding-lib
 ===================================================
 
 
-4.6 (unreleased)
+4.6 (2016-09-19)
 ----------------
 
 - Set nginx dir for ror-keringen downloads.
