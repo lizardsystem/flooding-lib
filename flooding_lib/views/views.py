@@ -1550,7 +1550,7 @@ def ror_keringen_download(request, filename):
         request=request,
         dirname=directory,
         filename=filename,
-        nginx_dirname=directory)
+        nginx_dirname='/download_ror_keringen_applied')
     response['Content-Disposition'] = 'attachment; filename="{}"'.format(filename)
     return response
 
