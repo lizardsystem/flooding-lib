@@ -5,7 +5,7 @@ Changelog of flooding-lib
 4.7 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Replace help file.
 
 
 4.6 (2016-09-19)
