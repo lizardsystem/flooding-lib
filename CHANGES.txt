@@ -2,7 +2,7 @@ Changelog of flooding-lib
 ===================================================
 
 
-4.7 (unreleased)
+4.7 (2016-09-21)
 ----------------
 
 - Replace help file.
