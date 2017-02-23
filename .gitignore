@@ -1,4 +1,5 @@
 .installed.cfg
+.idea
 bin
 develop-eggs
 *.egg-info
