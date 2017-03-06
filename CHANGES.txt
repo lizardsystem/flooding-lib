@@ -5,7 +5,8 @@ Changelog of flooding-lib
 3.29 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Add kadeschade module for waternet, including test and seperate management commando to run task
+- Add management commando for import of multiple scenarios from csv file settings
 
 
 3.28 (2014-11-17)

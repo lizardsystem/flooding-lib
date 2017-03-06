@@ -15,6 +15,7 @@ TASK_COMPUTE_MORTALITY_GRID_134 = 134
 TASK_SOBEK_PYRAMID_GENERATION_150 = 150
 TASK_HISSSM_SIMULATION_160 = 160
 TASK_SOBEK_EMBANKMENT_DAMAGE_162 = 162
+TASK_SOBEK_EMBANKMENT_DAMAGE_WATERNET_164 = 164
 TASK_HISSSM_PYRAMID_GENERATION_180 = 180
 TASK_SOBEK_PRESENTATION_GENERATION_155 = 155
 TASK_HISSSM_PRESENTATION_GENERATION_185 = 185
@@ -156,6 +157,16 @@ def perform_task(body, tasktype_id, worker_nr, broker_logging_handler=None):
             remarks = ('kadeschade_module-' + kadeschade_module.__revision__ +
                        ' uitvoerder: %02d/' % worker_nr)
             success_code, error_message = kadeschade_module.calc_damage(
+                scenario_id)
+
+        elif tasktype_id == TASK_SOBEK_EMBANKMENT_DAMAGE_WATERNET_164:
+            log.debug("execute TASK_SOBEK_EMBANKMENT_DAMAGE_WATERNET_164")
+            from flooding_lib.tasks import kadeschade_module_waternet
+            kadeschade_module_waternet.set_broker_logging_handler(
+                broker_logging_handler)
+            remarks = ('kadeschade_module-' + kadeschade_module_waternet.__revision__ +
+                       ' uitvoerder: %02d/' % worker_nr)
+            success_code, error_message = kadeschade_module_waternet.calc_damage(
                 scenario_id)
 
         elif tasktype_id == TASK_HISSSM_PYRAMID_GENERATION_180:
