@@ -1,0 +1,200 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2014-08-25 07:11-0500\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+
+#: models.py:20
+msgid "Export run"
+msgstr ""
+
+#: models.py:21
+msgid "Export runs"
+msgstr ""
+
+#: models.py:31
+msgid "Water depth map"
+msgstr "Waterdieptekaart"
+
+#: models.py:41
+msgid "Waiting"
+msgstr "Wachten"
+
+#: models.py:42
+msgid "Klaar"
+msgstr ""
+
+#: models.py:44 templates/export/exports_overview.html:22
+msgid "Name"
+msgstr "Naam"
+
+#: models.py:45 templates/export/exports_overview.html:24
+msgid "Description"
+msgstr "Omschrijving"
+
+#: models.py:52
+msgid "The maximal waterdepth"
+msgstr "De maximale waterdiepte"
+
+#: models.py:54
+msgid "The maximal flowvelocity"
+msgstr "De maximale stromingssnelheid"
+
+#: models.py:56
+msgid "The flooded area"
+msgstr "Het ondergelopen oppervlak"
+
+#: models.py:58
+msgid "The arrival times"
+msgstr "De arriveringstijden"
+
+#: models.py:60
+msgid "The period of increasing waterlevel"
+msgstr "De periode van verhoogd waterniveau"
+
+#: models.py:62
+msgid "The sources of inundation"
+msgstr "De bronnen van inundatie"
+
+#: models.py:68
+msgid "Owner"
+msgstr "Eigenaar"
+
+#: models.py:70 templates/export/exports_overview.html:23
+msgid "Creation date"
+msgstr "Aangemaakt op"
+
+#: models.py:72
+msgid "Run date"
+msgstr "Berekend op"
+
+#: models.py:74
+msgid "Approved date"
+msgstr "Goedgekeurd op"
+
+#: models.py:77
+msgid "Gridsize"
+msgstr "Gridgrootte"
+
+#: models.py:185
+msgid "Result"
+msgstr "Resultaat"
+
+#: models.py:186
+msgid "Results"
+msgstr "Resultaten"
+
+#: models.py:193
+msgid "Diked area"
+msgstr "Bedijkt gebied"
+
+#: models.py:194
+msgid "Province"
+msgstr "Provincie"
+
+#: models.py:195
+msgid "Country"
+msgstr "Land"
+
+#: views.py:43 views.py:80 views.py:113 views.py:227 views.py:261 views.py:286
+msgid "No permission to download export"
+msgstr "Geen rechten om exports te downloaden"
+
+#: views.py:65 views.py:93 views.py:119 views.py:143 views.py:300
+msgid "Export tool"
+msgstr ""
+
+#: views.py:95 views.py:121
+msgid "Export detail"
+msgstr ""
+
+#: views.py:124
+msgid "Export detail scenarios and projects"
+msgstr ""
+
+#: views.py:140 views.py:155 views.py:175
+msgid "No permission to create export"
+msgstr "Geen rechten om een export aan te maken"
+
+#: views.py:145
+msgid "New export"
+msgstr "Nieuwe export"
+
+#: views.py:302
+msgid "Edit export"
+msgstr "Bewerk export"
+
+#: templates/export/exports_new.html:24
+msgid "Select export maps"
+msgstr "Selecteer te exporteren kaarten"
+
+#: templates/export/exports_new.html:50
+msgid "Submit"
+msgstr "Verzenden"
+
+#: templates/export/exports_overview.html:14
+msgid "Export run overview"
+msgstr "Overzicht exportruns"
+
+#: templates/export/exports_overview.html:25
+msgid "State"
+msgstr "Status"
+
+#: templates/export/exports_overview.html:26
+#: templates/export/exports_overview.html:44
+#: templates/export/exports_run_detail.html:73
+#: templates/export/exports_run_detail.html:76
+msgid "Result file"
+msgstr "Resultaatbestand"
+
+#: templates/export/exports_overview.html:27
+#: templates/export/exports_overview.html:51
+msgid "Edit"
+msgstr "Bewerk"
+
+#: templates/export/exports_overview.html:70
+msgid "New export run"
+msgstr "Nieuwe exportrun"
+
+#: templates/export/exports_run_detail.html:16
+#: templates/export/exports_run_detail_scenarios_and_projects.html:14
+msgid "Export run details"
+msgstr "Details van de exportrun"
+
+#: templates/export/exports_run_detail.html:39
+msgid "Selected maps"
+msgstr "Geselecteerde kaarten"
+
+#: templates/export/exports_run_detail.html:63
+msgid "Used scenarios and projects (x out of y)"
+msgstr "Gebrukte scenario's en projecten (x v/d y)"
+
+#: templates/export/exports_run_detail.html:65
+msgid "out of"
+msgstr "v/d"
+
+#: templates/export/exports_run_detail_scenarios_and_projects.html:20
+msgid "Scenario ID"
+msgstr ""
+
+#: templates/export/exports_run_detail_scenarios_and_projects.html:21
+msgid "Scenario"
+msgstr ""
+
+#: templates/export/exports_run_detail_scenarios_and_projects.html:22
+msgid "Project"
+msgstr ""

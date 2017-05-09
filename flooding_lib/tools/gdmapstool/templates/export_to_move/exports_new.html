@@ -1,0 +1,61 @@
+{% load i18n %}
+
+<form id="exportRunForm" action="javascript: window['exportRunCallbackFormFunction']();">
+	{{form.errors}}
+    <table style="float:left; width:100%;">
+      <tr width="100%">
+	<td width="50%">
+	  <table>
+            <tr>
+              <th>{{form.name.label_tag}}</th>
+              <td>{{form.name}}</td>
+            </tr>
+            <tr>
+              <th>{{form.description.label_tag}}</th>
+              <td>{{form.description}}</td>
+            </tr>
+            <tr>
+              <th>{{form.gridsize.label_tag}}</th>
+              <td>{{form.gridsize}}</td>
+            </tr>
+            <tr>
+              <th>{{form.public.label_tag}}</th>
+              <td>{{form.public}}</td>
+            </tr>
+	  </table>
+	</td>
+	<td width="50%" valign="top">
+          {% trans 'Select export maps' %}:
+	  <hr>
+	      {{form.export_max_waterdepth}}
+	      {{form.export_max_waterdepth.label_tag}}
+	  <br>
+	      {{form.export_max_flowvelocity}}
+	      {{form.export_max_flowvelocity.label_tag}}
+	  <br>
+	      {{form.export_possibly_flooded}}
+	      {{form.export_possibly_flooded.label_tag}}
+	  <br>
+	      {{form.export_arrival_times}}
+	      {{form.export_arrival_times.label_tag}}
+	  <br>
+	      {{form.export_period_of_increasing_waterlevel}}
+	      {{form.export_period_of_increasing_waterlevel.label_tag}}
+	  <br>
+              {{form.export_inundation_sources}}
+              {{form.export_inundation_sources.label_tag}}
+	  <hr>
+              {{form.export_scenario_data}}
+              {{form.export_scenario_data.label_tag}}
+          <br>
+          <label>Let op: als gekozen wordt voor alle scenariodata, worden er geen
+            kaarten ge&euml;xporteerd.</label>
+	</td>
+      </tr>
+      <tr>
+	<td align="right">
+	  <input type="submit" value="{% trans 'Submit' %}" />
+	</td>
+	<td>&nbsp;</td></tr>
+    </table>
+</form>

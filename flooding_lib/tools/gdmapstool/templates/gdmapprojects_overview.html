@@ -1,0 +1,31 @@
+{% extends "lizard/base.html" %}
+{% load i18n %}
+{% block title %}Lizard export tool{% endblock %}
+{% block stylesheets %}
+  <link rel="shortcut icon" href="{{ url_favicon }}">
+  <link href="{% url "root_url" %}static_media/style/style.css" media="screen" type="text/css" rel="stylesheet">
+  <link href="{% url "root_url" %}static_media/style/forms.css" media="screen" type="text/css" rel="stylesheet">
+  <link href="{% url "root_url" %}static_media/Isomorphic_NenS_skin/skin_styles.css" media="screen" type="text/css" rel="stylesheet">
+{% endblock stylesheets %}
+
+{% block bodyarguments %} class="scrollable" {% endblock %}
+{% block content %}
+  <p>
+  <h1>{% trans "Gebiedsdekkende kaarten" %}</h1>
+  
+  {% for project in gd_map_projects %}
+    <p><strong>{{project.name}}</strong>
+    {% for map in project.gdmap_set.all %}
+      <ul class="cell">
+        <li>
+          <a href="{% url 'flooding_gdmapstool_mapdetails' map.id %}">{{ map.name }}</a>
+        </li>
+      </ul>
+    {% endfor %}
+  {% endfor %}
+
+  <!-- <br> -->
+  <!-- {% if has_create_rights %} -->
+  <!--   <a href="{% url 'flooding_tools_export_new_export_index' %}" >{% trans "New export run" %}</a> -->
+  <!-- {% endif %} -->
+{% endblock %}
