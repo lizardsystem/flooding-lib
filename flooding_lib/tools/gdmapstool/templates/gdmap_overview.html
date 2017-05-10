@@ -11,7 +11,7 @@
 {% block bodyarguments %} class="scrollable" {% endblock %}
 {% block content %}
   <h1>
-    {% trans "Gebiedsdekkende kaart overzicht" %}
+    {% trans "Gebiedsdekkende kaart overzicht" %}: {{gdmap.name}}
   </h1>
 
   <table class="timeseriesWrapper">
@@ -26,7 +26,7 @@
             <td width="80"><b>{% trans "Bekijk" %}</b></td>
           </thead>
           <tbody>
-              {% for scenario in scenarios %}
+              {% for scenario in gdmap.scenarios.all %}
                 <tr class="{% cycle 'cellDark' 'cell'%}">
                   <td>{{ scenario.id }}</td>
                   <td>{{scenario.name}}</td>
@@ -34,9 +34,10 @@
                   <td>{{scenario.owner.username}}</td>
                   <td>
                       <a target=_new href="/flooding/preload/{{scenario.main_project.id}}/{{scenario.id}}">
-                        {% trans "bekijk" %}
+                        {% trans "bekijk scenario" %}
                       </a>
-                  </td>                </tr>
+                  </td>                
+		</tr>
               {% endfor %}
           </tbody>
         </table>

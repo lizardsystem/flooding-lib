@@ -77,8 +77,25 @@ def gdmap_details(request, gdmap_id):
         {'name': _('GBMap detail')}]
     return render_to_response(
         'gdmap_overview.html',
-        {'scenarios': gdmap.scenarios.all(),
+        {'gdmap': gdmap,
          'breadcrumbs': breadcrumbs})
+
+
+def reuse_gdmap(request, gdmap_id):
+    # if not request.user.has_perm('exporttool.can_create'):
+    #     return HttpResponse(_("No permission to download export"))
+
+    gdmap = get_object_or_404(GDMap, pk=gdmap_id)
+
+    breadcrumbs = [
+        {'name': _('GBMap tool'),
+         'url': reverse('flooding_gdmaapstool_index')},
+        {'name': _('Edit gdmap')}]
+
+    return render_to_response('gdmap_edit.html',
+                              {'breadcrumbs': breadcrumbs,
+                               'gdmap': gdmap})
+
 
 
 # def export_detail_scenarios(request, export_run_id):

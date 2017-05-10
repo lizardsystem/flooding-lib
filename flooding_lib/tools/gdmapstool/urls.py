@@ -11,6 +11,10 @@ urlpatterns = patterns(
         'flooding_lib.tools.gdmapstool.views.gdmap_details',
         name='flooding_gdmapstool_mapdetails'),
 
+    url(r'^reusegdmap/(?P<gdmap_id>\d+)$',
+        'flooding_lib.tools.gdmapstool.views.reuse_gdmap',
+        name='flooding_gdmapstool_reuse_gdmap'),
+
     # url(r'^exportdetail/(?P<export_run_id>\d+)$',
     #     'flooding_lib.tools.exporttool.views.export_detail',
     #     name='flooding_tools_export_detail'),
