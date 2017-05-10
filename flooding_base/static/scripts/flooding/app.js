@@ -108,12 +108,25 @@ var loadFloodingApp = function () {
         onHide:function() {}
     });
 
+    var flooding_gdmap = new NApp(ST_GDMAP,{
+        id: "floodingGDMap",
+        description: "beheren van gebiedsdekkende kaarten",
+
+        screenType: IFRAME,
+        url:'flooding/tools/gdmap/',
+
+        onInit:function() {},
+        onShow:function() {},
+        onHide:function() {}
+    });
+
     flooding.addSubApps([
         flooding_result,
         flooding_new,
         flooding_table,
         flooding_import,
-        flooding_export
+        flooding_export,
+	flooding_gdmap
     ]);
 
     return flooding;
