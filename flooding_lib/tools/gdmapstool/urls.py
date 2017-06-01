@@ -15,6 +15,14 @@ urlpatterns = patterns(
         'flooding_lib.tools.gdmapstool.views.reuse_gdmap',
         name='flooding_gdmapstool_reuse_gdmap'),
 
+    url(r'^loadgdmapform/(?P<gdmap_id>\d+)/$',
+        'flooding_lib.tools.gdmapstool.views.load_gdmap_form',
+        name='flooding_tools_gdmap_load_form'),
+
+    url(r'^savegdmapform/$',
+        'flooding_lib.tools.gdmapstool.views.save_gdmap_form',
+        name='flooding_tools_gdmap_save_form'),
+
     # url(r'^exportdetail/(?P<export_run_id>\d+)$',
     #     'flooding_lib.tools.exporttool.views.export_detail',
     #     name='flooding_tools_export_detail'),
@@ -47,7 +55,7 @@ urlpatterns = patterns(
     #     'flooding_lib.tools.exporttool.views.reuse_export',
     #     name='flooding_tools_reuse_export'),
 
-    # url(r'^reuseexport/(?P<export_run_id>\w+)/scenarios$',
-    #     'flooding_lib.tools.exporttool.views.export_run_scenarios',
+    # url(r'^editgdmap/(?P<gdmap_id>\w+)/scenarios$',
+    #     'flooding_lib.tools.gdmapstool.views.export_run_scenarios',
     #     name='flooding_tools_reuse_export_scenarios'),
 )

@@ -11,7 +11,7 @@ from django.utils.translation import ugettext as _
 
 from flooding_lib.util import viewutil
 from flooding_lib.models import Scenario
-#from flooding_lib.tools.exporttool.forms import ExportRunForm
+from flooding_lib.tools.gdmapstool.forms import GDMapForm
 from flooding_lib.tools.gdmapstool.models import GDMapProject, GDMap
 
 
@@ -96,6 +96,80 @@ def reuse_gdmap(request, gdmap_id):
                               {'breadcrumbs': breadcrumbs,
                                'gdmap': gdmap})
 
+def load_gdmap_form(request, gdmap_id):
+    """Render the html form to load gdmap."""
+    # if not (request.user.is_authenticated() and
+    #         request.user.has_perm('exporttool.can_create')):
+    #     return HttpResponse(_("No permission to create export"))
+    gdmap = get_object_or_404(GDMap, pk=gdmap_id)
+    form = GDMapForm(instance=gdmap)
+    return render_to_response('gdmap_form.html',
+                              {'form': form})
+
+def save_gdmap_form(request):
+    """
+    Renders a html with only the form for creating a new export run
+
+    * It uses the Django-validation bud adds a custom validation rule:
+      there has to be at least one scenario selected. Otherwis an error
+      is added to the error list.
+    * If the form information is valid, a new export run is created and saved,
+      Also the needed information for the genereation of the waterdepth map is
+      saved in a CSV-file.
+    """
+    # if not (request.user.is_authenticated() and
+    #         request.user.has_perm('exporttool.can_create')):
+    #     return HttpResponse(_("No permission to create export"))
+
+    if request.method == 'POST':
+        form = GDMapForm(request.POST)
+        # necessary to call 'is_valid()' before adding custom errors
+        valid = form.is_valid()
+        scenario_ids = json.loads(request.REQUEST.get('scenarioIds'))
+
+        # try:
+        #     setting_max_scenarios = Setting.objects.get(
+        #         key='MAX_SCENARIOS_PER_EXPORT').value
+        #     max_scenarios = int(setting_max_scenarios)
+        # except Setting.DoesNotExist:
+        #     max_scenarios = DEFAULT_MAX_SCENARIOS_PER_EXPORT
+
+        if not scenario_ids:
+            form._errors['scenarios'] = form.error_class(
+                [u"U heeft geen scenario's geselecteerd."])
+            valid = False
+        gdmap_id = form.cleaned_data['id']
+        import pdb; pdb.set_trace()
+        if valid:
+            new_export_run = ExportRun(
+                export_type=ExportRun.EXPORT_TYPE_WATER_DEPTH_MAP,
+                name=form.cleaned_data['name'],
+                description=form.cleaned_data['description'],
+                owner=request.user,
+                creation_date=datetime.datetime.now(),
+                gridsize=form.cleaned_data['gridsize'],
+                export_max_waterdepth=form.cleaned_data['export_max_waterdepth'],
+                export_max_flowvelocity=form.cleaned_data['export_max_flowvelocity'],
+                export_possibly_flooded=form.cleaned_data['export_possibly_flooded'],
+                export_arrival_times=form.cleaned_data['export_arrival_times'],
+                export_period_of_increasing_waterlevel=
+                form.cleaned_data['export_period_of_increasing_waterlevel'],
+                export_inundation_sources=form.cleaned_data['export_inundation_sources'],
+                export_scenario_data=form.cleaned_data['export_scenario_data'],
+                public=form.cleaned_data['public']
+            )
+            new_export_run.save()
+            new_export_run.scenarios = Scenario.objects.filter(
+                pk__in=scenario_ids)
+            new_export_run.start()
+
+            return HttpResponse(
+                'redirect_in_js_to_' + reverse('flooding_tools_export_index'))
+    else:
+        form = ExportRunForm()
+
+    return render_to_response('export/exports_new.html',
+                              {'form': form})
 
 
 # def export_detail_scenarios(request, export_run_id):
@@ -144,7 +218,7 @@ def reuse_gdmap(request, gdmap_id):
 #                               {'breadcrumbs': breadcrumbs})
 
 
-# def load_export_form(request, export_run_id):
+# def load_gdmap_form(request, export_run_id):
 #     """Render the html form to load export run."""
 #     if not (request.user.is_authenticated() and
 #             request.user.has_perm('exporttool.can_create')):

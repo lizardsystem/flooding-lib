@@ -13,19 +13,18 @@
     <link href="{% url "root_url" %}static_media/Isomorphic_NenS_skin/skin_styles.css" media="screen" type="text/css" rel="stylesheet">
     <script> 
       var isomorphicDir="{% url "root_url" %}static_media/weblib/smartclient/9.0/isomorphic/"; // abs path to isomorphic, needed to locate SmartClient CSS
-      var exporttool_config = {};
-      var export_run = {};
-      exporttool_config.root_url = '{% url "root_url" %}';
+      var gdmap_config = {};
+      
+      gdmap_config.root_url = '{% url "root_url" %}';
+      gdmap_config.url_save_form = '{% url "flooding_tools_gdmap_save_form" %}';
       <!-- exporttool_config.url_export_tool = '{% url "flooding_tools_export_new_export" %}'; -->
       
-      <!-- exporttool_config.breadcrumbs = '<div class="breadcrumbs">{% if breadcrumbs %}&rsaquo;{% endif %}{% for blitem in breadcrumbs %}{% if blitem.url %}<a href="{{ blitem.url }}"> {{ blitem.name }} </a>{% else %} {{ blitem.name }} {% endif %}{% ifnotequal forloop.revcounter0 0 %}&rsaquo;{% endifnotequal %}{% endfor %}</div>'; -->
-      
-      <!-- exporttool_config.export_run_id = '{{ export_run.id }}'; -->
-      <!-- exporttool_config.url_export_scenarios = '{% url "flooding_tools_reuse_export_scenarios" export_run.id %}'; -->
+      gdmap_config.breadcrumbs = '<div class="breadcrumbs">{% if breadcrumbs %}&rsaquo;{% endif %}{% for blitem in breadcrumbs %}{% if blitem.url %}<a href="{{ blitem.url }}"> {{ blitem.name }} </a>{% else %} {{ blitem.name }} {% endif %}{% ifnotequal forloop.revcounter0 0 %}&rsaquo;{% endifnotequal %}{% endfor %}</div>'; 
+      gdmap_config.url_edit_form = '{% url "flooding_tools_gdmap_load_form" gdmap.id %}'
 
       <!-- exporttool_config.project_name = '{{ project.name }}'; -->
       <!-- exporttool_config.project_id = '{{ project.id }}'; -->
-      <!-- exporttool_config.url_export_edit = '{% url "flooding_tools_export_load_export_form" export_run.id %}' -->
+      
     </script>
 
     <SCRIPT type="text/javascript" SRC="{% url "root_url" %}static_media/weblib/smartclient/9.0/isomorphic/system/modules/ISC_Core.js"></SCRIPT>
@@ -43,6 +42,6 @@
   </head>
   <body>
     <!-- Javascript for the screen Framework -->
-    <script type="text/javascript" src="{% url "root_url" %}static_media/export/screen_gdmap.js" type="text/javascript"> </script>
+    <script type="text/javascript" src="{% url 'root_url' %}static_media/gdmap/screen_gdmap.js" type="text/javascript"> </script>
   </body>
 </html>

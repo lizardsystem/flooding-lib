@@ -1,20 +1,9 @@
 from django import forms
-from flooding_lib.tools.exporttool.models import ExportRun
+from flooding_lib.tools.gdmapstool.models import GDMap
 
 
-class ExportRunForm(forms.ModelForm):
-
+class GDMapForm(forms.ModelForm):
+    id =  forms.CharField(widget=forms.TextInput(attrs={'readonly':'True'}))
     class Meta:
-        model = ExportRun
-        fields = ('name',
-                  'description',
-                  'gridsize',
-                  'public',
-                  'export_max_waterdepth',
-                  'export_max_flowvelocity',
-                  'export_possibly_flooded',
-                  'export_arrival_times',
-                  'export_period_of_increasing_waterlevel',
-                  'export_inundation_sources',
-                  'export_scenario_data',
-                  )
+        model = GDMap
+        fields = ('id', 'name')
