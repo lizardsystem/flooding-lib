@@ -1,7 +1,7 @@
 console.log('loading screen_gdmap ..');
 
 /********************************************************************/
-/**** script: 		screen_gdmap
+/**** script: 		screen_gdmap based on screen_export
 /**** description: 	This script provides the functionality to edit
                         'gebiedsdekende kaart'
 /********************************************************************/
@@ -53,7 +53,6 @@ isc.DataSource.create({
     },
     autoFetchData:true,
     autoDraw:false,
-    //clientOnly: false,
     fields:[
 	{name:"scenario_id", primaryKey:true, hidden:false, type:"int"},
 	{name:"scenario_name", hidden: false, type:"text"},
@@ -66,12 +65,6 @@ isc.DataSource.create({
 	{name:"project_name", hidden: false, type:"text"},
 	{name:"owner_id", hidden: false, type:"int"},
 	{name:"owner_name", hidden: false, type:"text"},
-	//{name:"extwrepeattime", type:"text"},
-	//{name:"extwname", type:"text"},
-	//{name:"extwtype", type:"text"},
-	//{name:"calcmethod", type:"text"},
-	//{name: "statesecurity", type: "text"},
-        //{name: "shelflife", type: "text"},
 	{name: "_visible", hidden: true, type: "text"}
     ]
 });
@@ -161,7 +154,6 @@ isc.defineClass("ScenariosListGrid", "ListGrid").addProperties({
     leaveScrollbarGap:false,
     dataproperties: {
     	useClientFiltering: true
-    	//useClientSorting: true
     }
 });
 
@@ -201,14 +193,6 @@ isc.ScenariosListGrid.create({
 	{name: "scenario_id", title:"ID", type:"int"},
 	{name: "scenario_name", title: "Scenario naam", type: "text"},
         {name: "scenario_approved", title: "Goedgekeurd", type: "boolean"},
-	//{name: "extwrepeattime", title: "Overschrijdings frequentie", type: "text"},
-	//{name:"extwname", title: "Naam buitenwater", type:"text"},
-	//{name:"extwtype", title: "Buitenwater type", type:"text"},
-	//{name: "region_names", title: "Regio's", type: "text"},
-	//{name: "breach_names", title: "Doorbraak locaties", type: "text"},
-	//{name: "calcmethod", title: "Berekenigns methode", type: "text"},
-	//{name: "statesecurity", title: "Standzekerheid kerineng", type: "text"},
-        //{name: "shelflife", title: "Houdbaarheid scenario", type: "text"},
 	{name: "_visible", title: "_Visible", type: "text", enabled: false, showIf: "false"}
     ],
     emptyMessage:"<br><br>Geen scenario's beschikbaar voor dit project."
@@ -248,19 +232,17 @@ var copyToAllGrid = function() {
     //refresh filter it removes all existing filters
     scenariosAllListGrid.filterData({_visible: ""});
     scenariosAllListGrid.filterData({_visible: "true"});
-}
+};
 
 isc.Img.create({
     ID:"arrowRight",
     src: gdmap_config.root_url + "static_media/images/icons/arrow_right.png", width:32, height:32,overflow:"visible",
-    //click:"scenariosToExportListGrid.transferSelectedData(scenariosAllListGrid)"
     click:"copyToExportGrid();"
 });
 
 isc.Img.create({
     ID:"arrowLeft",
     src: gdmap_config.root_url + "static_media/images/icons/arrow_left.png", width:32, height:32,overflow:"visible",
-    //click:"scenariosAllListGrid.transferSelectedData(scenariosToExportListGrid)"
     click:"copyToAllGrid();"
 });
 
@@ -280,14 +262,7 @@ isc.ScenariosListGrid.create({
     fields:[
 	{name: "scenario_id", title:"ID", type:"int"},
 	{name: "scenario_name", title: "Scenario naam", type: "text"},
-	//{name: "extwrepeattime", title: "Overschrijdings frequentie", type: "text"},
-	//{name:"extwname", title: "Naam buitenwater", type:"text"},
-	//{name:"extwtype", title: "Buitenwater type", type:"text"},
-	//{name: "region_names", title: "Regio's", type: "text"},
-	//{name: "breach_names", title: "Doorbraak locaties", type: "text"}
-	//{name: "calcmethod", title: "Berekenigns methode", type: "text"},
-	//{name: "statesecurity", title: "Standzekerheid kerineng", type: "boolean"},
-        //{name: "shelflife", title: "Houdbaarheid scenario", type: "text"}
+	{name: "project_name", title: "Project naam", type: "text"}
     ],
     emptyMessage:"<br><br>Sleep scenario's hier heen voor export."
 });
@@ -295,11 +270,7 @@ isc.ScenariosListGrid.create({
 
 var getExportForm = function() {
     var contentsURL = ""
-    //if (gdmap_config.export_run_id != '' && gdmap_config.export_run_id != null) {
     contentsURL = gdmap_config.url_edit_form;
-    //} else {
-    //	contentsURL = gdmap_config.root_url + "flooding/tools/export/newexport";
-    //}
 
     var exportForm = isc.HTMLPane.create({
 	ID: "gGMapHTMLPane",
@@ -314,13 +285,13 @@ var getExportForm = function() {
 /*** Arrange UI elements ***/
 isc.VLayout.create({
     width: "100%",
-    height: "100%",
+    height: "80%",
     autoDraw: true,
     membersMargin: 10,
     members: [
 	breadcrumbs,
 	isc.HStack.create({
-	    membersMargin: 0,
+	    membersMargin: 10,
 	    overflow: "visible",
 	    members:[projectSelector,
 		     msg]
@@ -344,55 +315,20 @@ isc.VLayout.create({
 });
 msg.hide();
 
-var createExportRunDs = function(export_run_id){
-    var ds = isc.DataSource.create({
-	showPrompt: false,
-	dataFormat: "json",
-	dataURL: gdmap_config.url_export_scenarios,
-	transformRequest: function (dsRequest) {
-	    if (dsRequest.operationType == "fetch") {
-		var params = {export_run_id : export_run_id};
-		// combine paging parameters with criteria
-		return isc.addProperties({}, dsRequest.data, params);
-	    }
-	},
-	autoFetchData:false,
-	autoDraw:false,
-	fields:[
-	    {name:"scenario_id", primaryKey:true, hidden:false, type:"int"},
-	    {name:"scenario_name", hidden: false, type:"text"},
-	    {name:"breach_ids", hidden: false, type:"text"},
-	    {name:"breach_names", hidden: false, type:"text"},
-	    {name:"region_ids", hidden: false, type:"text"},
-	    {name:"region_names", hidden: false, type:"text"},
-	    {name:"project_id", hidden: false, type:"int"},
-	    {name:"project_name", hidden: false, type:"text"},
-	    {name:"owner_id", hidden: false, type:"int"},
-	    {name:"owner_name", hidden: false, type:"text"},
-	    {name:"extwrepeattimeser", type:"text"},
-	    {name:"extwname", type:"text"},
-	    {name:"extwtype", type:"text"},
-	    {name: "_visible", hidden: true, type: "text"}
-	]
-    });
-    return ds;
-}
+/*** Second gird for scenarios of the gdmap ***/
+isc.DataSource.create({
+    showPrompt: false,
+    dataFormat: "json",
+    data: gdmap_config.gdmap_scenarios,
+    autoFetchData:false,
+    autoDraw:false,
+    fields:[
+	{name:"scenario_id", primaryKey:true, hidden:false, type:"int"},
+	{name:"scenario_name", hidden: false, type:"text"},
+	{name:"project_name", hidden: false, type:"text"},
+	{name: "_visible", hidden: true, type: "text"}
+    ]
+});
 
-
-if (gdmap_config.export_run_id != '' && gdmap_config.export_run_id != null) {
-    // Put scenarios into grids, set project
-    console.log("=========RUN FETCH");
-    var prField = projectSelector.getFields()[0]
-    prField.setValue(gdmap_config.project_id);
-    LoadScenariosForProject(gdmap_config.project_id);
-    var dsExport = createExportRunDs(gdmap_config.export_run_id);
-    msg.animateShow();
-    dsExport.fetchData({}, function(response, data, request){
-	// call fetchData on list grid to
-	// prepare the local store for filtering
-	scenariosToExportListGrid.setData(data);
-	scenariosToExportListGrid.redraw();
-	msg.animateHide();
-    });
-    dsExport.destroy();
-}
+/*** Set scenarios into second grid ***/
+scenariosToExportListGrid.setData(gdmap_config.gdmap_scenarios);

@@ -20,8 +20,9 @@
       <!-- exporttool_config.url_export_tool = '{% url "flooding_tools_export_new_export" %}'; -->
       
       gdmap_config.breadcrumbs = '<div class="breadcrumbs">{% if breadcrumbs %}&rsaquo;{% endif %}{% for blitem in breadcrumbs %}{% if blitem.url %}<a href="{{ blitem.url }}"> {{ blitem.name }} </a>{% else %} {{ blitem.name }} {% endif %}{% ifnotequal forloop.revcounter0 0 %}&rsaquo;{% endifnotequal %}{% endfor %}</div>'; 
-      gdmap_config.url_edit_form = '{% url "flooding_tools_gdmap_load_form" gdmap.id %}'
-
+      gdmap_config.url_edit_form = '{% url "flooding_tools_gdmap_load_form" gdmap.id %}';
+      console.log({{scenarios|safe}});
+      gdmap_config.gdmap_scenarios = {{ scenarios| safe }};
       <!-- exporttool_config.project_name = '{{ project.name }}'; -->
       <!-- exporttool_config.project_id = '{{ project.id }}'; -->
       

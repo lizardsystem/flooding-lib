@@ -22,17 +22,14 @@
 	  <td width="375">
 	    <a href="{% url 'flooding_gdmapstool_mapdetails' map.id %}">{{ map.name }}</a> 
 	  </td>
+	  {% if has_edit_rights %}
 	  <td width="80">
 	    <a href="{% url 'flooding_gdmapstool_reuse_gdmap' map.id %}">Bewerk</a>
 	  </td>
+	  {% endif %}
 	</tr>
       {% endfor %}
       </tdbody>
     </table> 
   {% endfor %}
-
-  <!-- <br> -->
-  <!-- {% if has_create_rights %} -->
-  <!--   <a href="{% url 'flooding_tools_export_new_export_index' %}" >{% trans "New export run" %}</a> -->
-  <!-- {% endif %} -->
 {% endblock %}
