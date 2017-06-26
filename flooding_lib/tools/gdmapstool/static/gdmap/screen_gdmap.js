@@ -1,4 +1,4 @@
-console.log('loading screen_gdmap ..');
+//console.log('loading screen_gdmap ..');
 
 /********************************************************************/
 /**** script: 		screen_gdmap based on screen_export
@@ -65,6 +65,10 @@ isc.DataSource.create({
 	{name:"project_name", hidden: false, type:"text"},
 	{name:"owner_id", hidden: false, type:"int"},
 	{name:"owner_name", hidden: false, type:"text"},
+	{name:"extwrepeattime", type:"text"},
+	{name:"extwrepeattime", type:"text"},
+	{name:"extwname", type:"text"},
+	{name:"extwtype", type:"text"},
 	{name: "_visible", hidden: true, type: "text"}
     ]
 });
@@ -124,7 +128,7 @@ window['gdmapCallbackFormFunction'] = function() {
 	params: postParams,
 	callback: function(response, data, request){
 	    if (response.httpResponseCode == 200) {
-		console.log("Data ophalen gelukt, tonen op scherm.");
+		//console.log("Data ophalen gelukt, tonen op scherm.");
 		// check if we have to open it in the pane or in the complete window
 		if(data.match('redirect_in_js_to_')){
 		    url = data.replace('redirect_in_js_to_/', '');
@@ -134,7 +138,7 @@ window['gdmapCallbackFormFunction'] = function() {
 		    gGMapHTMLPane.setContents(data);
 		}
 	    } else {
-		console.log("Fout bij het ophalen van gegevens.");
+		//console.log("Fout bij het ophalen van gegevens.");
 	    }
 	}
     });
@@ -193,6 +197,11 @@ isc.ScenariosListGrid.create({
 	{name: "scenario_id", title:"ID", type:"int"},
 	{name: "scenario_name", title: "Scenario naam", type: "text"},
         {name: "scenario_approved", title: "Goedgekeurd", type: "boolean"},
+	{name: "extwrepeattime", title: "Overschrijdings frequentie", type: "text"},
+	{name:"extwname", title: "Naam buitenwater", type:"text"},
+	{name:"extwtype", title: "Buitenwater type", type:"text"},
+	{name: "region_names", title: "Regio's", type: "text"},
+	{name: "breach_names", title: "Doorbraak locaties", type: "text"},
 	{name: "_visible", title: "_Visible", type: "text", enabled: false, showIf: "false"}
     ],
     emptyMessage:"<br><br>Geen scenario's beschikbaar voor dit project."
@@ -222,7 +231,7 @@ var copyToAllGrid = function() {
     var gridData = scenariosAllListGrid.data.allRows;
     var selectedRows = scenariosToExportListGrid.getSelection()
     for (var i = 0; i < selectedRows.length; i++){
-	for (var j = 0; j < gridData.length; j++){
+	for (var j = 0; gridData != null && j < gridData.length; j++){
 	    if (gridData[j].scenario_id == selectedRows[i].scenario_id){
 		gridData[j]._visible = "true";
 	    }
@@ -230,8 +239,10 @@ var copyToAllGrid = function() {
 	scenariosToExportListGrid.data.remove(selectedRows[i]);
     }
     //refresh filter it removes all existing filters
-    scenariosAllListGrid.filterData({_visible: ""});
-    scenariosAllListGrid.filterData({_visible: "true"});
+    if (gridData != null) {
+	scenariosAllListGrid.filterData({_visible: ""});
+	scenariosAllListGrid.filterData({_visible: "true"});
+    }
 };
 
 isc.Img.create({
@@ -330,5 +341,5 @@ isc.DataSource.create({
     ]
 });
 
-/*** Set scenarios into second grid ***/
+/*** Set scenarios into second grid, init first grid ***/
 scenariosToExportListGrid.setData(gdmap_config.gdmap_scenarios);

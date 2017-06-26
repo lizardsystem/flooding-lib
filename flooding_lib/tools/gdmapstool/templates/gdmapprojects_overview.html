@@ -14,7 +14,7 @@
   <h1>{% trans "Gebiedsdekkende kaarten" %}</h1>
   
   {% for project in gd_map_projects %}
-    <p><strong>GDProject: {{project.name}}</strong>
+    <p><strong>Project: {{project.name}}</strong>
     <table class="timeseriesWrapper timeseries" summary="timeseries">
       <tdbody>
       {% for map in project.gdmap_set.all %}
