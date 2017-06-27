@@ -10,6 +10,9 @@ urlpatterns = patterns(
     url(r'^export/',
         include('flooding_lib.tools.exporttool.urls')),
 
+    url(r'^gdmap/',
+        include('flooding_lib.tools.gdmapstool.urls')),
+
     url(r'^import/',
         include('flooding_lib.tools.importtool.urls')),
 
