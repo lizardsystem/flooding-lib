@@ -126,7 +126,7 @@ var loadFloodingApp = function () {
         flooding_table,
         flooding_import,
         flooding_export,
-	flooding_gdmap
+        flooding_gdmap
     ]);
 
     return flooding;

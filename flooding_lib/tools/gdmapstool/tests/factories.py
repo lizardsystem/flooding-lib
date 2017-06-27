@@ -4,9 +4,8 @@ import factory
 
 
 from flooding_lib.tests.test_models import UserF
-from flooding_lib.tools.gdmapstool.models import (
-    GDMapProject,
-    GDMap)
+from flooding_lib.tools.gdmapstool.models import GDMapProject
+from flooding_lib.tools.gdmapstool.models import GDMap
 
 
 class GDMapProjectF(factory.DjangoModelFactory):
