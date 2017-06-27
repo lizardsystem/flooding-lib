@@ -5,7 +5,7 @@ Changelog of flooding-lib
 4.8 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Add GD Maps tool.
 
 
 4.7 (2016-09-21)
