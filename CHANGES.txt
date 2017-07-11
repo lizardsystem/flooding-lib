@@ -5,7 +5,9 @@ Changelog of flooding-lib
 4.9 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Chage labels and headers.
+- Add read permission for authenticated users gdmapstool.
+- Add download link
 
 
 4.8 (2017-06-27)
