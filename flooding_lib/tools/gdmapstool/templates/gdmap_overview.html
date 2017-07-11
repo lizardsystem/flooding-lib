@@ -11,7 +11,7 @@
 {% block bodyarguments %} class="scrollable" {% endblock %}
 {% block content %}
   <h1>
-    {% trans "Gebiedsdekkende kaart overzicht" %}: {{gdmap.name}}
+    {% trans "Scenario overzicht" %}: {{gdmap.name}}
   </h1>
 
   <table class="timeseriesWrapper">
@@ -24,6 +24,7 @@
             <td width="373"><b>{% trans "Project" %}</b></td>
             <td width="75"><b>{% trans "Eigenaar"%}</b></td>
             <td width="80"><b>{% trans "Bekijk" %}</b></td>
+	    <td width="120"><b>{% trans "Download" %}</b></td>
           </thead>
           <tbody>
               {% for scenario in gdmap.scenarios.all %}
@@ -36,7 +37,12 @@
                       <a target=_new href="/flooding/preload/{{scenario.main_project.id}}/{{scenario.id}}">
                         {% trans "bekijk scenario" %}
                       </a>
-                  </td>                
+                  </td>
+                  <td>
+                      <a target=_new href="/flooding/service?action=get_raw_result_scenario&scenarioid={{scenario.id}}">
+                        {% trans "download scenario" %}
+                      </a>
+                  </td>
 		</tr>
               {% endfor %}
           </tbody>

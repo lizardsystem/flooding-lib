@@ -14,11 +14,16 @@ def index(request):
     """
     Renders Lizard-flooding page with an overview of all gdmap-projects
     """
-    if request.user.is_authenticated() and request.user.has_perm(
+    has_edit_rights = False
+    has_read_rights = False
+
+    if request.user.has_perm(
             'gdmapstool.change_gdmap'):
         has_edit_rights = True
+    elif request.user.is_authenticated():
+        has_read_rights = True
     else:
-        has_edit_rights = False
+        return HttpResponse(_("No permission."))
 
     breadcrumbs = [
         {'name': _('GBMap tool')}]
@@ -30,7 +35,8 @@ def index(request):
         {
             'gd_map_projects': gd_map_projects,
             'breadcrumbs': breadcrumbs,
-            'has_edit_rights': has_edit_rights
+            'has_edit_rights': has_edit_rights,
+            'has_read_rights': has_read_rights
         })
 
 
@@ -53,7 +59,7 @@ def gdmap_details(request, gdmap_id):
 def reuse_gdmap(request, gdmap_id):
     if not (request.user.is_authenticated() and request.user.has_perm(
             'gdmapstool.change_gdmap')):
-        return HttpResponse(_("No permission to edit gdmaps"))
+        return HttpResponse(_("No permission."))
 
     gdmap = get_object_or_404(GDMap, pk=gdmap_id)
     scenarios = []
@@ -81,7 +87,7 @@ def load_gdmap_form(request, gdmap_id):
     """Render the html form to load gdmap."""
     if not (request.user.is_authenticated() and request.user.has_perm(
             'gdmapstool.change_gdmap')):
-        return HttpResponse(_("No permission to edit gdmaps"))
+        return HttpResponse(_("No permission."))
     gdmap = get_object_or_404(GDMap, pk=gdmap_id)
     form = GDMapForm(instance=gdmap)
     return render_to_response('gdmap_form.html',
@@ -93,7 +99,7 @@ def save_gdmap_form(request):
     """
     if not (request.user.is_authenticated() and request.user.has_perm(
             'gdmapstool.change_gdmap')):
-        return HttpResponse(_("No permission to edit gdmaps"))
+        return HttpResponse(_("No permission."))
 
     if request.method == 'POST':
         form = GDMapForm(request.POST)

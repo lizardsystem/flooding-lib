@@ -11,10 +11,10 @@
 {% block bodyarguments %} class="scrollable" {% endblock %}
 {% block content %}
   <p>
-  <h1>{% trans "Gebiedsdekkende kaarten" %}</h1>
+  <h1>{% trans "Kaarten" %}</h1>
   
   {% for project in gd_map_projects %}
-    <p><strong>Project: {{project.name}}</strong>
+    <p><strong>Onderwerp: {{project.name}}</strong>
     <table class="timeseriesWrapper timeseries" summary="timeseries">
       <tdbody>
       {% for map in project.gdmap_set.all %}
