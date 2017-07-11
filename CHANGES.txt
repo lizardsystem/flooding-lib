@@ -2,7 +2,7 @@ Changelog of flooding-lib
 ===================================================
 
 
-4.9 (unreleased)
+4.9 (2017-07-11)
 ----------------
 
 - Chage labels and headers.
