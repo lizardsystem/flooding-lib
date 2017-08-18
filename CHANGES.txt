@@ -2,7 +2,7 @@ Changelog of flooding-lib
 ===================================================
 
 
-4.10 (unreleased)
+4.10 (2017-08-18)
 -----------------
 
 - Removed two hardcoded non-working base layers.
