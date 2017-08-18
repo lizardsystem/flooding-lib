@@ -262,13 +262,14 @@ NMainScreenManager.prototype.initMap = function() {
 			{buffer: 0}
 		    )];
 		    this.map.addLayers(layers);
-                    layers = [
-                        new OpenLayers.Layer.OSM(
-                            "OpenStreetMap NL",
-                            "http://tile.openstreetmap.nl/tiles/${z}/${x}/${y}.png",
-                            {buffer: 0, tileOptions: {crossOriginKeyword: null}}
-                        )];
-                    this.map.addLayers(layers);
+                    // NOTE 2017-08-18: disabled (http + doesn't work anymore)
+                    // layers = [
+                    //     new OpenLayers.Layer.OSM(
+                    //         "OpenStreetMap NL",
+                    //         "http://tile.openstreetmap.nl/tiles/${z}/${x}/${y}.png",
+                    //         {buffer: 0, tileOptions: {crossOriginKeyword: null}}
+                    //     )];
+                    // this.map.addLayers(layers);
 
 
                 }
@@ -279,14 +280,15 @@ NMainScreenManager.prototype.initMap = function() {
             }
 
             // Add pdok layers
-            try {
-                layers = [
-                    new OpenLayers.Layer.WMS("Top10NL", "http://geoserver6.lizard.net/geoserver/ipo_ror_flooding/wms", {layers: 'ipo_ror_flooding:pdok_top10_50', format: 'image/png'}, { minResolution: 0.42, numZoomLevels: 7 })
-                ];
-                this.map.addLayers(layers);
-            } catch (e) {
-                console.log("kan PDOK lagen niet laden.");
-            }
+            // NOTE 2017-08-18: disabled (geoserver6 doesn't exist anymore)
+            // try {
+            //     layers = [
+            //         new OpenLayers.Layer.WMS("Top10NL", "http://geoserver6.lizard.net/geoserver/ipo_ror_flooding/wms", {layers: 'ipo_ror_flooding:pdok_top10_50', format: 'image/png'}, { minResolution: 0.42, numZoomLevels: 7 })
+            //     ];
+            //     this.map.addLayers(layers);
+            // } catch (e) {
+            //     console.log("kan PDOK lagen niet laden.");
+            // }
 
             this.map.addLayers(this.customLayers);
 
