@@ -5,7 +5,9 @@ Changelog of flooding-lib
 4.10 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Removed two hardcoded non-working base layers.
+
+- Switched openstreetmap base layer over to https.
 
 
 4.9 (2017-07-11)
