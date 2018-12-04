@@ -29,7 +29,6 @@ install_requires = [
     'mock',
     'xlrd',
     'xlwt',
-    'lizard_ui',
     'django-excel-response',
     'gislib',
     'pyproj',
