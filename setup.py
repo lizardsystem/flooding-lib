@@ -12,7 +12,7 @@ long_description = '\n\n'.join([
     ])
 
 install_requires = [
-    'Django >= 1.4, < 1.7',
+    'Django < 2',
     'iso8601',
     'django-nose',
     'django-markdown-deux',
@@ -23,7 +23,7 @@ install_requires = [
     'south',
     'matplotlib',
     'nens',
-    'GDAL',
+    'pygdal',
     'django-debug-toolbar',
     'factory-boy',
     'mock',
