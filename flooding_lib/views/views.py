@@ -6,8 +6,8 @@ import logging
 import os
 import time
 
-import Image
-import ImageDraw
+from PIL import Image
+from PIL import ImageDraw
 
 from django.conf import settings
 from django.contrib.auth.models import User

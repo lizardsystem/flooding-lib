@@ -1121,7 +1121,7 @@ class Scenario(models.Model):
     @property
     def main_project(self):
         try:
-            sp = ScenarioProject.objects.select_related(depth=1).get(
+            sp = ScenarioProject.objects.select_related("project").get(
                 scenario=self, is_main_project=True)
             return sp.project
         except ScenarioProject.DoesNotExist:
@@ -1134,8 +1134,7 @@ class Scenario(models.Model):
             raise ValueError
 
     def scenarioproject(self, project):
-        return ScenarioProject.objects.select_related(
-            depth=1).get(
+        return ScenarioProject.objects.select_related("project").get(
             scenario=self, project=project)
 
     def approval_object(self, project):

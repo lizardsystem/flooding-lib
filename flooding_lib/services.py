@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import Image
+from PIL import Image
 import json
 import StringIO
 import mapnik

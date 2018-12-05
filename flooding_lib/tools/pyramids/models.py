@@ -16,7 +16,7 @@ import os
 import shutil
 
 from matplotlib import colors
-import Image
+from PIL import Image
 from osgeo import gdal
 import numpy as np
 
