@@ -29,11 +29,12 @@ install_requires = [
     'iso8601',
     'lizard-raster',
     'lizard-worker',
+    # mapnik deliberately not here, buildout / syseggrecipe don't work
     'matplotlib',
     'mock',
     'nens',
     'numpy',
-    'psycopg2',
+    'psycopg2-binary',
     'pyproj',
     'raven',
     'scipy',
@@ -44,6 +45,8 @@ install_requires = [
     ],
 
 tests_require = [
+    'ipython',
+    'ipdb',
     ]
 
 setup(name='flooding-lib',
