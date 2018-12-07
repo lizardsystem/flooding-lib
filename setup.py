@@ -74,6 +74,6 @@ setup(name='flooding-lib',
       extras_require={'test': tests_require},
       entry_points={
           'console_scripts': [
-              'flask=raster_server.server:run',
+              'runflask=raster_server.server:run',
           ]},
       )
