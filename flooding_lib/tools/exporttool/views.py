@@ -291,7 +291,7 @@ def export_run_scenarios(request, export_run_id):
                     sbr.extwrepeattime for sbr in s.scenariobreach_set.all()]
             })
     return HttpResponse(
-        json.dumps(scenarios_export_list), mimetype="application/json")
+        json.dumps(scenarios_export_list), content_type="application/json")
 
 
 def reuse_export(request, export_run_id):

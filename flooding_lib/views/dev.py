@@ -111,7 +111,7 @@ def get_externalwater_csv(
         "%s,%.3f" %
         (a['time'], a['waterlevel'])
         for a in waterlevel.get_waterlevels()])
-    return HttpResponse(answer, mimetype="application/csv", content_type='csv')
+    return HttpResponse(answer, content_type='application/csv')
 
 
 def service_save_new_scenario(request):
@@ -283,7 +283,7 @@ def service_save_new_scenario(request):
         'successful': True,
         'save_log': 'opgeslagen. scenario id is: %i' % scenario.id}
 
-    return HttpResponse(json.dumps(answer), mimetype="application/json")
+    return HttpResponse(json.dumps(answer), content_type="application/json")
 
 
 @never_cache
@@ -406,7 +406,7 @@ def service_save_new_3di_scenario(request):
         'successful': True,
         'save_log': 'opgeslagen. scenario id is: %i' % scenario.id}
 
-    return HttpResponse(json.dumps(answer), mimetype="application/json")
+    return HttpResponse(json.dumps(answer), content_type="application/json")
 
 
 @receives_permission_manager

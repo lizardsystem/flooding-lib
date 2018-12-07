@@ -864,7 +864,7 @@ def scenario_list(request, permission_manager):
 
         # create a CSV response
         # write Unicode CSV to it directly
-        response = HttpResponse(mimetype='text/csv')
+        response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename=query.csv'
 
         writer = flooding_lib.util.csvutil.UnicodeWriter(response)
@@ -1370,7 +1370,7 @@ def fractal(request):
             if linelength(new_line) > 1:
                 lines.append(new_line)
 
-    response = HttpResponse(mimetype="image/png")
+    response = HttpResponse(content_type="image/png")
     image.save(response, "PNG")
     return response
 

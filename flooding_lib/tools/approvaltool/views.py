@@ -87,7 +87,7 @@ def approvaltable_page(request, approvalobject_id):
     """
     table = approvaltable(request, approvalobject_id)
     if request.method == 'POST':
-        return HttpResponse(table, mimetype="application/json")
+        return HttpResponse(table, content_type="application/json")
     else:
         return render_to_response('approval/table_page.html',
                                   {'table': table})

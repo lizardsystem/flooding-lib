@@ -300,7 +300,7 @@ def service_get_auth_filters(
             row['configurationid'] = configurations[0].id
             row['is_filter'] = True
         return HttpResponse(json.dumps(result_filters),
-                            mimetype='application/json')
+                            content_type='application/json')
     elif len(configurations) > 1:
         #create root items
         result_filters = [{'id': 'configuration_%d' % c.id,
@@ -327,10 +327,10 @@ def service_get_auth_filters(
             result_filters.extend(filters_single)
 
         response = HttpResponse(json.dumps(result_filters),
-                                mimetype='application/json')
+                                content_type='application/json')
     else:
         response = HttpResponse(json.dumps([]),
-                                mimetype='application/json')
+                                content_type='application/json')
     response['Pragma'] = "no-cache"
     return response
 
@@ -559,7 +559,7 @@ def service_get_timeseries(request, configuration_id):
                                                     filter_id,
                                                     location_id,
                                                     parameter_id)
-            response = HttpResponse(mimetype='text/csv')
+            response = HttpResponse(content_type='text/csv')
             response['Content-Disposition'] = 'attachment; filename="%s"' % (
                 filename)
             writer = csv.writer(response)
@@ -711,7 +711,7 @@ def service_get_current_observation(request, configuration_id):
         }
 
     return HttpResponse(json.dumps(response_dict),
-                        mimetype='application/javascript')
+                        content_type='application/javascript')
 
 
 def service_set_current_subapplication(request, site_name, js_app_name):
@@ -732,7 +732,7 @@ def service_set_current_subapplication(request, site_name, js_app_name):
         pass
     result = {'app_name': sa.get_subapplication_jsname()}
     return HttpResponse(json.dumps(result),
-                        mimetype='application/json')
+                        content_type='application/json')
 
 
 def service_uberservice(request):
