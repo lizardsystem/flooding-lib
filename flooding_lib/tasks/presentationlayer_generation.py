@@ -55,7 +55,7 @@ from osgeo import ogr, osr
 from shutil import copyfile, copytree, rmtree
 from zipfile import ZipFile, ZIP_DEFLATED
 
-import Image
+from PIL import Image
 import os
 import datetime
 

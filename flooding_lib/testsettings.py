@@ -8,10 +8,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'NAME': 'flooding_lib_test',
-        'USER': 'buildout',
-        'PASSWORD': 'buildout',
-        'HOST': '',
-        'PORT': ''
+        'USER': 'flooding',
+        'PASSWORD': 'flooding',
+        'HOST': 'db',
+        'PORT': 5432, # Mapnik requires an explicit port number
         }
 }
 
@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     'flooding_lib.tools.exporttool',
     'flooding_lib.tools.approvaltool',
     'flooding_lib.tools.pyramids',
+    'flooding_lib.tools.gdmapstool',  # see if this fixes the tests
     'flooding_lib.sharedproject',
     'flooding_presentation',
     'flooding_visualization',

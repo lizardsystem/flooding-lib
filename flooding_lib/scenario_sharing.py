@@ -81,7 +81,7 @@ def project_field(scenario, project_id):
     else:
         try:
             scenarioproject = (
-                models.ScenarioProject.objects.select_related(depth=1).
+                models.ScenarioProject.objects.select_related("project").
                 get(scenario=scenario, project__id=project_id))
         except models.ScenarioProject.DoesNotExist:
             # Scenario not in project

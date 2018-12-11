@@ -2,8 +2,8 @@
 import logging
 import os.path
 
-import Image
-import ImageFilter
+from PIL import Image
+from PIL import ImageFilter
 from pkg_resources import resource_filename
 
 from django.conf import settings

@@ -126,9 +126,9 @@ class ColorMap(object):
 
             red, green, blue = self.colors[i]
 
-            colorgrid[0] |= mask * red
-            colorgrid[1] |= mask * green
-            colorgrid[2] |= mask * blue
+            colorgrid[0, mask] = red
+            colorgrid[1, mask] = green
+            colorgrid[2, mask] = blue
 
         # The opacity should be equal to 'opacity_value' wherever
         # there is a color, and 0 elsewhere. There is a color defined

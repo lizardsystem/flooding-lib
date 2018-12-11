@@ -20,7 +20,7 @@ from matplotlib.ticker import MultipleLocator
 from matplotlib.ticker import FormatStrFormatter
 from matplotlib.ticker import LinearLocator
 from osgeo import ogr
-import Image
+from PIL import Image
 import mapnik
 import matplotlib.pyplot as plt
 

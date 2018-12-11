@@ -185,7 +185,7 @@ def approve_import(request, import_scenario_id):
             }
         return HttpResponse(
             json.dumps(answer),
-            mimetype="application/json")
+            content_type="application/json")
 
     else:
         f = []
@@ -277,7 +277,7 @@ def verify_import(request, import_scenario_id):
             'remarks': 'opgeslagen',
             'id': importscenario.id}
         return HttpResponse(
-            json.dumps(answer), mimetype="application/json")
+            json.dumps(answer), content_type="application/json")
 
     else:
         f = []
@@ -383,7 +383,7 @@ def post_new_import(posted_values, owner):
 
     return HttpResponse(
         json.dumps(answer),
-        mimetype="application/json")
+        content_type="application/json")
 
 
 def get_new_filename(filename, dest_filename):
@@ -769,7 +769,7 @@ def group_import_example_csv(request):
     writer = csv.writer(csv_file)
     # read created csv file for sending it over html
     csv_file = open('groupimport.csv', 'rb')
-    response = HttpResponse(csv_file.read(), mimetype='text/csv')
+    response = HttpResponse(csv_file.read(), content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename=groupimport.csv'
     csv_file.close()
 
