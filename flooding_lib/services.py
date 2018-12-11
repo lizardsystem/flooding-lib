@@ -787,7 +787,7 @@ def get_breaches_info(scenario):
     breaches = scenario.breaches.all()
     breaches_values = breaches.values(
         "name", "id", "region__id", "region__name", "externalwater__name",
-        "externalwater__type")
+        "externalwater__type", "administrator")
     info["names"] = [v.get("name") for v in breaches_values]
     info["ids"] = [v.get("id") for v in breaches_values]
     info["region_names"] = [v.get("region__name") for v in breaches_values]
@@ -796,6 +796,7 @@ def get_breaches_info(scenario):
         v.get("externalwater__name") for v in breaches_values]
     info["externalwater_type"] = [
         v.get("externalwater__type") for v in breaches_values]
+    info["administrator"] = [v.get("administrator") for v in breaches_values]
     return info
 
 
@@ -828,6 +829,7 @@ def service_get_scenarios_export_list(
                 'region_names': breaches_values.get("region_names"),
                 'extwname': breaches_values.get("externalwater_name"),
                 'extwtype': breaches_values.get("externalwater_type"),
+                'administrator': breaches_values.get("administrator"),
                 'project_id': project.id,
                 'project_name': project.name,
                 'project_id': project.id,

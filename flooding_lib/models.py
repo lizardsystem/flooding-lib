@@ -607,6 +607,7 @@ class Breach(models.Model):
     geom = models.PointField('node itself', srid=4326)
 
     code = models.CharField(max_length=20, null=True)
+    administrator = models.CharField(max_length=100, null=True, blank=True)
 
     objects = models.GeoManager()
 

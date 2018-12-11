@@ -60,6 +60,7 @@ isc.DataSource.create({
         {name:"scenario_approved", hidden: false, type: "boolean"},
 	{name:"breach_ids", hidden: false, type:"text"},
 	{name:"breach_names", hidden: false, type:"text"},
+	{name:"administrator", hidden: false, type:"text"},
 	{name:"region_ids", hidden: false, type:"text"},
 	{name:"region_names", hidden: false, type:"text"},
 	{name:"project_id", hidden: false, type:"int"},
@@ -206,6 +207,7 @@ isc.ScenariosListGrid.create({
 	{name:"extwtype", title: "Buitenwater type", type:"text"},
 	{name: "region_names", title: "Regio's", type: "text"},
 	{name: "breach_names", title: "Doorbraak locaties", type: "text"},
+	{name: "administrator", title: "Beheerder", type: "text"},
 	//{name: "calcmethod", title: "Berekenigns methode", type: "text"},
 	//{name: "statesecurity", title: "Standzekerheid kerineng", type: "text"},
         //{name: "shelflife", title: "Houdbaarheid scenario", type: "text"},
@@ -284,7 +286,8 @@ isc.ScenariosListGrid.create({
 	{name:"extwname", title: "Naam buitenwater", type:"text"},
 	{name:"extwtype", title: "Buitenwater type", type:"text"},
 	{name: "region_names", title: "Regio's", type: "text"},
-	{name: "breach_names", title: "Doorbraak locaties", type: "text"}
+	{name: "breach_names", title: "Doorbraak locaties", type: "text"},
+	{name: "administrator", title: "Beheerder", type: "text"},
 	//{name: "calcmethod", title: "Berekenigns methode", type: "text"},
 	//{name: "statesecurity", title: "Standzekerheid kerineng", type: "boolean"},
         //{name: "shelflife", title: "Houdbaarheid scenario", type: "text"}
@@ -363,6 +366,7 @@ var createExportRunDs = function(export_run_id){
 	    {name:"scenario_name", hidden: false, type:"text"},
 	    {name:"breach_ids", hidden: false, type:"text"},
 	    {name:"breach_names", hidden: false, type:"text"},
+            {name:"administrator", hidden: false, type:"text"},
 	    {name:"region_ids", hidden: false, type:"text"},
 	    {name:"region_names", hidden: false, type:"text"},
 	    {name:"project_id", hidden: false, type:"int"},
