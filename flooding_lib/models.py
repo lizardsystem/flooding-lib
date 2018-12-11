@@ -607,7 +607,7 @@ class Breach(models.Model):
     geom = models.PointField('node itself', srid=4326)
 
     code = models.CharField(max_length=20, null=True)
-    administrator = models.CharField(max_length=100, null=True, blank=True)
+    administrator = models.IntegerField(null=True, blank=True)
 
     objects = models.GeoManager()
 
@@ -1561,7 +1561,7 @@ class Scenario(models.Model):
 
         for header in grouped_input_fields:
             for input_field in header['fields']:
-                value = self.value_for_inputfield(input_field)
+                value = self.string_value_for_inputfield(input_field)
                 value_str = input_field.display_unicode(
                     value, for_viewing_only=True)
 

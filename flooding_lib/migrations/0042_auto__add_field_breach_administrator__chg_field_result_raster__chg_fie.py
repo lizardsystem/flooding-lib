@@ -10,7 +10,7 @@ class Migration(SchemaMigration):
     def forwards(self, orm):
         # Adding field 'Breach.administrator'
         db.add_column('flooding_breach', 'administrator',
-                      self.gf('django.db.models.fields.CharField')(max_length=100, null=True, blank=True),
+                      self.gf('django.db.models.fields.IntegerField')(null=True, blank=True),
                       keep_default=False)
 
 
@@ -114,7 +114,7 @@ class Migration(SchemaMigration):
         u'flooding_lib.breach': {
             'Meta': {'ordering': "['name']", 'object_name': 'Breach', 'db_table': "'flooding_breach'"},
             'active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
-            'administrator': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
+            'administrator': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
             'canalbottomlevel': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),
             'code': ('django.db.models.fields.CharField', [], {'max_length': '20', 'null': 'True'}),
             'decheight': ('django.db.models.fields.FloatField', [], {'null': 'True', 'blank': 'True'}),

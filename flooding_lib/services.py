@@ -44,6 +44,7 @@ from flooding_lib.views import service_save_new_scenario
 from flooding_lib.views import service_save_new_3di_scenario
 from flooding_lib.views import service_select_strategy
 from flooding_lib.tools.importtool.models import RORKering
+from flooding_lib.tools.importtool.models import InputField
 from flooding_lib.util.http import JSONResponse
 
 SPHERICAL_MERCATOR = (
@@ -796,7 +797,22 @@ def get_breaches_info(scenario):
         v.get("externalwater__name") for v in breaches_values]
     info["externalwater_type"] = [
         v.get("externalwater__type") for v in breaches_values]
-    info["administrator"] = [v.get("administrator") for v in breaches_values]
+
+    # lookup administrator through inputfield
+    try:
+        administrator_inputfield = InputField.objects.get(
+            destination_table='Breach',
+            destination_field='administrator',
+        )
+    except InputField.DoesNotExist:
+        administrator_inputfield = None
+    if administrator_inputfield is None:
+        info["administrator"] = breaches_values[0].get("administrator")
+    else:
+        info["administrator"] = [
+            scenario.string_value_for_inputfield(administrator_inputfield),
+        ]
+
     return info
 
 
