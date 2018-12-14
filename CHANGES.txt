@@ -7,6 +7,8 @@ Changelog of flooding-lib
 
 - Added administrator to breach model and export screen.
 
+- Added tests for infowindow and exportlist.
+
 
 4.10 (2017-08-18)
 -----------------
