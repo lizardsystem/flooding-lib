@@ -7,7 +7,7 @@ TMP_DIR = '/tmp/'
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'flooding_lib_test',
+        'NAME': 'flooding_lib',
         'USER': 'flooding',
         'PASSWORD': 'flooding',
         'HOST': 'db',
