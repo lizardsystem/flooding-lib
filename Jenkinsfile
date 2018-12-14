@@ -20,7 +20,6 @@ pipeline {
                 sh "docker-compose run --rm app bin/test"
             }
         }
-        }
     }
     post {
         always {
