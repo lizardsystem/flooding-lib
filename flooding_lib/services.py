@@ -788,7 +788,7 @@ def get_breaches_info(scenario):
     breaches = scenario.breaches.all()
     breaches_values = breaches.values(
         "name", "id", "region__id", "region__name", "externalwater__name",
-        "externalwater__type", "administrator")
+        "externalwater__type", "fl_rk_adm_jud", "fl_rk_dpv_ref_part")
     info["names"] = [v.get("name") for v in breaches_values]
     info["ids"] = [v.get("id") for v in breaches_values]
     info["region_names"] = [v.get("region__name") for v in breaches_values]
@@ -797,21 +797,11 @@ def get_breaches_info(scenario):
         v.get("externalwater__name") for v in breaches_values]
     info["externalwater_type"] = [
         v.get("externalwater__type") for v in breaches_values]
-
-    # lookup administrator through inputfield
-    try:
-        administrator_inputfield = InputField.objects.get(
-            destination_table='Breach',
-            destination_field='administrator',
-        )
-    except InputField.DoesNotExist:
-        administrator_inputfield = None
-    if administrator_inputfield is None:
-        info["administrator"] = breaches_values[0].get("administrator")
-    else:
-        info["administrator"] = [
-            scenario.string_value_for_inputfield(administrator_inputfield),
-        ]
+    
+    # 2019 fields
+    info["fl_rk_adm_jud"] = [v.get("fl_rk_adm_jud") for v in breaches_values]
+    info["fl_rk_dpv_ref_part"] = [
+        v.get("fl_rk_dpv_ref_part") for v in breaches_values]
 
     return info
 
@@ -845,7 +835,8 @@ def service_get_scenarios_export_list(
                 'region_names': breaches_values.get("region_names"),
                 'extwname': breaches_values.get("externalwater_name"),
                 'extwtype': breaches_values.get("externalwater_type"),
-                'administrator': breaches_values.get("administrator"),
+                'fl_rk_adm_jud': breaches_values.get("fl_rk_adm_jud"),
+                'fl_rk_dpv_ref_part': breaches_values.get("fl_rk_dpv_ref_part"),
                 'project_id': project.id,
                 'project_name': project.name,
                 'project_id': project.id,

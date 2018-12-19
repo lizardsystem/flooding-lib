@@ -13,6 +13,26 @@ class Migration(SchemaMigration):
                       self.gf('django.db.models.fields.IntegerField')(null=True, blank=True),
                       keep_default=False)
 
+        # Adding field 'Breach.fl_rk_adm_jud'
+        db.add_column('flooding_breach', 'fl_rk_adm_jud',
+                      self.gf('django.db.models.fields.IntegerField')(null=True, blank=True),
+                      keep_default=False)
+
+        # Adding field 'Breach.fl_rk_dpv_ref_part'
+        db.add_column('flooding_breach', 'fl_rk_dpv_ref_part',
+                      self.gf('django.db.models.fields.IntegerField')(null=True, blank=True),
+                      keep_default=False)
+
+        # Adding field 'Breach.fl_rk_dpv_ref_sect'
+        db.add_column('flooding_breach', 'fl_rk_dpv_ref_sect',
+                      self.gf('django.db.models.fields.IntegerField')(null=True, blank=True),
+                      keep_default=False)
+
+        # Adding field 'Breach.fl_rk_nrm'
+        db.add_column('flooding_breach', 'fl_rk_nrm',
+                      self.gf('django.db.models.fields.IntegerField')(null=True, blank=True),
+                      keep_default=False)
+
 
         # Changing field 'Result.raster'
         db.alter_column('flooding_result', 'raster_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['pyramids.Raster'], null=True, on_delete=models.SET_NULL))
@@ -23,6 +43,18 @@ class Migration(SchemaMigration):
     def backwards(self, orm):
         # Deleting field 'Breach.administrator'
         db.delete_column('flooding_breach', 'administrator')
+
+        # Deleting field 'Breach.fl_rk_adm_jud'
+        db.delete_column('flooding_breach', 'fl_rk_adm_jud')
+
+        # Deleting field 'Breach.fl_rk_dpv_ref_part'
+        db.delete_column('flooding_breach', 'fl_rk_dpv_ref_part')
+
+        # Deleting field 'Breach.fl_rk_dpv_ref_sect'
+        db.delete_column('flooding_breach', 'fl_rk_dpv_ref_sect')
+
+        # Deleting field 'Breach.fl_rk_nrm'
+        db.delete_column('flooding_breach', 'fl_rk_nrm')
 
 
         # Changing field 'Result.raster'
@@ -125,6 +157,10 @@ class Migration(SchemaMigration):
             'dike': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['flooding_lib.Dike']"}),
             'externalnode': ('django.contrib.gis.db.models.fields.PointField', [], {}),
             'externalwater': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['flooding_lib.ExternalWater']"}),
+            'fl_rk_adm_jud': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
+            'fl_rk_dpv_ref_part': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
+            'fl_rk_dpv_ref_sect': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
+            'fl_rk_nrm': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
             'geom': ('django.contrib.gis.db.models.fields.PointField', [], {}),
             'groundlevel': ('django.db.models.fields.FloatField', [], {}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
