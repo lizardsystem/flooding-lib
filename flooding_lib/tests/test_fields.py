@@ -20,7 +20,10 @@ class TestInfoWindow(utils.UserTestCase):
 
         # have a general project with related models in the database
         self.project = test_models.ProjectF.create()
-        breach = test_models.BreachF.create(administrator=1)
+        self.risk_fields = {'fl_rk_adm_jud': 2, 'fl_rk_dpv_ref_part': 3}
+        breach = test_models.BreachF.create(
+            administrator=1, **self.risk_fields
+        )
         sobekmodel = test_models.SobekModelF.create()
         test_models.BreachSobekModelF.create(
             sobekmodel=sobekmodel,
@@ -52,8 +55,9 @@ class TestInfoWindow(utils.UserTestCase):
         response = infowindow.infowindow(request)
         self.assertTrue(self.administrator_name in response.content)
 
-    def test_scenarios_export_list_contains_administrator(self):
+    def test_scenarios_export_list_contains_risks(self):
         url = '/service/?action=get_scenarios_export_list&project_id=%s'
         request = self.superuser_request(url % self.project.pk)
         response = service(request)
-        self.assertTrue(self.administrator_name in response.content)
+        self.assertTrue(all(k in response.content
+                            for k in self.risk_fields.keys()))

@@ -13,6 +13,7 @@ services:
       - ./:/code
       - ~/.netrc:/home/nens/.netrc  # github authentication
       - ~/.cache:/home/nens/.cache  # shared cache
+
   db:
     image: mdillon/postgis:9.3-alpine
     environment:

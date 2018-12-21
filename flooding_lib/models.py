@@ -615,7 +615,7 @@ class Breach(models.Model):
     )
     fl_rk_adm_jud = models.IntegerField(
         null=True, blank=True,
-        help_text='Flood risk - administrator judgment',
+        help_text='Flood risk - administrator judgment (section part)',
     )
     fl_rk_dpv_ref_part = models.IntegerField(
         null=True, blank=True,
