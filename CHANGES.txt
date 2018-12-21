@@ -5,7 +5,7 @@ Changelog of flooding-lib
 4.11 (unreleased)
 -----------------
 
-- Added administrator to breach model and export screen.
+- Added a couple of fields to breach model and some views.
 
 - Added tests for infowindow and exportlist.
 
