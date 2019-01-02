@@ -607,6 +607,29 @@ class Breach(models.Model):
     geom = models.PointField('node itself', srid=4326)
 
     code = models.CharField(max_length=20, null=True)
+    
+    # extra fields 2019
+    administrator = models.IntegerField(
+        null=True, blank=True,
+        help_text='Breach administrator',
+    )
+    fl_rk_adm_jud = models.IntegerField(
+        null=True, blank=True,
+        help_text='Flood risk - administrator judgment (section part)',
+    )
+    fl_rk_dpv_ref_part = models.IntegerField(
+        null=True, blank=True,
+        help_text='Flood risk - DPV reference (section part)',
+    )
+    fl_rk_dpv_ref_sect = models.IntegerField(
+        null=True, blank=True,
+        help_text='Flood risk - DPV reference (dike section)',
+    )
+    fl_rk_nrm = models.IntegerField(
+        null=True, blank=True,
+        help_text='Flood risk - Norm',
+    )
+
 
     objects = models.GeoManager()
 
@@ -1560,7 +1583,7 @@ class Scenario(models.Model):
 
         for header in grouped_input_fields:
             for input_field in header['fields']:
-                value = self.value_for_inputfield(input_field)
+                value = self.string_value_for_inputfield(input_field)
                 value_str = input_field.display_unicode(
                     value, for_viewing_only=True)
 

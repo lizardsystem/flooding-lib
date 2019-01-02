@@ -5,7 +5,9 @@ Changelog of flooding-lib
 4.11 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Added a couple of fields to breach model and some views.
+
+- Added tests for infowindow and exportlist.
 
 
 4.10 (2017-08-18)

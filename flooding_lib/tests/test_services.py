@@ -4,13 +4,13 @@ from __future__ import absolute_import, division
 
 import json
 
-from django.contrib.auth.models import User
 from django.http import Http404
 from django.test import TestCase, client
 
 from flooding_lib import services
 from flooding_lib import models
 from flooding_lib.tests import test_models
+from flooding_lib.tests import utils
 
 
 class TestService(TestCase):
@@ -26,26 +26,7 @@ class TestService(TestCase):
             self.request_factory.get('/service?action=whooptidoo')))
 
 
-class UserTestCase(TestCase):
-    def setUp(self):
-        self.request_factory = client.RequestFactory()
-        self.scenario = test_models.ScenarioF.create()
-
-        self.anonymous_user = User()
-        self.superuser = User(is_superuser=True)
-
-    def anon_request(self, url='/'):
-        request = self.request_factory.get(url)
-        request.user = self.anonymous_user
-        return request
-
-    def superuser_request(self, url='/'):
-        request = self.request_factory.get(url)
-        request.user = self.superuser
-        return request
-
-
-class TestServiceGetResultsFromScenario(UserTestCase):
+class TestServiceGetResultsFromScenario(utils.UserTestCase):
     def test_anon_no_access(self):
         self.assertRaises(
             Http404,
@@ -62,7 +43,7 @@ class TestServiceGetResultsFromScenario(UserTestCase):
 #        self.assertEquals(j, '')
 
 
-class TestServiceGetScenarioTree(UserTestCase):
+class TestServiceGetScenarioTree(utils.UserTestCase):
     def test_scenario_that_is_in_two_projects_shows_up_in_both(self):
         breach = test_models.BreachF.create()
         project1 = test_models.ProjectF.create(
