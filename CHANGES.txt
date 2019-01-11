@@ -9,6 +9,8 @@ Changelog of flooding-lib
 
 - Added tests for infowindow and exportlist.
 
+- Added an import to work without DEBUG mode.
+
 
 4.10 (2017-08-18)
 -----------------

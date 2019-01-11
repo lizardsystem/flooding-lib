@@ -7,6 +7,8 @@ from flooding_lib.models import ScenarioBreach
 from flooding_lib.models import Project
 from flooding_lib.models import Task
 
+# when not running in DEBUG mode, we need this to prevent an importerror
+from flooding_lib.sharedproject.models import Province
 
 class ScenarioForm(forms.ModelForm):
     class Meta:
