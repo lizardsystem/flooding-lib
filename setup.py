@@ -33,6 +33,7 @@ install_requires = [
     'matplotlib',
     'mock',
     'nens',
+    'netCDF4',
     'numpy',
     'psycopg2-binary',
     'pyproj',
