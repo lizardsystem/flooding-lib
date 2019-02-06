@@ -219,11 +219,11 @@ class Data(object):
         return layout
 
 
-def get_layout(path):
+def get_layout(nc):
     """
     Return dict with layout of calculation nodes.
 
-    :param path: path to netCDF file containing simulation results.
+    :param nc: netCDF dataset instance from 3Di
 
     The returned dict contains:
 
@@ -244,10 +244,9 @@ def get_layout(path):
     exists from the layout node id in array to the index in the node dimension
     in the netCDF.
     """
-    with netCDF4.Dataset(path) as nc:
-        if hasattr(nc, 'threedicore_version'):
-            data = Data.from_type_B(nc)
-        else:
-            data = Data.from_type_A(nc)
-        data.analyze()
-        return data.layout()
+    if hasattr(nc, 'threedicore_version'):
+        data = Data.from_type_B(nc)
+    else:
+        data = Data.from_type_A(nc)
+    data.analyze()
+    return data.layout()

@@ -26,10 +26,8 @@ output_dir = join(development_dir, 'output')
 bathymetry_dataset = gdal.Open(bathymetry_path)
 with Converter(results_3di_path) as converter:
     # Convert waterlevels and turn them into depths
-    for item in converter.extract(name='s1', interval=600):
-        # continue  # TODO remove
-        datetime = item['datetime']
-        with Dataset(item['array'], **converter.kwargs) as variable_dataset:
+    for datetime, array in converter.extract(name='s1', interval=600):
+        with Dataset(array, **converter.kwargs) as variable_dataset:
             subtractor = Subtractor(
                 bathymetry_dataset=bathymetry_dataset,
                 variable_dataset=variable_dataset,
@@ -41,8 +39,8 @@ with Converter(results_3di_path) as converter:
             subtractor.process(path=depth_path)
 
     # Convert maximum waterlevel and turn into depth
-    max_waterlevel = converter.maximum(name='s1')
-    with Dataset(item['array'], **converter.kwargs) as variable_dataset:
+    array = converter.maxlevel()
+    with Dataset(array, **converter.kwargs) as variable_dataset:
         subtractor = Subtractor(
             bathymetry_dataset=bathymetry_dataset,
             variable_dataset=variable_dataset,
@@ -52,8 +50,8 @@ with Converter(results_3di_path) as converter:
         subtractor.process(path=depth_maximum_path)
 
     # Convert maximum flow velocity and clip by bathymetry
-    max_waterlevel = converter.maximum(name='s1')
-    with Dataset(item['array'], **converter.kwargs) as variable_dataset:
+    array = converter.maxflow()
+    with Dataset(array, **converter.kwargs) as variable_dataset:
         subtractor = Subtractor(
             bathymetry_dataset=bathymetry_dataset,
             variable_dataset=variable_dataset,
