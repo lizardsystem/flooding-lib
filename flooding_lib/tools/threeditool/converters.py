@@ -20,16 +20,15 @@ def maximum(reader):
         """
         Determine the maximum of the reader.
         """
+        # we need the absolute minimum for the maximum aggregation
+        MINIMUM = np.finfo(reader.dtype).min
+
         # create double precision work array
-        result = np.empty(reader.shape[-1], dtype=reader.dtype)
+        result = np.full(reader.shape[-1], MINIMUM, dtype=reader.dtype)
 
-        if reader.no_data_value is not None:
-            # we need the absolute minimum for the maximum aggregation
-            MINIMUM = np.finfo(variable.dtype).min
-
-        for batch in self._get_batches(variable):
-            # replace variable no data with minimum
-        if reader.no_data_value is not None:
+        for batch in reader:
+            if reader.no_data_value is not None:
+                # replace batch no data with minimum
                 batch[batch == reader.no_data_value] = MINIMUM
 
             # replace result with maximum of result and batch
@@ -71,7 +70,22 @@ class Reader(object):
         result netCDF files, some renaming is done here.
         """
         self._variable = variable
-        self.__getitem__ = variable.__getitem__
+
+    def __getitem__(self, index):
+        return self._variable.__getitem__(index)
+
+    def __iter__(self):
+        """ Return generator of batches. """
+        nrows, ncols = self.shape
+        nsize_batch = 2 ** 20 / self._variable.dtype.itemsize
+        nrows_batch = max(1, int(nsize_batch // ncols))
+
+        nbatch = -int(-nrows // nrows_batch)
+
+        for i in range(nbatch):
+            start = i * nrows_batch
+            stop = start + nrows_batch
+            yield np.asarray(self._variable[start:stop])
 
     @property
     def no_data_value(self):
@@ -88,28 +102,15 @@ class Reader(object):
     def dtype(self):
         return self._variable.dtype
 
-    def __iter__(self):
-        """ Return generator of batches. """
-        nrows, ncols = self.shape
-        nsize_batch = 2 ** 20 / self.variable.dtype.itemsize
-        nrows_batch = max(1, int(nsize_batch // ncols))
-
-        nbatch = -int(-nrows // nrows_batch)
-
-        for i in range(nbatch):
-            start = i * nrows_batch
-            stop = start + nrows_batch
-            yield np.asarray(self.variable[start:stop])
-
 
 class MagnitudeReader(object):
-    """ 
+    """
     Reads magnitude of two readers.
     """
     def __init__(self, reader_x, reader_y):
         self._reader_x = reader_x
         self._reader_y = reader_y
-    
+
     @property
     def no_data_value(self):
         return self._reader_x.no_data_value
@@ -132,7 +133,7 @@ class MagnitudeReader(object):
                 sel = (batch1 != self.no_data_value)
 
             # calculate magnitude
-            result = np.full_like(batch1, no_data_value)
+            result = np.full_like(batch1, self.no_data_value)
             result[sel] = np.sqrt(batch1[sel] ** 2 + batch2[sel] ** 2)
 
             yield result
@@ -158,16 +159,16 @@ class Converter(object):
     def __enter__(self):
         """ init quads and arrays. """
         self.nc = Dataset(self.results_3di_path)
-        
+
         # add a time object
-        time_variable = self.nc('time')
+        time_variable = self.nc['time']
         time_units = time_variable.getncattr('units')
         time_data = time_variable[:]
         self.time = Time(data=time_data, units=time_units)
 
         # analyze the layout of the results
         self.layout = get_layout(self.nc)
-        
+
         # determine variable mappings and variable prefix
         if hasattr(self.nc, 'threedicore_version'):
             self.prefix = 'Mesh2D_'
@@ -197,20 +198,24 @@ class Converter(object):
         """ close netcdf dataset. """
         self.nc.close()
 
-
     def _get_reader(self, name):
         """
         :param name: Old version name of the variable.
         """
-        elif name in self.rename:
+        if name in self.rename:
             variable_name = self.rename[name]
         else:
             variable_name = self.prefix + name
 
-        return Reader(nc[variable_name])
+        return Reader(self.nc[variable_name])
 
     def _pad_and_replace(self, values, no_data_value):
-        """ Create and oversized array and replace the data with """
+        """
+        Return numpy array one cell bigger than values.
+
+        The returned array has our dtype and no data value. The added cell
+        contains no data value. This is used in the conversion to 2D.
+        """
         # create an oversized array of our dtype
         result = np.full(
             values.size + 1,
@@ -218,16 +223,18 @@ class Converter(object):
             dtype=self.DTYPE,
         )
 
-        # read the variable into it
+        # determine where the data is in values
         if no_data_value is None:
             select = True
         else:
             select = values != no_data_value
-            
-        # replace variable no data with global no data if applicable
+
+        # use that to paste the data
         result[:-1][select] = values[select]
 
-    def _make_2d(self, values):
+        return result
+
+    def _make_2d(self, values, no_data_value):
         """
         return 2d array with values.
 
@@ -236,17 +243,22 @@ class Converter(object):
 
         Note that values[-1] should already contain the no data value.
         """
-        nodes = self.layout['nodes_sw']
+        # need an oversized values array in the final dtype
+        values = self._pad_and_replace(
+            values=values,
+            no_data_value=no_data_value,
+        )
 
         # a lookup array will be constructed containing the values from the
         # netcdf at the correct positions for making a 2d array.
         lookup_size = self.layout['kwargs']['no_data_value'] + 1
-        lookup = np.empty(lookup_size, dtype=self.dtype)
-        lookup[-1] = self.no_data_value
+        lookup = np.empty(lookup_size, dtype=self.DTYPE)
+        lookup[-1] = self.NO_DATA_VALUE
 
         # reorder the data from netcdf to the layout order, putting the index
         # of the last element in the values where the netcdf has no data
         # (indicated by the 'no data node')
+        nodes = self.layout['nodes_sw']
         reorder = np.where(
             nodes == self.layout['no_data_node'],
             len(values) - 1,
@@ -254,16 +266,16 @@ class Converter(object):
         )
         lookup[:-1] = values[reorder]
 
-        return lookup[self.layout['array']]
+        result = lookup[self.layout['array']]
+        return result
 
     def _read_snapshot(self, name, index):
         """ Return a 2D array. """
         reader = self._get_reader(name)
-        values = self._pad_and_replace(
+        return self._make_2d(
             values=reader[index],
             no_data_value=reader.no_data_value,
         )
-        return self._make_2d(values)
 
     def extract(self, name, offset=0, interval=3600):
         """
@@ -276,23 +288,21 @@ class Converter(object):
         start, stop = self.time.period
         current = start + Timedelta(seconds=offset)
         step = Timedelta(seconds=interval)
-        reader = self._get_reader(name)
 
         while current <= stop:
             index, datetime = self.time.find(current)
-            array = self._read_snapshot(variable=variable, index=index)
-            yield {'datetime': datetime, 'array': array}
+            array = self._read_snapshot(name=name, index=index)
+            yield datetime, array
             current += step
 
     def maxlevel(self):
         """ Return numpy array. """
         reader = self._get_reader('s1')
         aggregated = maximum(reader)
-        converted = self._pad_and_replace(
+        return self._make_2d(
             values=aggregated,
             no_data_value=reader.no_data_value,
         )
-        return self._make_2d(converted)
 
     def maxflow(self):
         """ Return numpy array. """
@@ -301,8 +311,7 @@ class Converter(object):
             self._get_reader('ucy'),
         )
         aggregated = maximum(reader)
-        converted = self._pad_and_replace(
+        return self._make_2d(
             values=aggregated,
             no_data_value=reader.no_data_value,
         )
-        return self._make_2d(converted)

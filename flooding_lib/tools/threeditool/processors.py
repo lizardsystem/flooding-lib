@@ -17,7 +17,7 @@ from flooding_lib.tools.threeditool.datasets import Dataset
 
 # resulting dtypes for the processor results
 DTYPE = 'f4'
-NO_DATA_VALUE = np.finfo(DTYPE).min.item()
+NO_DATA_VALUE = -9999.
 
 DRIVER = gdal.GetDriverByName(str('Gtiff'))
 DATA_TYPE = gdal_array.NumericTypeCodeToGDALTypeCode(np.dtype(DTYPE).type)

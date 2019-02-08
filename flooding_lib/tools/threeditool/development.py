@@ -26,7 +26,7 @@ output_dir = join(development_dir, 'output')
 bathymetry_dataset = gdal.Open(bathymetry_path)
 with Converter(results_3di_path) as converter:
     # Convert waterlevels and turn them into depths
-    for datetime, array in converter.extract(name='s1', interval=600):
+    for datetime, array in converter.extract(name='s1', interval=3600):
         with Dataset(array, **converter.kwargs) as variable_dataset:
             subtractor = Subtractor(
                 bathymetry_dataset=bathymetry_dataset,
@@ -52,25 +52,13 @@ with Converter(results_3di_path) as converter:
     # Convert maximum flow velocity and clip by bathymetry
     array = converter.maxflow()
     with Dataset(array, **converter.kwargs) as variable_dataset:
-        subtractor = Subtractor(
+        cutter = Cutter(
             bathymetry_dataset=bathymetry_dataset,
             variable_dataset=variable_dataset,
             resolution=5,
         )
-        depth_maximum_path = join(output_dir, 'depth-maximum.tif')
-        subtractor.process(path=depth_maximum_path)
+        depth_maximum_path = join(output_dir, 'flow-maximum.tif')
+        cutter.process(path=depth_maximum_path)
 
+# iterate on the tifs to get arrival and risetime
 
-"""
-- Use new quads with extractor to yield frames
-- (Temporarily, or even in-memory?) Resample the bathymetry to some resolution
-- Create differ
-- Create iterator that optionally uses diffs
-- Create flowvelocity
-
-
-
-
-An object that generates tifs
-An object that iterates
-"""
