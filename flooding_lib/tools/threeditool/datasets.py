@@ -72,9 +72,7 @@ def create(array, geo_transform=None, projection=None, no_data_value=None):
 
 class Dataset(object):
     """
-    Usage:
-        >>> with Dataset(array) as dataset:
-        ...     # do gdal things.
+    Context manager to present numpy arrays as GDAL datasets.
     """
     def __init__(self, array, **kwargs):
         self.array = array
