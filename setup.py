@@ -4,7 +4,7 @@ import os.path
 version = '4.11.dev0'
 
 long_description = '\n\n'.join([
-    open('README.txt').read(),
+    open('README.rst').read(),
     open(os.path.join('flooding_lib', 'USAGE.txt')).read(),
     open('TODO.txt').read(),
     open('CREDITS.txt').read(),
