@@ -5,6 +5,7 @@ import datetime
 import logging
 import operator
 import os
+from shutil import copyfile
 
 from treebeard.al_tree import AL_Node  # Adjacent list implementation
 
@@ -14,6 +15,7 @@ from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.gis.db import models
 from django.core.urlresolvers import reverse
+from django.db.models import Manager
 from django.utils.translation import ugettext as _
 from django.utils.safestring import SafeString
 
@@ -607,7 +609,7 @@ class Breach(models.Model):
     geom = models.PointField('node itself', srid=4326)
 
     code = models.CharField(max_length=20, null=True)
-    
+
     # extra fields 2019
     administrator = models.IntegerField(
         null=True, blank=True,
@@ -1516,11 +1518,17 @@ class Scenario(models.Model):
 
     def setup_imported_task(self, username):
         self.create_calculated_status(username)
+
+        if self.modeller_software() == '3di':
+            workflow_code = 301  # Named '301' because that looks like '3Di'
+        else:
+            workflow_code = workermodels.WorkflowTemplate.IMPORTED_TEMPLATE_CODE
+
         workflow_template = workermodels.WorkflowTemplate.objects.get(
-            code=workermodels.WorkflowTemplate.IMPORTED_TEMPLATE_CODE)
+            code=workflow_code)
         self.workflow_template = workflow_template
         self.save()
-        workerexecutor.start_workflow(self.id, self.workflow_template.id)
+        workerexecutor.start_workflow(self.id, workflow_template.pk)
 
     def presentation_layer_of_type(self, type_id):
         pls = list(self.presentationlayer.filter(
@@ -1648,6 +1656,26 @@ class Scenario(models.Model):
         """Return True if this scenario uses 3di."""
         return (
             self.sobekmodel_inundation.sobekversion.name == "3di")
+
+    def modeller_software(self):
+        """Decide which modeller software we are.
+
+        Look up the "Modelleersoftware InputField; if it contains
+        '3di' then we assume we are that, otherwise 'sobek'.
+        """
+
+        try:
+            field = InputField.objects.get(name='Modelleersoftware')
+        except InputField.DoesNotExist:
+            # Should not happen
+            return 'sobek'
+
+        value = self.string_value_for_inputfield(field)
+
+        if value and '3di' in value.lower():
+            return '3di'
+
+        return 'sobek'
 
 
 class ScenarioProject(models.Model):
@@ -1852,6 +1880,46 @@ class ResultType(models.Model):
         return self.shortname_dutch or self.name
 
 
+class ResultManager(Manager):
+    """Helper functions to work with Results."""
+
+    def create_from_file(self, scenario, resulttype, filepath):
+        if not os.path.exists(filepath):
+            # Apparently it somehow happens that the files don't exist.
+            # Then we must skip saving the result too.
+            return None
+
+        result, _ = self.get_or_create(
+            scenario=scenario,
+            resulttype=resulttype,
+            defaults={
+                "resultloc": "-",
+                "deltat": 1.0 / 24})
+
+        dest_file_rel = os.path.join(
+            scenario.get_rel_destdir(),
+            os.path.basename(filepath))
+
+        dest_file = os.path.join(
+            Setting.objects.get(
+                key='destination_dir').value, dest_file_rel)
+        dest_file = dest_file.replace('\\', '/')
+
+        dest_path = os.path.dirname(dest_file)
+
+        if not os.path.isdir(dest_path):
+            os.makedirs(dest_path)
+
+        result.resultloc = dest_file_rel
+
+        filepath = filepath.replace('\\', '/')
+        dest_file = dest_file.replace('\\', '/')
+
+        result.save()
+
+        copyfile(filepath, dest_file)
+
+
 class Result(models.Model):
     """result properties:
     better name is RawResult
@@ -1878,6 +1946,8 @@ class Result(models.Model):
     value = models.FloatField(null=True, blank=True)
     bbox = models.MultiPolygonField(
         'Result Border', srid=4326, blank=True, null=True)
+
+    objects = ResultManager()
 
     class Meta:
         unique_together = (("scenario", "resulttype"),)
