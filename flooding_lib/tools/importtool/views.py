@@ -603,132 +603,130 @@ def post_group_import(request, form):
     method = 2
 
     try:
-        if method == 1:
-            pass
-        else:
-            wb = xlrd.open_workbook(groupimport.table.path)
-            sheet = wb.sheet_by_name('import scenarios')
+        wb = xlrd.open_workbook(groupimport.table.path)
+        sheet = wb.sheet_by_name('import scenarios')
 
-            nr_rows = sheet.nrows
+        nr_rows = sheet.nrows
 
-            #combine fields with ImportField
-            field_dict = {}
-            colnr = 1
-            for fieldname in sheet.row_slice(1, 1):
-                try:
-                    # Use name__iexact so case doesn't have to
-                    # be exactly right
-                    inputfield = InputField.objects.get(
-                        name__iexact=fieldname.value)
-                    field_dict[colnr] = inputfield
+        #combine fields with ImportField
+        field_dict = {}
+        colnr = 1
+        for fieldname in sheet.row_slice(1, 1):
+            try:
+                # Use name__iexact so case doesn't have to
+                # be exactly right
+                inputfield = InputField.objects.get(
+                    name__iexact=fieldname.value)
+                field_dict[colnr] = inputfield
 
-                except InputField.DoesNotExist, e:
-                    remarks.append('veld ' + fieldname.value +
-                                   ' komt niet voor in de database')
+            except InputField.DoesNotExist, e:
+                remarks.append('veld ' + fieldname.value +
+                               ' komt niet voor in de database')
 
-                colnr = colnr + 1
+            colnr = colnr + 1
 
-            nr_cols_field = colnr
+        nr_cols_field = colnr
 
-            zip_file = ZipFile(groupimport.results.path, "r")
-            for rownr in range(4, nr_rows):
-                row = sheet.row_slice(rownr)
+        zip_file = ZipFile(groupimport.results.path, "r")
+        for rownr in range(4, nr_rows):
+            row = sheet.row_slice(rownr)
 
-                if row[0].value == 'x':
-                    scenario_name = "geen"
+            if row[0].value != 'x':
+                continue
+            scenario_name = "geen"
 
-                    # eerst een import scenario maken
-                    approvalobject = ApprovalObject.objects.create(
-                        name=scenario_name)
-                    approvalobject.approvalobjecttype.add(
-                        ApprovalObjectType.default_approval_type())
-                    importscenario = ImportScenario.objects.create(
-                        owner=request.user, name=scenario_name,
-                        approvalobject=approvalobject,
-                        groupimport=groupimport)
+            # eerst een import scenario maken
+            approvalobject = ApprovalObject.objects.create(
+                name=scenario_name)
+            approvalobject.approvalobjecttype.add(
+                ApprovalObjectType.default_approval_type())
+            importscenario = ImportScenario.objects.create(
+                owner=request.user, name=scenario_name,
+                approvalobject=approvalobject,
+                groupimport=groupimport)
 
-                    # vervolgens de velden opslaan
-                    for col_nr in range(1, min(len(row), nr_cols_field)):
-                        field = row[col_nr]
-                        if (col_nr in field_dict and
-                            field.ctype != 'empty' and
-                            field.value != ''):
-                            importscenario_inputfield, new = (
-                                ImportScenarioInputField.objects.
+            # vervolgens de velden opslaan
+            for col_nr in range(1, min(len(row), nr_cols_field)):
+                field = row[col_nr]
+                if (col_nr in field_dict and
+                    field.ctype != 'empty' and
+                    field.value != ''):
+                    importscenario_inputfield, new = (
+                        ImportScenarioInputField.objects.
+                        get_or_create(
+                            importscenario=importscenario,
+                            inputfield=field_dict[col_nr]))
+                    try:
+                        value = field.value
+
+                        # Excel does bugged things with dates,
+                        # always use xl_date_as_tuple to correct them
+                        # Convert it to a string immediately
+                        if field.ctype == 'date':
+                            datetime_tuple = xlrd.xldate_as_tuple(
+                                field.value, wb.datemode)
+                            # Throw away time fields, it's not
+                            # a datetime it's a date
+                            date_only = datetime_tuple[:3]
+                            value = (
+                                datetime.date(date_only).isoformat())
+                        importscenario_inputfield.setValue(value)
+                    except ValueError as e:
+                        remarks.append(
+                            ("Value error. Rij %i, kolom "
+                             " '%s' van type %s. Waarde "
+                             "is: '%s'. error: %s") % (
+                                rownr,
+                                field_dict[col_nr].name,
+                                field_dict[col_nr].
+                                get_type_display(),
+                                str(field.value), e))
+                    except TypeError as e:
+                        remarks.append(
+                            ("Type error. Rij %i, kolom"
+                             "  '%s' van type %s. Waarde "
+                             "is: \'%s\'. error: %s") % (
+                                rownr,
+                                field_dict[col_nr].name,
+                                field_dict[col_nr].
+                                get_type_display(),
+                                str(field.value), e))
+
+                    if (field_dict[col_nr].type ==
+                        InputField.TYPE_FILE):
+                        try:
+                            filevalue, new = (
+                                FileValue.objects.
                                 get_or_create(
-                                    importscenario=importscenario,
-                                    inputfield=field_dict[col_nr]))
-                            try:
-                                value = field.value
+               importscenario_inputfield=importscenario_inputfield))
+                            #create empty
+                            #file. replace it later
+                            #with zipfile
+                            filevalue.value.save(
+                                field.value.replace('\\', '/').
+                                split('/')[-1] + '.zip',
+                                ContentFile(""))
+                            filevalue.save()
+                            filevalue.value.close()
 
-                                # Excel does bugged things with dates,
-                                # always use xl_date_as_tuple to correct them
-                                # Convert it to a string immediately
-                                if field.ctype == 'date':
-                                    datetime_tuple = xlrd.xldate_as_tuple(
-                                        field.value, wb.datemode)
-                                    # Throw away time fields, it's not
-                                    # a datetime it's a date
-                                    date_only = datetime_tuple[:3]
-                                    value = (
-                                        datetime.date(date_only).isoformat())
-                                importscenario_inputfield.setValue(value)
-                            except ValueError as e:
-                                remarks.append(
-                                    ("Value error. Rij %i, kolom "
-                                     " '%s' van type %s. Waarde "
-                                     "is: '%s'. error: %s") % (
-                                        rownr,
-                                        field_dict[col_nr].name,
-                                        field_dict[col_nr].
-                                        get_type_display(),
-                                        str(field.value), e))
-                            except TypeError as e:
-                                remarks.append(
-                                    ("Type error. Rij %i, kolom"
-                                     "  '%s' van type %s. Waarde "
-                                     "is: \'%s\'. error: %s") % (
-                                        rownr,
-                                        field_dict[col_nr].name,
-                                        field_dict[col_nr].
-                                        get_type_display(),
-                                        str(field.value), e))
+                            destination = (filevalue.value.
+                                           file.name)
+                            save_uploadfile_in_zipfile_groupimport(
+                                zip_file, field.value,
+                                destination,
+                                field_dict[col_nr].
+                                destination_filename)
 
-                            if (field_dict[col_nr].type ==
-                                InputField.TYPE_FILE):
-                                try:
-                                    filevalue, new = (
-                                        FileValue.objects.
-                                        get_or_create(
-                       importscenario_inputfield=importscenario_inputfield))
-                                    #create empty
-                                    #file. replace it later
-                                    #with zipfile
-                                    filevalue.value.save(
-                                        field.value.replace('\\', '/').
-                                        split('/')[-1] + '.zip',
-                                        ContentFile(""))
-                                    filevalue.save()
-                                    filevalue.value.close()
+                        except KeyError, e:
+                            remarks.append(
+                                ("File '%s' niet gevonden in "
+                                 "zipfile. Rij %i, kolom '%s'. ") %
+                                (str(field.value),
+                                 rownr, field_dict[col_nr].name))
+                            filevalue.delete()
 
-                                    destination = (filevalue.value.
-                                                   file.name)
-                                    save_uploadfile_in_zipfile_groupimport(
-                                        zip_file, field.value,
-                                        destination,
-                                        field_dict[col_nr].
-                                        destination_filename)
-
-                                except KeyError, e:
-                                    remarks.append(
-                                        ("File '%s' niet gevonden in "
-                                         "zipfile. Rij %i, kolom '%s'. ") %
-                                        (str(field.value),
-                                         rownr, field_dict[col_nr].name))
-                                    filevalue.delete()
-
-                    importscenario.update_scenario_name()
-                    importscenario.save()
+            importscenario.update_scenario_name()
+            importscenario.save()
 
         #to do. check of files aanwezig in zipfile
         remarks.append('klaar met inladen')

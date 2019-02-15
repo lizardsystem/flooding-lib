@@ -243,47 +243,18 @@ class ImportScenario(models.Model):
     def copy_result_files(self, result_values):
         # results
         for resulttype_id, value in result_values.items():
+            resulttype=ResultType.objects.get(pk=int(resulttype_id))
             filepath = os.path.join(
                 settings.MEDIA_ROOT, value.name)
 
-            result, _ = Result.objects.get_or_create(
-                scenario=self.scenario,
-                resulttype=ResultType.objects.get(
-                    pk=int(resulttype_id)),
-                defaults={
-                    "resultloc": "-",
-                    "deltat": 1.0 / 24})
-
-            dest_file_rel = os.path.join(
-                self.scenario.get_rel_destdir(),
-                os.path.basename(filepath))
-
-            dest_file = os.path.join(
-                Setting.objects.get(
-                    key='destination_dir').value, dest_file_rel)
-            dest_file = dest_file.replace('\\', '/')
-
-            dest_path = os.path.dirname(dest_file)
-
-            if not os.path.isdir(dest_path):
-                os.makedirs(dest_path)
-
-            result.resultloc = dest_file_rel
-
-            filepath = filepath.replace('\\', '/')
-            dest_file = dest_file.replace('\\', '/')
-
-            if os.path.exists(filepath):
-                # Apparently it somehow happens that the files don't exist.
-                # Then we must skip saving the result too.
-                result.save()
-
-                copyfile(filepath, dest_file)
+            Result.objects.create_from_file(
+                self.scenario, resulttype, filepath)
 
     def import_into_flooding(self, username):
         """Import all fields into the correct fields in flooding.
 
-        Returns two values: a success boolean, and a message string."""
+        Returns two values: a success boolean, and a message string.
+        """
 
         # Check whether attachments are present
         if not (self.region and self.breach and self.project):

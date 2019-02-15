@@ -5,11 +5,15 @@ from __future__ import unicode_literals
 import factory
 import mock
 import datetime
+import os
+import shutil
+import tempfile
 
 from django.contrib.auth.models import User, Group
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 
+from flooding_base.models import Setting
 from flooding_lib import models
 from flooding_lib import permission_manager
 from flooding_lib.tools.approvaltool.models import ApprovalObjectType
@@ -304,6 +308,7 @@ class ResultTypeF(factory.DjangoModelFactory):
     class Meta:
         model = models.ResultType
 
+    program = factory.SubFactory(ProgramF)
     name = "result type name"
 
 
@@ -1190,6 +1195,54 @@ class TestResultType(UnicodeTester, TestCase):
         """Test whether it has unicode."""
         resulttype = ResultTypeF.build()
         self.assert_has_unicode(resulttype)
+
+
+class TestResult(TestCase):
+    def test_create_from_file(self):
+        """Create a file in temporary directory; save it as some result
+        type, see if it was copied correctly."""
+
+        content = "abcdefg"
+
+        origdir = tempfile.mkdtemp()
+        targetdir = tempfile.mkdtemp()
+
+        setting, setting_created = Setting.objects.get_or_create(
+            key='destination_dir')
+        old_setting = setting.value if not setting_created else None
+        setting.value = targetdir
+        setting.save()
+
+        try:
+            filepath = os.path.join(origdir, 'file.txt')
+            with open(filepath, 'w') as f:
+                f.write(content)
+
+            scenario = ScenarioF.create()
+            ScenarioBreachF.create(scenario=scenario)
+
+
+            result_type = ResultTypeF.create()
+
+            models.Result.objects.create_from_file(
+                scenario, result_type, filepath)
+
+            result = models.Result.objects.get(
+                scenario=scenario, resulttype=result_type)
+
+            resultloc = result.absolute_resultloc
+
+            self.assertTrue(os.path.exists(resultloc))
+            self.assertTrue(resultloc.startswith(targetdir))
+            with open(resultloc, 'r') as f:
+                self.assertEquals(f.read(), content)
+        finally:
+            if not setting_created:
+                setting.value = old_setting
+                setting.save()
+
+            shutil.rmtree(origdir)
+            shutil.rmtree(targetdir)
 
 
 class TestCutoffLocationSobekModelSetting(UnicodeTester, TestCase):
