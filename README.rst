@@ -19,6 +19,7 @@ Init
 Update
     $ bin/fab staging_taskserver update_task
 
+
 Task 200
 ========
 
@@ -69,20 +70,6 @@ Task 210
 
 Do a 3Di calculation on a scenario and place the result netcdf back in a zip
 subgrid_map.zip.
-
-
-Task 220/221/222
-================
-
-Convert the netcdf in zip to a bunch of geo referenced png images.
-
-- 220: Mask of region, automatic resolution setting. This is the preferred
-  task.
-
-- 221: Mask of region, take gridsize 0.5 (finest detail). Use only for small
-  areas.
-
-- 222: No mask of region, automatic resolution setting.
 
 
 Upgrade to 3Di support
@@ -143,30 +130,17 @@ Start workflow 4 for scenario 10973.
 Development installation
 ------------------------
 
-The first time, you'll have to run the "bootstrap" script to set up setuptools
-and buildout::
+This is only needed for running the tests. To develop the complete stack
+including the webserver, have a look at `README.rst` in the flooding
+repository.
 
-    $> python bootstrap.py
+Use a docker-compose setup::
 
-And then run buildout to set everything up::
-
-    $> bin/buildout
-
-(On windows it is called ``bin\buildout.exe``).
-
-You'll have to re-run buildout when you or someone else made a change in
-``setup.py`` or ``buildout.cfg``.
-
-The current package is installed as a "development package", so
-changes in .py files are automatically available (just like with ``python
-setup.py develop``).
-
-If you want to use trunk checkouts of other packages (instead of released
-versions), add them as an "svn external" in the ``local_checkouts/`` directory
-and add them to the ``develop =`` list in buildout.cfg.
-
-Tests can always be run with ``bin/test`` or ``bin\test.exe``.
-
+    $ docker-compose build --build-arg uid=`id -u` --build-arg gid=`id -g` app
+    $ docker-compose up --no-start  # to not become too attached
+    $ docker-compose run --rm app bash
+    (docker)$ buildout
+    (docker)$ bin/test
 
 
 Deployment installation for Windows

@@ -19,12 +19,12 @@ TASK_HISSSM_PYRAMID_GENERATION_180 = 180
 TASK_SOBEK_PRESENTATION_GENERATION_155 = 155
 TASK_HISSSM_PRESENTATION_GENERATION_185 = 185
 TASK_CALCULATE_STATISTICS = 190
-TASK_GENERATE_EXPORT = 200  # See README.txt
-TASK_GENERATE_DATA_EXPORT = 201  # See README.txt
-TASK_PERFORM_3DI_SIMULATION_210 = 210  # See README.txt
-TASK_3DI_PNG_GENERATION_220 = 220  # See README.txt
-TASK_3DI_PNG_GENERATION_221 = 221
-TASK_3DI_PNG_GENERATION_222 = 222
+TASK_GENERATE_EXPORT = 200  # See README.rst
+TASK_GENERATE_DATA_EXPORT = 201  # See README.rst
+TASK_PERFORM_3DI_SIMULATION_210 = 210  # See README.rst
+TASK_GENERATE_DATA_EXPORT = 201  # See README.rst
+TASK_PERFORM_3DI_SIMULATION_210 = 210  # See README.rst
+TASK_3DI_PROCESS_IMPORTED_RESULT = 220
 
 
 def update_scenario_status_cache(scenario_id):
@@ -46,6 +46,7 @@ def perform_task(body, tasktype_id, worker_nr, broker_logging_handler=None):
     directory and sobek project.
     broker_logging_handler = sends loggings to broker
     """
+
     scenario_type = body['scenario_type']
     scenario_id = body['scenario_id']
 
@@ -212,26 +213,10 @@ def perform_task(body, tasktype_id, worker_nr, broker_logging_handler=None):
                      ' (and not "flooding_exportrun")') %
                     scenario_type)
                 success_code = False
-        elif tasktype_id == TASK_PERFORM_3DI_SIMULATION_210:
-            log.debug("execute TASK_PERFORM_3DI_SIMULATION_210 %s=%r" % (scenario_type, scenario_id))
-            from flooding_lib.tasks.threedi_210 import run_threedi_task
-            run_threedi_task(scenario_id, scenario_type)
-            success_code = True  # In case of problems, an exception is raised
-        elif tasktype_id == TASK_3DI_PNG_GENERATION_220:
-            log.debug("execute TASK_3DI_PNG_GENERATION_220 %s=%r" % (scenario_type, scenario_id))
-            from flooding_lib.tasks.threedi_nc_220 import process_threedi_nc
-            process_threedi_nc(scenario_id, scenario_type, with_region=True)
-            success_code = True  # In case of problems, an exception is raised
-        elif tasktype_id == TASK_3DI_PNG_GENERATION_221:
-            log.debug("execute TASK_3DI_PNG_GENERATION_221 (detailed) %s=%r" % (scenario_type, scenario_id))
-            from flooding_lib.tasks.threedi_nc_220 import process_threedi_nc
-            process_threedi_nc(scenario_id, scenario_type, detailed=True, gridsize=0.5)
-            success_code = True  # In case of problems, an exception is raised
-        elif tasktype_id == TASK_3DI_PNG_GENERATION_222:
-            log.debug("execute TASK_3DI_PNG_GENERATION_220 %s=%r" % (scenario_type, scenario_id))
-            from flooding_lib.tasks.threedi_nc_220 import process_threedi_nc
-            process_threedi_nc(scenario_id, scenario_type, with_region=False)
-            success_code = True  # In case of problems, an exception is raised
+        elif tasktype_id == TASK_3DI_PROCESS_IMPORTED_RESULT:
+            from flooding_lib.tasks import process_imported_3di_scenario
+            (success_code, remarks, error_message) = (
+                process_imported_3di_scenario.process_scenario(scenario_id))
         else:
             log.warning("selected a '%d' task but don't know what it is" %
                         tasktype_id)
