@@ -35,7 +35,7 @@ install_requires = [
     'nens',
     'netCDF4',
     'numpy',
-    'psycopg2-binary',
+    'psycopg2',
     'pyproj',
     'raven',
     'scipy',

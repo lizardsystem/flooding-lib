@@ -23,6 +23,7 @@ RUN apt-get update && apt-get install -y \
     python-gdal \
     python-mapnik2 \
     python-pip \
+    python-psycopg2 \
     python-tk \
     tzdata \
     zip \
