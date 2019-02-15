@@ -1920,6 +1920,8 @@ class ResultManager(Manager):
 
         copyfile(filepath, dest_file)
 
+        return result
+
 
 class Result(models.Model):
     """result properties:
