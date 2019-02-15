@@ -1663,6 +1663,7 @@ class Scenario(models.Model):
         Look up the "Modelleersoftware InputField; if it contains
         '3di' then we assume we are that, otherwise 'sobek'.
         """
+        from flooding_lib.tools.importtool.models import InputField
 
         try:
             field = InputField.objects.get(name='Modelleersoftware')
