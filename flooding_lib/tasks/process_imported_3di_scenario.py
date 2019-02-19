@@ -6,7 +6,7 @@ import tempfile
 
 from flooding_lib.tools.importtool.models import InputField
 from flooding_lib.models import Result, ResultType, Scenario
-from flooding_lib.util.files import temporarily_unzipped
+from flooding_lib.util.files import temporarily_unzipped, add_to_zip
 
 from flooding_lib.tools.threeditool.converters import Converter
 from flooding_lib.tools.threeditool.processors import Cutter, Subtractor
@@ -49,8 +49,6 @@ def process_scenario(scenario_id):
     bathymetry = scenario.result_set.get(resulttype__name='bathymetry')
     netcdf = scenario.result_set.get(resulttype__name='results_3di')
 
-    maxwdepth = ResultType.objects.get(name='gridmaxwaterdepth')
-
     success = True
 
     with temporarily_unzipped(bathymetry.absolute_resultloc) as bathpath:
@@ -61,24 +59,75 @@ def process_scenario(scenario_id):
                 workdir = tempfile.mkdtemp()
 
                 try:
-                    # Compute and store a max water depth TIF
-                    maxlevel = converter.maxlevel()
-                    with Dataset(maxlevel, **converter.kwargs) as variable_dataset:
-                        subtractor = Subtractor(
-                            bathymetry_dataset=bathymetry_dataset,
-                            variable_dataset=variable_dataset,
-                            resolution=GOAL_RESOLUTION,
-                        )
-                        depth_maximum_path = os.path.join(
-                            workdir, 'depth-maximum.tif')
-                        subtractor.process(path=depth_maximum_path)
+                    result, success = compute_waterdepth_animation(
+                        scenario,
+                        bathymetry_dataset,
+                        converter,
+                        workdir)
 
-                    # Import max water depth grid as a Result into the
-                    # normal Flooding database
-                    result = Result.objects.create_from_file(
-                        scenario, maxwdepth, depth_maximum_path)
-                    success = success and result is not None
+                    result, success = compute_max_waterdepth_tif_result(
+                        scenario,
+                        bathymetry_dataset,
+                        converter,
+                        workdir)
                 finally:
                     shutil.rmtree(workdir)
 
     return (success, bathymetry.absolute_resultloc, 'fouten')
+
+
+def compute_waterdepth_animation(
+        scenario, bathymetry_dataset, converter, workdir):
+    paths = []  # Will be input parameter for add_to_zip(), so should
+                # contain dicts with filename, arcname, remove_after
+    waterdepthanim = ResultType.objects.get(name='gridwaterdepth_t')
+
+    for datetime, array in converter.extract(name='s1', interval=3600):
+        with Dataset(array, **converter.kwargs) as variable_dataset:
+            subtractor = Subtractor(
+                bathymetry_dataset=bathymetry_dataset,
+                variable_dataset=variable_dataset,
+                resolution=GOAL_RESOLUTION,
+            )
+            depth_path = os.path.join(
+                workdir, datetime.strftime('depth-%Y%m%mT%H%M%S.tif'),
+            )
+            subtractor.process(path=depth_path)
+            paths.append({
+                'filename': depth_path,
+                'arcname': os.path.basename(depth_path),
+                'remove_after': False
+            })
+
+    zip_path = os.path.join(workdir, 'waterdepth_rasters.zip')
+    add_to_zip(zip_path, paths)
+
+    result = Result.objects.create_from_file(
+        scenario,
+        waterdepthanim,
+        zip_path)
+
+    return result, True
+
+def compute_max_waterdepth_tif_result(
+        scenario, bathymetry_dataset, converter, workdir):
+    # Compute and store a max water depth TIF
+    maxlevel = converter.maxlevel()
+    maxwdepth = ResultType.objects.get(name='gridmaxwaterdepth')
+
+    with Dataset(maxlevel, **converter.kwargs) as variable_dataset:
+        subtractor = Subtractor(
+            bathymetry_dataset=bathymetry_dataset,
+            variable_dataset=variable_dataset,
+            resolution=GOAL_RESOLUTION,
+        )
+        depth_maximum_path = os.path.join(
+            workdir, 'depth-maximum.tif')
+        subtractor.process(path=depth_maximum_path)
+
+    # Import max water depth grid as a Result into the
+    # normal Flooding database
+    result = Result.objects.create_from_file(
+        scenario, maxwdepth, depth_maximum_path)
+
+    return result, True

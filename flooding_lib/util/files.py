@@ -207,7 +207,7 @@ def add_to_zip(output_zipfile, zip_result):
     """
     Zip all files listed in zip_result
 
-    zip_result is a list with keys:
+    zip_result is a list of dictionaries with keys:
     - filename: filename on disc
     - arcname: target filename in archive
     - delete_after: set this to remove file from file system after zipping
