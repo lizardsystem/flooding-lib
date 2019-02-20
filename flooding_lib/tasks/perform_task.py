@@ -71,8 +71,8 @@ def perform_task(body, tasktype_id, worker_nr, broker_logging_handler=None):
 
     try:
         success_code = False
-        error_message = ""
-        remarks = ''
+        error_message = '-'
+        remarks = '-'
         if tasktype_id == TASK_COMPUTE_SOBEK_MODEL_120:
             log.debug("execute TASK_COMPUTE_SOBEK_MODEL_120")
             from flooding_lib.tasks import openbreach
