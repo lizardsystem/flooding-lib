@@ -197,7 +197,10 @@ def compute_pyramids(
     inc_file = next(
         (i for i in input_files if i.lower().endswith('.inc')), None)
 
-    compute_arrival_times = result.resulttype.use_to_compute_arrival_times
+    # arrival times computability
+    arrival_compatible_result = result.resulttype.use_to_compute_arrival_times
+    is_not_3di_scenario = result.scenario.modeller_software() != '3di'
+    compute_arrival_times = arrival_compatible_result and is_not_3di_scenario
 
     # For arrival times
     startmoment_breachgrowth_inputfield = InputField.objects.get(
