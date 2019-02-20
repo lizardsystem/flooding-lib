@@ -49,7 +49,8 @@ def process_scenario(scenario_id):
     bathymetry = scenario.result_set.get(resulttype__name='bathymetry')
     netcdf = scenario.result_set.get(resulttype__name='results_3di')
 
-    success = True
+    success1, success2 = False, False
+    result1, result2 = None, None
 
     with temporarily_unzipped(bathymetry.absolute_resultloc) as bathpath:
         with temporarily_unzipped(netcdf.absolute_resultloc) as ncdfpath:
@@ -59,13 +60,13 @@ def process_scenario(scenario_id):
                 workdir = tempfile.mkdtemp()
 
                 try:
-                    result, success = compute_waterdepth_animation(
+                    result1, success1 = compute_waterdepth_animation(
                         scenario,
                         bathymetry_dataset,
                         converter,
                         workdir)
 
-                    result, success = compute_max_waterdepth_tif_result(
+                    result2, success2 = compute_max_waterdepth_tif_result(
                         scenario,
                         bathymetry_dataset,
                         converter,
@@ -73,7 +74,9 @@ def process_scenario(scenario_id):
                 finally:
                     shutil.rmtree(workdir)
 
-    return (success, bathymetry.absolute_resultloc, 'fouten')
+    success = all([success1, success2])
+    result = result1, result2
+    return (success, result, '-')
 
 
 def compute_waterdepth_animation(
