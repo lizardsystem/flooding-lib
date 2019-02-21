@@ -11,6 +11,8 @@ Changelog of flooding-lib
 
 - Added an import to work without DEBUG mode.
 
+- Added checks to make sure the correct files are passed (depending on whether
+  a 3di or non-3di scenario is selected).
 
 4.10 (2017-08-18)
 -----------------
