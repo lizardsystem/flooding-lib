@@ -738,6 +738,7 @@ def post_group_import(request, form):
                 "applicatiebeheerder en vermeld het group-import "
                 "nummer %i") % groupimport.id)
     except Exception, e:
+        logger.exception("Error bij inlezen: %s", e)
         remarks.append(
             ("error bij inlezen: %s. De gegevens zijn wel "
              "opgeslagen, maar kunnen niet verwerkt worden."
