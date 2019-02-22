@@ -11,6 +11,8 @@ Changelog of flooding-lib
 
 - Added an import to work without DEBUG mode.
 
+- Add ugly data migration to create the *new* 3Di workflow
+
 - Added checks to make sure the correct files are passed (depending on whether
   a 3di or non-3di scenario is selected).
 
