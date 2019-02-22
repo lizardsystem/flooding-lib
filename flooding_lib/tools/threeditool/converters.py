@@ -281,6 +281,11 @@ class Converter(object):
         """
         Return generator of (datetime, array) tuples.
 
+        Yield arrays at times in the simulation accordin to given offset and
+        interval. It also yields at the last timestep in the period, because
+        animation (elsewhere in this repository) is only detected if there are
+        multiple frames to display.
+
         :param name: name of netcdf variable to extract
         :param offset: offset in seconds from start of calculation
         :param interval: seconds between generated arrays
@@ -289,11 +294,15 @@ class Converter(object):
         current = start + Timedelta(seconds=offset)
         step = Timedelta(seconds=interval)
 
-        while current <= stop:
-            index, datetime = self.time.find(current)
+        def result_for_time(time):
+            index, datetime = self.time.find(time)
             array = self._read_snapshot(name=name, index=index)
-            yield datetime, array
+            return datetime, array
+
+        while current <= stop:
+            yield result_for_time(current)
             current += step
+        yield result_for_time(stop)
 
     def maxlevel(self):
         """ Return numpy array. """
