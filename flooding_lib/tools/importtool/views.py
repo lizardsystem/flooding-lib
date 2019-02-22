@@ -630,6 +630,7 @@ def post_group_import(request, form):
         zip_file = ZipFile(groupimport.results.path, "r")
         for rownr in range(4, nr_rows):
             row = sheet.row_slice(rownr)
+            values_for_validation = {}
 
             if row[0].value != 'x':
                 continue
@@ -692,13 +693,15 @@ def post_group_import(request, form):
                                 get_type_display(),
                                 str(field.value), e))
 
+                    values_for_validation[field_dict[col_nr].name] = field.value
+
                     if (field_dict[col_nr].type ==
                         InputField.TYPE_FILE):
                         try:
                             filevalue, new = (
                                 FileValue.objects.
                                 get_or_create(
-               importscenario_inputfield=importscenario_inputfield))
+                importscenario_inputfield=importscenario_inputfield))
                             #create empty
                             #file. replace it later
                             #with zipfile
@@ -725,6 +728,40 @@ def post_group_import(request, form):
                                  rownr, field_dict[col_nr].name))
                             filevalue.delete()
 
+            # Extra validation on the columns as a whole.
+            modeller_software = values_for_validation.get("Modelleersoftware")
+            if modeller_software:
+                needed_3di = ["Bathymetrie (tif)", "3Di resultaat (nc)"]
+                needed_other = ["Maximale waterdiepte (asc of zip)"]
+                expecting_3di = ("3di" in modeller_software.lower())
+                extra_remarks = []
+                if expecting_3di:
+                    needed = needed_3di
+                    unwanted = needed_other
+                else:
+                    needed = needed_other
+                    unwanted = needed_3di
+
+                for field_name in needed:
+                    value = values_for_validation.get(field_name)
+                    if not value:
+                        extra_remarks.append(
+                            "Veld '%s' moet ingevuld zijn bij "
+                            "modelleersoftware '%s'." % (field_name,
+                                                         modeller_software))
+                for field_name in unwanted:
+                    value = values_for_validation.get(field_name)
+                    if value:
+                        extra_remarks.append(
+                            "Veld '%s' moet NIET ingevuld zijn bij "
+                            "modelleersoftware '%s'." % (field_name,
+                                                         modeller_software))
+                if extra_remarks:
+                    remarks += extra_remarks
+                    raise ValueError(
+                        "De juiste bestanden behorende bij de "
+                        "modelleringssoftware zijn niet gevonden.")
+
             importscenario.update_scenario_name()
             importscenario.save()
 
@@ -738,6 +775,7 @@ def post_group_import(request, form):
                 "applicatiebeheerder en vermeld het group-import "
                 "nummer %i") % groupimport.id)
     except Exception, e:
+        logger.exception("Error bij inlezen: %s", e)
         remarks.append(
             ("error bij inlezen: %s. De gegevens zijn wel "
              "opgeslagen, maar kunnen niet verwerkt worden."
