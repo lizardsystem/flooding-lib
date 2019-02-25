@@ -14,7 +14,10 @@ Changelog of flooding-lib
 - Add ugly data migration to create the *new* 3Di workflow
 
 - Added checks to make sure the correct files are passed (depending on whether
-  a 3di or non-3di scenario is selected).
+  a 3di or non-3di scenario is selected)
+
+- Added remark when groupimport fails on deflate64.
+
 
 4.10 (2017-08-18)
 -----------------
