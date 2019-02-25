@@ -596,8 +596,7 @@ def get_or_create_value_presentation_source(
             animation['lastnr'] = his.size() - 1
             animation['startnr'] = 0
     except Exception as e:
-        log.error('error generation value source')
-        log.error(','.join(map(str, e.args)))
+        log.error('Error generating %s: %s', pt , e)
         return False, None, None, None
 
     return True, source, animation, new

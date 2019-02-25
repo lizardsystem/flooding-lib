@@ -1,5 +1,9 @@
 """Module that can start 3Di-specific tasks."""
+
+from __future__ import division
+
 from osgeo import gdal
+import math
 import os
 import shutil
 import tempfile
@@ -12,8 +16,23 @@ from flooding_lib.tools.threeditool.converters import Converter
 from flooding_lib.tools.threeditool.processors import Cutter, Subtractor
 from flooding_lib.tools.threeditool.datasets import Dataset
 
-GOAL_RESOLUTION = 5  # We don't want the highest 3Di resolution for
-                     # space reasons
+RESOLUTION_MAX_DEPTH = 5  # We don't want the highest 3Di resolution for
+                          # space reasons
+
+# the animation resolution must be restricted to make each frame about this
+# amount of pixels
+APPROXIMATE_ANIMATION_PIXELS = 512 * 512
+
+
+def get_animation_resolution(dataset):
+    """ Return not too high resulution for animations based on dataset. """
+    dataset_size = dataset.RasterXSize * dataset.RasterYSize
+    dataset_resolution = dataset.GetGeoTransform()[1]
+
+    size_correction = dataset_size / APPROXIMATE_ANIMATION_PIXELS
+    resolution_correction = math.sqrt(size_correction)
+
+    return max(dataset_resolution, dataset_resolution * resolution_correction)
 
 
 def process_scenario(scenario_id):
@@ -49,7 +68,8 @@ def process_scenario(scenario_id):
     bathymetry = scenario.result_set.get(resulttype__name='bathymetry')
     netcdf = scenario.result_set.get(resulttype__name='results_3di')
 
-    success = True
+    success1, success2 = False, False
+    result1, result2 = None, None
 
     with temporarily_unzipped(bathymetry.absolute_resultloc) as bathpath:
         with temporarily_unzipped(netcdf.absolute_resultloc) as ncdfpath:
@@ -59,13 +79,13 @@ def process_scenario(scenario_id):
                 workdir = tempfile.mkdtemp()
 
                 try:
-                    result, success = compute_waterdepth_animation(
+                    result1, success1 = compute_waterdepth_animation(
                         scenario,
                         bathymetry_dataset,
                         converter,
                         workdir)
 
-                    result, success = compute_max_waterdepth_tif_result(
+                    result2, success2 = compute_max_waterdepth_tif_result(
                         scenario,
                         bathymetry_dataset,
                         converter,
@@ -73,7 +93,9 @@ def process_scenario(scenario_id):
                 finally:
                     shutil.rmtree(workdir)
 
-    return (success, bathymetry.absolute_resultloc, 'fouten')
+    success = all([success1, success2])
+    result = result1, result2
+    return (success, result, '-')
 
 
 def compute_waterdepth_animation(
@@ -87,7 +109,7 @@ def compute_waterdepth_animation(
             subtractor = Subtractor(
                 bathymetry_dataset=bathymetry_dataset,
                 variable_dataset=variable_dataset,
-                resolution=GOAL_RESOLUTION,
+                resolution=get_animation_resolution(bathymetry_dataset),
             )
             depth_path = os.path.join(
                 workdir, datetime.strftime('depth-%Y%m%mT%H%M%S.tif'),
@@ -119,7 +141,7 @@ def compute_max_waterdepth_tif_result(
         subtractor = Subtractor(
             bathymetry_dataset=bathymetry_dataset,
             variable_dataset=variable_dataset,
-            resolution=GOAL_RESOLUTION,
+            resolution=RESOLUTION_MAX_DEPTH,
         )
         depth_maximum_path = os.path.join(
             workdir, 'depth-maximum.tif')

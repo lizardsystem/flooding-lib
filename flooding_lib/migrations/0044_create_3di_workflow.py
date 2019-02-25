@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
-from south.utils import datetime_utils as datetime
-from south.db import db
 from south.v2 import DataMigration
-from django.db import models
+
 
 class Migration(DataMigration):
 
@@ -18,9 +16,19 @@ class Migration(DataMigration):
                 description='3Di import workflow template'
             ))
         import_task = TaskType.objects.get(name='220')
+        pyramid_task = TaskType.objects.get(name='150')
+        presentation_task = TaskType.objects.get(name='155')
 
-        WorkflowTemplateTask.objects.create(
+        WorkflowTemplateTask.objects.get_or_create(
             code=import_task, parent_code=import_task,
+            workflow_template=template
+        )
+        WorkflowTemplateTask.objects.get_or_create(
+            code=pyramid_task, parent_code=import_task,
+            workflow_template=template
+        )
+        WorkflowTemplateTask.objects.get_or_create(
+            code=presentation_task, parent_code=pyramid_task,
             workflow_template=template
         )
 
