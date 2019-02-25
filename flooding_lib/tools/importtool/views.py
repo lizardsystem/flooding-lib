@@ -772,13 +772,20 @@ def post_group_import(request, form):
 
         #to do. check of files aanwezig in zipfile
         remarks.append('klaar met inladen')
-    except BadZipfile, e:
+    except (BadZipfile, NotImplementedError) as e:
+        deflate64str = 'compression type 9 (deflate64)'
+        if isinstance(e, NotImplementedError) and str(e) == deflate64str:
+            cause = (
+                'Sommige bestanden zijn gecomprimeerd met een techniek '
+                '(deflate64) die niet door de server wordt ondersteund.'
+            )
+        else:
+            cause = 'De zip-file kan niet gelezen worden.'
         remarks.append((
-                "error bij inlezen. De zip-file kan niet gelezen "
-                "worden. De gegevens zijn wel opgeslagen, maar kunnen "
-                "niet verwerkt worden. Neem contact op met de "
-                "applicatiebeheerder en vermeld het group-import "
-                "nummer %i") % groupimport.id)
+            "error bij inlezen. %s De gegevens zijn wel opgeslagen, maar "
+            "kunnen niet verwerkt worden. Neem contact op met de "
+            "applicatiebeheerder en vermeld het group-import "
+            "nummer %i") % (cause, groupimport.id))
     except Exception, e:
         logger.exception("Error bij inlezen: %s", e)
         remarks.append(
