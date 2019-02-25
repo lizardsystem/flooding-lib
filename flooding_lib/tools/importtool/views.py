@@ -33,6 +33,10 @@ from flooding_lib.tools.importtool.models import ImportScenarioInputField
 from flooding_lib.tools.importtool.models import InputField
 from flooding_lib.util.files import remove_comments_from_asc_files
 
+
+ZIP_WRITE_OPTS = {'compression': ZIP_DEFLATED, 'allowZip64': True}
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -411,7 +415,8 @@ def save_uploadfile_in_zipfile_groupimport(
     upload_zipfile, re_filenames_in_upload_file,
     dest_zipfile_name, dest_filename_in_zip=None):
 
-    nzf = ZipFile(dest_zipfile_name, mode='w', compression=ZIP_DEFLATED)
+
+    nzf = ZipFile(dest_zipfile_name, mode='w', **ZIP_WRITE_OPTS)
 
     zf = upload_zipfile
 
@@ -446,7 +451,7 @@ def save_uploadfile_in_zipfile(
     upload_file, upload_filename,
     dest_zipfile_name, dest_filename_in_zip=None):
 
-    nzf = ZipFile(dest_zipfile_name, mode='w', compression=ZIP_DEFLATED)
+    nzf = ZipFile(dest_zipfile_name, mode='w', **ZIP_WRITE_OPTS)
 
     if upload_filename[-3:].lower() == u'zip':
         # 'zipfile, check and rename content'
