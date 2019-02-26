@@ -23,6 +23,8 @@ Changelog of flooding-lib
 - Make sure permissions of export run files are set to read for all so that
   Nginx can serve them.
 
+- Added Celery, violently dragging Flooding into 2013.
+
 
 4.10 (2017-08-18)
 -----------------

@@ -14,6 +14,7 @@ long_description = '\n\n'.join([
 install_requires = [
     'Django == 1.6.6',
     'Flask',
+    'django-celery',
     'django-appconf',
     'django-debug-toolbar',
     'django-excel-response',
