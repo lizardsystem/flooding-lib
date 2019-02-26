@@ -11,6 +11,8 @@ Changelog of flooding-lib
 
 - Added an import to work without DEBUG mode.
 
+- Resample 3Di based animations to just usable amount of pixels.
+
 - Add ugly data migration to create the *new* 3Di workflow
 
 - Added checks to make sure the correct files are passed (depending on whether
