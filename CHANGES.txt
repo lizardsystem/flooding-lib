@@ -18,6 +18,9 @@ Changelog of flooding-lib
 
 - Added remark when groupimport fails on deflate64.
 
+- Make sure permissions of export run files are set to read for all so that
+  Nginx can serve them.
+
 
 4.10 (2017-08-18)
 -----------------

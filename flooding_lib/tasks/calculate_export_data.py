@@ -9,6 +9,7 @@ from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import division
 
+from stat import S_IRUSR, S_IWUSR, S_IRGRP, S_IROTH
 import csv
 import os
 import shutil
@@ -57,6 +58,8 @@ def calculate_export_data(export_run_id):
     # Put data into a zipfile
     zipf = dirs_into_zipfile(tempdir, export_run.generate_dst_path())
 
+    # Make the zipfile readable for the Web server
+    make_file_readable_for_all(zipf)
     # Record this zipfile as the result of the export run
     logger.info("Storing zip file as export run result.")
     export_run.save_result_file(zipf)
@@ -194,3 +197,21 @@ def dirs_into_zipfile(tempdir, zipfile_path):
         zipfile_path = zipfile_path[:-4]
 
     return shutil.make_archive(zipfile_path, "zip", tempdir)
+
+
+def make_file_readable_for_all(filepath):
+    """This must be done to make the file readable to Nginx.
+
+    The same goal could be achieved by changing the group of
+    the file to 'www-data' and giving only the group read
+    permissions, but user buildout is not part of www-data and
+    therefore isn't allowed to do that. The below seems to be
+    the lesser evil."""
+
+    try:
+        os.chmod(filepath, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)
+    except OSError as e:
+        # Only log
+        logger.error(
+            'OSError as we tried to change export result permissions:',
+            str(e))
