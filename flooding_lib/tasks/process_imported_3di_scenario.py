@@ -21,7 +21,7 @@ RESOLUTION_MAX_DEPTH = 5  # We don't want the highest 3Di resolution for
 
 # the animation resolution must be restricted to make each frame about this
 # amount of pixels
-APPROXIMATE_ANIMATION_PIXELS = 512 * 512
+APPROXIMATE_ANIMATION_PIXELS = 4 * 1024 * 1024  # just low enough to work
 
 
 def get_animation_resolution(dataset):
