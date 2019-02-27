@@ -25,6 +25,9 @@ Changelog of flooding-lib
 
 - Added Celery, violently dragging Flooding into 2013.
 
+- Turn processing group imports into a Celery task, add Javascript to
+  the resulting page to get the remarks asynchronously.
+
 
 4.10 (2017-08-18)
 -----------------
