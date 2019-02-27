@@ -21,3 +21,11 @@ logger = logging.getLogger(__name__)
 def add(x, y):
     """Add two numbers, useful in testing."""
     return x + y
+
+
+@task
+def handle_imported_group_files_task(groupimport_id, user_id):
+    from flooding_lib.tools.importtool.views\
+        import handle_imported_group_files
+
+    return handle_imported_group_files(groupimport_id, user_id)

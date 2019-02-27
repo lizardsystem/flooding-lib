@@ -9,7 +9,9 @@ import os
 import re
 import xlrd
 
+from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
+from django.core.files.storage import FileSystemStorage
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
@@ -18,6 +20,7 @@ from django.conf import settings
 from django.utils.translation import ugettext as _
 
 from flooding_base.models import Text
+from flooding_lib.celery_tasks import handle_imported_group_files_task
 from flooding_lib.models import Breach
 from flooding_lib.models import Project
 from flooding_lib.models import Region
@@ -588,21 +591,35 @@ def post_group_import(request, form):
     """create a GroupImport object and fill it"""
     groupimport = GroupImport(
         name=form.cleaned_data['name'],
-        table=None,
-        results=None)
+        table=request.FILES['table'],
+        results=request.FILES['results'])
 
     groupimport.save()
-    # got it only working with creating explicitly the
-    # contentfile and saving it as 'file'
-    table_file_content = ContentFile(request.FILES['table'].read())
-    groupimport.table.save(
-        request.FILES['table'].name, table_file_content)
-    result_file_content = ContentFile(request.FILES['results'].read())
-    groupimport.results.save(
-        request.FILES['results'].name, result_file_content)
-    groupimport.save()
 
-    # Handle the input from the uploaded files
+    task = handle_imported_group_files_task.delay(
+        groupimport.pk,
+        request.user.pk)
+
+    return render_to_response(
+        'import/wait_for_group_import_remarks.html', {
+            'task_url': reverse('celery-task_status', kwargs={
+                'task_id': task.task_id
+            }),
+            'import_overview_url': reverse(
+                'flooding_tools_import_overview'),
+        }
+    )
+
+
+def handle_imported_group_files(groupimport_id, user_id):
+    """Handle the input from the uploaded files
+
+    Called from a task. Results are a list of remarks,
+    that are returned to the browser.
+    """
+    groupimport = GroupImport.objects.get(pk=groupimport_id)
+    user = User.objects.get(pk=user_id)
+
     remarks = []
     remarks.append('inladen')
     method = 2
@@ -647,7 +664,7 @@ def post_group_import(request, form):
             approvalobject.approvalobjecttype.add(
                 ApprovalObjectType.default_approval_type())
             importscenario = ImportScenario.objects.create(
-                owner=request.user, name=scenario_name,
+                owner=user, name=scenario_name,
                 approvalobject=approvalobject,
                 groupimport=groupimport)
 
@@ -795,10 +812,7 @@ def post_group_import(request, form):
              "en vermeld het group-import nummer %i") %
             (str(e), groupimport.id))
 
-    remarks.append('<a href="%s">ga terug naar importoverzicht</a>' %
-                   reverse('flooding_tools_import_overview'))
-
-    return HttpResponse('<br>'.join(remarks))
+    return remarks
 
 
 def group_import_example_csv(request):
