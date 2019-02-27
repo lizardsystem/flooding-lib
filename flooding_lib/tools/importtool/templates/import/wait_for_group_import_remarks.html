@@ -1,0 +1,65 @@
+<html>
+  <head>
+    <script type="text/javascript">
+      var task_url = "{{ task_url}}";
+
+      var receiveResponse = function() {
+          var response = this.responseText;
+          var json = null;
+          console.log('Received response: ', response);
+          if (response) {
+              json = JSON.parse(response);
+          }
+
+          if (json) {
+              var task_result = json.task.status;
+              if (task_result === 'SUCCESS') {
+                  showPage(json.task.result);
+                  return;
+              } else if (task_result === 'PENDING') {
+                  // Retry
+                  window.setTimeout(fetch_task_result, 2000) // 2 seconds
+                  return;
+              }
+          }
+
+          showPage([
+              'Er is helaas iets mis gegaan. De foutmelding was:',
+              response,
+             'Neem contact op met de Servicedesk.'
+          ]);
+      };
+
+      var fetch_task_result = function () {
+          var req = new XMLHttpRequest();
+
+          req.addEventListener("load", receiveResponse);
+          req.open("GET", task_url);
+          req.send();
+      };
+
+      var showPage = function (result) {
+          var waiting = document.getElementById("waiting");
+          var parent = waiting.parentNode;
+
+          parent.removeChild(waiting);
+
+          result.forEach(function (remark) {
+              var li = document.createElement('li');
+              li.innerHTML = remark;
+              parent.appendChild(li);
+          });
+      }
+
+      fetch_task_result();
+    </script>
+  </head>
+  <body>
+    <p id="remarks">
+      <ul>
+        <li id="waiting">Waiting for the import to be processed...</li>
+      </ul>
+    <p>
+    <p><a href="{{ import_overview_url }}">Ga terug naar importoverzicht</a></p>
+  </body>
+</html>

@@ -5,6 +5,7 @@ from flooding_lib import views
 from flooding_lib.views import pages
 from flooding_lib.models import Project
 import flooding_lib.sharedproject.urls
+import djcelery.urls
 
 info_dict = {
     'queryset': Project.objects.all(),
@@ -210,4 +211,6 @@ urlpatterns = patterns(
     url(r'^preload/(?P<project_id>\d+)/(?P<scenario_id>\d+)/',
         'flooding_lib.views.views.preload_scenario_redirect',
         name="preload_scenario_redirect"),
+
+    (r'^celery/', include(djcelery.urls)),
 )
