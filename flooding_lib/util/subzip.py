@@ -48,6 +48,7 @@ def rezip(source_path, source_item, target_path, target_item, timeout=1):
 
     If the zip process fails after starting, an exception will be raised, too.
     """
+    signal.signal(signal.SIGALRM, handler)  # only works in main thread
     workdir = tempfile.mkdtemp()
     startdir = getcwd()
 
@@ -90,6 +91,3 @@ def rezip(source_path, source_item, target_path, target_item, timeout=1):
     finally:
         chdir(startdir)
         shutil.rmtree(workdir)
-
-
-signal.signal(signal.SIGALRM, handler)
