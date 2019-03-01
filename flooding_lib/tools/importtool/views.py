@@ -35,6 +35,7 @@ from flooding_lib.tools.importtool.models import ImportScenario
 from flooding_lib.tools.importtool.models import ImportScenarioInputField
 from flooding_lib.tools.importtool.models import InputField
 from flooding_lib.util.files import remove_comments_from_asc_files
+from flooding_lib.util.subzip import rezip
 
 
 ZIP_WRITE_OPTS = {'compression': ZIP_DEFLATED, 'allowZip64': True}
@@ -418,11 +419,6 @@ def save_uploadfile_in_zipfile_groupimport(
     upload_zipfile, re_filenames_in_upload_file,
     dest_zipfile_name, dest_filename_in_zip=None):
 
-
-    nzf = ZipFile(dest_zipfile_name, mode='w', **ZIP_WRITE_OPTS)
-
-    zf = upload_zipfile
-
     reg_ex = '([0-9]*)'.join(
         [b for b in re_filenames_in_upload_file.split('#') if b != ''])
     reg_ex = (reg_ex.replace('\\', '/').replace('+', '\+').
@@ -430,18 +426,25 @@ def save_uploadfile_in_zipfile_groupimport(
 
     reg_ex = re.compile(reg_ex, re.I)
     found = False
-    for filename in zf.namelist():
+    for filename in upload_zipfile.namelist():
         filename = filename.replace('\\', '/')
         # write file to new
 
         if reg_ex.match(filename):
             # remove path
             new_filename = filename.replace('\\', '/').split('/')[-1]
-            a = get_new_filename(new_filename, dest_filename_in_zip)
-            nzf.writestr(a.lower(), zf.read(filename))
-            found = True
+            target_item = get_new_filename(new_filename, dest_filename_in_zip)
 
-    nzf.close()
+            # zip crashes on existing empty destination files
+            if os.path.exists(dest_zipfile_name):
+                os.remove(dest_zipfile_name)
+            rezip(
+                source_path=upload_zipfile.filename,
+                source_item=filename,
+                target_path=dest_zipfile_name,
+                target_item=target_item,
+            )
+            found = True
 
     # Remove comment line from .asc and .inc files after uploading
     remove_comments_from_asc_files(os.path.dirname(dest_zipfile_name))
@@ -589,11 +592,11 @@ def group_import(request):
 
 def post_group_import(request, form):
     """create a GroupImport object and fill it"""
-    groupimport = GroupImport(
-        name=form.cleaned_data['name'],
-        table=request.FILES['table'],
-        results=request.FILES['results'])
-
+    # first create the group_import instance so that it has an id
+    groupimport = GroupImport.objects.create(name=form.cleaned_data['name'])
+    # then add the files, since their paths use the id
+    groupimport.table=request.FILES['table']
+    groupimport.results=request.FILES['results']
     groupimport.save()
 
     task = handle_imported_group_files_task.delay(
