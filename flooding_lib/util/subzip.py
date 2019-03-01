@@ -11,10 +11,23 @@ from os.path import abspath, dirname
 
 import shlex
 import shutil
+import signal
 import tempfile
 
 
-def rezip(source_path, source_item, target_path, target_item):
+class TimeoutError(Exception):
+    pass
+
+
+class ZipError(Exception):
+    pass
+
+
+def handler(signum, frame):
+    raise TimeoutError('Timeout')
+
+
+def rezip(source_path, source_item, target_path, target_item, timeout=1):
     """
     Transfer using external zip and unzip processes.
 
@@ -22,8 +35,18 @@ def rezip(source_path, source_item, target_path, target_item):
     :param source_item: relative path of item in source zipfile
     :param target_path: path to target zipfile
     :param target_item: relative path of item in target zipfile
+    :param timeout: seconds patience for the start of the zip process
 
     Involves two processes and a fifo.
+
+    Note that if the unzip process fails, it happens quietly and the resulting
+    zip ends up with an empty item.
+
+    If the zip process fails to start, the function gets stuck on trying to
+    open the fifo for writing, which will raise an exception after timeout
+    seconds.
+
+    If the zip process fails after starting, an exception will be raised, too.
     """
     workdir = tempfile.mkdtemp()
     startdir = getcwd()
@@ -32,8 +55,8 @@ def rezip(source_path, source_item, target_path, target_item):
     zip_template = 'zip --force-zip64 --quiet --fifo %s %s'
 
     # paths need to be absolute because the workdir will be changed
-    zip_command = zip_template % (abspath(target_path), target_item)
-    unzip_command = 'unzip -p %s %s' % (abspath(source_path), source_item)
+    cmd_zip = zip_template % (abspath(target_path), target_item)
+    cmd_unzip = 'unzip -p %s %s' % (abspath(source_path), source_item)
 
     # change to the working dir to achieve correct zipped folder structure
     chdir(workdir)
@@ -45,17 +68,28 @@ def rezip(source_path, source_item, target_path, target_item):
         mkfifo(target_item)
 
         # start reading from the fifo
-        proc_zip = Popen(shlex.split(zip_command), stdout=PIPE, stderr=PIPE)
+        proc_zip = Popen(shlex.split(cmd_zip), stdout=PIPE, stderr=PIPE)
 
-        # start writing to the fifo
-        with open(target_item, 'w') as f:
-            Popen(shlex.split(unzip_command), stdout=f)
+        # set timeout for opening of the fifo
+        signal.alarm(timeout)
+        try:
+            # open the fifo for writing, which may block
+            with open(target_item, 'w') as f:
+                # disable the timeout
+                signal.alarm(0)
+                # start writing to the fifo from the unzip process
+                Popen(shlex.split(cmd_unzip), stdout=f)
+        except TimeoutError:
+            pass
 
         # make sure the zip process is finished
         stdout, stderr = proc_zip.communicate()
         if proc_zip.poll():
-            raise Exception(stdout)
+            raise ZipError(stdout)
 
     finally:
         chdir(startdir)
         shutil.rmtree(workdir)
+
+
+signal.signal(signal.SIGALRM, handler)

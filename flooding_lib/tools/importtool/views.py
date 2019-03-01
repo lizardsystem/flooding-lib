@@ -419,11 +419,6 @@ def save_uploadfile_in_zipfile_groupimport(
     upload_zipfile, re_filenames_in_upload_file,
     dest_zipfile_name, dest_filename_in_zip=None):
 
-
-    nzf = ZipFile(dest_zipfile_name, mode='w', **ZIP_WRITE_OPTS)
-
-    # zf = upload_zipfile
-
     reg_ex = '([0-9]*)'.join(
         [b for b in re_filenames_in_upload_file.split('#') if b != ''])
     reg_ex = (reg_ex.replace('\\', '/').replace('+', '\+').
@@ -439,16 +434,17 @@ def save_uploadfile_in_zipfile_groupimport(
             # remove path
             new_filename = filename.replace('\\', '/').split('/')[-1]
             target_item = get_new_filename(new_filename, dest_filename_in_zip)
+
+            # zip crashes on existing empty destination files
+            if os.path.exists(dest_zipfile_name):
+                os.remove(dest_zipfile_name)
             rezip(
                 source_path=upload_zipfile.filename,
                 source_item=filename,
                 target_path=dest_zipfile_name,
                 target_item=target_item,
             )
-            # nzf.writestr(a.lower(), upload_zipfile.read(filename))
             found = True
-
-    nzf.close()
 
     # Remove comment line from .asc and .inc files after uploading
     remove_comments_from_asc_files(os.path.dirname(dest_zipfile_name))
