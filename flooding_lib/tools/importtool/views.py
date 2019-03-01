@@ -592,9 +592,9 @@ def group_import(request):
 
 def post_group_import(request, form):
     """create a GroupImport object and fill it"""
+    # first create the group_import instance so that it has an id
     groupimport = GroupImport.objects.create(name=form.cleaned_data['name'])
-    groupimport.save()
-
+    # then add the files, since their paths use the id
     groupimport.table=request.FILES['table']
     groupimport.results=request.FILES['results']
     groupimport.save()
