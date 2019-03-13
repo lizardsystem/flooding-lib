@@ -28,6 +28,11 @@ Changelog of flooding-lib
 - Turn processing group imports into a Celery task, add Javascript to
   the resulting page to get the remarks asynchronously.
 
+- There was a bug where BoundaryConditions.get_max_storm_tide could
+  return None for 'stormpeak' (all stormfactors were 0). Cleaning up
+  the code a little bit made the bug disappear. Still unclear what the
+  root cause was and if this was a real fix.
+
 
 4.10 (2017-08-18)
 -----------------

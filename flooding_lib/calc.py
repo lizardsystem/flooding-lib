@@ -19,7 +19,6 @@ class BoundaryConditions:
     def __init__(self, breach, extwmaxlevel, tpeak, tstorm,
                  tsim, tstartbreach=0, tdeltaphase=0, tide_id=None,
                  extwbaselevel=None):
-        self.timePeakStorm = 0
         self.breach = breach
         self.extwmaxlevel = extwmaxlevel
         self.tpeak = tpeak
@@ -34,13 +33,18 @@ class BoundaryConditions:
         self.manualWaterlevels = []
 
     def get_max_storm_tide(self, tidewaterlevels):
+        # Get the *first* waterlevel where max value is reached
         maxtide = tidewaterlevels.order_by('-value')[0]
+        time_of_max_storm = maxtide.time + self.tdeltaphase
         stormpeak = None
         min_storm_level = 10000
         for tide in tidewaterlevels:
-            stormfactor = self.stormvalue(
-                tide.time - maxtide.time + self.tdeltaphase, 1)
+            distance_to_max_storm = abs(time_of_max_storm - tide.time)
+            stormfactor = self.stormvalue(distance_to_max_storm)
             if stormfactor > 0:
+                # Stormfactor is between 0 (no storm) and 1 (max)
+                # So lower values of the following expression are
+                # more "stormy".
                 stormvalue_if_peak_is_at_this_moment = (
                     self.extwmaxlevel - tide.value) / stormfactor
 
@@ -49,14 +53,20 @@ class BoundaryConditions:
                     min_storm_level = stormvalue_if_peak_is_at_this_moment
         return (maxtide, stormpeak, min_storm_level)
 
-    def stormvalue(self, timestamp, max_stormlevel):
-        rel2storm = timestamp - self.timePeakStorm
-        if abs(rel2storm) < 0.5 * self.tpeak:
-            return max_stormlevel
-        elif abs(rel2storm) < 0.5 * self.tstorm:
-            return (1 - (abs(rel2storm) - (0.5 * self.tpeak)) /
-                    (0.5 * self.tstorm - 0.5 * self.tpeak)) * max_stormlevel
+    def stormvalue(self, distance_to_max_storm):
+        half_peak_duration = 0.5 * self.tpeak
+        half_storm_duration = 0.5 * self.tstorm
+        half_buildup_duration = half_storm_duration - half_peak_duration
+
+        if distance_to_max_storm < half_peak_duration:
+            # In the peak
+            return 1
+        elif distance_to_max_storm < half_storm_duration:
+            # In the buildup -- linear between 0 and 1
+            return (1 - (distance_to_max_storm - half_peak_duration) /
+                    (half_buildup_duration))
         else:
+            # Outside of the storm
             return 0
 
     def get_waterlevels(self, tstart=-1000, tend=1000):
