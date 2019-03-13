@@ -34,7 +34,7 @@ class BoundaryConditions:
 
     def get_max_storm_tide(self, tidewaterlevels):
         # Get the *first* waterlevel where max value is reached
-        maxtide = tidewaterlevels.order_by('-value')[0]
+        maxtide = tidewaterlevels.order_by('-value', 'time')[0]
         time_of_max_storm = maxtide.time + self.tdeltaphase
         stormpeak = None
         min_storm_level = 10000
