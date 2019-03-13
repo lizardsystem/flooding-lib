@@ -2,6 +2,15 @@ Changelog of flooding-lib
 ===================================================
 
 
+4.11 (unreleased)
+-----------------
+
+- There was a bug where BoundaryConditions.get_max_storm_tide could
+  return None for 'stormpeak' (all stormfactors were 0). Cleaning up
+  the code a little bit made the bug disappear. Still unclear what the
+  root cause was and if this was a real fix.
+
+
 4.10 (2017-08-18)
 -----------------
 
