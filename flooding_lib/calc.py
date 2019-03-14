@@ -40,7 +40,7 @@ class BoundaryConditions:
         min_storm_level = 10000
         for tide in tidewaterlevels:
             distance_to_max_storm = abs(time_of_max_storm - tide.time)
-            stormfactor = self.stormvalue(distance_to_max_storm)
+            stormfactor = self.stormvalue(distance_to_max_storm, 1)
             if stormfactor > 0:
                 # Stormfactor is between 0 (no storm) and 1 (max)
                 # So lower values of the following expression are
@@ -53,18 +53,18 @@ class BoundaryConditions:
                     min_storm_level = stormvalue_if_peak_is_at_this_moment
         return (maxtide, stormpeak, min_storm_level)
 
-    def stormvalue(self, distance_to_max_storm):
+    def stormvalue(self, distance_to_max_storm, max_stormlevel):
         half_peak_duration = 0.5 * self.tpeak
         half_storm_duration = 0.5 * self.tstorm
         half_buildup_duration = half_storm_duration - half_peak_duration
 
         if distance_to_max_storm < half_peak_duration:
             # In the peak
-            return 1
+            return max_stormlevel
         elif distance_to_max_storm < half_storm_duration:
             # In the buildup -- linear between 0 and 1
             return (1 - (distance_to_max_storm - half_peak_duration) /
-                    (half_buildup_duration))
+                    (half_buildup_duration)) * max_stormlevel
         else:
             # Outside of the storm
             return 0
