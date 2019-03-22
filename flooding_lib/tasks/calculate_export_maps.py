@@ -797,6 +797,9 @@ def calculate_export_maps(exportrun_id):
 
     shutil.move(tmp_zip_filename, dst_path)
 
+    # Make the zipfile readable for the Web server
+    files.make_file_readable_for_all(dst_path)
+
     result_count = Result.objects.filter(export_run=export_run).count()
     if result_count > 0:
         log.warn('Warning: deleting old Result objects for this export run...')
