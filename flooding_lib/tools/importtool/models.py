@@ -6,14 +6,12 @@ import os
 import os.path
 import re
 import xlrd
-from shutil import copyfile
 
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.gis.db import models
 from django.utils.translation import ugettext_lazy as _
 
-from flooding_base.models import Setting
 from flooding_lib.dates import get_dayfloat_from_intervalstring
 from flooding_lib.dates import get_intervalstring_from_dayfloat
 from flooding_lib.models import Breach
@@ -236,8 +234,12 @@ class ImportScenario(models.Model):
                 extrainfofield=extrainfofield,
                 scenario=self.scenario,
                 defaults={"value": " "})
-            extrascenarioinfo.value = str(
-                extra_scenario_info[extra_field_name])
+            original_value = extra_scenario_info[extra_field_name]
+            try:
+                encoded_value = str(original_value)
+            except UnicodeEncodeError:
+                encoded_value = original_value.encode('utf-8')
+            extrascenarioinfo.value = encoded_value
             extrascenarioinfo.save()
 
     def copy_result_files(self, result_values):

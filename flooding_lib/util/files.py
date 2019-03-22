@@ -1,6 +1,8 @@
 from __future__ import unicode_literals, division
 from __future__ import print_function, absolute_import
 
+from stat import S_IRUSR, S_IWUSR, S_IRGRP, S_IROTH
+import logging
 import os
 import scipy.misc
 import shutil
@@ -10,6 +12,7 @@ import zipfile
 from django.conf import settings
 
 """Utilities for working with files in general."""
+logger = logging.getLogger(__name__)
 
 
 class ZipfileTooLarge(Exception):
@@ -253,3 +256,21 @@ def save_geopng(path, colorgrid, geo_transform=None):
         for gt in dxx, dxy, dyx, dyy, x0, y0:
             f.write("{0}\n".format(gt))
         f.close()
+
+
+def make_file_readable_for_all(filepath):
+    """This must be done to make the file readable to Nginx.
+
+    The same goal could be achieved by changing the group of
+    the file to 'www-data' and giving only the group read
+    permissions, but user buildout is not part of www-data and
+    therefore isn't allowed to do that. The below seems to be
+    the lesser evil."""
+
+    try:
+        os.chmod(filepath, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)
+    except OSError as e:
+        # Only log
+        logger.error(
+            'OSError as we tried to change export result permissions:',
+            str(e))
