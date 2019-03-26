@@ -5,7 +5,7 @@ Changelog of flooding-lib
 5.1 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Added help doc about 3Di scenarios.
 
 
 5.0 (2019-03-26)
