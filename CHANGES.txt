@@ -2,8 +2,8 @@ Changelog of flooding-lib
 ===================================================
 
 
-4.11 (unreleased)
------------------
+5.0 (2019-03-26)
+----------------
 
 - Added a couple of fields to breach model and some views.
 
