@@ -2,7 +2,7 @@ Changelog of flooding-lib
 ===================================================
 
 
-5.0.2 (unreleased)
+5.0.2 (2019-04-01)
 ------------------
 
 - Replaced some deprecated and removed PIL methods.
