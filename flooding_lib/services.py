@@ -1367,14 +1367,14 @@ def service_get_existing_embankments_shape(
     m.layers.append(lyr_polygon_selected_embankments)
 
     ##################### render map #############################
-    m.zoom_to_box(mapnik.Envelope(*bbox))
+    m.zoom_to_box(mapnik.Box2d(*bbox))
     #m.zoom_to_box(lyrl.envelope())
 
     img = mapnik.Image(width, height)
     mapnik.render(m, img)
 
     # you can use this if you want te modify image with PIL
-    imgPIL = Image.fromstring(
+    imgPIL = Image.frombytes(
         'RGBA', (width, height), img.tostring())
     #imgPIL = imgPIL.convert('RGB')
     buffer = StringIO.StringIO()
@@ -1457,14 +1457,14 @@ def service_get_extra_shapes(request, width, height, bbox, region_id):
     m.layers.append(lyr3)
 
     ##################### render map #############################
-    m.zoom_to_box(mapnik.Envelope(*bbox))
+    m.zoom_to_box(mapnik.Box2d(*bbox))
     #m.zoom_to_box(lyrl.envelope())
 
     img = mapnik.Image(width, height)
     mapnik.render(m, img)
 
     # you can use this if you want te modify image with PIL
-    imgPIL = Image.fromstring('RGBA', (width, height), img.tostring())
+    imgPIL = Image.frombytes('RGBA', (width, height), img.tostring())
     #imgPIL = imgPIL.convert('RGB')
     buffer = StringIO.StringIO()
     imgPIL.save(buffer, 'png')
@@ -1508,14 +1508,14 @@ def service_get_extra_grid_shapes(request, width, height, bbox, region_id):
     m.layers.append(lyrl)
 
     ##################### render map #############################
-    m.zoom_to_box(mapnik.Envelope(*bbox))
+    m.zoom_to_box(mapnik.Box2d(*bbox))
     #m.zoom_to_box(lyrl.envelope())
 
     img = mapnik.Image(width, height)
     mapnik.render(m, img)
 
     # you can use this if you want te modify image with PIL
-    imgPIL = Image.fromstring('RGBA', (width, height), img.tostring())
+    imgPIL = Image.frombytes('RGBA', (width, height), img.tostring())
     #imgPIL = imgPIL.convert('RGB')
     buffer = StringIO.StringIO()
     imgPIL.save(buffer, 'png')
