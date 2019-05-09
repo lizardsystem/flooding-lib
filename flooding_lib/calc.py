@@ -92,9 +92,9 @@ class BoundaryConditions:
 
                     for tide in tidewaterlevels:
                         time_rel = tide.time - beginsimulation_rel
-                        stormlevel = self.stormvalue(
-                            tide.time - maxtide.time + self.tdeltaphase,
-                            maxlevel_storm)
+                        stormvalue = self.stormvalue(
+                            tide.time - maxtide.time + self.tdeltaphase)
+                        stormlevel = stormvalue * maxlevel_storm
                         waterlevel = stormlevel + tide.value
                         waterleveltbl.append({
                                 'time': time_rel,

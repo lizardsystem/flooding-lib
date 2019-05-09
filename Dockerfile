@@ -14,7 +14,8 @@ ARG DEBIAN_FRONTEND=noninteractive
 # python-dev is here because installing some python packages require it.
 RUN apt-get update && apt-get install -y \
     git \
-    # libfreetype6-dev \
+    libfreetype6-dev \
+    pkg-config \
     # libnetcdf-dev \
     # libpq-dev \
     # locales \
