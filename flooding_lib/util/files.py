@@ -274,3 +274,18 @@ def make_file_readable_for_all(filepath):
         logger.error(
             'OSError as we tried to change export result permissions:',
             str(e))
+
+
+def make_archive(zipfile_path, directory):
+    """Implementation of shutil.make_archive that allows creating
+    2GB+ archives. The shutil function only does that since Python 3.4.
+    """
+    with zipfile.ZipFile(
+            zipfile_path + '.zip',
+            'w',
+            zipfile.ZIP_DEFLATED,
+            allowZip64=True
+    ) as myzip:
+        for filepath in all_files_in(directory):
+            relpath = os.path.relpath(filepath, directory)
+            myzip.write(filepath, relpath)

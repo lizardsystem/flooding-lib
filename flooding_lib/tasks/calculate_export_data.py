@@ -196,4 +196,4 @@ def dirs_into_zipfile(tempdir, zipfile_path):
     if zipfile_path.endswith(".zip"):
         zipfile_path = zipfile_path[:-4]
 
-    return shutil.make_archive(zipfile_path, "zip", tempdir)
+    return files.make_archive(zipfile_path, tempdir)

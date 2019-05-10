@@ -7,6 +7,8 @@ Changelog of flooding-lib
 
 - Prevent projects showing up multiple times in pull downs.
 
+- Make ZIP archives use allowZip64=True.
+
 
 5.0.3 (2019-05-09)
 ------------------
