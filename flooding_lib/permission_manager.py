@@ -261,7 +261,7 @@ class UserPermissionManager(object):
         #generate list of projects
         return Project.objects.filter(
             projectgrouppermission__group__user=self.user,
-            projectgrouppermission__permission=permission)
+            projectgrouppermission__permission=permission).distinct()
 
     def get_regionsets(self,
                        permission=UserPermission.PERMISSION_SCENARIO_VIEW):

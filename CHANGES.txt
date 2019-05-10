@@ -5,7 +5,7 @@ Changelog of flooding-lib
 5.0.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Prevent projects showing up multiple times in pull downs.
 
 
 5.0.3 (2019-05-09)
