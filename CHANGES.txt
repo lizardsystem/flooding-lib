@@ -2,7 +2,7 @@ Changelog of flooding-lib
 ===================================================
 
 
-5.0.5 (unreleased)
+5.0.5 (2019-06-14)
 ------------------
 
 - Use Mapbox for base layers of maps (same as in Lizard).
