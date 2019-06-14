@@ -255,6 +255,12 @@ NMainScreenManager.prototype.initMap = function() {
 
           this.map.addLayers([
             new OpenLayers.Layer.XYZ(
+              "Mapbox Neutral",
+              'https://a.tiles.mapbox.com/v3/nelenschuurmans.l15e647c/${z}/${x}/${y}.png', {
+                type: "png",
+                isBaseLayer: true
+              }),
+            new OpenLayers.Layer.XYZ(
               "Mapbox Topography",
               'https://a.tiles.mapbox.com/v3/nelenschuurmans.iaa98k8k/${z}/${x}/${y}.png', {
                 type: "png",
@@ -263,12 +269,6 @@ NMainScreenManager.prototype.initMap = function() {
             new OpenLayers.Layer.XYZ(
               "Mapbox Satellite",
               'https://a.tiles.mapbox.com/v3/nelenschuurmans.iaa79205/${z}/${x}/${y}.png', {
-                type: "png",
-                isBaseLayer: true
-              }),
-            new OpenLayers.Layer.XYZ(
-              "Mapbox Neutral",
-              'https://a.tiles.mapbox.com/v3/nelenschuurmans.l15e647c/${z}/${x}/${y}.png', {
                 type: "png",
                 isBaseLayer: true
               }),
