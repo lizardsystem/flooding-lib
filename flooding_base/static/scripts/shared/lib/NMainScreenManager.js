@@ -253,34 +253,45 @@ NMainScreenManager.prototype.initMap = function() {
                 }
             }
 
-            if (this.useOpenStreetMap)
-            {
-                try {
-		    layers = [new OpenLayers.Layer.OSM(
-			"OpenStreetMap",
-			"https://tile.openstreetmap.org/${z}/${x}/${y}.png",
-			{buffer: 0}
-		    )];
-		    this.map.addLayers(layers);
-                    // NOTE 2017-08-18: disabled (http + doesn't work anymore)
-                    // layers = [
-                    //     new OpenLayers.Layer.OSM(
-                    //         "OpenStreetMap NL",
-                    //         "http://tile.openstreetmap.nl/tiles/${z}/${x}/${y}.png",
-                    //         {buffer: 0, tileOptions: {crossOriginKeyword: null}}
-                    //     )];
-                    // this.map.addLayers(layers);
+          this.map.addLayers([
+            new OpenLayers.Layer.XYZ(
+              "Mapbox Topography",
+              'https://a.tiles.mapbox.com/v3/nelenschuurmans.iaa98k8k/${z}/${x}/${y}.png', {
+                type: "png",
+                isBaseLayer: true
+              }),
+            new OpenLayers.Layer.XYZ(
+              "Mapbox Satellite",
+              'https://a.tiles.mapbox.com/v3/nelenschuurmans.iaa79205/${z}/${x}/${y}.png', {
+                type: "png",
+                isBaseLayer: true
+              }),
+            new OpenLayers.Layer.XYZ(
+              "Mapbox Neutral",
+              'https://a.tiles.mapbox.com/v3/nelenschuurmans.l15e647c/${z}/${x}/${y}.png', {
+                type: "png",
+                isBaseLayer: true
+              }),
+          ]);
 
-
-                }
-                catch (e) {
-                    console.log("kan Openstreet Map lagen niet laden." + e);
-                }
-
+          if (this.useOpenStreetMap)
+          {
+            try {
+	      layers = [new OpenLayers.Layer.OSM(
+		"OpenStreetMap",
+		"https://tile.openstreetmap.org/${z}/${x}/${y}.png",
+		{buffer: 0}
+	      )];
+	      this.map.addLayers(layers);
+            }
+            catch (e) {
+              console.log("kan Openstreet Map lagen niet laden." + e);
             }
 
-            // Add pdok layers
-            // NOTE 2017-08-18: disabled (geoserver6 doesn't exist anymore)
+          }
+
+          // Add pdok layers
+          // NOTE 2017-08-18: disabled (geoserver6 doesn't exist anymore)
             // try {
             //     layers = [
             //         new OpenLayers.Layer.WMS("Top10NL", "http://geoserver6.lizard.net/geoserver/ipo_ror_flooding/wms", {layers: 'ipo_ror_flooding:pdok_top10_50', format: 'image/png'}, { minResolution: 0.42, numZoomLevels: 7 })
