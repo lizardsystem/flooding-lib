@@ -2,7 +2,7 @@ Changelog of flooding-lib
 ===================================================
 
 
-5.0.6 (unreleased)
+5.0.6 (2019-06-17)
 ------------------
 
 - Make export scenarios list query a little bit faster.
