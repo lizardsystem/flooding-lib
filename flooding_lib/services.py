@@ -825,7 +825,7 @@ def service_get_scenarios_export_list(
     scenarios = project.scenarios.filter(
         archived=False).select_related('owner').prefetch_related(
             'breaches', 'breaches__region', 'breaches__externalwater',
-            'scenariobreach_set', 'project')
+            'scenariobreach_set')
 
     for s in scenarios:
         breaches_values = get_breaches_info(s)
