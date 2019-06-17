@@ -797,7 +797,7 @@ def get_breaches_info(scenario):
         v.get("externalwater__name") for v in breaches_values]
     info["externalwater_type"] = [
         v.get("externalwater__type") for v in breaches_values]
-    
+
     # 2019 fields
     info["fl_rk_adm_jud"] = [v.get("fl_rk_adm_jud") for v in breaches_values]
     info["fl_rk_dpv_ref_part"] = [
@@ -822,7 +822,12 @@ def service_get_scenarios_export_list(
     approved_scenario_ids = ScenarioProject.objects.filter(
         project=project,
         approved=True).values_list('scenario_id', flat=True)
-    for s in project.all_active_scenarios():
+    scenarios = project.scenarios.filter(
+        archived=False).select_related('owner').prefetch_related(
+            'breaches', 'breaches__region', 'breaches__externalwater',
+            'scenariobreach_set', 'project')
+
+    for s in scenarios:
         breaches_values = get_breaches_info(s)
         scenarios_export_list.append(
             {
@@ -847,6 +852,7 @@ def service_get_scenarios_export_list(
                     sbr.extwrepeattime for sbr in s.scenariobreach_set.all()],
                 '_visible': True
             })
+
     return JSONResponse(scenarios_export_list)
 
 
