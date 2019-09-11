@@ -276,12 +276,17 @@ def make_file_readable_for_all(filepath):
             str(e))
 
 
-def make_archive(zipfile_path, directory):
-    """Implementation of shutil.make_archive that allows creating
+def make_archive(zipfile_name, directory):
+    """
+    Create zip archive from directory and return the path to the archive.
+
+    Implementation of shutil.make_archive that allows creating
     2GB+ archives. The shutil function only does that since Python 3.4.
     """
+    zipfile_path = zipfile_name + '.zip'
+
     with zipfile.ZipFile(
-            zipfile_path + '.zip',
+            zipfile_path,
             'w',
             zipfile.ZIP_DEFLATED,
             allowZip64=True
@@ -289,3 +294,4 @@ def make_archive(zipfile_path, directory):
         for filepath in all_files_in(directory):
             relpath = os.path.relpath(filepath, directory)
             myzip.write(filepath, relpath)
+    return zipfile_path

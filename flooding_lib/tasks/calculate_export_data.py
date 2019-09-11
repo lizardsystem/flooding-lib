@@ -193,7 +193,5 @@ def dirs_into_zipfile(tempdir, zipfile_path):
 
     # Zipfile_path should end with ".zip", but shutil.make_archive wants
     # to add that itself.
-    if zipfile_path.endswith(".zip"):
-        zipfile_path = zipfile_path[:-4]
-
-    return files.make_archive(zipfile_path, tempdir)
+    zipfile_name = os.path.splitext(zipfile_path)[0]
+    return files.make_archive(zipfile_name, tempdir)
