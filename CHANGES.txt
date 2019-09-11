@@ -2,7 +2,7 @@ Changelog of flooding-lib
 ===================================================
 
 
-5.0.7 (unreleased)
+5.0.7 (2019-09-11)
 ------------------
 
 - Fixed custom make_archive by returning the path to the archive.
