@@ -256,19 +256,19 @@ NMainScreenManager.prototype.initMap = function() {
       this.map.addLayers([
         new OpenLayers.Layer.XYZ(
           "Mapbox Neutral",
-          "https://api.mapbox.com/styles/v1/nelenschuurmans/ck8o9q49a3df21ipjpobadw4y/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoibmVsZW5zY2h1dXJtYW5zIiwiYSI6ImhkXzhTdXcifQ.3k2-KAxQdyl5bILh_FioCw", {
+          "https://api.mapbox.com/styles/v1/nelenschuurmans/ck8o9q49a3df21ipjpobadw4y/tiles/256/${z}/${x}/${y}@2x?access_token=pk.eyJ1IjoibmVsZW5zY2h1dXJtYW5zIiwiYSI6ImhkXzhTdXcifQ.3k2-KAxQdyl5bILh_FioCw", {
             type: "png",
             isBaseLayer: true
           }),
         new OpenLayers.Layer.XYZ(
           "Mapbox Topography",
-          "https://api.mapbox.com/styles/v1/nelenschuurmans/ck8sgpk8h25ql1io2ccnueuj6/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoibmVsZW5zY2h1dXJtYW5zIiwiYSI6ImhkXzhTdXcifQ.3k2-KAxQdyl5bILh_FioCw", {
+          "https://api.mapbox.com/styles/v1/nelenschuurmans/ck8sgpk8h25ql1io2ccnueuj6/tiles/256/${z}/${x}/${y}@2x?access_token=pk.eyJ1IjoibmVsZW5zY2h1dXJtYW5zIiwiYSI6ImhkXzhTdXcifQ.3k2-KAxQdyl5bILh_FioCw", {
             type: "png",
             isBaseLayer: true
           }),
         new OpenLayers.Layer.XYZ(
           "Mapbox Satellite",
-          "https://api.mapbox.com/styles/v1/nelenschuurmans/ck8oabi090nys1imfdxgb6nv3/tiles/256/{z}/{x}/{y}@2x?access_token=pk.eyJ1IjoibmVsZW5zY2h1dXJtYW5zIiwiYSI6ImhkXzhTdXcifQ.3k2-KAxQdyl5bILh_FioCw", {
+          "https://api.mapbox.com/styles/v1/nelenschuurmans/ck8oabi090nys1imfdxgb6nv3/tiles/256/${z}/${x}/${y}@2x?access_token=pk.eyJ1IjoibmVsZW5zY2h1dXJtYW5zIiwiYSI6ImhkXzhTdXcifQ.3k2-KAxQdyl5bILh_FioCw", {
             type: "png",
             isBaseLayer: true
           }),
