@@ -1329,7 +1329,7 @@ def service_get_existing_embankments_shape(
     lyr_linepoints_specific_region.srs = '+proj=latlong +datum=WGS84'
     BUFFERED_TABLE = (
         '''(SELECT pointgeometry As geometry
-            FROM (SELECT ST_EndPoint(geometry) AS pointgeometry FROM flooding_embankment_unit WHERE type=0 AND region_id=%i 
+            FROM (SELECT ST_EndPoint(geometry) AS pointgeometry FROM flooding_embankment_unit WHERE type=0 AND region_id=%i
             UNION ALL
             SELECT ST_StartPoint(geometry) AS pointgeometry FROM flooding_embankment_unit WHERE type=0 AND region_id=%i ) As foo) As foo2''' % (region_id, region_id))
     lyr_linepoints_specific_region.datasource = mapnik.PostGIS(

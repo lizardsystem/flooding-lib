@@ -1,0 +1,59 @@
+{% extends "lizard/base.html" %}
+{% load utils %}
+{% load i18n %}
+
+{% block title %}
+Flooding: {% trans 'Execute scenarios' %}
+{% endblock %}
+
+{% block content %}
+{% if task_id %}
+<h2>Overzicht logging Scenario {{ scenario_id }} Workflow {{ workflow_id }} Taak {{ task_id }}</h2>
+{% else %}
+<h2>Overzicht logging Scenario {{ scenario_id }} Workflow {{ workflow_id }}</h2>
+{% endif %}
+<p />
+<table>
+    <thead>
+      <th>ID</th>
+      <th>Scenario</th>
+      <th>Workflow</th>
+      <th>Taak</th>
+      <th>Taak ID</th>
+      <th>Datum Tijd</th>
+      <th>Level</th>
+      <th>Worker_nr</th>
+      <th>Host</th>
+      <th>Bericht</th>
+    </thead>
+    <tbody>
+      {% for message in loggings %}
+      <tr>
+        <td>{{ message.id }}</td>
+	<td>{{ message.workflow.scenario }}</td>
+	<td>{{ message.workflow.id }}</td>
+	<td>{{ message.task.code.name }}</td>
+	<td>{{ message.task.id }}</td>
+	<td>{{ message.time }}</td>
+	<td>{{ message.level }}</td>
+	<td>{{ message.worker.worker_nr }}</td>
+	<td>{{ message.worker.node }}</td>
+	<td>{{ message.message }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+</table>
+
+<p />
+<dev class="pagination">
+<table><tr>
+{% for i in steps %}
+{% if i != step %}
+ <td><a href='{% url "lizard_worker_workflow_logging" scenario_id workflow_id i %}'>{{ i }}</a></td>
+{% else %}
+ <td>{{ i }}</td>
+{% endif %}
+{% endfor %}
+</tr></table>
+</dev>
+{% endblock %}

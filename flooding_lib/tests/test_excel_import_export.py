@@ -8,7 +8,7 @@ import mock
 import os
 import xlrd
 
-from django.test import TestCase
+from django.test import TransactionTestCase, TestCase
 from django.utils.translation import activate, deactivate
 
 from flooding_lib import excel_import_export as eie
@@ -483,7 +483,7 @@ class TestGetWorksheet(TestCase):
             self.assertEquals(sheet, worksheet)
 
 
-class TestImportUploadedExcelFile(TestCase):
+class TestImportUploadedExcelFile(TransactionTestCase):
     @mock.patch('flooding_lib.excel_import_export.import_header',
                 return_value=(None, []))
     def test_calls_import_header(self, patched_import_header):

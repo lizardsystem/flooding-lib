@@ -1,0 +1,31 @@
+{% extends "lizard/base.html" %}
+{% comment %}
+20090408 k.k.ha template for task list with search and filter functionalities
+inputs:
+  fields: dictionary of fieldname: fieldvalue
+  table_columns: see objecttable templatetag
+  table_data: see objecttable templatetag
+{% endcomment %}
+
+{% load utils %}
+{% load i18n %}
+
+{% block title %}
+Lizard-flooding: {% trans 'Task list' %}
+{% endblock %}
+
+{% block content %}
+
+<h1>{% trans 'Task list' %}</h1>
+<p>
+
+{% search_form 'q' fields.q fields %}
+
+{% filters filter_entries fields %}
+
+{% objecttable name table_columns table_data fields.sort fields %}
+{% digg_paginator fields %}
+
+</p>
+
+{% endblock %}

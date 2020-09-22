@@ -368,34 +368,37 @@ def get_worksheet(path, name):
     return worksheet
 
 
-@transaction.commit_manually
 def import_uploaded_excel_file(path, allowed_scenario_ids):
     """Check and import the Excel file. The whole operation is wrapped
     in a database transaction, so that any problems won't change the
     database. Returns a list of error messages; an empty list
     indicates success."""
 
-    worksheet = get_worksheet(path, SCENARIO_DATA_WORKSHEET)
-    header_titles = tuple(cell.value for cell in worksheet.row(1))
-
+    transaction.set_autocommit(False)
     errors = []
 
-    header, header_errors = import_header(header_titles)
+    try:
+        worksheet = get_worksheet(path, SCENARIO_DATA_WORKSHEET)
+        header_titles = tuple(cell.value for cell in worksheet.row(1))
 
-    if header_errors:
-        errors += header_errors
+        header, header_errors = import_header(header_titles)
 
-    for rownr in range(HEADER_ROWS, worksheet.nrows):
-        row_errors = import_scenario_row(
-            header, rownr, worksheet.row(rownr), allowed_scenario_ids)
+        if header_errors:
+            errors += header_errors
 
-        if row_errors:
-            errors += row_errors
+        for rownr in range(HEADER_ROWS, worksheet.nrows):
+            row_errors = import_scenario_row(
+                header, rownr, worksheet.row(rownr), allowed_scenario_ids)
 
-    if errors:
-        transaction.rollback()
-    else:
-        transaction.commit()
+            if row_errors:
+                errors += row_errors
+
+        if errors:
+            transaction.rollback()
+        else:
+            transaction.commit()
+    finally:
+        transaction.set_autocommit(True)
 
     return errors
 

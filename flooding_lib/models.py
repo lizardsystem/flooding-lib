@@ -479,7 +479,7 @@ class Map(models.Model):
     transparent = models.NullBooleanField(default=None)
     tiled = models.NullBooleanField(default=None)
     srs = models.CharField(max_length=50, default='EPSG:900913')
-    visible = models.BooleanField()
+    visible = models.BooleanField(default=False)
 
     class Meta:
         db_table = 'flooding_map'
@@ -688,6 +688,9 @@ class CutoffLocationSet(models.Model):
         return self.name
 
 
+def get_default_approval_type():
+    return ApprovalObjectType.default_approval_type()
+
 class Project(models.Model):
     """project properties:
 
@@ -711,7 +714,7 @@ class Project(models.Model):
 
     approval_object_type = models.ForeignKey(
         ApprovalObjectType,
-        default=ApprovalObjectType.default_approval_type,
+        default=get_default_approval_type,
         null=True)  # Should never actually be null
 
     class Meta:

@@ -1,0 +1,43 @@
+{% extends "lizard/base.html" %}
+{% load utils %}
+{% load i18n %}
+
+{% block title %}
+Flooding: {% trans 'Execute scenarios' %}
+{% endblock %}
+
+{% block content %}
+
+<h2>Overzicht uitvoeringen Scenario {{ scenario_id }}</h2>
+<p />
+<table>
+    <thead>
+      <th>ID</th>
+      <th>Taken</th>
+      <th>Status</th>
+      <th>DT verstuurd</th>
+      <th>DT start</th>
+      <th>DT eind</th>  
+      <th>Laatste logging</th>
+    </thead>
+    <tbody>
+      {% for workflow in workflows %}
+      <tr>
+        <td>{{ workflow.id }}</td>
+	<td><a href="{{ workflow.get_absolute_url_tasks }}">
+	    {{ workflow.tasks_count }}
+	    </a>
+	</td>
+	<td>{{ workflow.get_status }}</td>
+	<td>{{ workflow.tcreated }}</td>
+	<td>{{ workflow.tstart }}</td>
+	<td>{{ workflow.get_tfinished }}</td>
+	<td><a href="{{ workflow.get_absolute_url_logging }}">
+	    {{ workflow.latest_log }}
+	    </a>
+	</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

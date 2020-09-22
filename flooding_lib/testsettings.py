@@ -7,12 +7,12 @@ TMP_DIR = '/tmp/'
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'flooding_lib',
+        'HOST': 'db',
+        'PORT': 5432,  # Mapnik requires an explicit port number
+        'NAME': 'flooding',
         'USER': 'flooding',
         'PASSWORD': 'flooding',
-        'HOST': 'db',
-        'PORT': 5432, # Mapnik requires an explicit port number
-        }
+    }
 }
 
 SETTINGS_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -23,6 +23,19 @@ SETTINGS_DIR = os.path.dirname(os.path.realpath(__file__))
 BUILDOUT_DIR = os.path.abspath(os.path.join(SETTINGS_DIR, '..'))
 
 FLOODING_SHARE = os.path.join(BUILDOUT_DIR, 'var')
+
+MIDDLEWARE_CLASSES = (
+    # Gzip needs to be at the top.
+    #'django.middleware.gzip.GZipMiddleware',
+    # Below is the default list, don't modify it.
+    'django.middleware.common.CommonMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
+    #'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    )
+
 
 SITE_ID = 1
 INSTALLED_APPS = [

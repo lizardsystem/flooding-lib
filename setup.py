@@ -12,10 +12,11 @@ long_description = '\n\n'.join([
     ])
 
 install_requires = [
-    'Django == 1.6.6',
+    'Django == 1.7',
     'Flask',
     'django-celery',
     'django-appconf',
+    'django_compressor >= 1.1',  # Yes, underscore.
     'django-debug-toolbar',
     'django-excel-response',
     'django-extensions',
@@ -29,7 +30,7 @@ install_requires = [
     'gunicorn',
     'iso8601',
     'lizard-raster',
-    'lizard-worker',
+    'pika >= 0.9.8',
     # mapnik deliberately not here, buildout / syseggrecipe don't work
     'matplotlib',
     'mock',
@@ -40,7 +41,6 @@ install_requires = [
     'pyproj',
     'raven',
     'scipy',
-    'south',
     'supervisor',
     'xlrd',
     'xlwt',
@@ -68,7 +68,8 @@ setup(name='flooding-lib',
                 'flooding_presentation',
                 'flooding_visualization',
                 'flooding_base',
-                'raster_server'],
+                'raster_server',
+                'lizard_worker'],
       include_package_data=True,
       zip_safe=False,
       install_requires=install_requires,
