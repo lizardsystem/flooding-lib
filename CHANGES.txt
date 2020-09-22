@@ -2,6 +2,18 @@ Changelog of flooding-lib
 ===================================================
 
 
+5.0.9 (unreleased)
+------------------
+
+- Nothing changed yet.
+
+
+5.0.8 (2020-05-15)
+------------------
+
+- Update to new version of Mapbox tile URLs.
+
+
 5.0.7 (2019-09-11)
 ------------------
 
