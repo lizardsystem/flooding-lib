@@ -8,7 +8,6 @@ import django.contrib.gis.db.models.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('flooding_lib', '__first__'),
     ]
 
     operations = [
@@ -190,7 +189,6 @@ class Migration(migrations.Migration):
                 ('default_legend_id', models.IntegerField()),
                 ('default_maxvalue', models.FloatField(null=True, blank=True)),
                 ('custom_indicator', models.ForeignKey(blank=True, to='flooding_presentation.CustomIndicator', null=True)),
-                ('default_colormap', models.ForeignKey(blank=True, to='flooding_lib.Colormap', null=True)),
             ],
             options={
                 'db_table': 'presentation_presentationtype',
