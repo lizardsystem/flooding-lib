@@ -112,7 +112,7 @@ def compute_waterdepth_animation(
                 resolution=get_animation_resolution(bathymetry_dataset),
             )
             depth_path = os.path.join(
-                workdir, datetime.strftime('depth-%Y%m%mT%H%M%S.tif'),
+                workdir, datetime.strftime('depth-%Y%m%dT%H%M%S.tif'),
             )
             subtractor.process(path=depth_path)
             paths.append({
